@@ -35,6 +35,9 @@ class View(LoginRequiredMixin, View):
     #---------------------------------------------------------------------------
     def post(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
+        cursor = connection.cursor()
+        action = request.POST.get('action', '')
+        #-----------------------------------------------------------------------
         if action == 'stop':
             #-------------------------------------------------------------------
             result = db_result(cursor, 'SELECT ua_profile_stop_holidays(' + str(self.profile['id']) + ')')

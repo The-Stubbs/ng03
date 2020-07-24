@@ -36,6 +36,9 @@ class View(LoginRequiredMixin, View):
     #---------------------------------------------------------------------------
     def post(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
+        cursor = connection.cursor()
+        action = request.POST.get('action', '')
+        #-----------------------------------------------------------------------
         if action == 'reset':
             #-------------------------------------------------------------------
             name = request.POST.get('name', '')
@@ -45,7 +48,7 @@ class View(LoginRequiredMixin, View):
             if result != 0: messages.error(request, 'profile_rename_error' + str(result))
             else:
                 #-------------------------------------------------------------------
-                result = db_result(cursor, 'SELECT ua_profile_reset(' + str(self.profile['id']) + ',' + str(galaxy_id) ')')
+                result = db_result(cursor, 'SELECT ua_profile_reset(' + str(self.profile['id']) + ',' + str(galaxy_id) + ')')
                 if result == 0: return HttpResponseRedirect(self.success_url)
                 else: messages.error(request, 'profile_reset_error' + str(result))
         #-----------------------------------------------------------------------

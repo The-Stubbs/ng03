@@ -3,25 +3,29 @@
 {% load i18n %}
 
 {% block page %}
-<div class="page-content">
+<div id="page-content">
+    <div class="d-flex align-items-center justify-content-center mb-3">
+        <img src="/static/logo.png"/>
+        <span class="c-normal mx-3">ng03</span>
+    </div>
     {% include 'game/_messages.html' %}
     <div class="box">
         <div class="box-header">
-            <div class="box-item"><span class="c-highlight">{% trans "Vaisseau de colonisation" %}</span></div>
+            <div class="box-item text-center"><b class="c-highlight">{% trans "Vaisseau de colonisation" %}</b></div>
         </div>
         <div class="box-line">
-            <div class="box-item"><span class="c-normal">
-                {% trans "Votre vaisseau de colonisation est en route vers sa planète de destination." %}<br/>
-                {% trans "Lorsqu'il sera arrivé, vous pourrez coloniser la planète et commencer à foonder votre empire." %}<br/>
-            </span></div>
-        </div>
-        <form method="post">
-            {% csrf_token%}
-            <input type="hidden" name="action" value="create">
-            <div class="box-line">
-                <div class="box-item"><input type="submit" value="{% trans 'Coloniser' %}"></div>
+            <div class="box-item text-center">
+                <p class="c-normal">
+                    {% trans "Votre vaisseau de colonisation est en route vers sa planète de destination." %}<br/>
+                    {% trans "Lorsqu'il sera arrivé, vous pourrez coloniser la planète et commencer à foonder votre empire." %}<br/>
+                </p>
+                <form method="post">
+                    {% csrf_token%}
+                    <input type="hidden" name="action" value="create">
+                    <input type="submit" class="button" value="{% trans 'Coloniser' %}">
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}

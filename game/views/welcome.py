@@ -32,6 +32,9 @@ class View(LoginRequiredMixin, View):
     #---------------------------------------------------------------------------
     def post(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
+        cursor = connection.cursor()
+        action = request.POST.get('action', '')
+        #-----------------------------------------------------------------------
         if action == 'create':
             #-------------------------------------------------------------------
             result = db_result(cursor, 'SELECT ua_profile_create(' + str(request.user.id) + ',' + sql_str(request.META.get('REMOTE_ADDR')) + ',' + sql_str(request.META.get('HTTP_USER_AGENT')) + ')')
