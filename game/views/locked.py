@@ -13,6 +13,16 @@ class View(LoginRequiredMixin, View):
     #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
+        if MAINTENANCE: return HttpResponseRedirect('/game/maintenance/')
+        #-----------------------------------------------------------------------
+        cursor = connection.cursor()
+        profile = db_row(cursor, 'SELECT * FROM gm_profiles WHERE user_id=' + str(request.user.id) + ' LIMIT 1')
+        if not profile: return HttpResponseRedirect('/game/welcome/')
+        #-----------------------------------------------------------------------
+        self.profile = profile
+        #-----------------------------------------------------------------------
+        if self.profile['privilege'] != 'locked': return HttpResponseRedirect('/game/')
+        #-----------------------------------------------------------------------
         return super().dispatch(request, *args, **kwargs)
         #-----------------------------------------------------------------------
 
