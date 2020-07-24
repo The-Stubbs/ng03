@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(ActionView):
+class View(LoginRequiredMixin, View):
     
     template_name = 'game/welcome.html'
     success_url = '/game/starting/'

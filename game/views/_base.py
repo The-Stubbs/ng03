@@ -63,7 +63,7 @@ class RestView(LoginRequiredMixin, ExileMixin, View):
 
 
 ################################################################################
-class TemplateView(LoginRequiredMixin, View):
+class TemplateView(LoginRequiredMixin, ExileMixin, View):
     
     template_name = None
         

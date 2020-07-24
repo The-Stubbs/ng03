@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.urls import path
+from django.views.generic.base import RedirectView
 
 from .views import closed
 from .views import locked
@@ -99,6 +100,8 @@ from .views import report_spying
 ################################################################################
 urlpatterns = [
 	#---------------------------------------------------------------------------
+	path('', RedirectView.as_view(url='/game/empire/overview/')),
+	#---------------------------------------------------------------------------
     path('closed/', closed.View.as_view()),
     path('locked/', locked.View.as_view()),
     path('gameover/', gameover.View.as_view()),
@@ -106,10 +109,10 @@ urlpatterns = [
     path('maintenance/', maintenance.View.as_view()),
     path('starting/', starting.View.as_view()),
     path('welcome/', welcome.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('rest/chat/', rest_chat.View.as_view()),
     path('rest/fleets/', rest_fleets.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('alliance/announce/', alliance_announce.View.as_view()),
     path('alliance/creation/', alliance_creation.View.as_view()),
     path('alliance/displaying/', alliance_displaying.View.as_view()),
@@ -125,14 +128,14 @@ urlpatterns = [
     path('alliance/tributes/', alliance_tributes.View.as_view()),
     path('alliance/wallet/', alliance_wallet.View.as_view()),
     path('alliance/wars/', alliance_wars.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('chat/creation/', chat_creation.View.as_view()),
     path('chat/messages/', chat_messages.View.as_view()),
     path('chat/overview/', chat_overview.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('commander/overview/', commander_overview.View.as_view()),
     path('commander/skills/', commander_skills.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('empire/stats/', empire_stats.View.as_view()),
     path('empire/fleets/', empire_fleets.View.as_view()),
     path('empire/orbiting/', empire_orbiting.View.as_view()),
@@ -143,27 +146,27 @@ urlpatterns = [
     path('empire/purchases/', empire_purchases.View.as_view()),
     path('empire/researches/', empire_researches.View.as_view()),
     path('empire/sales/', empire_sales.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('fleet/overview/', fleet_overview.View.as_view()),
     path('fleet/ships/', fleet_ships.View.as_view()),
     path('fleet/splitting/', fleet_splitting.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('help/buildings/', help_buildings.View.as_view()),
     path('help/researches/', help_researches.View.as_view()),
     path('help/ships/', help_ships.View.as_view()),
     path('help/bbcode/', help_bbcode.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('mail/blacklist/', mail_blacklist.View.as_view()),
     path('mail/creation/', mail_creation.View.as_view()),
     path('mail/inbox/', mail_inbox.View.as_view()),
     path('mail/outbox/', mail_outbox.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('map/galaxy/', map_galaxy.View.as_view()),
     path('map/sector/', map_sector.View.as_view()),
     path('map/universe/', map_universe.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('mercenary/spying/', mercenary_spying.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('planet/overview/', planet_overview.View.as_view()),
     path('planet/production/', planet_production.View.as_view()),
     path('planet/working/', planet_working.View.as_view()),
@@ -175,18 +178,18 @@ urlpatterns = [
     path('planet/orbit/', planet_orbit.View.as_view()),
     path('planet/purchases/', planet_purchases.View.as_view()),
     path('planet/sales/', planet_sales.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('profile/displaying/', profile_displaying.View.as_view()),
     path('profile/overview/', profile_overview.View.as_view()),
     path('profile/reports/', profile_reports.View.as_view()),
     path('profile/notes/', profile_notes.View.as_view()),
     path('profile/options/', profile_options.View.as_view()),
     path('profile/vacancy/', profile_vacancy.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('ranking/alliances/', ranking_alliances.View.as_view()),
     path('ranking/players/', ranking_players.View.as_view()),
     path('ranking/searching/', ranking_searching.View.as_view()),
-    
+	#---------------------------------------------------------------------------
     path('report/battle/', report_battle.View.as_view()),
     path('report/invasion/', report_invasion.View.as_view()),
     path('report/spying/', report_spying.View.as_view()),

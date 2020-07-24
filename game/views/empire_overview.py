@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(TemplateView, ExileMixin):
+class View(TemplateView):
     
     template_name = 'game/empire_overview.html'
 
@@ -14,6 +14,7 @@ class View(TemplateView, ExileMixin):
         #-----------------------------------------------------------------------
         context = super().get_context(request, cursor, **kwargs)
         #-----------------------------------------------------------------------
+        context['profile'] = self.profile
         #-----------------------------------------------------------------------
         return context
         #-----------------------------------------------------------------------
