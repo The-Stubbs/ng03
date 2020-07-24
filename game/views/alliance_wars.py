@@ -24,19 +24,19 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'create':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_alliance_war_create(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'pay':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_alliance_war_pay(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'cancel':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_alliance_war_cancel(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

@@ -24,7 +24,7 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'split':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_fleet_split(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

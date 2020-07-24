@@ -24,25 +24,25 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'engage':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_commander_engage(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'fire':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_commander_fire(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'rename':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_commander_rename(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'train':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_commander_train(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

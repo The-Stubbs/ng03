@@ -12,7 +12,7 @@ class View(RestView):
         #-----------------------------------------------------------------------
         if action == 'assign':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_fleet_assign_category(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

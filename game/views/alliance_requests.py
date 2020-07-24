@@ -24,25 +24,25 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'create':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_alliance_wallet_request_create(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'accept':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_alliance_wallet_request_accept(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'decline':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_alliance_wallet_request_decline(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'cancel':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_alliance_wallet_request_cancel(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

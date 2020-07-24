@@ -24,7 +24,7 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'save':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_alliance_update_tax(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

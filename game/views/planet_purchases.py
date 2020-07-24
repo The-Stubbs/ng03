@@ -24,7 +24,7 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'buy':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_market_purchase_create(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

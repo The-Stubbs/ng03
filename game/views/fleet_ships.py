@@ -24,7 +24,7 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'transfer':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_spying_create(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

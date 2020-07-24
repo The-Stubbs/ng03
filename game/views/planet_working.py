@@ -24,7 +24,7 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'save':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_planet_building_update_enabled_count(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

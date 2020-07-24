@@ -100,6 +100,13 @@ class ActionView(TemplateView):
     #---------------------------------------------------------------------------
     
     #---------------------------------------------------------------------------
+    def do_action(self, action, cursor, query):
+        result = db_result(cursor, query)
+        db_execute(cursor, 'INSERT INTO log_actions(profile_id, action, result) VALUES(' + str(self.profile['id']) + ',' + str(action) + ',' + str(result) + ')')
+        return result
+    #---------------------------------------------------------------------------
+    
+    #---------------------------------------------------------------------------
     def success(self):
         return HttpResponseRedirect(self.success_url)
     #---------------------------------------------------------------------------

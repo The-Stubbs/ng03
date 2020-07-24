@@ -24,13 +24,13 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'save':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = do_action('ua_profile_update_alliance_rank', cursor, 'SELECT ua_profile_update_alliance_rank(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'kick':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = do_action('ua_profile_kick_alliance', cursor, 'SELECT ua_profile_kick_alliance(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------

@@ -18,7 +18,7 @@ class View(RestView):
         #-----------------------------------------------------------------------
         elif action == 'post':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_chat_message_create(' + ')')
             if result == 0: return self.success()
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
