@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(ActionView, ExileMixin):
+class View(ActionView):
     
     template_name = 'game/mail_creation.html'
     success_url = '/game/mail/creation/'

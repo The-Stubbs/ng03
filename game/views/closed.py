@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(TemplateView):
+class View(LoginRequiredMixin, View):
     
     template_name = 'game/closed.html'
 

@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(TemplateView, ExileMixin):
+class View(TemplateView):
     
     template_name = 'game/ranking_players.html'
 
