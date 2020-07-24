@@ -2162,7 +2162,10 @@ CREATE SEQUENCE ng03.dt_building_building_requirements_id_seq
 ALTER TABLE ng03.dt_building_building_requirements_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.dt_building_building_requirements (
-    id integer DEFAULT nextval('ng03.dt_building_building_requirements_id_seq'::regclass) NOT NULL
+    id integer DEFAULT nextval('ng03.dt_building_building_requirements_id_seq'::regclass) NOT NULL,
+    building_id character varying NOT NULL,
+    requirement_id character varying NOT NULL,
+    count integer DEFAULT 1 NOT NULL
 );
 
 ALTER TABLE ng03.dt_building_building_requirements OWNER TO exileng;
@@ -2170,6 +2173,60 @@ ALTER TABLE ng03.dt_building_building_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_building_building_requirements_id_seq OWNED BY ng03.dt_building_building_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_building_building_requirements ADD CONSTRAINT dt_building_building_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_building_building_requirements ADD CONSTRAINT dt_building_building_requirements_building_id_fkey FOREIGN KEY (building_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.dt_building_building_requirements ADD CONSTRAINT dt_building_building_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+INSERT INTO ng03.dt_building_building_requirements VALUES(1, 'bd_planet_city', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(2, 'bd_planet_city', 'bd_construction_prefab', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(3, 'bd_planet_metropolis', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(4, 'bd_planet_metropolis', 'bd_construction_automate', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(5, 'bd_planet_wonder', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(6, 'bd_planet_cave', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(7, 'bd_planet_cave', 'bd_construction_automate', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(8, 'bd_planet_moon', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(9, 'bd_construction_prefab', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(10, 'bd_construction_automate', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(11, 'bd_construction_synthesis', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(12, 'bd_construction_sandworm', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(13, 'bd_resource_mine', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(14, 'bd_resource_well', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(15, 'bd_resource_manufactory', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(16, 'bd_resource_field', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(17, 'bd_energy_solar_plant', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(18, 'bd_energy_geothermal', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(19, 'bd_energy_nuclear', 'bd_construction_automate', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(20, 'bd_energy_tokamak', 'bd_construction_synthesis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(21, 'bd_energy_rectenna', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(22, 'bd_energy_solar_satellite', 'bd_energy_rectenna', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(23, 'bd_energy_receiving_satellite', 'bd_energy_rectenna', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(24, 'bd_energy_sending_satellite', 'bd_energy_rectenna', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(25, 'bd_energy_sending_satellite', 'bd_construction_synthesis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(26, 'bd_energy_star_belt', 'bd_energy_rectenna', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(27, 'bd_energy_star_panel', 'bd_energy_star_belt', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(28, 'bd_people_laboratory', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(29, 'bd_people_center', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(30, 'bd_people_workshop', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(31, 'bd_people_house', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(32, 'bd_people_barrack', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(33, 'bd_people_base', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(34, 'bd_ore_storage_1', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(35, 'bd_ore_storage_2', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(36, 'bd_ore_storage_3', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(37, 'bd_ore_storage_merchant', 'bd_planet_merchant', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(38, 'bd_hydro_storage_1', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(39, 'bd_hydro_storage_2', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(40, 'bd_hydro_storage_3', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(41, 'bd_hydro_storage_merchant', 'bd_planet_merchant', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(42, 'bd_energy_storage_1', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(43, 'bd_army_light', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(44, 'bd_army_heavy', 'bd_army_light', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(45, 'bd_army_heavy', 'bd_planet_metropolis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(46, 'bd_army_heavy', 'bd_construction_synthesis', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(47, 'bd_space_radar', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(48, 'bd_space_spaceport', 'bd_planet_colony', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(49, 'bd_space_sphipyard', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(50, 'bd_space_satellite', 'bd_planet_city', 1);
+INSERT INTO ng03.dt_building_building_requirements VALUES(51, 'bd_space_jammer', 'bd_planet_metropolis', 1);
 
 --------------------------------------------------------------------------------
 
@@ -2184,7 +2241,10 @@ CREATE SEQUENCE ng03.dt_building_research_requirements_id_seq
 ALTER TABLE ng03.dt_building_research_requirements_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.dt_building_research_requirements (
-    id integer DEFAULT nextval('ng03.dt_building_research_requirements_id_seq'::regclass) NOT NULL
+    id integer DEFAULT nextval('ng03.dt_building_research_requirements_id_seq'::regclass) NOT NULL,
+    building_id character varying NOT NULL,
+    requirement_id character varying NOT NULL,
+    level integer DEFAULT 1 NOT NULL
 );
 
 ALTER TABLE ng03.dt_building_research_requirements OWNER TO exileng;
@@ -2192,6 +2252,23 @@ ALTER TABLE ng03.dt_building_research_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_building_research_requirements_id_seq OWNED BY ng03.dt_building_research_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_building_research_requirements ADD CONSTRAINT dt_building_research_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_building_research_requirements ADD CONSTRAINT dt_building_research_requirements_building_id_fkey FOREIGN KEY (building_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.dt_building_research_requirements ADD CONSTRAINT dt_building_research_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+INSERT INTO ng03.dt_building_research_requirements VALUES(1, 'bd_planet_cave', 'rs_science_planetology', 1);
+INSERT INTO ng03.dt_building_research_requirements VALUES(2, 'bd_planet_moon', 'rs_science_planetology', 1);
+INSERT INTO ng03.dt_building_research_requirements VALUES(3, 'bd_construction_sandworm', 'rs_science_sandworm', 1);
+INSERT INTO ng03.dt_building_research_requirements VALUES(4, 'bd_resource_field', 'rs_science_sandworm', 1);
+INSERT INTO ng03.dt_building_research_requirements VALUES(5, 'bd_energy_geothermal', 'rs_science_study', 2);
+INSERT INTO ng03.dt_building_research_requirements VALUES(6, 'bd_energy_nuclear', 'rs_science_nuclear', 2);
+INSERT INTO ng03.dt_building_research_requirements VALUES(7, 'bd_energy_tokamak', 'rs_science_nuclear', 3);
+INSERT INTO ng03.dt_building_research_requirements VALUES(8, 'bd_energy_tokamak', 'rs_science_plasma', 3);
+INSERT INTO ng03.dt_building_research_requirements VALUES(9, 'bd_energy_tokamak', 'rs_science_quantum', 3);
+INSERT INTO ng03.dt_building_research_requirements VALUES(10, 'bd_energy_receiving_satellite', 'rs_science_energy_transfer', 1);
+INSERT INTO ng03.dt_building_research_requirements VALUES(11, 'bd_energy_sending_satellite', 'rs_science_energy_transfer', 1);
+INSERT INTO ng03.dt_building_research_requirements VALUES(12, 'bd_energy_star_belt', 'rs_science_nuclear', 3);
+INSERT INTO ng03.dt_building_research_requirements VALUES(13, 'bd_energy_star_belt', 'rs_science_plasma', 3);
+INSERT INTO ng03.dt_building_research_requirements VALUES(14, 'bd_energy_star_belt', 'rs_science_quantum', 3);
 
 --------------------------------------------------------------------------------
 
@@ -2206,7 +2283,10 @@ CREATE SEQUENCE ng03.dt_research_building_requirements_id_seq
 ALTER TABLE ng03.dt_research_building_requirements_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.dt_research_building_requirements (
-    id integer DEFAULT nextval('ng03.dt_research_building_requirements_id_seq'::regclass) NOT NULL
+    id integer DEFAULT nextval('ng03.dt_research_building_requirements_id_seq'::regclass) NOT NULL,
+    research_id character varying NOT NULL,
+    requirement_id character varying NOT NULL,
+    count integer DEFAULT 1 NOT NULL
 );
 
 ALTER TABLE ng03.dt_research_building_requirements OWNER TO exileng;
@@ -2214,6 +2294,12 @@ ALTER TABLE ng03.dt_research_building_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_research_building_requirements_id_seq OWNED BY ng03.dt_research_building_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_research_building_requirements ADD CONSTRAINT dt_research_building_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_research_building_requirements ADD CONSTRAINT dt_research_building_requirements_research_id_fkey FOREIGN KEY (research_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.dt_research_building_requirements ADD CONSTRAINT dt_research_building_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+INSERT INTO ng03.dt_research_building_requirements VALUES(1, 'rs_technology_jumpdrive', 'bd_people_center', 3);
+INSERT INTO ng03.dt_research_building_requirements VALUES(2, 'rs_science_planetology', 'bd_people_center', 5);
+INSERT INTO ng03.dt_research_building_requirements VALUES(3, 'rs_science_sandworm', 'bd_planet_sandworm', 1);
 
 --------------------------------------------------------------------------------
 
@@ -2228,7 +2314,10 @@ CREATE SEQUENCE ng03.dt_research_research_requirements_id_seq
 ALTER TABLE ng03.dt_research_research_requirements_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.dt_research_research_requirements (
-    id integer DEFAULT nextval('ng03.dt_research_research_requirements_id_seq'::regclass) NOT NULL
+    id integer DEFAULT nextval('ng03.dt_research_research_requirements_id_seq'::regclass) NOT NULL,
+    research_id character varying NOT NULL,
+    requirement_id character varying NOT NULL,
+    level integer DEFAULT 1 NOT NULL
 );
 
 ALTER TABLE ng03.dt_research_research_requirements OWNER TO exileng;
@@ -2236,6 +2325,50 @@ ALTER TABLE ng03.dt_research_research_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_research_research_requirements_id_seq OWNED BY ng03.dt_research_research_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_research_research_requirements ADD CONSTRAINT dt_research_research_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_research_research_requirements ADD CONSTRAINT dt_research_research_requirements_research_id_fkey FOREIGN KEY (research_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.dt_research_research_requirements ADD CONSTRAINT dt_research_research_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+INSERT INTO ng03.dt_research_research_requirements VALUES(1, 'rs_booster_propulsion', 'rs_technology_propulsion', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(2, 'rs_booster_shield', 'rs_weapon_shield', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(3, 'rs_booster_damage', 'rs_weapon_army', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(4, 'rs_booster_damage', 'rs_science_plasma', 1);
+INSERT INTO ng03.dt_research_research_requirements VALUES(5, 'rs_technology_energy', 'rs_technology_propulsion', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(6, 'rs_technology_jumpdrive', 'rs_science_quantum', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(7, 'rs_technology_deployment', 'rs_orientation_scientist', 1);
+INSERT INTO ng03.dt_research_research_requirements VALUES(8, 'rs_technology_deployment', 'rs_ship_util', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(9, 'rs_production_massive', 'rs_production_industry', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(10, 'rs_production_mining', 'rs_production_industry', 2);
+INSERT INTO ng03.dt_research_research_requirements VALUES(11, 'rs_production_mining_improved', 'rs_production_industry', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(12, 'rs_production_mining_improved', 'rs_production_mining', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(13, 'rs_production_refining', 'rs_production_industry', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(14, 'rs_production_refining_improved', 'rs_production_industry', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(15, 'rs_production_refining_improved', 'rs_production_refining', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(16, 'rs_science_nuclear', 'rs_science_study', 2);
+INSERT INTO ng03.dt_research_research_requirements VALUES(17, 'rs_science_plasma', 'rs_science_study', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(18, 'rs_science_plasma', 'rs_science_nuclear', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(19, 'rs_science_quantum', 'rs_science_study', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(20, 'rs_science_planetology', 'rs_science_study', 4);
+INSERT INTO ng03.dt_research_research_requirements VALUES(21, 'rs_science_energy_transfer', 'rs_technology_propulsion', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(22, 'rs_science_energy_transfer_improved', 'rs_science_energy_transfer', 1);
+INSERT INTO ng03.dt_research_research_requirements VALUES(23, 'rs_weapon_army', 'rs_ship_mechanic', 1);
+INSERT INTO ng03.dt_research_research_requirements VALUES(24, 'rs_weapon_rocket', 'rs_weapon_army', 2);
+INSERT INTO ng03.dt_research_research_requirements VALUES(25, 'rs_weapon_missile', 'rs_weapon_army', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(26, 'rs_weapon_missile', 'rs_weapon_rocket', 1);
+INSERT INTO ng03.dt_research_research_requirements VALUES(27, 'rs_weapon_turret', 'rs_weapon_army', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(28, 'rs_weapon_railgun', 'rs_weapon_army', 4);
+INSERT INTO ng03.dt_research_research_requirements VALUES(29, 'rs_weapon_ion', 'rs_weapon_army', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(30, 'rs_weapon_ion', 'rs_science_plasma', 1);
+INSERT INTO ng03.dt_research_research_requirements VALUES(31, 'rs_weapon_shield', 'rs_technology_energy', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(32, 'rs_ship_util', 'rs_ship_mechanic', 1);
+INSERT INTO ng03.dt_research_research_requirements VALUES(33, 'rs_ship_tactic', 'rs_ship_util', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(34, 'rs_ship_tactic', 'rs_ship_mechanic', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(35, 'rs_ship_light', 'rs_ship_mechanic', 2);
+INSERT INTO ng03.dt_research_research_requirements VALUES(36, 'rs_ship_corvet', 'rs_ship_mechanic', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(37, 'rs_ship_corvet', 'rs_technology_energy', 1);
+INSERT INTO ng03.dt_research_research_requirements VALUES(38, 'rs_ship_frigate', 'rs_ship_mechanic', 4);
+INSERT INTO ng03.dt_research_research_requirements VALUES(39, 'rs_ship_frigate', 'rs_technology_energy', 3);
+INSERT INTO ng03.dt_research_research_requirements VALUES(40, 'rs_ship_cruiser', 'rs_ship_mechanic', 5);
+INSERT INTO ng03.dt_research_research_requirements VALUES(41, 'rs_ship_cruiser', 'rs_technology_energy', 4);
 
 --------------------------------------------------------------------------------
 
@@ -2250,7 +2383,10 @@ CREATE SEQUENCE ng03.dt_ship_building_requirements_id_seq
 ALTER TABLE ng03.dt_ship_building_requirements_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.dt_ship_building_requirements (
-    id integer DEFAULT nextval('ng03.dt_ship_building_requirements_id_seq'::regclass) NOT NULL
+    id integer DEFAULT nextval('ng03.dt_ship_building_requirements_id_seq'::regclass) NOT NULL,
+    ship_id character varying NOT NULL,
+    requirement_id character varying NOT NULL,
+    count integer DEFAULT 1 NOT NULL
 );
 
 ALTER TABLE ng03.dt_ship_building_requirements OWNER TO exileng;
@@ -2258,6 +2394,60 @@ ALTER TABLE ng03.dt_ship_building_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_ship_building_requirements_id_seq OWNED BY ng03.dt_ship_building_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_ship_building_requirements ADD CONSTRAINT dt_ship_building_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_ship_building_requirements ADD CONSTRAINT dt_ship_building_requirements_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.dt_ship_building_requirements ADD CONSTRAINT dt_ship_building_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+INSERT INTO ng03.dt_ship_building_requirements VALUES(1, 'sh_cargo_1', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(2, 'sh_cargo_2', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(3, 'sh_cargo_3', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(4, 'sh_cargo_caravel', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(5, 'sh_util_probe', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(6, 'sh_util_recycler', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(7, 'sh_util_jumper', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(8, 'sh_util_droppods', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(9, 'sh_deployment_colony', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(10, 'sh_deployment_prefab', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(11, 'sh_deployment_automate', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(12, 'sh_deployment_synthesis', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(13, 'sh_deployment_geothermal', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(14, 'sh_deployment_laboratory', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(15, 'sh_deployment_center', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(16, 'sh_deployment_workshop', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(17, 'sh_deployment_barrack', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(18, 'sh_deployment_ore_storage_1', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(19, 'sh_deployment_ore_storage_2', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(20, 'sh_deployment_hydro_storage_1', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(21, 'sh_deployment_hydro_storage_2', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(22, 'sh_deployment_vortex_medium', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(23, 'sh_deployment_vortex_large', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(24, 'sh_deployment_vortex_killer', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(25, 'sh_tactic_radar', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(26, 'sh_tactic_jammer', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(27, 'sh_tactic_battle', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(28, 'sh_tactic_logistic', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(29, 'sh_fighter_light', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(30, 'sh_fighter_heavy', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(31, 'sh_fighter_elite', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(32, 'sh_corvet_light', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(33, 'sh_corvet_light', 'bd_army_light', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(34, 'sh_corvet_heavy', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(35, 'sh_corvet_heavy', 'bd_army_light', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(36, 'sh_corvet_multigun', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(37, 'sh_corvet_multigun', 'bd_army_light', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(38, 'sh_corvet_elite', 'bd_space_spaceport', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(39, 'sh_corvet_elite', 'bd_army_light', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(40, 'sh_frigate_light', 'bd_army_light', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(41, 'sh_frigate_light', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(42, 'sh_frigate_heavy', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(43, 'sh_frigate_heavy', 'bd_army_heavy', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(44, 'sh_frigate_elite', 'bd_army_light', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(45, 'sh_frigate_elite', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(46, 'sh_cruiser_light', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(47, 'sh_cruiser_light', 'bd_army_heavy', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(48, 'sh_cruiser_heavy', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(49, 'sh_cruiser_heavy', 'bd_army_heavy', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(50, 'sh_cruiser_elite', 'bd_space_sphipyard', 1);
+INSERT INTO ng03.dt_ship_building_requirements VALUES(51, 'sh_cruiser_elite', 'bd_army_heavy', 1);
 
 --------------------------------------------------------------------------------
 
@@ -2272,7 +2462,10 @@ CREATE SEQUENCE ng03.dt_ship_research_requirements_id_seq
 ALTER TABLE ng03.dt_ship_research_requirements_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.dt_ship_research_requirements (
-    id integer DEFAULT nextval('ng03.dt_ship_research_requirements_id_seq'::regclass) NOT NULL
+    id integer DEFAULT nextval('ng03.dt_ship_research_requirements_id_seq'::regclass) NOT NULL,
+    ship_id character varying NOT NULL,
+    requirement_id character varying NOT NULL,
+    level integer DEFAULT 1 NOT NULL
 );
 
 ALTER TABLE ng03.dt_ship_research_requirements OWNER TO exileng;
@@ -2280,92 +2473,250 @@ ALTER TABLE ng03.dt_ship_research_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_ship_research_requirements_id_seq OWNED BY ng03.dt_ship_research_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_ship_research_requirements ADD CONSTRAINT dt_ship_research_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_ship_research_requirements ADD CONSTRAINT dt_ship_research_requirements_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.dt_ship_research_requirements ADD CONSTRAINT dt_ship_research_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+INSERT INTO ng03.dt_ship_research_requirements VALUES(1, 'sh_cargo_1', 'rs_ship_util', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(2, 'sh_cargo_2', 'rs_ship_util', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(3, 'sh_cargo_3', 'rs_ship_util', 5);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(4, 'sh_cargo_caravel', 'rs_orientation_merchant', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(5, 'sh_cargo_caravel', 'rs_ship_util', 5);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(6, 'sh_util_probe', 'rs_ship_mechanic', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(7, 'sh_util_recycler', 'rs_ship_util', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(8, 'sh_util_jumper', 'rs_ship_util', 5);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(9, 'sh_util_jumper', 'rs_technology_jumpdrive', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(10, 'sh_util_droppods', 'rs_ship_util', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(11, 'sh_deployment_colony', 'rs_ship_util', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(12, 'sh_deployment_prefab', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(13, 'sh_deployment_prefab', 'rs_ship_util', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(14, 'sh_deployment_automate', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(15, 'sh_deployment_automate', 'rs_ship_util', 4);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(16, 'sh_deployment_synthesis', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(17, 'sh_deployment_synthesis', 'rs_ship_util', 5);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(18, 'sh_deployment_geothermal', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(19, 'sh_deployment_geothermal', 'rs_science_study', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(20, 'sh_deployment_geothermal', 'rs_ship_util', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(21, 'sh_deployment_laboratory', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(22, 'sh_deployment_laboratory', 'rs_ship_util', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(23, 'sh_deployment_center', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(24, 'sh_deployment_center', 'rs_ship_util', 4);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(25, 'sh_deployment_workshop', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(26, 'sh_deployment_workshop', 'rs_ship_util', 4);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(27, 'sh_deployment_barrack', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(28, 'sh_deployment_barrack', 'rs_ship_util', 4);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(29, 'sh_deployment_ore_storage_1', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(30, 'sh_deployment_ore_storage_1', 'rs_ship_util', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(31, 'sh_deployment_ore_storage_2', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(32, 'sh_deployment_ore_storage_2', 'rs_ship_util', 4);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(33, 'sh_deployment_hydro_storage_1', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(34, 'sh_deployment_hydro_storage_1', 'rs_ship_util', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(35, 'sh_deployment_hydro_storage_2', 'rs_technology_deployment', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(36, 'sh_deployment_hydro_storage_2', 'rs_ship_util', 4);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(37, 'sh_deployment_vortex_medium', 'rs_technology_jumpdrive', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(38, 'sh_deployment_vortex_medium', 'rs_ship_tactic', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(39, 'sh_deployment_vortex_large', 'rs_orientation_soldier', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(40, 'sh_deployment_vortex_large', 'rs_technology_jumpdrive', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(41, 'sh_deployment_vortex_large', 'rs_ship_tactic', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(42, 'sh_deployment_vortex_killer', 'rs_orientation_scientist', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(43, 'sh_deployment_vortex_killer', 'rs_technology_jumpdrive', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(44, 'sh_deployment_vortex_killer', 'rs_ship_tactic', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(45, 'sh_tactic_radar', 'rs_ship_tactic', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(46, 'sh_tactic_jammer', 'rs_ship_tactic', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(47, 'sh_tactic_battle', 'rs_ship_tactic', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(48, 'sh_tactic_logistic', 'rs_technology_jumpdrive', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(49, 'sh_tactic_logistic', 'rs_ship_tactic', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(50, 'sh_fighter_light', 'rs_weapon_army', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(51, 'sh_fighter_light', 'rs_ship_light', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(52, 'sh_fighter_heavy', 'rs_weapon_army', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(53, 'sh_fighter_heavy', 'rs_ship_light', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(54, 'sh_fighter_elite', 'rs_weapon_army', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(55, 'sh_fighter_elite', 'rs_ship_light', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(56, 'sh_corvet_light', 'rs_weapon_turret', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(57, 'sh_corvet_light', 'rs_ship_corvet', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(58, 'sh_corvet_heavy', 'rs_weapon_rocket', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(59, 'sh_corvet_heavy', 'rs_ship_corvet', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(60, 'sh_corvet_multigun', 'rs_weapon_turret', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(61, 'sh_corvet_multigun', 'rs_ship_corvet', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(62, 'sh_corvet_elite', 'rs_weapon_turret', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(63, 'sh_corvet_elite', 'rs_ship_corvet', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(64, 'sh_frigate_light', 'rs_weapon_railgun', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(65, 'sh_frigate_light', 'rs_ship_frigate', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(66, 'sh_frigate_heavy', 'rs_weapon_ion', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(67, 'sh_frigate_heavy', 'rs_ship_frigate', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(68, 'sh_frigate_elite', 'rs_weapon_missile', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(69, 'sh_frigate_elite', 'rs_ship_frigate', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(70, 'sh_cruiser_light', 'rs_weapon_railgun', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(71, 'sh_cruiser_light', 'rs_ship_cruiser', 1);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(72, 'sh_cruiser_heavy', 'rs_weapon_railgun', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(73, 'sh_cruiser_heavy', 'rs_ship_cruiser', 2);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(74, 'sh_cruiser_elite', 'rs_weapon_railgun', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(75, 'sh_cruiser_elite', 'rs_ship_cruiser', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(76, 'sh_dreadnought', 'rs_weapon_railgun', 3);
+INSERT INTO ng03.dt_ship_research_requirements VALUES(77, 'sh_dreadnought', 'rs_ship_cruiser', 3);
 
 --------------------------------------------------------------------------------
 
-CREATE SEQUENCE ng03.dt_commander_firstnames_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER TABLE ng03.dt_commander_firstnames_id_seq OWNER TO exileng;
-
 CREATE TABLE ng03.dt_commander_firstnames (
-    id integer DEFAULT nextval('ng03.dt_commander_firstnames_id_seq'::regclass) NOT NULL
+    id character varying NOT NULL
 );
 
 ALTER TABLE ng03.dt_commander_firstnames OWNER TO exileng;
 
-ALTER SEQUENCE ng03.dt_commander_firstnames_id_seq OWNED BY ng03.dt_commander_firstnames.id;
-
 ALTER TABLE ONLY ng03.dt_commander_firstnames ADD CONSTRAINT dt_commander_firstnames_pkey PRIMARY KEY (id);
+
+INSERT INTO ng03.dt_commander_firstnames VALUES('Alia');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Leto');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Siona');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Gurney');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Vladimir');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Darwi');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Duncan');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Paul');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Ben');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Jacen');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Maximus');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Yan');
+INSERT INTO ng03.dt_commander_firstnames VALUES('John');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Alexandre');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Charles');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Robert');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Pavel');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Travis');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Leonard');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Tina');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Kira');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Janice');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Alfred');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Marcus');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Thomas');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Oliver');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Douglas');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Conrad');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Jane');
+INSERT INTO ng03.dt_commander_firstnames VALUES('James');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Frank');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Arthur');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Richard');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Steve');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Julian');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Dave');
+INSERT INTO ng03.dt_commander_firstnames VALUES('William');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Walter');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Eric');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Tony');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Peter');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Max');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Martin');
+INSERT INTO ng03.dt_commander_firstnames VALUES('David');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Leo');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Howard');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Julius');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Chris');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Cyril');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Anne');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Anke');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Alberto');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Nicolas');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Arkan');
+INSERT INTO ng03.dt_commander_firstnames VALUES('André');
+INSERT INTO ng03.dt_commander_firstnames VALUES('Mike');
 
 --------------------------------------------------------------------------------
 
-CREATE SEQUENCE ng03.dt_commander_lastnames_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER TABLE ng03.dt_commander_lastnames_id_seq OWNER TO exileng;
-
 CREATE TABLE ng03.dt_commander_lastnames (
-    id integer DEFAULT nextval('ng03.dt_commander_lastnames_id_seq'::regclass) NOT NULL
+    id character varying NOT NULL
 );
 
 ALTER TABLE ng03.dt_commander_lastnames OWNER TO exileng;
 
-ALTER SEQUENCE ng03.dt_commander_lastnames_id_seq OWNED BY ng03.dt_commander_lastnames.id;
-
 ALTER TABLE ONLY ng03.dt_commander_lastnames ADD CONSTRAINT dt_commander_lastnames_pkey PRIMARY KEY (id);
+
+INSERT INTO ng03.dt_commander_lastnames VALUES('Burnett');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Adams');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Leary');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Page');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Keats');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Keller');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Anderson');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Aicard');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Allen');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Atwood');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Augustus');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Estrada');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Eckhart');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Hebey');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Huxley');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Harris');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Hnin Yu');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Muller');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Moore');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Monroe');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Orban');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Orwell');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Thompson');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Carr');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Chen');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Claudius');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Gambetta');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Grant');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Newton');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Nietzsche');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Nerval');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Bonaparte');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Nin');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Neumann');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Rolland');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Rousseau');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Rostand');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Russel');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Ruskin');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Surcouffe');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Shepard');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Sheen');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Smith');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Doe');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Sterne');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Stuart');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Swift');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Scott');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Falcon');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Wartburg');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Wesley');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Wiesel');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Wolfe');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Wei');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Wellington');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Mairet');
+INSERT INTO ng03.dt_commander_lastnames VALUES('Riker');
 
 --------------------------------------------------------------------------------
 
-CREATE SEQUENCE ng03.dt_mails_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER TABLE ng03.dt_mails_id_seq OWNER TO exileng;
-
 CREATE TABLE ng03.dt_mails (
-    id integer DEFAULT nextval('ng03.dt_mails_id_seq'::regclass) NOT NULL
+    id character varying NOT NULL,
+    sender_name character varying
 );
 
 ALTER TABLE ng03.dt_mails OWNER TO exileng;
 
-ALTER SEQUENCE ng03.dt_mails_id_seq OWNED BY ng03.dt_mails.id;
-
 ALTER TABLE ONLY ng03.dt_mails ADD CONSTRAINT dt_mails_pkey PRIMARY KEY (id);
+
+INSERT INTO ng03.dt_mails VALUES('ml_new_planet', null);
+INSERT INTO ng03.dt_mails VALUES('ml_research', null);
+INSERT INTO ng03.dt_mails VALUES('ml_first_ship', null);
+INSERT INTO ng03.dt_mails VALUES('ml_first_colonizer', null);
+INSERT INTO ng03.dt_mails VALUES('ml_contract_ending', 'Guilde Marchande');
+INSERT INTO ng03.dt_mails VALUES('ml_contract_starting', 'Guilde Marchande');
+INSERT INTO ng03.dt_mails VALUES('ml_lotery_starting', 'Guilde Marchande');
+INSERT INTO ng03.dt_mails VALUES('ml_lotery_winning', 'Guilde Marchande');
+INSERT INTO ng03.dt_mails VALUES('ml_lotery_failing', 'Guilde Marchande');
 
 --------------------------------------------------------------------------------
 
-CREATE SEQUENCE ng03.dt_orientations_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER TABLE ng03.dt_orientations_id_seq OWNER TO exileng;
-
 CREATE TABLE ng03.dt_orientations (
-    id integer DEFAULT nextval('ng03.dt_orientations_id_seq'::regclass) NOT NULL
+    id character varying NOT NULL
 );
 
 ALTER TABLE ng03.dt_orientations OWNER TO exileng;
-
-ALTER SEQUENCE ng03.dt_orientations_id_seq OWNED BY ng03.dt_orientations.id;
 
 ALTER TABLE ONLY ng03.dt_orientations ADD CONSTRAINT dt_orientations_pkey PRIMARY KEY (id);
 
