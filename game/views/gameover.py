@@ -8,7 +8,7 @@ from game.views._base import *
 class View(LoginRequiredMixin, View):
     
     template_name = 'game/gameover.html'
-    success_url = '/game/gameover/'
+    success_url = '/game/empire/overview/'
 
     #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
@@ -38,15 +38,22 @@ class View(LoginRequiredMixin, View):
         #-----------------------------------------------------------------------
         if action == 'reset':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
-            if result == 0: return HttpResponseRedirect(self.success_url)
-            else: messages.error(request, 'error_' + str(result))
+            name = request.POST.get('name', '')
+            galaxy_id = get_int(request.POST.get('galaxy_id', 0))
+            #-------------------------------------------------------------------
+            result = db_result(cursor, 'SELECT ua_profile_rename(' + str(self.profile['id']) + ',' + sql_str(name) + ')')
+            if result != 0: messages.error(request, 'profile_rename_error' + str(result))
+            else:
+                #-------------------------------------------------------------------
+                result = db_result(cursor, 'SELECT ua_profile_reset(' + str(self.profile['id']) + ',' + str(galaxy_id) ')')
+                if result == 0: return HttpResponseRedirect(self.success_url)
+                else: messages.error(request, 'profile_reset_error' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'delete':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_delete(' + str(self.profile['id']) + ')')
             if result == 0: return HttpResponseRedirect(self.success_url)
-            else: messages.error(request, 'error_' + str(result))
+            else: messages.error(request, 'profile_delete_error' + str(result))
         #-----------------------------------------------------------------------
         context = {}
         return render(request, self.template_name, context)

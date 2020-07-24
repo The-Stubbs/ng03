@@ -8,7 +8,7 @@ from game.views._base import *
 class View(LoginRequiredMixin, View):
     
     template_name = 'game/starting.html'
-    success_url = '/game/starting/'
+    success_url = '/game/empire/overview/'
 
     #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
@@ -22,6 +22,7 @@ class View(LoginRequiredMixin, View):
         self.profile = profile
         #-----------------------------------------------------------------------
         if self.profile['privilege'] != 'new': return HttpResponseRedirect('/game/')
+        if self.profile['reset_count'] != 0: return HttpResponseRedirect('/game/')
         #-----------------------------------------------------------------------
         return super().dispatch(request, *args, **kwargs)
         #-----------------------------------------------------------------------
@@ -35,11 +36,19 @@ class View(LoginRequiredMixin, View):
     #---------------------------------------------------------------------------
     def post(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
-        if action == 'reset':
+        if action == 'start':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
-            if result == 0: return HttpResponseRedirect(self.success_url)
-            else: messages.error(request, 'error_' + str(result))
+            name = request.POST.get('name', '')
+            galaxy_id = get_int(request.POST.get('galaxy_id', 0))
+            orientation = get_int(request.POST.get('orientation', 0))
+            #-------------------------------------------------------------------
+            result = db_result(cursor, 'SELECT ua_profile_init(' + str(self.profile['id']) + ',' + sql_str(name) + ',' + str(orientation) + ')')
+            if result != 0: messages.error(request, 'profile_init_error' + str(result))
+            else:
+                #-------------------------------------------------------------------
+                result = db_result(cursor, 'SELECT ua_profile_reset(' + str(self.profile['id']) + ',' + str(galaxy_id) + ')')
+                if result == 0: return HttpResponseRedirect(self.success_url)
+                else: messages.error(request, 'profile_reset_error' + str(result))
         #-----------------------------------------------------------------------
         context = {}
         return render(request, self.template_name, context)

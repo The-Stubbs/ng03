@@ -35,11 +35,11 @@ class View(LoginRequiredMixin, View):
     #---------------------------------------------------------------------------
     def post(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
-        if action == 'unlock':
+        if action == 'stop':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_stop_holidays(' + str(self.profile['id']) + ')')
             if result == 0: return HttpResponseRedirect(self.success_url)
-            else: messages.error(request, 'error_' + str(result))
+            else: messages.error(request, 'profile_stop_holidays_error' + str(result))
         #-----------------------------------------------------------------------
         context = {}
         return render(request, self.template_name, context)

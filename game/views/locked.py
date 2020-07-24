@@ -8,7 +8,7 @@ from game.views._base import *
 class View(LoginRequiredMixin, View):
     
     template_name = 'game/locked.html'
-    success_url = '/game/locked/'
+    success_url = '/game/empire/overview/'
 
     #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
@@ -37,9 +37,9 @@ class View(LoginRequiredMixin, View):
         #-----------------------------------------------------------------------
         if action == 'unlock':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT (' + ')')
+            result = db_result(cursor, 'SELECT ua_profile_unlock(' + str(self.profile['id']) + ')')
             if result == 0: return HttpResponseRedirect(self.success_url)
-            else: messages.error(request, 'error_' + str(result))
+            else: messages.error(request, 'profile_unlock_error' + str(result))
         #-----------------------------------------------------------------------
         context = {}
         return render(request, self.template_name, context)
