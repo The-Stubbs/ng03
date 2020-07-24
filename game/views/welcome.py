@@ -24,22 +24,22 @@ class View(LoginRequiredMixin, View):
         #-----------------------------------------------------------------------
 
     #---------------------------------------------------------------------------
-    def get_context(self, request, cursor, **kwargs):
-        #-----------------------------------------------------------------------
-        context = super().get_context(request, cursor, **kwargs)
-        return context
-        #-----------------------------------------------------------------------
+    def get(self, request, *args, **kwargs):
+        context = {}
+        return render(request, self.template_name, context)
+    #---------------------------------------------------------------------------
     
     #---------------------------------------------------------------------------
-    def process_action(self, request, cursor, action):
+    def post(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
         if action == 'create':
             #-------------------------------------------------------------------
             result = db_result(cursor, 'SELECT ua_profile_create(' + str(request.user.id) + ',' + sql_str(request.META.get('REMOTE_ADDR')) + ',' + sql_str(request.META.get('HTTP_USER_AGENT')) + ')')
-            if result == 0: return self.success(request)
+            if result == 0: return HttpResponseRedirect(self.success_url)
             else: messages.error(request, 'profile_create_error' + str(result))
         #-----------------------------------------------------------------------
-        return self.failed(request, cursor)
+        context = {}
+        return render(request, self.template_name, context)
         #-----------------------------------------------------------------------
 
 ################################################################################

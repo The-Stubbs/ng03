@@ -5,36 +5,40 @@ from game.views._base import *
 
 
 ################################################################################
-class View(ActionView):
+class View(LoginRequiredMixin, View):
     
     template_name = 'game/gameover.html'
     success_url = '/game/gameover/'
 
     #---------------------------------------------------------------------------
-    def get_context(self, request, cursor, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
-        context = super().get_context(request, cursor, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
         #-----------------------------------------------------------------------
-        #-----------------------------------------------------------------------
-        return context
-        #-----------------------------------------------------------------------
+ 
+    #---------------------------------------------------------------------------
+    def get(self, request, *args, **kwargs):
+        context = {}
+        return render(request, self.template_name, context)
+    #---------------------------------------------------------------------------
     
     #---------------------------------------------------------------------------
-    def process_action(self, request, cursor, action):
+    def post(self, request, *args, **kwargs):
         #-----------------------------------------------------------------------
         if action == 'reset':
             #-------------------------------------------------------------------
             result = db_result(cursor, 'SELECT (' + ')')
-            if result == 0: return self.success()
+            if result == 0: return HttpResponseRedirect(self.success_url)
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
         elif action == 'delete':
             #-------------------------------------------------------------------
             result = db_result(cursor, 'SELECT (' + ')')
-            if result == 0: return self.success()
+            if result == 0: return HttpResponseRedirect(self.success_url)
             else: messages.error(request, 'error_' + str(result))
         #-----------------------------------------------------------------------
-        return self.failed()
+        context = {}
+        return render(request, self.template_name, context)
         #-----------------------------------------------------------------------
 
 ################################################################################
