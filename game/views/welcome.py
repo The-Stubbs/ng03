@@ -16,6 +16,10 @@ class View(ActionView):
         if MAINTENANCE: return HttpResponseRedirect('/game/maintenance/')
         if not REGISTRATION: return HttpResponseRedirect('/game/closed/')
         #-----------------------------------------------------------------------
+        cursor = connection.cursor()
+        profile = db_row(cursor, 'SELECT * FROM gm_profiles WHERE user_id=' + str(request.user.id) + ' LIMIT 1')
+        if profile: return HttpResponseRedirect('/game/')
+        #-----------------------------------------------------------------------
         return super().dispatch(request, *args, **kwargs)
         #-----------------------------------------------------------------------
 

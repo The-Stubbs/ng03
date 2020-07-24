@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(ExileMixin, ActionView):
+class View(ActionView, ExileMixin):
     
     template_name = 'game/commander_skills.html'
     success_url = '/game/commander/skills/'

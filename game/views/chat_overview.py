@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(ExileMixin, TemplateView):
+class View(TemplateView, ExileMixin):
     
     template_name = 'game/chat_overview.html'
     success_url = '/game/chat/overview/'

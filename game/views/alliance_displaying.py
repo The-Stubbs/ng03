@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(ExileMixin, TemplateView):
+class View(TemplateView, ExileMixin):
     
     template_name = 'game/alliance_displaying.html'
 

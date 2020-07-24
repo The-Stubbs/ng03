@@ -5,7 +5,7 @@ from game.views._base import *
 
 
 ################################################################################
-class View(ExileMixin, ActionView):
+class View(ActionView, ExileMixin):
     
     template_name = 'game/empire_fleets.html'
     success_url = '/game/empire/fleets/'
