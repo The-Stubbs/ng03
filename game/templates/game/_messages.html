@@ -1,0 +1,11 @@
+{% load i18n %}
+
+{% if messages %}
+{% for message in messages %}
+    <div class="box box-{{ message.tags }}">
+        <div class="box-line">
+            <div class="box-item"><span class="c-{{ message.tags }}">{% trans message.message %}</span></div>
+        </div>
+    </div>
+{% endfor %}
+{% endif %}

@@ -1,0 +1,27 @@
+{% extends 'game/_base.html' %}
+
+{% load i18n %}
+
+{% block page %}
+<div class="page-content">
+    {% include 'game/_messages.html' %}
+    <div class="box">
+        <div class="box-header">
+            <div class="box-item"><span class="c-highlight">{% trans "Vaisseau de colonisation" %}</span></div>
+        </div>
+        <div class="box-line">
+            <div class="box-item"><span class="c-normal">
+                {% trans "Votre vaisseau de colonisation est en route vers sa planète de destination." %}<br/>
+                {% trans "Lorsqu'il sera arrivé, vous pourrez coloniser la planète et commencer à foonder votre empire." %}<br/>
+            </span></div>
+        </div>
+        <form method="post">
+            {% csrf_token%}
+            <input type="hidden" name="action" value="create">
+            <div class="box-line">
+                <div class="box-item"><input type="submit" value="{% trans 'Coloniser' %}"></div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
