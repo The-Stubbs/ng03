@@ -3438,7 +3438,21 @@ CREATE SEQUENCE ng03.gm_alliances_id_seq
 ALTER TABLE ng03.gm_alliances_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliances (
-    id integer DEFAULT nextval('ng03.gm_alliances_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliances_id_seq'::regclass) NOT NULL,
+    chat_id integer NOT NULL,
+    tag character varying(4) NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    logo_url character varying,
+    announce text,
+    member_max integer DEFAULT 30 NOT NULL,
+    tax real DEFAULT 0 NOT NULL,
+    credit_count integer DEFAULT 0 NOT NULL,
+    previous_score integer DEFAULT 0 NOT NULL,
+    defcon smallint DEFAULT 5 NOT NULL,
+    last_kick_date timestamp with time zone DEFAULT now() NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliances OWNER TO exileng;
@@ -3460,7 +3474,11 @@ CREATE SEQUENCE ng03.gm_alliance_invitations_id_seq
 ALTER TABLE ng03.gm_alliance_invitations_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_invitations (
-    id integer DEFAULT nextval('ng03.gm_alliance_invitations_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_invitations_id_seq'::regclass) NOT NULL,
+    alliance_id integer NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_invitations OWNER TO exileng;
@@ -3482,7 +3500,11 @@ CREATE SEQUENCE ng03.gm_alliance_nap_requests_id_seq
 ALTER TABLE ng03.gm_alliance_nap_requests_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_nap_requests (
-    id integer DEFAULT nextval('ng03.gm_alliance_nap_requests_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_nap_requests_id_seq'::regclass) NOT NULL,
+    alliance_id_1 integer NOT NULL,
+    alliance_id_2 integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_nap_requests OWNER TO exileng;
@@ -3504,7 +3526,11 @@ CREATE SEQUENCE ng03.gm_alliance_naps_id_seq
 ALTER TABLE ng03.gm_alliance_naps_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_naps (
-    id integer DEFAULT nextval('ng03.gm_alliance_naps_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_naps_id_seq'::regclass) NOT NULL,
+    alliance_id_1 integer NOT NULL,
+    alliance_id_2 integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_naps OWNER TO exileng;
@@ -3526,7 +3552,10 @@ CREATE SEQUENCE ng03.gm_alliance_ranks_id_seq
 ALTER TABLE ng03.gm_alliance_ranks_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_ranks (
-    id integer DEFAULT nextval('ng03.gm_alliance_ranks_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_ranks_id_seq'::regclass) NOT NULL,
+    alliance_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_ranks OWNER TO exileng;
@@ -3548,7 +3577,10 @@ CREATE SEQUENCE ng03.gm_alliance_reports_id_seq
 ALTER TABLE ng03.gm_alliance_reports_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_reports (
-    id integer DEFAULT nextval('ng03.gm_alliance_reports_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_reports_id_seq'::regclass) NOT NULL,
+    alliance_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_reports OWNER TO exileng;
@@ -3570,7 +3602,11 @@ CREATE SEQUENCE ng03.gm_alliance_tributes_id_seq
 ALTER TABLE ng03.gm_alliance_tributes_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_tributes (
-    id integer DEFAULT nextval('ng03.gm_alliance_tributes_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_tributes_id_seq'::regclass) NOT NULL,
+    alliance_id_1 integer NOT NULL,
+    alliance_id_2 integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_tributes OWNER TO exileng;
@@ -3592,7 +3628,10 @@ CREATE SEQUENCE ng03.gm_alliance_wallet_logs_id_seq
 ALTER TABLE ng03.gm_alliance_wallet_logs_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_wallet_logs (
-    id integer DEFAULT nextval('ng03.gm_alliance_wallet_logs_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_wallet_logs_id_seq'::regclass) NOT NULL,
+    alliance_id_1 integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_wallet_logs OWNER TO exileng;
@@ -3614,7 +3653,11 @@ CREATE SEQUENCE ng03.gm_alliance_wallet_requests_id_seq
 ALTER TABLE ng03.gm_alliance_wallet_requests_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_wallet_requests (
-    id integer DEFAULT nextval('ng03.gm_alliance_wallet_requests_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_wallet_requests_id_seq'::regclass) NOT NULL,
+    alliance_id integer NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_wallet_requests OWNER TO exileng;
@@ -3636,7 +3679,11 @@ CREATE SEQUENCE ng03.gm_alliance_wars_id_seq
 ALTER TABLE ng03.gm_alliance_wars_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_alliance_wars (
-    id integer DEFAULT nextval('ng03.gm_alliance_wars_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_alliance_wars_id_seq'::regclass) NOT NULL,
+    alliance_id_1 integer NOT NULL,
+    alliance_id_2 integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_alliance_wars OWNER TO exileng;
@@ -3658,7 +3705,10 @@ CREATE SEQUENCE ng03.gm_battles_id_seq
 ALTER TABLE ng03.gm_battles_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_battles (
-    id integer DEFAULT nextval('ng03.gm_battles_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_battles_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_battles OWNER TO exileng;
@@ -3680,7 +3730,10 @@ CREATE SEQUENCE ng03.gm_battle_fleets_id_seq
 ALTER TABLE ng03.gm_battle_fleets_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_battle_fleets (
-    id integer DEFAULT nextval('ng03.gm_battle_fleets_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_battle_fleets_id_seq'::regclass) NOT NULL,
+    battle_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_battle_fleets OWNER TO exileng;
@@ -3702,7 +3755,10 @@ CREATE SEQUENCE ng03.gm_battle_fleet_ships_id_seq
 ALTER TABLE ng03.gm_battle_fleet_ships_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_battle_fleet_ships (
-    id integer DEFAULT nextval('ng03.gm_battle_fleet_ships_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_battle_fleet_ships_id_seq'::regclass) NOT NULL,
+    battle_fleet_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_battle_fleet_ships OWNER TO exileng;
@@ -3724,7 +3780,10 @@ CREATE SEQUENCE ng03.gm_battle_fleet_ship_kills_id_seq
 ALTER TABLE ng03.gm_battle_fleet_ship_kills_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_battle_fleet_ship_kills (
-    id integer DEFAULT nextval('ng03.gm_battle_fleet_ship_kills_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_battle_fleet_ship_kills_id_seq'::regclass) NOT NULL,
+    battle_fleet_ship_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_battle_fleet_ship_kills OWNER TO exileng;
@@ -3746,7 +3805,10 @@ CREATE SEQUENCE ng03.gm_chats_id_seq
 ALTER TABLE ng03.gm_chats_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_chats (
-    id integer DEFAULT nextval('ng03.gm_chats_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_chats_id_seq'::regclass) NOT NULL,
+    name character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_chats OWNER TO exileng;
@@ -3754,6 +3816,9 @@ ALTER TABLE ng03.gm_chats OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_chats_id_seq OWNED BY ng03.gm_chats.id;
 
 ALTER TABLE ONLY ng03.gm_chats ADD CONSTRAINT gm_chats_pkey PRIMARY KEY (id);
+
+INSERT INTO ng03.gm_chats(created_by, id, name) VALUES('system', 1, 'Nouveaux joueurs');
+INSERT INTO ng03.gm_chats(created_by, id, name) VALUES('system', 2, 'Exile');
 
 --------------------------------------------------------------------------------
 
@@ -3768,7 +3833,10 @@ CREATE SEQUENCE ng03.gm_chat_messages_id_seq
 ALTER TABLE ng03.gm_chat_messages_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_chat_messages (
-    id integer DEFAULT nextval('ng03.gm_chat_messages_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_chat_messages_id_seq'::regclass) NOT NULL,
+    chat_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_chat_messages OWNER TO exileng;
@@ -3790,6 +3858,8 @@ CREATE SEQUENCE ng03.gm_galaxies_id_seq
 ALTER TABLE ng03.gm_galaxies_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_galaxies (
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
     id integer DEFAULT nextval('ng03.gm_galaxies_id_seq'::regclass) NOT NULL
 );
 
@@ -3812,7 +3882,10 @@ CREATE SEQUENCE ng03.gm_invasions_id_seq
 ALTER TABLE ng03.gm_invasions_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_invasions (
-    id integer DEFAULT nextval('ng03.gm_invasions_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_invasions_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_invasions OWNER TO exileng;
@@ -3834,7 +3907,10 @@ CREATE SEQUENCE ng03.gm_planets_id_seq
 ALTER TABLE ng03.gm_planets_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_planets (
-    id integer DEFAULT nextval('ng03.gm_planets_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planets_id_seq'::regclass) NOT NULL,
+    galaxy_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_planets OWNER TO exileng;
@@ -3856,7 +3932,11 @@ CREATE SEQUENCE ng03.gm_planet_building_pendings_id_seq
 ALTER TABLE ng03.gm_planet_building_pendings_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_planet_building_pendings (
-    id integer DEFAULT nextval('ng03.gm_planet_building_pendings_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planet_building_pendings_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL,
+    building_id character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_planet_building_pendings OWNER TO exileng;
@@ -3878,7 +3958,11 @@ CREATE SEQUENCE ng03.gm_planet_buildings_id_seq
 ALTER TABLE ng03.gm_planet_buildings_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_planet_buildings (
-    id integer DEFAULT nextval('ng03.gm_planet_buildings_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planet_buildings_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL,
+    building_id character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_planet_buildings OWNER TO exileng;
@@ -3900,7 +3984,11 @@ CREATE SEQUENCE ng03.gm_planet_energy_transfers_id_seq
 ALTER TABLE ng03.gm_planet_energy_transfers_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_planet_energy_transfers (
-    id integer DEFAULT nextval('ng03.gm_planet_energy_transfers_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planet_energy_transfers_id_seq'::regclass) NOT NULL,
+    planet_id_1 integer NOT NULL,
+    planet_id_2 integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_planet_energy_transfers OWNER TO exileng;
@@ -3922,7 +4010,11 @@ CREATE SEQUENCE ng03.gm_planet_ship_pendings_id_seq
 ALTER TABLE ng03.gm_planet_ship_pendings_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_planet_ship_pendings (
-    id integer DEFAULT nextval('ng03.gm_planet_ship_pendings_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planet_ship_pendings_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL,
+    ship_id character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_planet_ship_pendings OWNER TO exileng;
@@ -3944,7 +4036,11 @@ CREATE SEQUENCE ng03.gm_planet_ships_id_seq
 ALTER TABLE ng03.gm_planet_ships_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_planet_ships (
-    id integer DEFAULT nextval('ng03.gm_planet_ships_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planet_ships_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL,
+    ship_id character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_planet_ships OWNER TO exileng;
@@ -3966,7 +4062,10 @@ CREATE SEQUENCE ng03.gm_planet_training_pendings_id_seq
 ALTER TABLE ng03.gm_planet_training_pendings_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_planet_training_pendings (
-    id integer DEFAULT nextval('ng03.gm_planet_training_pendings_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planet_training_pendings_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_planet_training_pendings OWNER TO exileng;
@@ -3988,8 +4087,11 @@ CREATE SEQUENCE ng03.gm_profiles_id_seq
 ALTER TABLE ng03.gm_profiles_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profiles (
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
     id integer DEFAULT nextval('ng03.gm_profiles_id_seq'::regclass) NOT NULL,
-    user_id integer NOT NULL,
+    user_id integer,
+    pseudo character varying NOT NULL,
     privilege character varying DEFAULT 'new'::character varying NOT NULL,
     reset_count smallint DEFAULT 0 NOT NULL,
     bankruptcy smallint DEFAULT 168 NOT NULL
@@ -4002,6 +4104,10 @@ ALTER SEQUENCE ng03.gm_profiles_id_seq OWNED BY ng03.gm_profiles.id;
 ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_user_id_key UNIQUE (user_id);
 ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.auth_user(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+INSERT INTO ng03.gm_profiles(created_by, id, pseudo, privilege) VALUES('system', 1, 'Les fossoyeurs', 'active');
+INSERT INTO ng03.gm_profiles(created_by, id, pseudo, privilege) VALUES('system', 2, 'Nation oubliée', 'active');
+INSERT INTO ng03.gm_profiles(created_by, id, pseudo, privilege) VALUES('system', 3, 'Guilde marchande', 'active');
 
 --------------------------------------------------------------------------------
 
@@ -4016,7 +4122,10 @@ CREATE SEQUENCE ng03.gm_profile_bounties_id_seq
 ALTER TABLE ng03.gm_profile_bounties_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_bounties (
-    id integer DEFAULT nextval('ng03.gm_profile_bounties_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_bounties_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_bounties OWNER TO exileng;
@@ -4038,7 +4147,11 @@ CREATE SEQUENCE ng03.gm_profile_chats_id_seq
 ALTER TABLE ng03.gm_profile_chats_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_chats (
-    id integer DEFAULT nextval('ng03.gm_profile_chats_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_chats_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL,
+    chat_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_chats OWNER TO exileng;
@@ -4060,7 +4173,10 @@ CREATE SEQUENCE ng03.gm_profile_commanders_id_seq
 ALTER TABLE ng03.gm_profile_commanders_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_commanders (
-    id integer DEFAULT nextval('ng03.gm_profile_commanders_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_commanders_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_commanders OWNER TO exileng;
@@ -4082,7 +4198,10 @@ CREATE SEQUENCE ng03.gm_profile_fleet_categories_id_seq
 ALTER TABLE ng03.gm_profile_fleet_categories_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_fleet_categories (
-    id integer DEFAULT nextval('ng03.gm_profile_fleet_categories_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_fleet_categories_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_fleet_categories OWNER TO exileng;
@@ -4104,7 +4223,10 @@ CREATE SEQUENCE ng03.gm_profile_fleets_id_seq
 ALTER TABLE ng03.gm_profile_fleets_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_fleets (
-    id integer DEFAULT nextval('ng03.gm_profile_fleets_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_fleets_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_fleets OWNER TO exileng;
@@ -4126,7 +4248,10 @@ CREATE SEQUENCE ng03.gm_profile_fleet_routes_id_seq
 ALTER TABLE ng03.gm_profile_fleet_routes_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_fleet_routes (
-    id integer DEFAULT nextval('ng03.gm_profile_fleet_routes_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_fleet_routes_id_seq'::regclass) NOT NULL,
+    fleet_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_fleet_routes OWNER TO exileng;
@@ -4148,7 +4273,10 @@ CREATE SEQUENCE ng03.gm_profile_fleet_route_waypoints_id_seq
 ALTER TABLE ng03.gm_profile_fleet_route_waypoints_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_fleet_route_waypoints (
-    id integer DEFAULT nextval('ng03.gm_profile_fleet_route_waypoints_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_fleet_route_waypoints_id_seq'::regclass) NOT NULL,
+    route_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_fleet_route_waypoints OWNER TO exileng;
@@ -4170,7 +4298,11 @@ CREATE SEQUENCE ng03.gm_profile_fleet_ships_id_seq
 ALTER TABLE ng03.gm_profile_fleet_ships_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_fleet_ships (
-    id integer DEFAULT nextval('ng03.gm_profile_fleet_ships_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_fleet_ships_id_seq'::regclass) NOT NULL,
+    fleet_id integer NOT NULL,
+    ship_id character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_fleet_ships OWNER TO exileng;
@@ -4192,7 +4324,10 @@ CREATE SEQUENCE ng03.gm_profile_holidays_id_seq
 ALTER TABLE ng03.gm_profile_holidays_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_holidays (
-    id integer DEFAULT nextval('ng03.gm_profile_holidays_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_holidays_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_holidays OWNER TO exileng;
@@ -4214,7 +4349,10 @@ CREATE SEQUENCE ng03.gm_profile_mails_id_seq
 ALTER TABLE ng03.gm_profile_mails_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_mails (
-    id integer DEFAULT nextval('ng03.gm_profile_mails_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_mails_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_mails OWNER TO exileng;
@@ -4236,7 +4374,10 @@ CREATE SEQUENCE ng03.gm_profile_mail_addressee_list_id_seq
 ALTER TABLE ng03.gm_profile_mail_addressee_list_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_mail_addressee_list (
-    id integer DEFAULT nextval('ng03.gm_profile_mail_addressee_list_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_mail_addressee_list_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_mail_addressee_list OWNER TO exileng;
@@ -4258,7 +4399,11 @@ CREATE SEQUENCE ng03.gm_profile_mail_blacklist_id_seq
 ALTER TABLE ng03.gm_profile_mail_blacklist_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_mail_blacklist (
-    id integer DEFAULT nextval('ng03.gm_profile_mail_blacklist_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_mail_blacklist_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL,
+    ignored_profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_mail_blacklist OWNER TO exileng;
@@ -4269,7 +4414,7 @@ ALTER TABLE ONLY ng03.gm_profile_mail_blacklist ADD CONSTRAINT gm_profile_mail_b
 
 --------------------------------------------------------------------------------
 
-CREATE SEQUENCE ng03.gm_profile_market_purchases_id_seq
+CREATE SEQUENCE ng03.gm_planet_market_purchases_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -4277,21 +4422,24 @@ CREATE SEQUENCE ng03.gm_profile_market_purchases_id_seq
     NO MAXVALUE
     CACHE 1;
 
-ALTER TABLE ng03.gm_profile_market_purchases_id_seq OWNER TO exileng;
+ALTER TABLE ng03.gm_planet_market_purchases_id_seq OWNER TO exileng;
 
-CREATE TABLE ng03.gm_profile_market_purchases (
-    id integer DEFAULT nextval('ng03.gm_profile_market_purchases_id_seq'::regclass) NOT NULL
+CREATE TABLE ng03.gm_planet_market_purchases (
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planet_market_purchases_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL
 );
 
-ALTER TABLE ng03.gm_profile_market_purchases OWNER TO exileng;
+ALTER TABLE ng03.gm_planet_market_purchases OWNER TO exileng;
 
-ALTER SEQUENCE ng03.gm_profile_market_purchases_id_seq OWNED BY ng03.gm_profile_market_purchases.id;
+ALTER SEQUENCE ng03.gm_planet_market_purchases_id_seq OWNED BY ng03.gm_planet_market_purchases.id;
 
-ALTER TABLE ONLY ng03.gm_profile_market_purchases ADD CONSTRAINT gm_profile_market_purchases_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planet_market_purchases ADD CONSTRAINT gm_planet_market_purchases_pkey PRIMARY KEY (id);
 
 --------------------------------------------------------------------------------
 
-CREATE SEQUENCE ng03.gm_profile_market_sales_id_seq
+CREATE SEQUENCE ng03.gm_planet_market_sales_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -4299,17 +4447,20 @@ CREATE SEQUENCE ng03.gm_profile_market_sales_id_seq
     NO MAXVALUE
     CACHE 1;
 
-ALTER TABLE ng03.gm_profile_market_sales_id_seq OWNER TO exileng;
+ALTER TABLE ng03.gm_planet_market_sales_id_seq OWNER TO exileng;
 
-CREATE TABLE ng03.gm_profile_market_sales (
-    id integer DEFAULT nextval('ng03.gm_profile_market_sales_id_seq'::regclass) NOT NULL
+CREATE TABLE ng03.gm_planet_market_sales (
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_planet_market_sales_id_seq'::regclass) NOT NULL,
+    planet_id integer NOT NULL
 );
 
-ALTER TABLE ng03.gm_profile_market_sales OWNER TO exileng;
+ALTER TABLE ng03.gm_planet_market_sales OWNER TO exileng;
 
-ALTER SEQUENCE ng03.gm_profile_market_sales_id_seq OWNED BY ng03.gm_profile_market_sales.id;
+ALTER SEQUENCE ng03.gm_planet_market_sales_id_seq OWNED BY ng03.gm_planet_market_sales.id;
 
-ALTER TABLE ONLY ng03.gm_profile_market_sales ADD CONSTRAINT gm_profile_market_sales_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planet_market_sales ADD CONSTRAINT gm_planet_market_sales_pkey PRIMARY KEY (id);
 
 --------------------------------------------------------------------------------
 
@@ -4324,7 +4475,10 @@ CREATE SEQUENCE ng03.gm_profile_reports_id_seq
 ALTER TABLE ng03.gm_profile_reports_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_reports (
-    id integer DEFAULT nextval('ng03.gm_profile_reports_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_reports_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_reports OWNER TO exileng;
@@ -4346,7 +4500,11 @@ CREATE SEQUENCE ng03.gm_profile_researches_id_seq
 ALTER TABLE ng03.gm_profile_researches_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_researches (
-    id integer DEFAULT nextval('ng03.gm_profile_researches_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_researches_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL,
+    research_id character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_researches OWNER TO exileng;
@@ -4368,7 +4526,11 @@ CREATE SEQUENCE ng03.gm_profile_research_pendings_id_seq
 ALTER TABLE ng03.gm_profile_research_pendings_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_research_pendings (
-    id integer DEFAULT nextval('ng03.gm_profile_research_pendings_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_research_pendings_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL,
+    research_id character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_research_pendings OWNER TO exileng;
@@ -4390,7 +4552,11 @@ CREATE SEQUENCE ng03.gm_profile_ship_kills_id_seq
 ALTER TABLE ng03.gm_profile_ship_kills_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_profile_ship_kills (
-    id integer DEFAULT nextval('ng03.gm_profile_ship_kills_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_profile_ship_kills_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL,
+    ship_id character varying NOT NULL
 );
 
 ALTER TABLE ng03.gm_profile_ship_kills OWNER TO exileng;
@@ -4412,7 +4578,10 @@ CREATE SEQUENCE ng03.gm_spyings_id_seq
 ALTER TABLE ng03.gm_spyings_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_spyings (
-    id integer DEFAULT nextval('ng03.gm_spyings_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_spyings_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_spyings OWNER TO exileng;
@@ -4434,7 +4603,10 @@ CREATE SEQUENCE ng03.gm_spying_buildings_id_seq
 ALTER TABLE ng03.gm_spying_buildings_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_spying_buildings (
-    id integer DEFAULT nextval('ng03.gm_spying_buildings_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_spying_buildings_id_seq'::regclass) NOT NULL,
+    spying_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_spying_buildings OWNER TO exileng;
@@ -4456,7 +4628,10 @@ CREATE SEQUENCE ng03.gm_spying_fleets_id_seq
 ALTER TABLE ng03.gm_spying_fleets_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_spying_fleets (
-    id integer DEFAULT nextval('ng03.gm_spying_fleets_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_spying_fleets_id_seq'::regclass) NOT NULL,
+    spying_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_spying_fleets OWNER TO exileng;
@@ -4478,7 +4653,10 @@ CREATE SEQUENCE ng03.gm_spying_planets_id_seq
 ALTER TABLE ng03.gm_spying_planets_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_spying_planets (
-    id integer DEFAULT nextval('ng03.gm_spying_planets_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_spying_planets_id_seq'::regclass) NOT NULL,
+    spying_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_spying_planets OWNER TO exileng;
@@ -4500,7 +4678,10 @@ CREATE SEQUENCE ng03.gm_spying_researches_id_seq
 ALTER TABLE ng03.gm_spying_researches_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.gm_spying_researches (
-    id integer DEFAULT nextval('ng03.gm_spying_researches_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.gm_spying_researches_id_seq'::regclass) NOT NULL,
+    spying_id integer NOT NULL
 );
 
 ALTER TABLE ng03.gm_spying_researches OWNER TO exileng;
@@ -4522,7 +4703,10 @@ CREATE SEQUENCE ng03.log_actions_id_seq
 ALTER TABLE ng03.log_actions_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.log_actions (
-    id integer DEFAULT nextval('ng03.log_actions_id_seq'::regclass) NOT NULL
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.log_actions_id_seq'::regclass) NOT NULL,
+    profile_id integer NOT NULL
 );
 
 ALTER TABLE ng03.log_actions OWNER TO exileng;
@@ -4544,8 +4728,9 @@ CREATE SEQUENCE ng03.log_connections_id_seq
 ALTER TABLE ng03.log_connections_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.log_connections (
-    id integer DEFAULT nextval('ng03.log_connections_id_seq'::regclass) NOT NULL,
     creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.log_connections_id_seq'::regclass) NOT NULL,
     profile_id integer NOT NULL,
     remote_addr character varying NOT NULL,
     user_agent character varying NOT NULL
@@ -4556,7 +4741,6 @@ ALTER TABLE ng03.log_connections OWNER TO exileng;
 ALTER SEQUENCE ng03.log_connections_id_seq OWNED BY ng03.log_connections.id;
 
 ALTER TABLE ONLY ng03.log_connections ADD CONSTRAINT log_connections_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY ng03.log_connections ADD CONSTRAINT log_connections_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --------------------------------------------------------------------------------
 
@@ -4571,8 +4755,9 @@ CREATE SEQUENCE ng03.log_processes_id_seq
 ALTER TABLE ng03.log_processes_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.log_processes (
-    id integer DEFAULT nextval('ng03.log_processes_id_seq'::regclass) NOT NULL,
     creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    created_by character varying DEFAULT 'system' NOT NULL,
+    id integer DEFAULT nextval('ng03.log_processes_id_seq'::regclass) NOT NULL,
     process_id character varying NOT NULL,
     error character varying NOT NULL
 );
@@ -4582,7 +4767,19 @@ ALTER TABLE ng03.log_processes OWNER TO exileng;
 ALTER SEQUENCE ng03.log_processes_id_seq OWNED BY ng03.log_processes.id;
 
 ALTER TABLE ONLY ng03.log_processes ADD CONSTRAINT log_processes_pkey PRIMARY KEY (id);
+
+--------------------------------------------------------------------------------
+-- FOREIGN KEYS
+--------------------------------------------------------------------------------
+
+ALTER TABLE ONLY ng03.gm_alliances ADD CONSTRAINT gm_alliances_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES ng03.gm_chats(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_alliance_invitations ADD CONSTRAINT gm_alliance_invitations_alliance_id_fkey FOREIGN KEY (alliance_id) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_alliance_invitations ADD CONSTRAINT gm_alliance_invitations_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
 ALTER TABLE ONLY ng03.log_processes ADD CONSTRAINT log_processes_process_id_fkey FOREIGN KEY (process_id) REFERENCES ng03.dt_processes(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.log_connections ADD CONSTRAINT log_connections_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --------------------------------------------------------------------------------
 -- PostgreSQL database
