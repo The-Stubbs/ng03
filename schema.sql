@@ -2375,9 +2375,11 @@ CREATE FUNCTION ng03.admin_execute_processes() RETURNS void
     AS $$
 DECLARE
    
+   process record;
+   
 BEGIN
 
-	FOR process IN (SELECT * FROM dt_processes WHERE last_rundate + frequency < now()) LOOP
+	FOR process IN (SELECT * FROM dt_processes WHERE last_rundate IS NULL OR last_rundate + frequency < now()) LOOP
         BEGIN
         
             EXECUTE 'SELECT ' || process.id;
