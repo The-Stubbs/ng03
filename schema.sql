@@ -1758,6 +1758,644 @@ END;$$;
 ALTER FUNCTION ng03.ua_spying_create(_profile_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_alliance_nap_breakings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_alliance_nap_breakings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_alliance_tributes() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_alliance_tributes() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_alliance_war_billings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_alliance_war_billings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_alliance_war_ceasings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_alliance_war_ceasings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_commander_generations() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_commander_generations() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_commander_promotions() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_commander_promotions() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_fleet_delay_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_fleet_delay_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_fleet_recyclings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_fleet_recyclings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_fleet_travels() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_fleet_travels() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_fleet_waitings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_fleet_waitings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_annihilation_fleets_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_annihilation_fleets_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_lost_nation_leavings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_lost_nation_leavings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_merchant_fleets_cleaning() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_merchant_fleets_cleaning() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_merchant_unloading() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_merchant_unloading() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_resource_prices_updating() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_resource_prices_updating() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_resource_spawnings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_resource_spawnings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_resource_spawns_updating() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_resource_spawns_updating() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_rogue_fleets_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_rogue_fleets_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_galaxy_rogue_planets() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_galaxy_rogue_planets() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_bonus_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_bonus_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_building_destructions() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_building_destructions() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_building_pendings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_building_pendings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_laboratory_accidents_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_laboratory_accidents_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_magnetic_storm_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_magnetic_storm_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_productions() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_productions() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_riot_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_riot_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_robbery_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_robbery_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_sandworm_attack_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_sandworm_attack_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_seism_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_seism_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_ship_pendings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_ship_pendings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_trainings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_trainings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_planet_watching() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_planet_watching() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_alliance_leaving() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_alliance_leaving() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_booster_market_generation() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_booster_market_generation() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_bounties() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_bounties() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_credit_production() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_credit_production() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_deletion() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_deletion() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_holidays_ending() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_holidays_ending() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_holidays_starting() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_holidays_starting() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_market_purchases() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_market_purchases() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_market_sales() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_market_sales() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_research_pendings() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_research_pendings() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_profile_score_updating() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_profile_score_updating() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_server_alliance_cleaning() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_server_alliance_cleaning() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_server_cleaning() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_server_cleaning() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_server_fleet_route_cleaning() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_server_fleet_route_cleaning() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.process_server_lottery() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+END;$$;
+
+ALTER FUNCTION ng03.process_server_lottery() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.admin_execute_processes() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+   
+BEGIN
+
+	FOR process IN (SELECT * FROM dt_processes WHERE last_rundate + frequency < now()) LOOP
+        BEGIN
+        
+            EXECUTE 'SELECT ' || process.id;
+            UPDATE dt_processes SET last_rundate = now(), last_result = null WHERE id = process.id;
+            
+        EXCEPTION WHEN OTHERS THEN
+            
+            UPDATE dt_processes SET last_rundate = now(), last_result = SQLERRM WHERE id = process.id;
+            INSERT INTO log_processes(process_id, error) VALUES(process.id, SQLERRM);
+            
+        END;
+    END LOOP;
+    
+END;$$;
+
+ALTER FUNCTION ng03.admin_execute_processes() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
 -- TABLES
 --------------------------------------------------------------------------------
 
@@ -2720,27 +3358,70 @@ ALTER TABLE ng03.dt_orientations OWNER TO exileng;
 
 ALTER TABLE ONLY ng03.dt_orientations ADD CONSTRAINT dt_orientations_pkey PRIMARY KEY (id);
 
+INSERT INTO ng03.dt_orientations VALUES('or_scientist');
+INSERT INTO ng03.dt_orientations VALUES('or_soldier');
+INSERT INTO ng03.dt_orientations VALUES('or_merchant');
+
 --------------------------------------------------------------------------------
 
-CREATE SEQUENCE ng03.dt_processes_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER TABLE ng03.dt_processes_id_seq OWNER TO exileng;
-
 CREATE TABLE ng03.dt_processes (
-    id integer DEFAULT nextval('ng03.dt_processes_id_seq'::regclass) NOT NULL
+    id character varying NOT NULL,
+    frequency interval NOT NULL,
+    last_rundate timestamp with time zone,
+    last_result character varying
 );
 
 ALTER TABLE ng03.dt_processes OWNER TO exileng;
 
-ALTER SEQUENCE ng03.dt_processes_id_seq OWNED BY ng03.dt_processes.id;
-
 ALTER TABLE ONLY ng03.dt_processes ADD CONSTRAINT dt_processes_pkey PRIMARY KEY (id);
+
+INSERT INTO ng03.dt_processes VALUES('process_alliance_nap_breakings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_alliance_tributes()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_alliance_war_billings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_alliance_war_ceasings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_commander_generations()', '00:30:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_commander_promotions()', '00:30:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_fleet_delay_generation()', '00:10:30', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_fleet_recyclings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_fleet_travels()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_fleet_waitings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_annihilation_fleets_generation()', '00:30:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_lost_nation_leavings()', '00:11:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_merchant_fleets_cleaning()', '00:00:05', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_merchant_unloading()', '00:00:05', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_resource_prices_updating()', '01:00:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_resource_spawnings()', '00:19:10', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_resource_spawns_updating()', '00:01:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_rogue_fleets_generation()', '01:30:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_galaxy_rogue_planets()', '01:00:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_bonus_generation()', '00:10:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_building_destructions()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_building_pendings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_laboratory_accidents_generation()', '00:10:20', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_magnetic_storm_generation()', '00:10:40', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_productions()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_riot_generation()', '00:10:50', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_robbery_generation()', '00:10:10', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_sandworm_attack_generation()', '00:11:10', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_seism_generation()', '00:10:40', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_ship_pendings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_trainings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_planet_watching()', '00:10:40', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_alliance_leaving()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_booster_market_generation()', '24:00:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_bounties()', '00:00:05', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_credit_production()', '00:01:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_deletion()', '00:01:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_holidays_ending()', '00:00:05', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_holidays_starting()', '00:00:05', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_market_purchases()', '00:00:05', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_market_sales()', '00:00:05', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_research_pendings()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_profile_score_updating()', '00:00:01', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_server_alliance_cleaning()', '00:01:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_server_cleaning()', '24:00:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_server_fleet_route_cleaning()', '00:05:00', null, null);
+INSERT INTO ng03.dt_processes VALUES('process_server_lottery()', '168:00:00', null, null);
 
 --------------------------------------------------------------------------------
 
@@ -3888,7 +4569,10 @@ CREATE SEQUENCE ng03.log_processes_id_seq
 ALTER TABLE ng03.log_processes_id_seq OWNER TO exileng;
 
 CREATE TABLE ng03.log_processes (
-    id integer DEFAULT nextval('ng03.log_processes_id_seq'::regclass) NOT NULL
+    id integer DEFAULT nextval('ng03.log_processes_id_seq'::regclass) NOT NULL,
+    creation_date timestamp with time zone DEFAULT now() NOT NULL,
+    process_id character varying NOT NULL,
+    error character varying NOT NULL
 );
 
 ALTER TABLE ng03.log_processes OWNER TO exileng;
@@ -3896,6 +4580,7 @@ ALTER TABLE ng03.log_processes OWNER TO exileng;
 ALTER SEQUENCE ng03.log_processes_id_seq OWNED BY ng03.log_processes.id;
 
 ALTER TABLE ONLY ng03.log_processes ADD CONSTRAINT log_processes_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.log_processes ADD CONSTRAINT log_processes_process_id_fkey FOREIGN KEY (process_id) REFERENCES ng03.dt_processes(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --------------------------------------------------------------------------------
 -- PostgreSQL database
