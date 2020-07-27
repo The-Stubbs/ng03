@@ -33,7 +33,7 @@ class View(LoginRequiredMixin, View):
         cursor = connection.cursor()
         context = {}
         #------------------------------------------------------------------------
-        context['galaxies'] = db_rows(cursor, 'SELECT * FROM vw_starting_galaxies')
+        context['galaxies'] = db_rows(cursor, 'SELECT * FROM vw_starting_galaxies WHERE recommendation >= 0')
         context['orientations'] = db_rows(cursor, 'SELECT * FROM vw_starting_orientations')
         #------------------------------------------------------------------------
         return render(request, self.template_name, context)
@@ -49,9 +49,9 @@ class View(LoginRequiredMixin, View):
             #-------------------------------------------------------------------
             name = request.POST.get('name', '')
             galaxy_id = get_int(request.POST.get('galaxy_id', 0))
-            orientation = get_int(request.POST.get('orientation', 0))
+            orientation = request.POST.get('orientation', '')
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT ua_profile_init(' + str(self.profile['id']) + ',' + sql_str(name) + ',' + str(orientation) + ')')
+            result = db_result(cursor, 'SELECT ua_profile_init(' + str(self.profile['id']) + ',' + sql_str(name) + ',' + sql_str(orientation) + ')')
             if result != 0: messages.error(request, 'profile_init_error' + str(result))
             else:
                 #-------------------------------------------------------------------

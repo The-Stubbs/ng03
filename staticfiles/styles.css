@@ -66,4 +66,7 @@ a:hover { color: #ffa500; }
 .c-normal { color: #bcbcc0!important; }
 .c-highlight { color: #ffffff!important; }
 
+.c-danger { color: #ff4444!important; }
+.c-success { color: #00ff00!important; }
+
 .c-self { color: #7777ff!important; }
