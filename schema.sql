@@ -970,16 +970,20 @@ CREATE FUNCTION ng03.ua_profile_create(_user_id integer, _remote_addr character 
     AS $$
 DECLARE
 
-   test record;
+   user record;
+   profile record;
 
    profile_id integer;
 
 BEGIN
 
-   SELECT INTO test * FROM gm_profiles WHERE user_id = _user_id;
-   IF FOUND THEN RETURN -1; END IF;
+   SELECT INTO user * FROM auth_user WHERE id = _user_id;
+   IF NOT FOUND THEN RETURN -1; END IF;
+   
+   SELECT INTO profile * FROM gm_profiles WHERE user_id = _user_id;
+   IF FOUND THEN RETURN -2; END IF;
 
-   INSERT INTO gm_profiles(user_id) VALUES(_user_id) RETURNING id INTO profile_id;
+   INSERT INTO gm_profiles(created_by, user_id, pseudo) VALUES("user".username, _user_id, "user".username) RETURNING id INTO profile_id;
 
    INSERT INTO log_connections(profile_id, remote_addr, user_agent) VALUES(profile_id, _remote_addr, _user_agent);
 
@@ -2471,6 +2475,480 @@ BEGIN
 END;$$;
 
 ALTER FUNCTION ng03.admin_execute_processes() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.admin_generate_starting_galaxy(_galaxy_id integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    i integer;
+    t integer;
+
+    sector integer;
+    sector_value float;
+    sector_planets integer;
+    special_planets integer[];
+
+    planet_id integer;
+    planet_type integer;
+    floor integer;
+    space integer;
+    ore_pct integer;
+    hydro_pct integer;
+
+BEGIN
+
+    INSERT INTO gm_galaxies(id) VALUES(_galaxy_id);
+
+    FOR sector IN 1..99 LOOP
+
+        FOR i IN 1..10 LOOP special_planets[i] := int4(50 * random()); END LOOP;
+        
+        sector_planets := 25;
+        FOR p IN 1..25 LOOP
+            FOR i IN 1..10 LOOP
+                IF special_planets[i] = p THEN
+                    sector_planets := sector_planets - 1;
+                    EXIT;
+                END IF;
+            END LOOP;
+        END LOOP;
+
+        IF sector = 45 OR sector = 46 OR sector = 55 OR sector = 56 THEN sector_planets := sector_planets - 1; END IF;
+
+        sector_value := (6 - 0.55 * sqrt(power(5.5 - (sector % 10), 2) + power(5.5 - (sector / 10 + 1), 2))) * 20;
+        sector_value := sector_value * 25 / sector_planets;
+
+        FOR p IN 1..25 LOOP
+
+            planet_type := 1;
+
+            FOR i IN 1..10 LOOP
+                IF special_planets[i] = p THEN
+
+	                planet_type := int2(100 * random());
+                    IF planet_type < 92 THEN planet_type := 0;
+		            ELSEIF planet_type <= 98 THEN planet_type := 3;
+		            ELSE planet_type := 4;
+		            END IF;
+
+		            IF (planet_type = 3 OR planet_type = 4) AND (6 - 0.55 * sqrt(power(5.5 - (sector % 10), 2) + power(5.5 - (sector / 10 + 1), 2))) > 4.5 THEN planet_type := 1; END IF;
+
+                    EXIT;
+	            END IF;
+            END LOOP;
+
+            IF p = 13 AND (sector = 23 OR sector = 28 OR sector = 73 OR sector = 78) THEN planet_type := 1; END IF;
+
+            IF (sector = 45 AND p = 25) OR (sector = 46 AND p = 21) OR (sector = 55 AND p = 5) OR (sector = 56 AND p = 1) THEN planet_type := 0; END IF;
+
+            IF sector <= 10 OR sector >= 90 OR sector % 10 = 0 OR sector % 10 = 1 THEN
+          
+                IF planet_type = 3 OR planet_type = 4 THEN planet_type := 0; END IF;
+
+                floor := 80;
+                space := 10;
+                ore_pct := 60;
+                hydro_pct := 60;
+
+            ELSE
+
+                floor := int2((sector_value * 2/3) + random() * sector_value / 3);
+                WHILE floor < 80 LOOP floor := floor + 4; END LOOP;
+                WHILE floor > 155 LOOP floor := floor - 4; END LOOP;
+                
+                IF floor < 90 THEN space := int2(20 + random() * 20);
+                ELSEIF floor < 100 THEN space := int2(15 + random() * 20);
+                ELSE space := int2(10 + random() * 15);
+                END IF;
+                
+                t := int2(80 + random() * 100 + sector_value / 5);
+                IF floor > 70 AND floor < 85 THEN t := int2(t * 1.3); END IF;
+                ore_pct := int2(LEAST(35 + random() * (t - 47), t));
+                hydro_pct := t - ore_pct;
+    
+                IF random() > 0.6 THEN
+                    t := hydro_pct;
+                    hydro_pct := ore_pct;
+                    ore_pct := t;
+                END IF;
+
+            END IF;
+
+            IF planet_type = 0 THEN
+
+                INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro) VALUES(_galaxy_id, sector, p, 0, 0, 0, 0);
+
+            ELSEIF planet_type = 1 THEN
+
+                INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro) VALUES(_galaxy_id, sector, p, floor, space, ore_pct, hydro_pct) RETURNING id INTO planet_id;
+
+                IF floor > 120 AND random() < 0.01 THEN
+                    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_sandworm');
+                END IF;
+
+	            IF floor > 65 AND random() < 0.001 THEN
+	                INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_magnetic');
+	            END IF;
+
+            ELSEIF planet_type = 3 THEN
+
+                IF sector = 34 OR sector = 35 OR sector = 36 OR sector = 37 OR sector = 44 OR sector = 47 OR sector = 54 OR sector = 57 OR sector = 64 OR sector = 65 OR sector = 66 OR sector = 67 THEN
+                    INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro, spawn_ore) VALUES(_galaxy_id, sector, p, 0, 0, 0, 0, 22000 + 5000 * random());
+                ELSE
+                    INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro, spawn_ore) VALUES(_galaxy_id, sector, p, 0, 0, 0, 0, 13000 + 4000 * random());
+                END IF;
+
+            ELSE
+
+                IF sector = 34 OR sector = 35 OR sector = 36 OR sector = 37 OR sector = 44 OR sector = 47 OR sector = 54 OR sector = 57 OR sector = 64 OR sector = 65 OR sector = 66 OR sector = 67 THEN
+                    INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro, spawn_hydro) VALUES(_galaxy_id, sector, p, 0, 0, 0, 0, 22000 + 5000 * random());
+                ELSE
+                    INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro, spawn_hydro) VALUES(_galaxy_id, sector, p, 0, 0, 0, 0, 13000 + 4000 * random());
+                END IF;
+
+            END IF;
+
+        END LOOP;
+
+    END LOOP;
+
+    PERFORM admin_generate_merchant(_galaxy_id, 23, 13);
+    PERFORM admin_generate_merchant(_galaxy_id, 28, 13);
+    PERFORM admin_generate_merchant(_galaxy_id, 73, 13);
+    PERFORM admin_generate_merchant(_galaxy_id, 78, 13);
+
+    PERFORM admin_generate_vortexes(_galaxy_id);
+
+    PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 1, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor > 95 AND gm_planets.floor <= 120 AND profile_id IS NULL;
+    PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 2, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor > 120 AND profile_id IS NULL;
+	UPDATE gm_profile_fleets SET stance = true WHERE profile_id = 1 AND NOT stance;
+
+END;$$;
+
+ALTER FUNCTION ng03.admin_generate_starting_galaxy(_galaxy_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.admin_generate_special_galaxy(_galaxy_id integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    i integer;
+    t integer;
+
+    sector integer;
+    sector_value float;
+    sector_planets integer;
+    special_planets integer[];
+
+    planet_id integer;
+    planet_type integer;
+    floor integer;
+    space integer;
+    ore_pct integer;
+    hydro_pct integer;
+    
+BEGIN
+
+    INSERT INTO gm_galaxies(id, allow_new) VALUES(_galaxy_id, false);
+
+    FOR sector IN 1..99 LOOP
+    
+        FOR i IN 1..10 LOOP special_planets[i] := int4(30 * random()); END LOOP;
+        
+        sector_planets := 25;
+        FOR p IN 1..25 LOOP
+            FOR i IN 1..10 LOOP
+                IF special_planets[i] = p THEN
+                    sector_planets := sector_planets - 1;
+                    EXIT;
+                END IF;
+            END LOOP;
+        END LOOP;
+
+        IF sector = 45 OR sector = 46 OR sector = 55 OR sector = 56 THEN sector_planets := sector_planets - 1; END IF;
+
+        sector_value := 130 - 3 * LEAST(_planet_get_distance(sector, 13, 23, 13), _planet_get_distance(sector, 13, 28, 13), _planet_get_distance(sector, 13, 73, 13), _planet_get_distance(sector, 13, 78, 13));
+        sector_value := sector_value * 25 / sector_planets;
+
+        FOR p IN 1..25 LOOP
+         
+            planet_type := 1;
+
+            FOR i IN 1..10 LOOP
+                IF special_planets[i] = p THEN
+
+	                planet_type := int2(100 * random());
+                    IF planet_type < 98 THEN planet_type := 0;
+		            ELSEIF random() < 0.5 THEN planet_type := 3;
+		            ELSE planet_type := 4;
+		            END IF;
+
+                    EXIT;
+	            END IF;
+            END LOOP;
+
+            IF p = 13 AND (sector = 23 OR sector = 28 OR sector = 73 OR sector = 78) THEN planet_type := 1; END IF;
+
+            IF (sector = 45 AND p = 25) OR (sector = 46 AND p = 21) OR (sector = 55 AND p = 5) OR (sector = 56 AND p = 1) THEN planet_type := 0; END IF;
+            
+            floor := int2(1.1 * ((sector_value * 2/3) + random() * sector_value / 3));
+            WHILE floor > 200 LOOP floor := floor - 4; END LOOP;
+            
+            IF floor < 90 THEN space := int2(20 + random() * 20);
+            ELSEIF floor < 100 THEN space := int2(15 + random() * 20);
+            ELSE space := int2(10 + random() * 15);
+            END IF;
+            
+            t := int2(80 + random() * 100 + sector_value / 5);
+            ore_pct := int2(LEAST(35 + random() * (t - 47), t));
+            hydro_pct := t - ore_pct;
+
+            IF random() > 0.6 THEN
+                t := hydro_pct;
+                hydro_pct := ore_pct;
+                ore_pct := t;
+            END IF;
+            
+            IF planet_type = 0 THEN
+
+                INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro) VALUES(_galaxy_id, sector, p, 0, 0, 0, 0);
+
+            ELSEIF planet_type = 1 THEN
+
+                INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro) VALUES(_galaxy_id, sector, p, floor, space, ore_pct, hydro_pct) RETURNING id INTO planet_id;
+
+                IF floor > 170 AND random() < 0.5 THEN
+                    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_seismic');
+                END IF;
+
+	            IF floor > 129 AND random() < 0.05 THEN
+	                INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_sandworm');
+	            END IF;
+
+	            IF floor > 65 AND random() < 0.02 THEN
+	                INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_extraordinary');
+	            END IF;
+
+	            IF floor > 65 AND random() < 0.01 THEN
+	                INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_magnetic');
+	            END IF;
+
+            ELSEIF planet_type = 3 THEN
+
+                INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro, spawn_ore) VALUES(_galaxy_id, sector, p, 0, 0, 0, 0, 42000 + 10000 * random());
+
+            ELSE
+
+                INSERT INTO gm_planets(galaxy_id, sector, planet, floor, space, pct_ore, pct_hydro, spawn_hydro) VALUES(_galaxy_id, sector, p, 0, 0, 0, 0, 42000 + 10000 * random());
+
+            END IF;
+            
+        END LOOP;
+       
+    END LOOP;
+
+    PERFORM admin_generate_vortexes(_galaxy_id);
+    
+    PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 5, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor = 0 AND profile_id IS NULL;
+    PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 6, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor >= 95 AND gm_planets.floor < 140 AND profile_id IS NULL;
+    PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 7, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor >= 140 AND gm_planets.floor < 180 AND profile_id IS NULL;
+    PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 8, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor >= 180 AND profile_id IS NULL;
+	UPDATE gm_profile_fleets SET stance = true WHERE profile_id = 1 AND NOT stance;
+
+END;$$;
+
+ALTER FUNCTION ng03.admin_generate_special_galaxy(_galaxy_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.admin_generate_vortexes(_galaxy_id integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    vortexes integer;
+    
+    gm_planet record;
+    
+BEGIN
+
+	SELECT INTO gm_planet * FROM gm_planets
+	    WHERE galaxy_id = _galaxy_id AND sector > 11 AND sector < 30 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
+	    ORDER BY random() LIMIT 1;
+	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
+	vortexes := 1;
+	
+	IF random() > 0.40 THEN
+		SELECT INTO gm_planet * FROM gm_planets
+		    WHERE galaxy_id = _galaxy_id AND sector > 31 AND sector < 50 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
+		ORDER BY random() LIMIT 1;		
+		IF FOUND THEN
+        	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
+        	vortexes := 2;
+		END IF;
+	END IF;
+
+	IF random() > 0.70 THEN
+		SELECT INTO gm_planet * FROM gm_planets
+		    WHERE galaxy_id = _galaxy_id AND sector > 51 AND sector < 90 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
+		ORDER BY random() LIMIT 1;		
+		IF FOUND THEN
+        	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
+        	vortexes := 3;
+		END IF;
+	END IF;
+
+	IF vortexes < 2 OR random() > 0.5 THEN
+		SELECT INTO gm_planet * FROM gm_planets
+		    WHERE galaxy_id = _galaxy_id AND sector > 71 AND sector < 90 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
+		ORDER BY random() LIMIT 1;		
+		IF FOUND THEN
+        	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
+        	vortexes := 4;
+		END IF;
+	END IF;
+
+END;$$;
+
+ALTER FUNCTION ng03.admin_generate_vortexes(_galaxy_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.admin_generate_merchant(_galaxy_id integer, _sector integer, _planet integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    gm_planet record;
+
+BEGIN
+
+    SELECT INTO gm_planet * FROM gm_planets WHERE galaxy_id = _galaxy_id AND sector = _sector AND planet = _planet;
+	IF NOT FOUND THEN RETURN; END IF;
+	
+	UPDATE gm_planets SET profile_id = 3 WHERE id = gm_planet.id AND profile_id IS NULL;
+
+	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_merchant');
+	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_ore_storage_merchant');
+	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_hydro_storage_merchant');
+
+	UPDATE gm_planets SET worker_count = 100000, growing = false WHERE id = gm_planet.id;
+
+END;$$;
+
+ALTER FUNCTION ng03.admin_generate_merchant(_galaxy_id integer, _sector integer, _planet integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.admin_generate_fleet(_profile_id integer, _name character varying, _size integer, _planet_id integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    fleet_id integer;
+
+BEGIN
+
+	INSERT INTO gm_profile_fleets(created_by, profile_id, planet_id, name) VALUES('system', _profile_id, _planet_id, _name) RETURNING id INTO fleet_id;
+	
+	IF _size = 1 THEN
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 20 + int4(random() * 20));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 80 + int4(random() * 50));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 50 + int4(random() * 50));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 20 + int4(random() * 20));
+	END IF;
+
+	IF _size = 2 THEN
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 100 + int4(random() * 100));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 100 + int4(random() * 100));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 60 + int4(random() * 50));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 100 + int4(random() * 100));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 30 + int4(random() * 30));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 30 + int4(random() * 30));
+		UPDATE gm_profile_fleets SET cargo_worker = 5000 WHERE id = fleet_id;
+	END IF;
+
+	IF _size = 5 THEN
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 200 + int4(random() * 2000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 200 + int4(random() * 2000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 200 + int4(random() * 500));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 200 + int4(random() * 500));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 200 + int4(random() * 600));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 200 + int4(random() * 500));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 200 + int4(random() * 800));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 500 + int4(random() * 1000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 300 + int4(random() * 800));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 500 + int4(random() * 700));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_util_droppods', 30 + int4(random() * 70));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_util_jumper', int4(random() * 300));
+		UPDATE fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+	END IF;
+
+	IF _size = 6 THEN
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 200 + int4(random() * 1000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 200 + int4(random() * 1000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 200 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 200 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 200 + int4(random() * 300));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 200 + int4(random() * 300));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 200 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 500 + int4(random() * 500));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 300 + int4(random() * 300));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 500 + int4(random() * 300));
+		UPDATE fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+	END IF;
+
+	IF _size = 7 THEN
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 1200 + int4(random() * 1000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 1200 + int4(random() * 1000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 300 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 300 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 300 + int4(random() * 300));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 300 + int4(random() * 300));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 400 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 700 + int4(random() * 500));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 500 + int4(random() * 300));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 1000 + int4(random() * 300));
+		UPDATE fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+	END IF;
+
+	IF _size = 8 THEN
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 5200 + int4(random() * 2000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 5200 + int4(random() * 2000));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 800 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 800 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 1200 + int4(random() * 300));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 1000 + int4(random() * 300));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 600 + int4(random() * 200));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 1000 + int4(random() * 500));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 1200 + int4(random() * 800));
+		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 2000 + int4(random() * 1000));
+		UPDATE fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+	END IF;
+	
+END;$$;
+
+ALTER FUNCTION ng03.admin_generate_fleet(_profile_id integer, _name character varying, _size integer, _planet_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03._planet_get_distance(_from_sector integer, _from_planet integer, _to_sector integer,  _to_planet integer) RETURNS double precision
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF _from_sector <> _to_sector THEN
+		RETURN 6 * sqrt(((_from_sector - 1) / 10 - (_to_sector - 1) / 10 ) ^ 2 + ((_from_sector - 1) % 10 - (_to_sector - 1) % 10) ^ 2);
+	ELSE
+		RETURN sqrt(((_from_planet - 1) / 5 - (_to_planet - 1) / 5 ) ^ 2 + ((_from_planet - 1) % 5 - (_to_planet - 1) % 5) ^ 2);
+	END IF;
+END;$$;
+
+ALTER FUNCTION ng03._planet_get_distance(_from_sector integer, _from_planet integer, _to_sector integer,  _to_planet integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 -- TABLES
@@ -4511,7 +4989,7 @@ CREATE TABLE ng03.gm_profile_fleets (
     cargo_worker integer DEFAULT 0 NOT NULL,
     cargo_scientist integer DEFAULT 0 NOT NULL,
     cargo_soldier integer DEFAULT 0 NOT NULL,
-    idle_since_date timestamp with time zone,
+    idle_since_date timestamp with time zone DEFAULT now() NOT NULL,
     is_shared boolean DEFAULT false NOT NULL
 );
 
@@ -5248,6 +5726,25 @@ ALTER TABLE ONLY ng03.log_actions ADD CONSTRAINT log_actions_profile_id_fkey FOR
 ALTER TABLE ONLY ng03.log_connections ADD CONSTRAINT log_connections_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE ONLY ng03.log_processes ADD CONSTRAINT log_processes_process_id_fkey FOREIGN KEY (process_id) REFERENCES ng03.dt_processes(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+--------------------------------------------------------------------------------
+-- VIEWS
+--------------------------------------------------------------------------------
+
+CREATE VIEW ng03.vw_starting_galaxies AS
+    SELECT gm_galaxies.id
+    FROM gm_galaxies;
+   
+ALTER TABLE ng03.vw_starting_galaxies OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE VIEW ng03.vw_starting_orientations AS
+    SELECT dt_orientations.id,
+        dt_orientations.id::text || '_label'::text AS label
+    FROM dt_orientations;
+   
+ALTER TABLE ng03.vw_starting_orientations OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 -- PostgreSQL database

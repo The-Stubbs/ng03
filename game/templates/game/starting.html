@@ -1,4 +1,92 @@
 {% extends 'game/_base.html' %}
 
-{% block body %}
+{% load i18n %}
+
+{% block page %}
+<script>
+
+    var rec = [];
+    {% for galaxy in galaxies %}rec[{{ galaxy.id }}] = {{ galaxy.recommendation }};{% endfor %}
+    
+    function showRecommendation(obj) {
+        
+    	var r = rec[obj.options[obj.selectedIndex].value];
+    	if (r == 2) {
+    		$("recommendation").innerHTML = '{% trans "Galaxie recommandée" %}';
+    		$("recommendation").className = 'c-success';
+    	}
+    	else
+    	if (r == 1) {
+    		$("recommendation").innerHTML = '';
+    		$("recommendation").className = '';
+    	}
+    	else {
+    		$("recommendation").innerHTML = '{% trans "Galaxie non recommandée" %}';
+    		$("recommendation").className = 'c-danger';
+    	}
+    }
+    
+    function displayOrientation(obj) {
+        
+    	var opt = obj.options[obj.selectedIndex].value;
+    	if (opt == 0) hide();
+    	else $('description').innerHTML = $('orientation' + opt).innerHTML;
+    }
+</script>
+<div id="page-content">
+    <div class="d-flex align-items-center justify-content-center mb-3">
+        <img src="/static/logo.png"/>
+        <span class="c-normal mx-3">ng03</span>
+    </div>
+    {% include 'game/_messages.html' %}
+    <div class="box">
+        <div class="box-header">
+            <div class="box-item text-center"><b class="c-highlight">{% trans "Démarrage" %}</b></div>
+        </div>
+        <form method="post">
+            {% csrf_token%}
+            <input type="hidden" name="action" value="start">
+            <div class="box-line">
+                <div class="box-item text-center">
+                    <p class="c-self bold">{{ user.username }}</p>
+                    <p class="c-normal">{% trans "Bienvenue dans ExileNG, avant de commencer, veuillez entrer un nom pour votre nation. Ce sera le nom sous lequel vous jouerez dans le jeu, choisissez un nom différent de votre compte." %}</p>
+                    <p class="c-highlight">
+                        {% trans "Nom de nation" %}:
+                        <input type="text" class="control" name="name" value="{{ user.username }}"/>
+                    </p>
+                </div>
+            </div>
+            <div class="box-line">
+                <div class="box-item text-center">
+                    <p class="c-highlight">
+                        {% trans "Galaxie de départ" %}:
+                        <select class="control" name="galaxy_id" id="galaxy_id" onchange="showRecommendation(this);">
+                            {% for galaxy in galaxies %}<option value="{{ galaxy.id }}">{{ galaxy.id }}</option>{% endfor %}
+                        </select>
+                    </p>
+                    <span id="recommendation"></span>
+                </div>
+            </div>
+            <div class="box-line">
+                <div class="box-item text-center">
+                    <p class="c-normal">
+                        {% trans "Désormais, vous devez choisir l'orientation de votre nation, ce choix aura pour conséquence de vous attribuer des bonus de départ que vous garderez tout le long du jeu." %}<br/>
+                        {% trans "Il n'est pas possible d'en changer en cours de route alors choisissez bien suivant le style de jeu que vous préférez." %}<br/>
+                        {% trans "Quelque soit l'orientation choisie, vous jouerez au même jeu mais avec des avantages différents." %}
+                    </p>
+                    <p class="c-highlight">
+                        {% trans "Orientation" %}:
+                        <select class="control" name="orientation" id="orientation" onchange="displayOrientation(this);">
+                            <option value="0">{% trans "Choisissez" %}</option>
+                            {% for orientation in orientations %}<option value="{{ orientation.id }}">{% trans orientation.label %}</option>{% endfor %}
+                        </select>
+                    </p>
+                    <p id="description"></p>
+                    <input type="submit" class="button" value="{% trans 'Valider' %}">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>showRecommendation($('galaxy_id'));</script>
 {% endblock %}

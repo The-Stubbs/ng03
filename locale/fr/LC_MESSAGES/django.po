@@ -18,6 +18,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+# orientation labels
+msgid "or_scientist_label"
+msgstr "Scientifique"
+
+msgid "or_soldier_label"
+msgstr "Soldat"
+
+msgid "or_merchant_label"
+msgstr "Marchand"
+
 #: game/templates/game/welcome.html:14
 msgid "Vaisseau de colonisation"
 msgstr ""

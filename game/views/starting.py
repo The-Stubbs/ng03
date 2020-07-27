@@ -29,9 +29,15 @@ class View(LoginRequiredMixin, View):
 
     #---------------------------------------------------------------------------
     def get(self, request, *args, **kwargs):
+        #------------------------------------------------------------------------
+        cursor = connection.cursor()
         context = {}
+        #------------------------------------------------------------------------
+        context['galaxies'] = db_rows(cursor, 'SELECT * FROM vw_starting_galaxies')
+        context['orientations'] = db_rows(cursor, 'SELECT * FROM vw_starting_orientations')
+        #------------------------------------------------------------------------
         return render(request, self.template_name, context)
-    #---------------------------------------------------------------------------
+        #------------------------------------------------------------------------
     
     #---------------------------------------------------------------------------
     def post(self, request, *args, **kwargs):

@@ -12,6 +12,9 @@ body {
 
 p { margin-bottom: .5rem; }
 
+a { color: #ffa500; }
+a:hover { color: #ffa500; }
+
 /* LAYOUT */
 
 #page-content {
@@ -38,6 +41,15 @@ p { margin-bottom: .5rem; }
 
 .box-item { padding: 5px 5px; }
 
+/* FORM */
+
+.control {
+    padding: 2px 5px;
+    color: #ffffff;
+    background-color: #555555;
+    border: 1px solid #888888; border-radius: .125rem;
+}
+
 /* BUTTON */
 
 .button {
@@ -49,5 +61,9 @@ p { margin-bottom: .5rem; }
 
 /* TYPOGRAPHY */
 
+.bold { font-weight: 700!important; }
+
 .c-normal { color: #bcbcc0!important; }
 .c-highlight { color: #ffffff!important; }
+
+.c-self { color: #7777ff!important; }
