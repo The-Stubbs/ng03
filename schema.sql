@@ -24,7 +24,7 @@ ALTER SCHEMA ng03 OWNER TO exileng;
 -- FUNCTIONS
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_create(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_create(_profile_id integer, _tag character varying, _name character varying) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -32,6 +32,12 @@ DECLARE
    profile record;
    
 BEGIN
+
+    -- -1 no active profile
+    -- -2 can't create alliance
+    -- -3 not enough credit
+    -- -4 duplicated tag
+    -- -5 duplicated name
 
    SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
@@ -43,7 +49,7 @@ ALTER FUNCTION ng03.ua_alliance_create(_profile_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_give_credits(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_give_credits(_profile_id integer, _credit_count integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -51,6 +57,10 @@ DECLARE
    profile record;
    
 BEGIN
+
+    -- -1 no active profile
+    -- -2 can't give to alliance
+    -- -3 not enough credit
 
    SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
@@ -62,7 +72,7 @@ ALTER FUNCTION ng03.ua_alliance_give_credits(_profile_id integer) OWNER TO exile
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_invitation_accept(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_invitation_accept(_profile_id integer, _invitation_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -81,7 +91,7 @@ ALTER FUNCTION ng03.ua_alliance_invitation_accept(_profile_id integer) OWNER TO 
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_invitation_create(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_invitation_create(_profile_id integer, _member_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -100,7 +110,7 @@ ALTER FUNCTION ng03.ua_alliance_invitation_create(_profile_id integer) OWNER TO 
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_invitation_decline(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_invitation_decline(_profile_id integer, _invitation_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -138,7 +148,7 @@ ALTER FUNCTION ng03.ua_alliance_leave(_profile_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_nap_break(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_nap_break(_profile_id integer, _nap_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -157,7 +167,7 @@ ALTER FUNCTION ng03.ua_alliance_nap_break(_profile_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_nap_request_accept(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_nap_request_accept(_profile_id integer, _nap_request_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -176,7 +186,7 @@ ALTER FUNCTION ng03.ua_alliance_nap_request_accept(_profile_id integer) OWNER TO
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_nap_request_cancel(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_nap_request_cancel(_profile_id integer, _nap_request_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -195,7 +205,7 @@ ALTER FUNCTION ng03.ua_alliance_nap_request_cancel(_profile_id integer) OWNER TO
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_nap_request_create(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_nap_request_create(_profile_id integer, _alliance_id integer, _guarantee integer, _breaking_delay interval) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -214,7 +224,7 @@ ALTER FUNCTION ng03.ua_alliance_nap_request_create(_profile_id integer) OWNER TO
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_nap_request_decline(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_nap_request_decline(_profile_id integer, _nap_request_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -233,7 +243,7 @@ ALTER FUNCTION ng03.ua_alliance_nap_request_decline(_profile_id integer) OWNER T
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_nap_toggle_location(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_nap_toggle_location(_profile_id integer, _nap_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -252,7 +262,7 @@ ALTER FUNCTION ng03.ua_alliance_nap_toggle_location(_profile_id integer) OWNER T
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_nap_toggle_radar(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_nap_toggle_radar(_profile_id integer, _nap_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -271,26 +281,7 @@ ALTER FUNCTION ng03.ua_alliance_nap_toggle_radar(_profile_id integer) OWNER TO e
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_rank_update(_profile_id integer) RETURNS integer
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-
-   profile record;
-   
-BEGIN
-
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
-   IF NOT FOUND THEN RETURN -1; END IF;
-
-   RETURN 0;
-END;$$;
-
-ALTER FUNCTION ng03.ua_alliance_rank_update(_profile_id integer) OWNER TO exileng;
-
---------------------------------------------------------------------------------
-
-CREATE FUNCTION ng03.ua_alliance_tribute_cancel(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_tribute_cancel(_profile_id integer, _tribute_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -309,7 +300,7 @@ ALTER FUNCTION ng03.ua_alliance_tribute_cancel(_profile_id integer) OWNER TO exi
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_tribute_create(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_tribute_create(_profile_id integer, _alliance_id integer, _credit_count integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -328,7 +319,7 @@ ALTER FUNCTION ng03.ua_alliance_tribute_create(_profile_id integer) OWNER TO exi
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_update_announce(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_update_announce(_profile_id integer, _defcon smallint, _announce text) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -347,7 +338,7 @@ ALTER FUNCTION ng03.ua_alliance_update_announce(_profile_id integer) OWNER TO ex
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_alliance_update_details(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_alliance_update_details(_profile_id integer, _tag character varying, _name character varying, _description text, _logo_url character varying) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -2370,6 +2361,90 @@ ALTER FUNCTION ng03.process_server_lottery() OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
+CREATE FUNCTION ng03.trigger_chat_messages_before_insert() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	
+BEGIN
+    
+    RETURN NEW;
+END;$$;
+
+ALTER FUNCTION ng03.trigger_chat_messages_before_insert() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.trigger_planet_buildings_after_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	
+BEGIN
+    
+    RETURN NULL;
+END;$$;
+
+ALTER FUNCTION ng03.trigger_planet_buildings_after_update() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.trigger_planet_energy_transfers_before_changes() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	
+BEGIN
+    
+    RETURN NEW;
+END;$$;
+
+ALTER FUNCTION ng03.trigger_planet_energy_transfers_before_changes() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.trigger_planet_ships_before_insert() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	
+BEGIN
+    
+    RETURN NEW;
+END;$$;
+
+ALTER FUNCTION ng03.trigger_planet_ships_before_insert() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.trigger_planet_ships_after_changes() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	
+BEGIN
+    
+    RETURN NULL;
+END;$$;
+
+ALTER FUNCTION ng03.trigger_planet_ships_after_changes() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03.trigger_planet_ship_pendings_after_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	
+BEGIN
+    
+    RETURN NULL;
+END;$$;
+
+ALTER FUNCTION ng03.trigger_planet_ship_pendings_after_delete() OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
 CREATE FUNCTION ng03.admin_execute_processes() RETURNS void
     LANGUAGE plpgsql
     AS $$
@@ -2414,6 +2489,7 @@ CREATE TABLE ng03.dt_building_categories (
 ALTER TABLE ng03.dt_building_categories OWNER TO exileng;
 
 ALTER TABLE ONLY ng03.dt_building_categories ADD CONSTRAINT dt_building_categories_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_building_categories ADD CONSTRAINT dt_building_categories_displaying_order_key UNIQUE (displaying_order);
 
 INSERT INTO ng03.dt_building_categories VALUES(10, 'cat_bd_modifier');
 INSERT INTO ng03.dt_building_categories VALUES(20, 'cat_bd_deployed');
@@ -2485,6 +2561,7 @@ CREATE TABLE ng03.dt_buildings (
 ALTER TABLE ng03.dt_buildings OWNER TO exileng;
 
 ALTER TABLE ONLY ng03.dt_buildings ADD CONSTRAINT dt_buildings_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_buildings ADD CONSTRAINT dt_buildings_displaying_order_key UNIQUE (category_id, displaying_order);
 ALTER TABLE ONLY ng03.dt_buildings ADD CONSTRAINT dt_buildings_category_id_fkey FOREIGN KEY (category_id) REFERENCES ng03.dt_building_categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 INSERT INTO ng03.dt_buildings VALUES('cat_bd_modifier', 10, 'bd_modifier_babyboom', 1, 0, false, false, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -2560,6 +2637,7 @@ CREATE TABLE ng03.dt_research_categories (
 ALTER TABLE ng03.dt_research_categories OWNER TO exileng;
 
 ALTER TABLE ONLY ng03.dt_research_categories ADD CONSTRAINT dt_research_categories_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_research_categories ADD CONSTRAINT dt_research_categories_displaying_order_key UNIQUE (displaying_order);
 
 INSERT INTO ng03.dt_research_categories VALUES(10, 'cat_rs_orientation');
 INSERT INTO ng03.dt_research_categories VALUES(20, 'cat_rs_booster');
@@ -2611,6 +2689,7 @@ CREATE TABLE ng03.dt_researches (
 ALTER TABLE ng03.dt_researches OWNER TO exileng;
 
 ALTER TABLE ONLY ng03.dt_researches ADD CONSTRAINT dt_researches_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_researches ADD CONSTRAINT dt_researches_displaying_order_key UNIQUE (category_id, displaying_order);
 ALTER TABLE ONLY ng03.dt_researches ADD CONSTRAINT dt_research_category_id_fkey FOREIGN KEY (category_id) REFERENCES ng03.dt_research_categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 INSERT INTO ng03.dt_researches VALUES('cat_rs_orientation', 10, 'rs_orientation_merchant', false, 0, 1, 0, null, 0, 0.05, 0.05, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.25, 0, -0.05, 0, 0, 0, 0, 0.1, 0, 0, 0, 0.05, 0.1, 0.1);
@@ -2665,6 +2744,7 @@ CREATE TABLE ng03.dt_ship_categories (
 ALTER TABLE ng03.dt_ship_categories OWNER TO exileng;
 
 ALTER TABLE ONLY ng03.dt_ship_categories ADD CONSTRAINT dt_ship_categories_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_ship_categories ADD CONSTRAINT dt_ship_categories_displaying_order_key UNIQUE (displaying_order);
 
 INSERT INTO ng03.dt_ship_categories VALUES(10, 'cat_sh_cargo');
 INSERT INTO ng03.dt_ship_categories VALUES(20, 'cat_sh_util');
@@ -2729,6 +2809,7 @@ CREATE TABLE ng03.dt_ships (
 ALTER TABLE ng03.dt_ships OWNER TO exileng;
 
 ALTER TABLE ONLY ng03.dt_ships ADD CONSTRAINT dt_ships_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_ships ADD CONSTRAINT dt_ships_displaying_order_key UNIQUE (category_id, displaying_order);
 ALTER TABLE ONLY ng03.dt_ships ADD CONSTRAINT dt_ship_category_id_fkey FOREIGN KEY (category_id) REFERENCES ng03.dt_ship_categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 INSERT INTO ng03.dt_ships VALUES('cat_sh_cargo', 10, 'sh_cargo_1', 3600, 8000, 8000, 500, 200, 0, 0, 0, 32, 1200, 30000, 0, 0, 0, 20, 3000, 1000, 200, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, null, null, 2, 0, 0, 0, 0, 0, 0, 0);
@@ -2813,6 +2894,7 @@ ALTER TABLE ng03.dt_building_building_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_building_building_requirements_id_seq OWNED BY ng03.dt_building_building_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_building_building_requirements ADD CONSTRAINT dt_building_building_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_building_building_requirements ADD CONSTRAINT dt_building_building_requirements_requirement_id_key UNIQUE (building_id, requirement_id);
 ALTER TABLE ONLY ng03.dt_building_building_requirements ADD CONSTRAINT dt_building_building_requirements_building_id_fkey FOREIGN KEY (building_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY ng03.dt_building_building_requirements ADD CONSTRAINT dt_building_building_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -2892,6 +2974,7 @@ ALTER TABLE ng03.dt_building_research_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_building_research_requirements_id_seq OWNED BY ng03.dt_building_research_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_building_research_requirements ADD CONSTRAINT dt_building_research_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_building_research_requirements ADD CONSTRAINT dt_building_research_requirements_requirement_id_key UNIQUE (building_id, requirement_id);
 ALTER TABLE ONLY ng03.dt_building_research_requirements ADD CONSTRAINT dt_building_research_requirements_building_id_fkey FOREIGN KEY (building_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY ng03.dt_building_research_requirements ADD CONSTRAINT dt_building_research_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -2934,6 +3017,7 @@ ALTER TABLE ng03.dt_research_building_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_research_building_requirements_id_seq OWNED BY ng03.dt_research_building_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_research_building_requirements ADD CONSTRAINT dt_research_building_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_research_building_requirements ADD CONSTRAINT dt_research_building_requirements_requirement_id_key UNIQUE (research_id, requirement_id);
 ALTER TABLE ONLY ng03.dt_research_building_requirements ADD CONSTRAINT dt_research_building_requirements_research_id_fkey FOREIGN KEY (research_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY ng03.dt_research_building_requirements ADD CONSTRAINT dt_research_building_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -2965,6 +3049,7 @@ ALTER TABLE ng03.dt_research_research_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_research_research_requirements_id_seq OWNED BY ng03.dt_research_research_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_research_research_requirements ADD CONSTRAINT dt_research_research_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_research_research_requirements ADD CONSTRAINT dt_research_research_requirements_requirement_id_key UNIQUE (research_id, requirement_id);
 ALTER TABLE ONLY ng03.dt_research_research_requirements ADD CONSTRAINT dt_research_research_requirements_research_id_fkey FOREIGN KEY (research_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY ng03.dt_research_research_requirements ADD CONSTRAINT dt_research_research_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -3034,6 +3119,7 @@ ALTER TABLE ng03.dt_ship_building_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_ship_building_requirements_id_seq OWNED BY ng03.dt_ship_building_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_ship_building_requirements ADD CONSTRAINT dt_ship_building_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_ship_building_requirements ADD CONSTRAINT dt_ship_building_requirements_requirement_id_key UNIQUE (ship_id, requirement_id);
 ALTER TABLE ONLY ng03.dt_ship_building_requirements ADD CONSTRAINT dt_ship_building_requirements_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY ng03.dt_ship_building_requirements ADD CONSTRAINT dt_ship_building_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -3113,6 +3199,7 @@ ALTER TABLE ng03.dt_ship_research_requirements OWNER TO exileng;
 ALTER SEQUENCE ng03.dt_ship_research_requirements_id_seq OWNED BY ng03.dt_ship_research_requirements.id;
 
 ALTER TABLE ONLY ng03.dt_ship_research_requirements ADD CONSTRAINT dt_ship_research_requirements_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.dt_ship_research_requirements ADD CONSTRAINT dt_ship_research_requirements_requirement_id_key UNIQUE (ship_id, requirement_id);
 ALTER TABLE ONLY ng03.dt_ship_research_requirements ADD CONSTRAINT dt_ship_research_requirements_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY ng03.dt_ship_research_requirements ADD CONSTRAINT dt_ship_research_requirements_requirement_id_fkey FOREIGN KEY (requirement_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -3460,6 +3547,8 @@ ALTER TABLE ng03.gm_alliances OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_alliances_id_seq OWNED BY ng03.gm_alliances.id;
 
 ALTER TABLE ONLY ng03.gm_alliances ADD CONSTRAINT gm_alliances_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_alliances ADD CONSTRAINT gm_alliances_tag_key UNIQUE (tag);
+ALTER TABLE ONLY ng03.gm_alliances ADD CONSTRAINT gm_alliances_name_key UNIQUE (name);
 
 --------------------------------------------------------------------------------
 
@@ -3486,6 +3575,7 @@ ALTER TABLE ng03.gm_alliance_invitations OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_alliance_invitations_id_seq OWNED BY ng03.gm_alliance_invitations.id;
 
 ALTER TABLE ONLY ng03.gm_alliance_invitations ADD CONSTRAINT gm_alliance_invitations_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_alliance_invitations ADD CONSTRAINT gm_alliance_invitations_profile_id_key UNIQUE (alliance_id, profile_id);
 
 --------------------------------------------------------------------------------
 
@@ -3514,6 +3604,7 @@ ALTER TABLE ng03.gm_alliance_nap_requests OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_alliance_nap_requests_id_seq OWNED BY ng03.gm_alliance_nap_requests.id;
 
 ALTER TABLE ONLY ng03.gm_alliance_nap_requests ADD CONSTRAINT gm_alliance_nap_requests_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_alliance_nap_requests ADD CONSTRAINT gm_alliance_nap_requests_alliance_id_2_key UNIQUE (alliance_id_1, alliance_id_2);
 
 --------------------------------------------------------------------------------
 
@@ -3545,6 +3636,7 @@ ALTER TABLE ng03.gm_alliance_naps OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_alliance_naps_id_seq OWNED BY ng03.gm_alliance_naps.id;
 
 ALTER TABLE ONLY ng03.gm_alliance_naps ADD CONSTRAINT gm_alliance_naps_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_alliance_naps ADD CONSTRAINT gm_alliance_naps_alliance_id_2_key UNIQUE (alliance_id_1, alliance_id_2);
 
 --------------------------------------------------------------------------------
 
@@ -3588,6 +3680,9 @@ ALTER TABLE ng03.gm_alliance_ranks OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_alliance_ranks_id_seq OWNED BY ng03.gm_alliance_ranks.id;
 
 ALTER TABLE ONLY ng03.gm_alliance_ranks ADD CONSTRAINT gm_alliance_ranks_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_alliance_ranks ADD CONSTRAINT gm_alliance_ranks_name_key UNIQUE (alliance_id, name);
+ALTER TABLE ONLY ng03.gm_alliance_ranks ADD CONSTRAINT gm_alliance_ranks_is_leader_key UNIQUE (alliance_id, is_leader);
+ALTER TABLE ONLY ng03.gm_alliance_ranks ADD CONSTRAINT gm_alliance_ranks_is_default_key UNIQUE (alliance_id, is_default);
 
 --------------------------------------------------------------------------------
 
@@ -3642,6 +3737,7 @@ ALTER TABLE ng03.gm_alliance_tributes OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_alliance_tributes_id_seq OWNED BY ng03.gm_alliance_tributes.id;
 
 ALTER TABLE ONLY ng03.gm_alliance_tributes ADD CONSTRAINT gm_alliance_tributes_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_alliance_tributes ADD CONSTRAINT gm_alliance_tributes_alliance_id_2_key UNIQUE (alliance_id_1, alliance_id_2);
 
 --------------------------------------------------------------------------------
 
@@ -3697,6 +3793,7 @@ ALTER TABLE ng03.gm_alliance_wallet_requests OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_alliance_wallet_requests_id_seq OWNED BY ng03.gm_alliance_wallet_requests.id;
 
 ALTER TABLE ONLY ng03.gm_alliance_wallet_requests ADD CONSTRAINT gm_alliance_wallet_requests_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_alliance_wallet_requests ADD CONSTRAINT gm_alliance_wallet_requests_profile_id_key UNIQUE (alliance_id, profile_id);
 
 --------------------------------------------------------------------------------
 
@@ -3727,6 +3824,7 @@ ALTER TABLE ng03.gm_alliance_wars OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_alliance_wars_id_seq OWNED BY ng03.gm_alliance_wars.id;
 
 ALTER TABLE ONLY ng03.gm_alliance_wars ADD CONSTRAINT gm_alliance_wars_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_alliance_wars ADD CONSTRAINT gm_alliance_wars_alliance_id_2_key UNIQUE (alliance_id_1, alliance_id_2);
 
 --------------------------------------------------------------------------------
 
@@ -3804,6 +3902,7 @@ CREATE TABLE ng03.gm_battle_fleet_ships (
     created_by character varying DEFAULT 'system' NOT NULL,
     id integer DEFAULT nextval('ng03.gm_battle_fleet_ships_id_seq'::regclass) NOT NULL,
     battle_fleet_id integer NOT NULL,
+    ship_id character varying NOT NULL,
     before integer DEFAULT 0 NOT NULL,
     after integer DEFAULT 0 NOT NULL,
     killed integer DEFAULT 0 NOT NULL
@@ -3814,6 +3913,7 @@ ALTER TABLE ng03.gm_battle_fleet_ships OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_battle_fleet_ships_id_seq OWNED BY ng03.gm_battle_fleet_ships.id;
 
 ALTER TABLE ONLY ng03.gm_battle_fleet_ships ADD CONSTRAINT gm_battle_fleet_ships_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_battle_fleet_ships ADD CONSTRAINT gm_battle_fleet_ships_ship_id_key UNIQUE (battle_fleet_id, ship_id);
 
 --------------------------------------------------------------------------------
 
@@ -3841,6 +3941,7 @@ ALTER TABLE ng03.gm_battle_fleet_ship_kills OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_battle_fleet_ship_kills_id_seq OWNED BY ng03.gm_battle_fleet_ship_kills.id;
 
 ALTER TABLE ONLY ng03.gm_battle_fleet_ship_kills ADD CONSTRAINT gm_battle_fleet_ship_kills_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_battle_fleet_ship_kills ADD CONSTRAINT gm_battle_fleet_ship_kills_ship_id_key UNIQUE (battle_fleet_ship_id, ship_id);
 
 --------------------------------------------------------------------------------
 
@@ -3867,6 +3968,7 @@ ALTER TABLE ng03.gm_chats OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_chats_id_seq OWNED BY ng03.gm_chats.id;
 
 ALTER TABLE ONLY ng03.gm_chats ADD CONSTRAINT gm_chats_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_chats ADD CONSTRAINT gm_chats_password_key UNIQUE (name, password);
 
 INSERT INTO ng03.gm_chats(created_by, id, name) VALUES('system', 1, 'Nouveaux joueurs');
 INSERT INTO ng03.gm_chats(created_by, id, name) VALUES('system', 2, 'Exile');
@@ -4018,6 +4120,8 @@ ALTER TABLE ng03.gm_planets OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_planets_id_seq OWNED BY ng03.gm_planets.id;
 
 ALTER TABLE ONLY ng03.gm_planets ADD CONSTRAINT gm_planets_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planets ADD CONSTRAINT gm_planets_planet_key UNIQUE (galaxy_id, sector, planet);
+ALTER TABLE ONLY ng03.gm_planets ADD CONSTRAINT gm_planets_commander_id_key UNIQUE (commander_id);
 
 --------------------------------------------------------------------------------
 
@@ -4046,6 +4150,7 @@ ALTER TABLE ng03.gm_planet_building_pendings OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_planet_building_pendings_id_seq OWNED BY ng03.gm_planet_building_pendings.id;
 
 ALTER TABLE ONLY ng03.gm_planet_building_pendings ADD CONSTRAINT gm_planet_building_pendings_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planet_building_pendings ADD CONSTRAINT gm_planet_building_pendings_building_id_key UNIQUE (planet_id, building_id);
 
 --------------------------------------------------------------------------------
 
@@ -4074,6 +4179,7 @@ ALTER TABLE ng03.gm_planet_buildings OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_planet_buildings_id_seq OWNED BY ng03.gm_planet_buildings.id;
 
 ALTER TABLE ONLY ng03.gm_planet_buildings ADD CONSTRAINT gm_planet_buildings_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planet_buildings ADD CONSTRAINT gm_planet_buildings_building_id_key UNIQUE (planet_id, building_id);
 
 --------------------------------------------------------------------------------
 
@@ -4101,6 +4207,7 @@ ALTER TABLE ng03.gm_planet_energy_transfers OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_planet_energy_transfers_id_seq OWNED BY ng03.gm_planet_energy_transfers.id;
 
 ALTER TABLE ONLY ng03.gm_planet_energy_transfers ADD CONSTRAINT gm_planet_energy_transfers_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planet_energy_transfers ADD CONSTRAINT gm_planet_energy_transfers_planet_id_2_key UNIQUE (planet_id_1, planet_id_2);
 
 --------------------------------------------------------------------------------
 
@@ -4158,6 +4265,7 @@ ALTER TABLE ng03.gm_planet_ships OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_planet_ships_id_seq OWNED BY ng03.gm_planet_ships.id;
 
 ALTER TABLE ONLY ng03.gm_planet_ships ADD CONSTRAINT gm_planet_ships_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planet_ships ADD CONSTRAINT gm_planet_ships_ship_id_key UNIQUE (planet_id, ship_id);
 
 --------------------------------------------------------------------------------
 
@@ -4244,7 +4352,7 @@ ALTER SEQUENCE ng03.gm_profiles_id_seq OWNED BY ng03.gm_profiles.id;
 
 ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_user_id_key UNIQUE (user_id);
-ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.auth_user(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_pseudo_key UNIQUE (pseudo);
 
 INSERT INTO ng03.gm_profiles(created_by, id, pseudo, privilege) VALUES('system', 1, 'Les fossoyeurs', 'active');
 INSERT INTO ng03.gm_profiles(created_by, id, pseudo, privilege) VALUES('system', 2, 'Nation oubliée', 'active');
@@ -4302,6 +4410,7 @@ ALTER TABLE ng03.gm_profile_chats OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_chats_id_seq OWNED BY ng03.gm_profile_chats.id;
 
 ALTER TABLE ONLY ng03.gm_profile_chats ADD CONSTRAINT gm_profile_chats_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_chats ADD CONSTRAINT gm_profile_chats_chat_id_key UNIQUE (profile_id, chat_id);
 
 --------------------------------------------------------------------------------
 
@@ -4345,6 +4454,7 @@ ALTER TABLE ng03.gm_profile_commanders OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_commanders_id_seq OWNED BY ng03.gm_profile_commanders.id;
 
 ALTER TABLE ONLY ng03.gm_profile_commanders ADD CONSTRAINT gm_profile_commanders_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_commanders ADD CONSTRAINT gm_profile_commanders_name_key UNIQUE (profile_id, name);
 
 --------------------------------------------------------------------------------
 
@@ -4371,6 +4481,7 @@ ALTER TABLE ng03.gm_profile_fleet_categories OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_fleet_categories_id_seq OWNED BY ng03.gm_profile_fleet_categories.id;
 
 ALTER TABLE ONLY ng03.gm_profile_fleet_categories ADD CONSTRAINT gm_profile_fleet_categories_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_fleet_categories ADD CONSTRAINT gm_profile_fleet_categories_name_key UNIQUE (profile_id, name);
 
 --------------------------------------------------------------------------------
 
@@ -4393,6 +4504,7 @@ CREATE TABLE ng03.gm_profile_fleets (
     planet_id integer,
     category_id smallint,
     current_waypoint_id integer,
+    name character varying NOT NULL,
     stance boolean DEFAULT false NOT NULL,
     cargo_ore integer DEFAULT 0 NOT NULL,
     cargo_hydro integer DEFAULT 0 NOT NULL,
@@ -4408,6 +4520,8 @@ ALTER TABLE ng03.gm_profile_fleets OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_fleets_id_seq OWNED BY ng03.gm_profile_fleets.id;
 
 ALTER TABLE ONLY ng03.gm_profile_fleets ADD CONSTRAINT gm_profile_fleets_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_fleets ADD CONSTRAINT gm_profile_fleets_commander_id_key UNIQUE (commander_id);
+ALTER TABLE ONLY ng03.gm_profile_fleets ADD CONSTRAINT gm_profile_fleets_current_waypoint_id_key UNIQUE (current_waypoint_id);
 
 --------------------------------------------------------------------------------
 
@@ -4436,6 +4550,7 @@ ALTER TABLE ng03.gm_profile_fleet_waypoints OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_fleet_waypoints_id_seq OWNED BY ng03.gm_profile_fleet_waypoints.id;
 
 ALTER TABLE ONLY ng03.gm_profile_fleet_waypoints ADD CONSTRAINT gm_profile_fleet_waypoints_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_fleet_waypoints ADD CONSTRAINT gm_profile_fleet_waypoints_next_waypoint_id_key UNIQUE (next_waypoint_id);
 
 --------------------------------------------------------------------------------
 
@@ -4463,6 +4578,7 @@ ALTER TABLE ng03.gm_profile_fleet_ships OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_fleet_ships_id_seq OWNED BY ng03.gm_profile_fleet_ships.id;
 
 ALTER TABLE ONLY ng03.gm_profile_fleet_ships ADD CONSTRAINT gm_profile_fleet_ships_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_fleet_ships ADD CONSTRAINT gm_profile_fleet_ships_ship_id_key UNIQUE (fleet_id, ship_id);
 
 --------------------------------------------------------------------------------
 
@@ -4491,6 +4607,7 @@ ALTER TABLE ng03.gm_profile_holidays OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_holidays_id_seq OWNED BY ng03.gm_profile_holidays.id;
 
 ALTER TABLE ONLY ng03.gm_profile_holidays ADD CONSTRAINT gm_profile_holidays_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_holidays ADD CONSTRAINT gm_profile_holidays_profile_id_key UNIQUE (profile_id);
 
 --------------------------------------------------------------------------------
 
@@ -4547,6 +4664,7 @@ ALTER TABLE ng03.gm_profile_mail_addressee_list OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_mail_addressee_list_id_seq OWNED BY ng03.gm_profile_mail_addressee_list.id;
 
 ALTER TABLE ONLY ng03.gm_profile_mail_addressee_list ADD CONSTRAINT gm_profile_mail_addressee_list_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_mail_addressee_list ADD CONSTRAINT gm_profile_mail_addressee_list_addressee_id_key UNIQUE (profile_id, addressee_id);
 
 --------------------------------------------------------------------------------
 
@@ -4573,6 +4691,7 @@ ALTER TABLE ng03.gm_profile_mail_blacklist OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_mail_blacklist_id_seq OWNED BY ng03.gm_profile_mail_blacklist.id;
 
 ALTER TABLE ONLY ng03.gm_profile_mail_blacklist ADD CONSTRAINT gm_profile_mail_blacklist_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_mail_blacklist ADD CONSTRAINT gm_profile_mail_blacklist_ignored_profile_id_key UNIQUE (profile_id, ignored_profile_id);
 
 --------------------------------------------------------------------------------
 
@@ -4602,6 +4721,7 @@ ALTER TABLE ng03.gm_planet_market_purchases OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_planet_market_purchases_id_seq OWNED BY ng03.gm_planet_market_purchases.id;
 
 ALTER TABLE ONLY ng03.gm_planet_market_purchases ADD CONSTRAINT gm_planet_market_purchases_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planet_market_purchases ADD CONSTRAINT gm_planet_market_purchases_planet_id_key UNIQUE (planet_id);
 
 --------------------------------------------------------------------------------
 
@@ -4630,6 +4750,7 @@ ALTER TABLE ng03.gm_planet_market_sales OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_planet_market_sales_id_seq OWNED BY ng03.gm_planet_market_sales.id;
 
 ALTER TABLE ONLY ng03.gm_planet_market_sales ADD CONSTRAINT gm_planet_market_sales_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_planet_market_sales ADD CONSTRAINT gm_planet_market_sales_planet_id_key UNIQUE (planet_id);
 
 --------------------------------------------------------------------------------
 
@@ -4685,6 +4806,7 @@ ALTER TABLE ng03.gm_profile_researches OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_researches_id_seq OWNED BY ng03.gm_profile_researches.id;
 
 ALTER TABLE ONLY ng03.gm_profile_researches ADD CONSTRAINT gm_profile_researches_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_researches ADD CONSTRAINT gm_profile_researches_research_id_key UNIQUE (profile_id, research_id);
 
 --------------------------------------------------------------------------------
 
@@ -4714,6 +4836,7 @@ ALTER TABLE ng03.gm_profile_research_pendings OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_research_pendings_id_seq OWNED BY ng03.gm_profile_research_pendings.id;
 
 ALTER TABLE ONLY ng03.gm_profile_research_pendings ADD CONSTRAINT gm_profile_research_pendings_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_research_pendings ADD CONSTRAINT gm_profile_research_pendings_research_id_key UNIQUE (profile_id, research_id);
 
 --------------------------------------------------------------------------------
 
@@ -4742,6 +4865,7 @@ ALTER TABLE ng03.gm_profile_ship_kills OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_profile_ship_kills_id_seq OWNED BY ng03.gm_profile_ship_kills.id;
 
 ALTER TABLE ONLY ng03.gm_profile_ship_kills ADD CONSTRAINT gm_profile_ship_kills_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_profile_ship_kills ADD CONSTRAINT gm_profile_ship_kills_ship_id_key UNIQUE (profile_id, ship_id);
 
 --------------------------------------------------------------------------------
 
@@ -4789,7 +4913,7 @@ CREATE TABLE ng03.gm_spying_buildings (
     created_by character varying DEFAULT 'system' NOT NULL,
     id integer DEFAULT nextval('ng03.gm_spying_buildings_id_seq'::regclass) NOT NULL,
     spying_id integer NOT NULL,
-    building_id integer NOT NULL,
+    building_id character varying NOT NULL,
     count smallint NOT NULL
 );
 
@@ -4798,6 +4922,7 @@ ALTER TABLE ng03.gm_spying_buildings OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_spying_buildings_id_seq OWNED BY ng03.gm_spying_buildings.id;
 
 ALTER TABLE ONLY ng03.gm_spying_buildings ADD CONSTRAINT gm_spying_buildings_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_spying_buildings ADD CONSTRAINT gm_spying_buildings_building_id_key UNIQUE (spying_id, building_id);
 
 --------------------------------------------------------------------------------
 
@@ -4826,6 +4951,7 @@ ALTER TABLE ng03.gm_spying_fleets OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_spying_fleets_id_seq OWNED BY ng03.gm_spying_fleets.id;
 
 ALTER TABLE ONLY ng03.gm_spying_fleets ADD CONSTRAINT gm_spying_fleets_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_spying_fleets ADD CONSTRAINT gm_spying_fleets_name_key UNIQUE (spying_id, name);
 
 --------------------------------------------------------------------------------
 
@@ -4877,6 +5003,7 @@ ALTER TABLE ng03.gm_spying_planets OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_spying_planets_id_seq OWNED BY ng03.gm_spying_planets.id;
 
 ALTER TABLE ONLY ng03.gm_spying_planets ADD CONSTRAINT gm_spying_planets_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_spying_planets ADD CONSTRAINT gm_spying_planets_name_key UNIQUE (spying_id, name);
 
 --------------------------------------------------------------------------------
 
@@ -4904,6 +5031,7 @@ ALTER TABLE ng03.gm_spying_researches OWNER TO exileng;
 ALTER SEQUENCE ng03.gm_spying_researches_id_seq OWNED BY ng03.gm_spying_researches.id;
 
 ALTER TABLE ONLY ng03.gm_spying_researches ADD CONSTRAINT gm_spying_researches_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ng03.gm_spying_researches ADD CONSTRAINT gm_spying_researches_name_key UNIQUE (spying_id, name);
 
 --------------------------------------------------------------------------------
 
@@ -4994,14 +5122,132 @@ ALTER TABLE ONLY ng03.gm_alliances ADD CONSTRAINT gm_alliances_chat_id_fkey FORE
 ALTER TABLE ONLY ng03.gm_alliance_invitations ADD CONSTRAINT gm_alliance_invitations_alliance_id_fkey FOREIGN KEY (alliance_id) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY ng03.gm_alliance_invitations ADD CONSTRAINT gm_alliance_invitations_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
-gm_alliance_nap_requests alliance_id_1
-gm_alliance_nap_requests alliance_id_2
+ALTER TABLE ONLY ng03.gm_alliance_nap_requests ADD CONSTRAINT gm_alliance_nap_requests_alliance_id_1_fkey FOREIGN KEY (alliance_id_1) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_alliance_nap_requests ADD CONSTRAINT gm_alliance_nap_requests_alliance_id_2_fkey FOREIGN KEY (alliance_id_2) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
+ALTER TABLE ONLY ng03.gm_alliance_naps ADD CONSTRAINT gm_alliance_naps_alliance_id_1_fkey FOREIGN KEY (alliance_id_1) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_alliance_naps ADD CONSTRAINT gm_alliance_naps_alliance_id_2_fkey FOREIGN KEY (alliance_id_2) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
+ALTER TABLE ONLY ng03.gm_alliance_ranks ADD CONSTRAINT gm_alliance_ranks_alliance_id_fkey FOREIGN KEY (alliance_id) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE ONLY ng03.log_processes ADD CONSTRAINT log_processes_process_id_fkey FOREIGN KEY (process_id) REFERENCES ng03.dt_processes(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_alliance_reports ADD CONSTRAINT gm_alliance_reports_alliance_id_fkey FOREIGN KEY (alliance_id) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_alliance_tributes ADD CONSTRAINT gm_alliance_tributes_alliance_id_1_fkey FOREIGN KEY (alliance_id_1) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_alliance_tributes ADD CONSTRAINT gm_alliance_tributes_alliance_id_2_fkey FOREIGN KEY (alliance_id_2) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_alliance_wallet_logs ADD CONSTRAINT gm_alliance_wallet_logs_alliance_id_fkey FOREIGN KEY (alliance_id) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_alliance_wallet_requests ADD CONSTRAINT gm_alliance_wallet_requests_alliance_id_fkey FOREIGN KEY (alliance_id) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_alliance_wallet_requests ADD CONSTRAINT gm_alliance_wallet_requests_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_alliance_wars ADD CONSTRAINT gm_alliance_wars_alliance_id_1_fkey FOREIGN KEY (alliance_id_1) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_alliance_wars ADD CONSTRAINT gm_alliance_wars_alliance_id_2_fkey FOREIGN KEY (alliance_id_2) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_battle_fleet_ship_kills ADD CONSTRAINT gm_battle_fleet_ship_kills_battle_fleet_ship_id_fkey FOREIGN KEY (battle_fleet_ship_id) REFERENCES ng03.gm_battle_fleet_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_battle_fleet_ship_kills ADD CONSTRAINT gm_battle_fleet_ship_kills_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_battle_fleet_ships ADD CONSTRAINT gm_battle_fleet_ships_battle_fleet_id_fkey FOREIGN KEY (battle_fleet_id) REFERENCES ng03.gm_battle_fleets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_battle_fleet_ships ADD CONSTRAINT gm_battle_fleet_ships_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_battle_fleets ADD CONSTRAINT gm_battle_fleets_battle_id_fkey FOREIGN KEY (battle_id) REFERENCES ng03.gm_battles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_battles ADD CONSTRAINT gm_battles_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_chat_messages ADD CONSTRAINT gm_chat_messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES ng03.gm_chats(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_invasions ADD CONSTRAINT gm_invasions_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planet_building_pendings ADD CONSTRAINT gm_planet_building_pendings_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_planet_building_pendings ADD CONSTRAINT gm_planet_building_pendings_building_id_fkey FOREIGN KEY (building_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planet_buildings ADD CONSTRAINT gm_planet_buildings_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_planet_buildings ADD CONSTRAINT gm_planet_buildings_building_id_fkey FOREIGN KEY (building_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planet_energy_transfers ADD CONSTRAINT gm_planet_energy_transfers_planet_id_1_fkey FOREIGN KEY (planet_id_1) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_planet_energy_transfers ADD CONSTRAINT gm_planet_energy_transfers_planet_id_2_fkey FOREIGN KEY (planet_id_2) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planet_market_purchases ADD CONSTRAINT gm_planet_market_purchases_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planet_market_sales ADD CONSTRAINT gm_planet_market_sales_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planet_ship_pendings ADD CONSTRAINT gm_planet_ship_pendings_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_planet_ship_pendings ADD CONSTRAINT gm_planet_ship_pendings_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planet_ships ADD CONSTRAINT gm_planet_ships_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_planet_ships ADD CONSTRAINT gm_planet_ships_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planet_training_pendings ADD CONSTRAINT gm_planet_training_pendings_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_planets ADD CONSTRAINT gm_planets_galaxy_id_fkey FOREIGN KEY (galaxy_id) REFERENCES ng03.gm_galaxies(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_planets ADD CONSTRAINT gm_planets_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_planets ADD CONSTRAINT gm_planets_commander_id_fkey FOREIGN KEY (commander_id) REFERENCES ng03.gm_profile_commanders(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_bounties ADD CONSTRAINT gm_profile_bounties_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_chats ADD CONSTRAINT gm_profile_chats_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_chats ADD CONSTRAINT gm_profile_chats_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES ng03.gm_chats(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_commanders ADD CONSTRAINT gm_profile_commanders_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_fleet_categories ADD CONSTRAINT gm_profile_fleet_categories_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_fleet_ships ADD CONSTRAINT gm_profile_fleet_ships_fleet_id_fkey FOREIGN KEY (fleet_id) REFERENCES ng03.gm_profile_fleets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_fleet_ships ADD CONSTRAINT gm_profile_fleet_ships_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_fleet_waypoints ADD CONSTRAINT gm_profile_fleet_waypoints_fleet_id_fkey FOREIGN KEY (fleet_id) REFERENCES ng03.gm_profile_fleets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_fleet_waypoints ADD CONSTRAINT gm_profile_fleet_waypoints_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_fleet_waypoints ADD CONSTRAINT gm_profile_fleet_waypoints_next_waypoint_id_fkey FOREIGN KEY (next_waypoint_id) REFERENCES ng03.gm_profile_fleet_waypoints(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_fleets ADD CONSTRAINT gm_profile_fleets_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_fleets ADD CONSTRAINT gm_profile_fleets_commander_id_fkey FOREIGN KEY (commander_id) REFERENCES ng03.gm_profile_commanders(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_fleets ADD CONSTRAINT gm_profile_fleets_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_fleets ADD CONSTRAINT gm_profile_fleets_category_id_fkey FOREIGN KEY (category_id) REFERENCES ng03.gm_profile_fleet_categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_fleets ADD CONSTRAINT gm_profile_fleets_current_waypoint_id_fkey FOREIGN KEY (current_waypoint_id) REFERENCES ng03.gm_profile_fleet_waypoints(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_holidays ADD CONSTRAINT gm_profile_holidays_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_mail_addressee_list ADD CONSTRAINT gm_profile_mail_addressee_list_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_mail_addressee_list ADD CONSTRAINT gm_profile_mail_addressee_list_addressee_id_fkey FOREIGN KEY (addressee_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_mail_blacklist ADD CONSTRAINT gm_profile_mail_blacklist_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_mail_blacklist ADD CONSTRAINT gm_profile_mail_blacklist_ignored_profile_id_fkey FOREIGN KEY (ignored_profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_mails ADD CONSTRAINT gm_profile_mails_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_mails ADD CONSTRAINT gm_profile_mails_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_reports ADD CONSTRAINT gm_profile_reports_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_research_pendings ADD CONSTRAINT gm_profile_research_pendings_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_research_pendings ADD CONSTRAINT gm_profile_research_pendings_research_id_fkey FOREIGN KEY (research_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_researches ADD CONSTRAINT gm_profile_researches_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_researches ADD CONSTRAINT gm_profile_researches_research_id_fkey FOREIGN KEY (research_id) REFERENCES ng03.dt_researches(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profile_ship_kills ADD CONSTRAINT gm_profile_ship_kills_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profile_ship_kills ADD CONSTRAINT gm_profile_ship_kills_ship_id_fkey FOREIGN KEY (ship_id) REFERENCES ng03.dt_ships(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.auth_user(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_last_planet_id_fkey FOREIGN KEY (last_planet_id) REFERENCES ng03.gm_planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_alliance_id_fkey FOREIGN KEY (alliance_id) REFERENCES ng03.gm_alliances(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_alliance_rank_id_fkey FOREIGN KEY (alliance_rank_id) REFERENCES ng03.gm_alliance_ranks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_profiles ADD CONSTRAINT gm_profiles_orientation_id_fkey FOREIGN KEY (orientation_id) REFERENCES ng03.dt_orientations(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_spying_buildings ADD CONSTRAINT gm_spying_buildings_spying_id_fkey FOREIGN KEY (spying_id) REFERENCES ng03.gm_spyings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ng03.gm_spying_buildings ADD CONSTRAINT gm_spying_buildings_building_id_fkey FOREIGN KEY (building_id) REFERENCES ng03.dt_buildings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_spying_fleets ADD CONSTRAINT gm_spying_fleets_spying_id_fkey FOREIGN KEY (spying_id) REFERENCES ng03.gm_spyings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_spying_planets ADD CONSTRAINT gm_spying_planets_spying_id_fkey FOREIGN KEY (spying_id) REFERENCES ng03.gm_spyings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_spying_researches ADD CONSTRAINT gm_spying_researches_spying_id_fkey FOREIGN KEY (spying_id) REFERENCES ng03.gm_spyings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.gm_spyings ADD CONSTRAINT gm_spyings_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_spyings(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.log_actions ADD CONSTRAINT log_actions_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE ONLY ng03.log_connections ADD CONSTRAINT log_connections_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES ng03.gm_profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ng03.log_processes ADD CONSTRAINT log_processes_process_id_fkey FOREIGN KEY (process_id) REFERENCES ng03.dt_processes(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --------------------------------------------------------------------------------
 -- PostgreSQL database
