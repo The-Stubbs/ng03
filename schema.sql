@@ -45,7 +45,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_create(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_create(_profile_id integer, _tag character varying, _name character varying) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_give_credits(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_give_credits(_profile_id integer, _credit_count integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_invitation_accept(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_invitation_accept(_profile_id integer, _invitation_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -106,7 +106,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_invitation_create(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_invitation_create(_profile_id integer, _member_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -125,7 +125,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_invitation_decline(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_invitation_decline(_profile_id integer, _invitation_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -163,7 +163,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_nap_break(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_nap_break(_profile_id integer, _nap_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -182,7 +182,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_nap_request_accept(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_nap_request_accept(_profile_id integer, _nap_request_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -201,7 +201,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_nap_request_cancel(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_nap_request_cancel(_profile_id integer, _nap_request_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -220,7 +220,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_nap_request_create(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_nap_request_create(_profile_id integer, _alliance_id integer, _guarantee integer, _breaking_delay interval) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -239,7 +239,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_nap_request_decline(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_nap_request_decline(_profile_id integer, _nap_request_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -258,7 +258,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_nap_toggle_location(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_nap_toggle_location(_profile_id integer, _nap_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -277,7 +277,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_nap_toggle_radar(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_nap_toggle_radar(_profile_id integer, _nap_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -296,7 +296,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_tribute_cancel(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_tribute_cancel(_profile_id integer, _tribute_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -315,7 +315,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_tribute_create(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_tribute_create(_profile_id integer, _alliance_id integer, _credit_count integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -334,7 +334,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_update_announce(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_update_announce(_profile_id integer, _defcon smallint, _announce text) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -353,7 +353,7 @@ BEGIN
    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_alliance_update_details(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_alliance_update_details(_profile_id integer, _tag character varying, _name character varying, _description text, _logo_url character varying) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -2886,7 +2886,7 @@ BEGIN
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 500 + int4(random() * 700));
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_util_droppods', 30 + int4(random() * 70));
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_util_jumper', int4(random() * 300));
-		UPDATE fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+		UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
 	END IF;
 
 	IF _size = 6 THEN
@@ -2900,7 +2900,7 @@ BEGIN
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 500 + int4(random() * 500));
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 300 + int4(random() * 300));
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 500 + int4(random() * 300));
-		UPDATE fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+		UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
 	END IF;
 
 	IF _size = 7 THEN
@@ -2914,7 +2914,7 @@ BEGIN
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 700 + int4(random() * 500));
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 500 + int4(random() * 300));
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 1000 + int4(random() * 300));
-		UPDATE fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+		UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
 	END IF;
 
 	IF _size = 8 THEN
@@ -2928,7 +2928,7 @@ BEGIN
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 1000 + int4(random() * 500));
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 1200 + int4(random() * 800));
 		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 2000 + int4(random() * 1000));
-		UPDATE fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+		UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
 	END IF;
 	
 END;$$;
@@ -2949,6 +2949,33 @@ BEGIN
 END;$$;
 
 ALTER FUNCTION ng03._planet_get_distance(_from_sector integer, _from_planet integer, _to_sector integer,  _to_planet integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03._galaxy_get_recommendation(_galaxy_id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    galaxy record;
+    
+    profiles integer;
+    recommendation integer;
+    
+BEGIN
+    
+    SELECT INTO galaxy * FROM gm_galaxies WHERE id = _galaxy_id AND allow_new = true;
+    IF NOT FOUND THEN RETURN -1; END IF;
+    
+    SELECT INTO profiles COUNT(DISTINCT profile_id) FROM gm_planets WHERE galaxy_id = _galaxy_id;
+    IF profiles < 50 THEN recommendation := 2;
+    ELSE recommendation := 1;
+    END IF;
+    
+    RETURN recommendation;
+END;$$;
+
+ALTER FUNCTION ng03._galaxy_get_recommendation(_galaxy_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 -- TABLES
@@ -4778,7 +4805,7 @@ ALTER TABLE ONLY ng03.gm_planet_training_pendings ADD CONSTRAINT gm_planet_train
 
 CREATE SEQUENCE ng03.gm_profiles_id_seq
     AS integer
-    START WITH 1
+    START WITH 4
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
@@ -5732,8 +5759,9 @@ ALTER TABLE ONLY ng03.log_processes ADD CONSTRAINT log_processes_process_id_fkey
 --------------------------------------------------------------------------------
 
 CREATE VIEW ng03.vw_starting_galaxies AS
-    SELECT gm_galaxies.id
-    FROM gm_galaxies;
+    SELECT gm_galaxies.id,
+        ng03._galaxy_get_recommendation(gm_galaxies.id) AS recommendation
+    FROM ng03.gm_galaxies;
    
 ALTER TABLE ng03.vw_starting_galaxies OWNER TO exileng;
 
@@ -5742,7 +5770,7 @@ ALTER TABLE ng03.vw_starting_galaxies OWNER TO exileng;
 CREATE VIEW ng03.vw_starting_orientations AS
     SELECT dt_orientations.id,
         dt_orientations.id::text || '_label'::text AS label
-    FROM dt_orientations;
+    FROM ng03.dt_orientations;
    
 ALTER TABLE ng03.vw_starting_orientations OWNER TO exileng;
 
