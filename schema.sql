@@ -39,7 +39,7 @@ BEGIN
     -- -4 duplicated tag
     -- -5 duplicated name
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -62,7 +62,7 @@ BEGIN
     -- -2 can't give to alliance
     -- -3 not enough credit
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -81,7 +81,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -100,7 +100,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -119,7 +119,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -138,7 +138,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -157,7 +157,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -176,7 +176,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -195,7 +195,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -214,7 +214,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -233,7 +233,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -252,7 +252,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -271,7 +271,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -290,7 +290,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -309,7 +309,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -328,7 +328,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -347,7 +347,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -366,7 +366,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -385,7 +385,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -404,7 +404,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -423,7 +423,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -442,7 +442,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -461,7 +461,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -480,7 +480,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -499,7 +499,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -518,7 +518,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -537,7 +537,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -556,7 +556,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -575,7 +575,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -594,7 +594,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -613,7 +613,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -632,7 +632,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -651,7 +651,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -670,7 +670,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -689,7 +689,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -708,7 +708,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -727,7 +727,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -746,7 +746,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -765,7 +765,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -784,7 +784,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -803,7 +803,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -822,7 +822,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -841,7 +841,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -860,7 +860,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -879,7 +879,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -898,7 +898,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -917,7 +917,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -936,7 +936,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -955,7 +955,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1003,7 +1003,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1022,7 +1022,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1041,7 +1041,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1060,7 +1060,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1079,7 +1079,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1098,7 +1098,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1117,7 +1117,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1136,7 +1136,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1155,7 +1155,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1174,7 +1174,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1193,7 +1193,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1212,7 +1212,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1231,7 +1231,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1241,22 +1241,58 @@ ALTER FUNCTION ng03.ua_profile_fleet_split(_profile_id integer) OWNER TO exileng
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_profile_fleet_start_moving(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_profile_fleet_start_moving(_profile_id integer, _fleet_id integer, _planet_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
 
-   profile record;
-   
+    gm_fleet record;
+    gm_origin record;
+    gm_profile record;
+    gm_destination record;
+    
+    travel_cost int4;
+    travel_time interval;
+    travel_distance float;
+    
+    waypoint_id integer;
+    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
-   IF NOT FOUND THEN RETURN -1; END IF;
+    -- -1 no active profile
+    -- -2 invalid fleet
+    -- -3 origin and destination are the same
+    -- -4 invalid destination
 
-   RETURN 0;
+    SELECT INTO gm_profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
+    IF NOT FOUND THEN RETURN -1; END IF;
+
+    SELECT INTO gm_fleet * FROM gm_profile_fleets WHERE id = _fleet_id AND profile_id = _profile_id AND current_waypoint_id IS NULL FOR UPDATE;
+    IF NOT FOUND THEN RETURN -2; END IF;
+
+    IF _planet_id = gm_fleet.planet_id THEN RETURN -3; END IF;
+
+    SELECT INTO gm_origin * FROM gm_planets WHERE id = gm_fleet.planet_id;
+    
+    SELECT INTO gm_destination * FROM gm_planets WHERE id = _planet_id AND NOT production_frozen AND galaxy_id = gm_origin.galaxy_id;
+    IF NOT FOUND THEN RETURN -4; END IF;
+
+    travel_distance := _planet_get_distance(gm_destination.sector, gm_destination.planet, gm_origin.sector, gm_origin.planet);
+    travel_time := travel_distance * 3600 * 1000.0 / _fleet_get_speed(_fleet_id) * INTERVAL '1 second';
+    travel_cost := int4(floor(travel_distance / 200.0 * _fleet_get_real_signature(_fleet_id)));
+    travel_cost := GREATEST(1, travel_cost);
+
+    UPDATE gm_profiles SET credit_count = credit_count - travel_cost WHERE id = _profile_id;
+
+    INSERT INTO gm_profile_fleet_waypoints(fleet_id, planet_id, action, ending_date) VALUES(_fleet_id, _planet_id, 'move', now() + travel_time)
+        RETURNING id INTO waypoint_id;
+    
+    UPDATE gm_profile_fleets SET idle_since_date = null, current_waypoint_id = waypoint_id WHERE id = _fleet_id AND profile_id = _profile_id;
+
+    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_profile_fleet_start_moving(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_profile_fleet_start_moving(_profile_id integer, _fleet_id integer, _planet_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -1269,7 +1305,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1288,7 +1324,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1307,7 +1343,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1326,7 +1362,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1345,7 +1381,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1364,7 +1400,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1383,7 +1419,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1393,22 +1429,47 @@ ALTER FUNCTION ng03.ua_profile_fleet_warp(_profile_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_profile_init(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_profile_init(_profile_id integer, _name character varying, _orientation_id character varying) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
 
    profile record;
+   orientation record;
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
-   IF NOT FOUND THEN RETURN -1; END IF;
+    -- -1 no new profile
+    -- -2 invalid name
+    -- -3 banned name
+    -- -4 already used name
+    -- -5 invalid orientation
 
-   RETURN 0;
+    SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'new' AND reset_count = 0;
+    IF NOT FOUND THEN RETURN -1; END IF;
+
+    IF _name = '' OR LENGTH(_name) < 2 OR LENGTH(_name) > 12 THEN RETURN -2; END IF;
+    
+    PERFORM 1 FROM dt_banned_pseudo WHERE id ILIKE _name;
+    IF FOUND THEN RETURN -3; END IF;
+    
+    PERFORM 1 FROM gm_profiles WHERE pseudo ILIKE _name AND id <> _profile_id;
+    IF FOUND THEN RETURN -4; END IF;
+    
+    SELECT INTO orientation FROM dt_orientations WHERE id = _orientation_id;
+    IF NOT FOUND THEN RETURN -5; END IF;
+    
+    UPDATE gm_profiles SET pseudo = _name, orientation_id = _orientation_id WHERE id = _profile_id;
+    
+    IF _orientation_id = 'or_scientist' THEN INSERT INTO gm_profile_researches(profile_id, research_id) VALUES(_profile_id, 'rs_orientation_scientist');
+    ELSEIF _orientation_id = 'or_soldier' THEN INSERT INTO gm_profile_researches(profile_id, research_id) VALUES(_profile_id, 'rs_orientation_soldier');
+    ELSEIF _orientation_id = 'or_merchant' THEN INSERT INTO gm_profile_researches(profile_id, research_id) VALUES(_profile_id, 'rs_orientation_merchant');
+    END IF;
+    
+    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_profile_init(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_profile_init(_profile_id integer, _name character varying, _orientation_id character varying) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -1421,7 +1482,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1440,7 +1501,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1459,7 +1520,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1478,7 +1539,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1497,7 +1558,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1516,7 +1577,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1535,7 +1596,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1554,7 +1615,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1573,7 +1634,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1592,7 +1653,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1602,22 +1663,100 @@ ALTER FUNCTION ng03.ua_profile_research_pending_toggle(_profile_id integer) OWNE
 
 --------------------------------------------------------------------------------
 
-CREATE FUNCTION ng03.ua_profile_reset(_profile_id integer) RETURNS integer
+CREATE FUNCTION ng03.ua_profile_reset(_profile_id integer, _galaxy_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
 
-   profile record;
+    gm_planet record;
+    gm_profile record;
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
-   IF NOT FOUND THEN RETURN -1; END IF;
+    -- -1 no profile
+    -- -2 still has planet
+    -- -3 no planet available
 
-   RETURN 0;
+    SELECT INTO gm_profile * FROM gm_profiles WHERE id = _profile_id;
+    IF NOT FOUND THEN RETURN -1; END IF;
+
+    PERFORM 1 FROM gm_planets WHERE profile_id = _profile_id;
+    IF FOUND THEN RETURN -2; END IF;
+    
+    UPDATE gm_profile_fleets SET profile_id = 2 WHERE profile_id = _profile_id;
+
+    DELETE FROM gm_profile_research_pendings WHERE profile_id = _profile_id;
+    
+    INSERT INTO gm_profile_researches(profile_id, research_id, level)
+        SELECT _profile_id, id, default_level FROM dt_researches
+            WHERE default_level > 0
+              AND NOT EXISTS(SELECT 1 FROM gm_profile_researches WHERE profile_id = _profile_id AND research_id = dt_researches.id);
+    
+    SELECT INTO gm_planet * FROM gm_planets
+        INNER JOIN gm_galaxies ON (gm_galaxies.id = gm_planets.galaxy_id)
+        WHERE profile_id IS NULL
+          AND gm_galaxies.id = _profile_id
+          AND planet % 2 = 0
+          AND (sector % 10 = 0 OR sector % 10 = 1 OR sector <= 10 OR sector > 90)
+          AND floor > 0 AND space > 0
+          AND allow_new
+    ORDER BY random() LIMIT 1 FOR UPDATE;
+    IF NOT FOUND THEN RETURN -3; END IF;
+    
+    PERFORM ua_profile_fleet_start_moving(gm_profile_fleets.profile_id, gm_profile_fleets.id, _planet_get_nearest(gm_profile_fleets.profile_id, gm_planets.id))
+    FROM gm_planets
+        INNER JOIN gm_profile_fleets ON (gm_profile_fleets.action <> -1 AND gm_profile_fleets.action <> 1 AND gm_profile_fleets.planet_id = gm_planets.id AND gm_profile_fleets.profile_id <> gm_planets.profile_id)
+    WHERE gm_planets.id = gm_planet.id;
+    
+    PERFORM _planet_clear(gm_planet.id);
+
+    DELETE FROM gm_planet_ships WHERE planet_id = gm_planet.id;
+    
+    UPDATE gm_planets SET
+        name = gm_profile.pseudo || ' I', profile_id = _profile_id,
+        ore_count = 10000, hydro_count = 7500,
+        worker_count = 10000, scientist_count = 50, soldier_count = 50
+    WHERE id = gm_planet.id;
+    
+    INSERT INTO gm_planet_buildings(planet_id, building_id, count) VALUES(gm_planet.id, 'bd_planet_colony', 1);
+    
+    PERFORM _profile_reset_commanders(_profile_id);
+    
+    UPDATE gm_planets SET
+        commander_id = (SELECT id FROM gm_profile_commanders WHERE profile_id = _profile_id LIMIT 1),
+        mood = 100
+    WHERE id = gm_planet.id;
+    
+    UPDATE gm_profiles SET
+        privilege = 'active',
+        reset_count = reset_count + 1,
+        credit_count = DEFAULT,
+        prestige_count = DEFAULT,
+        bankruptcy = DEFAULT,
+        score_dev = DEFAULT,
+        score_battle = DEFAULT,
+        previous_score_dev = DEFAULT,
+        alliance_id = null,
+        alliance_rank_id = null,
+        last_catastrophe_date = now(),
+        last_holidays_date = now(),
+        current_upkeep_commanders = DEFAULT,
+        current_upkeep_planets = DEFAULT,
+        current_upkeep_scientists = DEFAULT,
+        current_upkeep_soldiers = DEFAULT,
+        current_upkeep_fleets = DEFAULT,
+        current_upkeep_orbitting = DEFAULT,
+        current_upkeep_parking = DEFAULT
+    WHERE id = _profile_id;
+
+    DELETE FROM gm_profile_chats WHERE profile_id = _profile_id;
+    DELETE FROM gm_profile_mail_addressee_list WHERE addressee_id = _profile_id;
+    DELETE FROM gm_profile_mail_blacklist WHERE ignored_profile_id = _profile_id;
+    
+    RETURN 0;
 END;$$;
 
-ALTER FUNCTION ng03.ua_profile_reset(_profile_id integer) OWNER TO exileng;
+ALTER FUNCTION ng03.ua_profile_reset(_profile_id integer, _galaxy_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 
@@ -1630,7 +1769,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1649,7 +1788,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1668,7 +1807,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1687,7 +1826,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1706,7 +1845,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1725,7 +1864,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -1744,7 +1883,7 @@ DECLARE
    
 BEGIN
 
-   SELECT INTO profile * FROM gm_profiles WHERE id = __profile_id AND privilege = 'active';
+   SELECT INTO profile * FROM gm_profiles WHERE id = _profile_id AND privilege = 'active';
    IF NOT FOUND THEN RETURN -1; END IF;
 
    RETURN 0;
@@ -2369,7 +2508,7 @@ CREATE FUNCTION ng03.trigger_chat_messages_before_insert() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
-	
+    
 BEGIN
     
     RETURN NEW;
@@ -2383,7 +2522,7 @@ CREATE FUNCTION ng03.trigger_planet_buildings_after_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
-	
+    
 BEGIN
     
     RETURN NULL;
@@ -2397,7 +2536,7 @@ CREATE FUNCTION ng03.trigger_planet_energy_transfers_before_changes() RETURNS tr
     LANGUAGE plpgsql
     AS $$
 DECLARE
-	
+    
 BEGIN
     
     RETURN NEW;
@@ -2411,7 +2550,7 @@ CREATE FUNCTION ng03.trigger_planet_ships_before_insert() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
-	
+    
 BEGIN
     
     RETURN NEW;
@@ -2425,7 +2564,7 @@ CREATE FUNCTION ng03.trigger_planet_ships_after_changes() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
-	
+    
 BEGIN
     
     RETURN NULL;
@@ -2439,7 +2578,7 @@ CREATE FUNCTION ng03.trigger_planet_ship_pendings_after_delete() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
-	
+    
 BEGIN
     
     RETURN NULL;
@@ -2458,7 +2597,7 @@ DECLARE
    
 BEGIN
 
-	FOR process IN (SELECT * FROM dt_processes WHERE last_rundate IS NULL OR last_rundate + frequency < now()) LOOP
+    FOR process IN (SELECT * FROM dt_processes WHERE last_rundate IS NULL OR last_rundate + frequency < now()) LOOP
         BEGIN
         
             EXECUTE 'SELECT ' || process.id;
@@ -2528,16 +2667,16 @@ BEGIN
             FOR i IN 1..10 LOOP
                 IF special_planets[i] = p THEN
 
-	                planet_type := int2(100 * random());
+                    planet_type := int2(100 * random());
                     IF planet_type < 92 THEN planet_type := 0;
-		            ELSEIF planet_type <= 98 THEN planet_type := 3;
-		            ELSE planet_type := 4;
-		            END IF;
+                    ELSEIF planet_type <= 98 THEN planet_type := 3;
+                    ELSE planet_type := 4;
+                    END IF;
 
-		            IF (planet_type = 3 OR planet_type = 4) AND (6 - 0.55 * sqrt(power(5.5 - (sector % 10), 2) + power(5.5 - (sector / 10 + 1), 2))) > 4.5 THEN planet_type := 1; END IF;
+                    IF (planet_type = 3 OR planet_type = 4) AND (6 - 0.55 * sqrt(power(5.5 - (sector % 10), 2) + power(5.5 - (sector / 10 + 1), 2))) > 4.5 THEN planet_type := 1; END IF;
 
                     EXIT;
-	            END IF;
+                END IF;
             END LOOP;
 
             IF p = 13 AND (sector = 23 OR sector = 28 OR sector = 73 OR sector = 78) THEN planet_type := 1; END IF;
@@ -2589,9 +2728,9 @@ BEGIN
                     INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_sandworm');
                 END IF;
 
-	            IF floor > 65 AND random() < 0.001 THEN
-	                INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_magnetic');
-	            END IF;
+                IF floor > 65 AND random() < 0.001 THEN
+                    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_magnetic');
+                END IF;
 
             ELSEIF planet_type = 3 THEN
 
@@ -2624,7 +2763,7 @@ BEGIN
 
     PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 1, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor > 95 AND gm_planets.floor <= 120 AND profile_id IS NULL;
     PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 2, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor > 120 AND profile_id IS NULL;
-	UPDATE gm_profile_fleets SET stance = true WHERE profile_id = 1 AND NOT stance;
+    UPDATE gm_profile_fleets SET stance = true WHERE profile_id = 1 AND NOT stance;
 
 END;$$;
 
@@ -2682,14 +2821,14 @@ BEGIN
             FOR i IN 1..10 LOOP
                 IF special_planets[i] = p THEN
 
-	                planet_type := int2(100 * random());
+                    planet_type := int2(100 * random());
                     IF planet_type < 98 THEN planet_type := 0;
-		            ELSEIF random() < 0.5 THEN planet_type := 3;
-		            ELSE planet_type := 4;
-		            END IF;
+                    ELSEIF random() < 0.5 THEN planet_type := 3;
+                    ELSE planet_type := 4;
+                    END IF;
 
                     EXIT;
-	            END IF;
+                END IF;
             END LOOP;
 
             IF p = 13 AND (sector = 23 OR sector = 28 OR sector = 73 OR sector = 78) THEN planet_type := 1; END IF;
@@ -2726,17 +2865,17 @@ BEGIN
                     INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_seismic');
                 END IF;
 
-	            IF floor > 129 AND random() < 0.05 THEN
-	                INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_sandworm');
-	            END IF;
+                IF floor > 129 AND random() < 0.05 THEN
+                    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_sandworm');
+                END IF;
 
-	            IF floor > 65 AND random() < 0.02 THEN
-	                INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_extraordinary');
-	            END IF;
+                IF floor > 65 AND random() < 0.02 THEN
+                    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_extraordinary');
+                END IF;
 
-	            IF floor > 65 AND random() < 0.01 THEN
-	                INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_magnetic');
-	            END IF;
+                IF floor > 65 AND random() < 0.01 THEN
+                    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(planet_id, 'bd_planet_magnetic');
+                END IF;
 
             ELSEIF planet_type = 3 THEN
 
@@ -2758,7 +2897,7 @@ BEGIN
     PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 6, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor >= 95 AND gm_planets.floor < 140 AND profile_id IS NULL;
     PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 7, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor >= 140 AND gm_planets.floor < 180 AND profile_id IS NULL;
     PERFORM admin_generate_fleet(1, 'Les fossoyeurs', 8, id) FROM gm_planets WHERE galaxy_id = _galaxy_id AND gm_planets.floor >= 180 AND profile_id IS NULL;
-	UPDATE gm_profile_fleets SET stance = true WHERE profile_id = 1 AND NOT stance;
+    UPDATE gm_profile_fleets SET stance = true WHERE profile_id = 1 AND NOT stance;
 
 END;$$;
 
@@ -2777,41 +2916,41 @@ DECLARE
     
 BEGIN
 
-	SELECT INTO gm_planet * FROM gm_planets
-	    WHERE galaxy_id = _galaxy_id AND sector > 11 AND sector < 30 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
-	    ORDER BY random() LIMIT 1;
-	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
-	vortexes := 1;
-	
-	IF random() > 0.40 THEN
-		SELECT INTO gm_planet * FROM gm_planets
-		    WHERE galaxy_id = _galaxy_id AND sector > 31 AND sector < 50 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
-		ORDER BY random() LIMIT 1;		
-		IF FOUND THEN
-        	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
-        	vortexes := 2;
-		END IF;
-	END IF;
+    SELECT INTO gm_planet * FROM gm_planets
+        WHERE galaxy_id = _galaxy_id AND sector > 11 AND sector < 30 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
+        ORDER BY random() LIMIT 1;
+    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
+    vortexes := 1;
+    
+    IF random() > 0.40 THEN
+        SELECT INTO gm_planet * FROM gm_planets
+            WHERE galaxy_id = _galaxy_id AND sector > 31 AND sector < 50 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
+        ORDER BY random() LIMIT 1;        
+        IF FOUND THEN
+            INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
+            vortexes := 2;
+        END IF;
+    END IF;
 
-	IF random() > 0.70 THEN
-		SELECT INTO gm_planet * FROM gm_planets
-		    WHERE galaxy_id = _galaxy_id AND sector > 51 AND sector < 90 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
-		ORDER BY random() LIMIT 1;		
-		IF FOUND THEN
-        	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
-        	vortexes := 3;
-		END IF;
-	END IF;
+    IF random() > 0.70 THEN
+        SELECT INTO gm_planet * FROM gm_planets
+            WHERE galaxy_id = _galaxy_id AND sector > 51 AND sector < 90 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
+        ORDER BY random() LIMIT 1;        
+        IF FOUND THEN
+            INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
+            vortexes := 3;
+        END IF;
+    END IF;
 
-	IF vortexes < 2 OR random() > 0.5 THEN
-		SELECT INTO gm_planet * FROM gm_planets
-		    WHERE galaxy_id = _galaxy_id AND sector > 71 AND sector < 90 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
-		ORDER BY random() LIMIT 1;		
-		IF FOUND THEN
-        	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
-        	vortexes := 4;
-		END IF;
-	END IF;
+    IF vortexes < 2 OR random() > 0.5 THEN
+        SELECT INTO gm_planet * FROM gm_planets
+            WHERE galaxy_id = _galaxy_id AND sector > 71 AND sector < 90 AND sector % 10 <> 0 AND sector % 10 <> 1 AND floor = 0 AND spawn_ore = 0 AND spawn_hydro = 0
+        ORDER BY random() LIMIT 1;        
+        IF FOUND THEN
+            INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_vortex');
+            vortexes := 4;
+        END IF;
+    END IF;
 
 END;$$;
 
@@ -2829,15 +2968,15 @@ DECLARE
 BEGIN
 
     SELECT INTO gm_planet * FROM gm_planets WHERE galaxy_id = _galaxy_id AND sector = _sector AND planet = _planet;
-	IF NOT FOUND THEN RETURN; END IF;
-	
-	UPDATE gm_planets SET profile_id = 3 WHERE id = gm_planet.id AND profile_id IS NULL;
+    IF NOT FOUND THEN RETURN; END IF;
+    
+    UPDATE gm_planets SET profile_id = 3 WHERE id = gm_planet.id AND profile_id IS NULL;
 
-	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_merchant');
-	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_ore_storage_merchant');
-	INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_hydro_storage_merchant');
+    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_planet_merchant');
+    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_ore_storage_merchant');
+    INSERT INTO gm_planet_buildings(planet_id, building_id) VALUES(gm_planet.id, 'bd_hydro_storage_merchant');
 
-	UPDATE gm_planets SET worker_count = 100000, growing = false WHERE id = gm_planet.id;
+    UPDATE gm_planets SET worker_count = 100000, growing = false WHERE id = gm_planet.id;
 
 END;$$;
 
@@ -2854,83 +2993,83 @@ DECLARE
 
 BEGIN
 
-	INSERT INTO gm_profile_fleets(created_by, profile_id, planet_id, name) VALUES('system', _profile_id, _planet_id, _name) RETURNING id INTO fleet_id;
-	
-	IF _size = 1 THEN
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 20 + int4(random() * 20));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 80 + int4(random() * 50));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 50 + int4(random() * 50));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 20 + int4(random() * 20));
-	END IF;
+    INSERT INTO gm_profile_fleets(created_by, profile_id, planet_id, name) VALUES('system', _profile_id, _planet_id, _name) RETURNING id INTO fleet_id;
+    
+    IF _size = 1 THEN
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 20 + int4(random() * 20));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 80 + int4(random() * 50));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 50 + int4(random() * 50));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 20 + int4(random() * 20));
+    END IF;
 
-	IF _size = 2 THEN
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 100 + int4(random() * 100));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 100 + int4(random() * 100));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 60 + int4(random() * 50));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 100 + int4(random() * 100));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 30 + int4(random() * 30));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 30 + int4(random() * 30));
-		UPDATE gm_profile_fleets SET cargo_worker = 5000 WHERE id = fleet_id;
-	END IF;
+    IF _size = 2 THEN
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 100 + int4(random() * 100));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 100 + int4(random() * 100));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 60 + int4(random() * 50));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 100 + int4(random() * 100));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 30 + int4(random() * 30));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 30 + int4(random() * 30));
+        UPDATE gm_profile_fleets SET cargo_worker = 5000 WHERE id = fleet_id;
+    END IF;
 
-	IF _size = 5 THEN
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 200 + int4(random() * 2000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 200 + int4(random() * 2000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 200 + int4(random() * 500));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 200 + int4(random() * 500));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 200 + int4(random() * 600));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 200 + int4(random() * 500));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 200 + int4(random() * 800));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 500 + int4(random() * 1000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 300 + int4(random() * 800));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 500 + int4(random() * 700));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_util_droppods', 30 + int4(random() * 70));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_util_jumper', int4(random() * 300));
-		UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
-	END IF;
+    IF _size = 5 THEN
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 200 + int4(random() * 2000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 200 + int4(random() * 2000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 200 + int4(random() * 500));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 200 + int4(random() * 500));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 200 + int4(random() * 600));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 200 + int4(random() * 500));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 200 + int4(random() * 800));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 500 + int4(random() * 1000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 300 + int4(random() * 800));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 500 + int4(random() * 700));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_util_droppods', 30 + int4(random() * 70));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_util_jumper', int4(random() * 300));
+        UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+    END IF;
 
-	IF _size = 6 THEN
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 200 + int4(random() * 1000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 200 + int4(random() * 1000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 200 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 200 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 200 + int4(random() * 300));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 200 + int4(random() * 300));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 200 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 500 + int4(random() * 500));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 300 + int4(random() * 300));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 500 + int4(random() * 300));
-		UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
-	END IF;
+    IF _size = 6 THEN
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 200 + int4(random() * 1000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 200 + int4(random() * 1000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 200 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 200 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 200 + int4(random() * 300));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 200 + int4(random() * 300));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 200 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 500 + int4(random() * 500));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 300 + int4(random() * 300));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 500 + int4(random() * 300));
+        UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+    END IF;
 
-	IF _size = 7 THEN
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 1200 + int4(random() * 1000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 1200 + int4(random() * 1000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 300 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 300 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 300 + int4(random() * 300));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 300 + int4(random() * 300));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 400 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 700 + int4(random() * 500));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 500 + int4(random() * 300));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 1000 + int4(random() * 300));
-		UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
-	END IF;
+    IF _size = 7 THEN
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 1200 + int4(random() * 1000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 1200 + int4(random() * 1000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 300 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 300 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 300 + int4(random() * 300));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 300 + int4(random() * 300));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 400 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 700 + int4(random() * 500));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 500 + int4(random() * 300));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 1000 + int4(random() * 300));
+        UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+    END IF;
 
-	IF _size = 8 THEN
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 5200 + int4(random() * 2000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 5200 + int4(random() * 2000));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 800 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 800 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 1200 + int4(random() * 300));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 1000 + int4(random() * 300));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 600 + int4(random() * 200));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 1000 + int4(random() * 500));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 1200 + int4(random() * 800));
-		INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 2000 + int4(random() * 1000));
-		UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
-	END IF;
-	
+    IF _size = 8 THEN
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_light', 5200 + int4(random() * 2000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_fighter_heavy', 5200 + int4(random() * 2000));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_light', 800 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_heavy', 800 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_corvet_multigun', 1200 + int4(random() * 300));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_light', 1000 + int4(random() * 300));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_heavy', 600 + int4(random() * 200));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_frigate_elite', 1000 + int4(random() * 500));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_light', 1200 + int4(random() * 800));
+        INSERT INTO gm_profile_fleet_ships(created_by, fleet_id, ship_id, count) VALUES('system', fleet_id, 'sh_cruiser_heavy', 2000 + int4(random() * 1000));
+        UPDATE gm_profile_fleets SET cargo_soldier = 50000, cargo_worker = 50000 WHERE id = fleet_id;
+    END IF;
+    
 END;$$;
 
 ALTER FUNCTION ng03.admin_generate_fleet(_profile_id integer, _name character varying, _size integer, _planet_id integer) OWNER TO exileng;
@@ -2941,11 +3080,11 @@ CREATE FUNCTION ng03._planet_get_distance(_from_sector integer, _from_planet int
     LANGUAGE plpgsql
     AS $$
 BEGIN
-	IF _from_sector <> _to_sector THEN
-		RETURN 6 * sqrt(((_from_sector - 1) / 10 - (_to_sector - 1) / 10 ) ^ 2 + ((_from_sector - 1) % 10 - (_to_sector - 1) % 10) ^ 2);
-	ELSE
-		RETURN sqrt(((_from_planet - 1) / 5 - (_to_planet - 1) / 5 ) ^ 2 + ((_from_planet - 1) % 5 - (_to_planet - 1) % 5) ^ 2);
-	END IF;
+    IF _from_sector <> _to_sector THEN
+        RETURN 6 * sqrt(((_from_sector - 1) / 10 - (_to_sector - 1) / 10 ) ^ 2 + ((_from_sector - 1) % 10 - (_to_sector - 1) % 10) ^ 2);
+    ELSE
+        RETURN sqrt(((_from_planet - 1) / 5 - (_to_planet - 1) / 5 ) ^ 2 + ((_from_planet - 1) % 5 - (_to_planet - 1) % 5) ^ 2);
+    END IF;
 END;$$;
 
 ALTER FUNCTION ng03._planet_get_distance(_from_sector integer, _from_planet integer, _to_sector integer,  _to_planet integer) OWNER TO exileng;
@@ -2978,11 +3117,104 @@ END;$$;
 ALTER FUNCTION ng03._galaxy_get_recommendation(_galaxy_id integer) OWNER TO exileng;
 
 --------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03._profile_reset_commanders(_profile_id integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    gm_profile record;
+    
+BEGIN
+
+    SELECT INTO gm_profile * FROM gm_profiles WHERE id = _profile_id;
+    IF NOT FOUND THEN RETURN; END IF;
+    
+    DELETE FROM gm_profile_commanders WHERE profile_id = _profile_id;
+
+    IF gm_profile.orientation = 'or_soldier' THEN
+        INSERT INTO gm_profile_commanders(profile_id, engaging_date, points, mod_fleet_shield, mod_fleet_handling, mod_fleet_tracking_speed, mod_fleet_damage)
+            VALUES(_profile_id, now(), 10, 1.10, 1.10, 1.10, 1.10);
+    ELSE
+        INSERT INTO gm_profile_commanders(profile_id, engaging_date, points)
+            VALUES(_profile_id, now(), 15);
+    END IF;
+END;$$;
+
+ALTER FUNCTION ng03._profile_reset_commanders(_profile_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03._fleet_get_speed(_fleet_id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    speed integer;
+    
+    ship_speed integer;
+    
+BEGIN
+
+    speed := 25000;
+    
+    FOR ship_speed IN (SELECT speed FROM gm_profile_fleet_ships JOIN dt_ships ON gm_profile_fleet_ships.ship_id = dt_ships.id WHERE fleet_id = _fleet_id AND count > 0) LOOP
+        IF ship_speed < speed THEN speed := ship_speed; END IF;
+    END LOOP;
+    
+    return speed;
+END;$$;
+
+ALTER FUNCTION ng03._fleet_get_speed(_fleet_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03._fleet_get_real_signature(_fleet_id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    signature integer;
+    
+    ship record;
+    
+BEGIN
+
+    signature := 0;
+    
+    FOR ship IN (SELECT signature, count FROM gm_profile_fleet_ships JOIN dt_ships ON gm_profile_fleet_ships.ship_id = dt_ships.id WHERE fleet_id = _fleet_id) LOOP
+        signature := signature + (ship.signature * ship.count);
+    END LOOP;
+    
+    return signature;
+END;$$;
+
+ALTER FUNCTION ng03._fleet_get_real_signature(_fleet_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
 -- TABLES
 --------------------------------------------------------------------------------
 
 SET default_tablespace = '';
 SET default_table_access_method = heap;
+
+--------------------------------------------------------------------------------
+
+CREATE TABLE ng03.dt_banned_pseudo (
+    id character varying NOT NULL
+);
+
+ALTER TABLE ng03.dt_banned_pseudo OWNER TO exileng;
+
+ALTER TABLE ONLY ng03.dt_banned_pseudo ADD CONSTRAINT dt_banned_pseudo_pkey PRIMARY KEY (id);
+
+INSERT INTO ng03.dt_banned_pseudo VALUES('^modo$');
+INSERT INTO ng03.dt_banned_pseudo VALUES('^admin');
+INSERT INTO ng03.dt_banned_pseudo VALUES('^exile$');
+INSERT INTO ng03.dt_banned_pseudo VALUES('^moderat');
+INSERT INTO ng03.dt_banned_pseudo VALUES('^f[0o]ss[0o]*');
+INSERT INTO ng03.dt_banned_pseudo VALUES('^oublié*');
+INSERT INTO ng03.dt_banned_pseudo VALUES('^marchand*');
 
 --------------------------------------------------------------------------------
 
