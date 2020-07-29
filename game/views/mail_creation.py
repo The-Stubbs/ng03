@@ -9,6 +9,10 @@ class View(ActionView):
     
     template_name = 'game/mail_creation.html'
     success_url = '/game/mail/creation/'
+    
+    tab_selected = None
+    menu_selected = None
+    submenu_selected = None
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

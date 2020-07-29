@@ -73,6 +73,7 @@ class TemplateView(LoginRequiredMixin, ExileMixin, View):
     
     template_name = None
     
+    tab_selected = None
     menu_selected = None
     submenu_selected = None
 
@@ -87,18 +88,24 @@ class TemplateView(LoginRequiredMixin, ExileMixin, View):
                 self.profile['last_planet_id'] = planet['id']
         #-----------------------------------------------------------------------
         context = self.get_context(request, connection.cursor(), **kwargs)
-        #-----------------------------------------------------------------------
-        if self.menu_selected: context['menu_selected'] = self.menu_selected
-        if self.submenu_selected: context['submenu_selected'] = self.submenu_selected
-        #-----------------------------------------------------------------------
         return render(request, self.template_name, context)
         #-----------------------------------------------------------------------
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):
+        #-----------------------------------------------------------------------
         kwargs.setdefault('view', self)
-        return kwargs
-    #---------------------------------------------------------------------------
+        context = kwargs
+        #-----------------------------------------------------------------------
+        if self.tab_selected: context['tab_selected'] = self.tab_selected
+        if self.menu_selected: context['menu_selected'] = self.menu_selected
+        if self.submenu_selected: context['submenu_selected'] = self.submenu_selected
+        #-----------------------------------------------------------------------
+        context['profile'] = db_row(cursor, 'SELECT * FROM vw_layout_profile WHERE profile_id=' + str(self.profile['id']))
+        context['profile']['planet'] = db_row(cursor, 'SELECT * FROM vw_layout_planet WHERE planet_id=' + str(self.profile['last_planet_id']))
+        #-----------------------------------------------------------------------
+        return context
+        #-----------------------------------------------------------------------
     
 ################################################################################
 

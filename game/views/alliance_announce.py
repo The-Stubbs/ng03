@@ -9,6 +9,10 @@ class View(ActionView):
     
     template_name = 'game/alliance_announce.html'
     success_url = '/game/alliance/announce/'
+    
+    tab_selected = None
+    menu_selected = 'alliance'
+    submenu_selected = 'alliance_overview'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

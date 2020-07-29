@@ -8,6 +8,10 @@ from game.views._base import *
 class View(TemplateView):
     
     template_name = 'game/alliance_displaying.html'
+    
+    tab_selected = None
+    menu_selected = 'alliance'
+    submenu_selected = None
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

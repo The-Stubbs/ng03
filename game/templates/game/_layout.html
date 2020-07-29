@@ -18,7 +18,79 @@
             <a href="/game/empire/fleets/" class="menu-lvl-2"> · {% trans "Flottes" %}</a>
             <div class="{% if menu_selected == 'empire_fleets' %}d-block{% else %}d-none{% endif %}">
                 <a href="/game/empire/fleets/" class="menu-lvl-3 {% if submenu_selected == 'empire_fleets' %}selected{% endif %}"> · {% trans "Flottes" %}</a>
+                <a href="/game/empire/orbiting/" class="menu-lvl-3 {% if submenu_selected == 'empire_orbiting' %}selected{% endif %}"> · {% trans "Flottes en orbite" %}</a>
+                <a href="/game/empire/parking/" class="menu-lvl-3 {% if submenu_selected == 'empire_parking' %}selected{% endif %}"> · {% trans "Vaisseaux au sol" %}</a>
+                <a href="/game/empire/stats/" class="menu-lvl-3 {% if submenu_selected == 'empire_stats' %}selected{% endif %}"> · {% trans "Détruits / perdus" %}</a>
             </div>
+            <a href="/game/empire/planets/" class="menu-lvl-2 {% if menu_selected == 'empire_planets' %}selected{% endif %}"> · {% trans "Planètes" %}</a>
+            <a href="/game/empire/purchases/" class="menu-lvl-2"> · {% trans "Marchands" %}</a>
+            <div class="{% if menu_selected == 'empire_purchases' %}d-block{% else %}d-none{% endif %}">
+                <a href="/game/empire/purchases/" class="menu-lvl-3 {% if submenu_selected == 'empire_purchases' %}selected{% endif %}"> · {% trans "Achats" %}</a>
+                <a href="/game/empire/sales/" class="menu-lvl-3 {% if submenu_selected == 'empire_sales' %}selected{% endif %}"> · {% trans "Ventes" %}</a>
+            </div>
+            <a href="/game/empire/researches/" class="menu-lvl-2 {% if menu_selected == 'empire_researches' %}selected{% endif %}"> · {% trans "Recherches" %}</a>
+            {% if profile.alliance_id %}
+            <a href="/game/alliance/displaying/" class="menu-lvl-2"> · {% trans "Alliance" %}</a>
+            <div class="{% if menu_selected == 'alliance' %}d-block{% else %}d-none{% endif %}">
+                <a href="/game/alliance/displaying/" class="menu-lvl-3 {% if submenu_selected == 'alliance_displaying' %}selected{% endif %}"> · {% trans "Vue d'ensemble" %}</a>
+                {% if profile.show_management %}<a href="/game/alliance/overview/" class="menu-lvl-3 {% if submenu_selected == 'alliance_overview' %}selected{% endif %}"> · {% trans "Gestion" %}</a>{% endif %}
+                {% if profile.show_members %}<a href="/game/alliance/members/" class="menu-lvl-3 {% if submenu_selected == 'alliance_members' %}selected{% endif %}"> · {% trans "Membres" %}</a>{% endif %}
+                <a href="/game/alliance/naps/" class="menu-lvl-3 {% if submenu_selected == 'alliance_naps' %}selected{% endif %}"> · {% trans "PNA" %}</a>
+                <a href="/game/alliance/tributes/" class="menu-lvl-3 {% if submenu_selected == 'alliance_tributes' %}selected{% endif %}"> · {% trans "Tributs" %}</a>
+                <a href="/game/alliance/wars/" class="menu-lvl-3 {% if submenu_selected == 'alliance_wars' %}selected{% endif %}"> · {% trans "Guerres" %}</a>
+                <a href="/game/alliance/wallet/" class="menu-lvl-3 {% if submenu_selected == 'alliance_wallet' %}selected{% endif %}"> · {% trans "Portefeuille" %}</a>
+                {% if profile.show_reports %}<a href="/game/alliance/reports/" class="menu-lvl-3 {% if submenu_selected == 'alliance_reports' %}selected{% endif %}"> · {% trans "Rapports" %}</a>{% endif %}
+                <a href="/game/alliance/invitations/" class="menu-lvl-3 {% if submenu_selected == 'alliance_invitations' %}selected{% endif %}"> · {% trans "Invitations" %}</a>
+            </div>
+            {% else %}
+            <a href="/game/alliance/invitations/" class="menu-lvl-2"> · {% trans "Alliance" %}</a>
+            <div class="{% if menu_selected == 'alliance' %}d-block{% else %}d-none{% endif %}">
+                <a href="/game/alliance/creation/" class="menu-lvl-3 {% if submenu_selected == 'alliance_creation' %}selected{% endif %}"> · {% trans "Création" %}</a>
+                <a href="/game/alliance/invitations/" class="menu-lvl-3 {% if submenu_selected == 'alliance_invitations' %}selected{% endif %}"> · {% trans "Invitations" %}</a>
+            </div>
+            {% endif %}
+            <a href="/game/map/sector/?g={{ profile.planet.galaxy_id }}&s={{ profile.planet.sector }}" class="menu-lvl-1"><span>{% trans "Galaxie" %}</span><i class="fas fa-angle-double-down"></i></a>
+            <a href="/game/map/sector/?g={{ profile.planet.galaxy_id }}&s={{ profile.planet.sector }}" class="menu-lvl-2 {% if menu_selected == 'map_sector' %}selected{% endif %}"> · {% trans "Carte spatiale" %}</a>
+            <a href="/game/ranking/alliances/" class="menu-lvl-2 {% if menu_selected == 'ranking_alliances' %}selected{% endif %}"> · {% trans "Alliances" %}</a>
+            <a href="/game/planet/overview/?id={{ profile.planet.id }}" class="menu-lvl-1"><span>{% trans "Planète ({{ profile.planet.galaxy }}.{{ profile.planet.sector }}.{{ profile.planet.planet }})" %}</span><i class="fas fa-angle-double-down"></i></a>
+            <a href="/game/planet/overview/?id={{ profile.planet.id }}" class="menu-lvl-2 {% if menu_selected == 'planet_overview' %}selected{% endif %}"> · {% trans "Vue d'ensemble" %}</a>
+            <a href="/game/planet/production/?id={{ profile.planet.id }}" class="menu-lvl-2 {% if menu_selected == 'planet_production' %}selected{% endif %}"> · {% trans "Production" %}</a>
+            <a href="/game/planet/buildings/?id={{ profile.planet.id }}" class="menu-lvl-2 {% if menu_selected == 'planet_buildings' %}selected{% endif %}"> · {% trans "Infrastructures" %}</a>
+            <a href="/game/planet/ships/?id={{ profile.planet.id }}" class="menu-lvl-2"> · {% trans "Chantier spatial" %}</a>
+            <div class="{% if menu_selected == 'planet_ships' %}d-block{% else %}d-none{% endif %}">
+                <a href="/game/planet/ships/?id={{ profile.planet.id }}" class="menu-lvl-3 {% if submenu_selected == 'planet_ships' %}selected{% endif %}"> · {% trans "Tous" %}</a>
+                <a href="/game/planet/ships/?id={{ profile.planet.id }}&f=1" class="menu-lvl-3 {% if submenu_selected == 'planet_ships_military' %}selected{% endif %}"> · {% trans "Militaire" %}</a>
+                <a href="/game/planet/ships/?id={{ profile.planet.id }}&f=2" class="menu-lvl-3 {% if submenu_selected == 'planet_ships_utility' %}selected{% endif %}"> · {% trans "Utilitaire" %}</a>
+                <a href="/game/planet/ships/?id={{ profile.planet.id }}&f=3" class="menu-lvl-3 {% if submenu_selected == 'planet_ships_upgrade' %}selected{% endif %}"> · {% trans "Upgrade" %}</a>
+                <a href="/game/planet/recycling/?id={{ profile.planet.id }}" class="menu-lvl-3 {% if submenu_selected == 'planet_recycling' %}selected{% endif %}"> · {% trans "Recyclage" %}</a>
+            </div>
+            <a href="/game/planet/trainings/?id={{ profile.planet.id }}" class="menu-lvl-2 {% if menu_selected == 'planet_trainings' %}selected{% endif %}"> · {% trans "Entraînements" %}</a>
+            <a href="/game/planet/orbit/?id={{ profile.planet.id }}" class="menu-lvl-2 {% if menu_selected == 'planet_orbit' %}selected{% endif %}"> · {% trans "Orbite" %}</a>
+            <a href="/game/planet/purchases/?id={{ profile.planet.id }}" class="menu-lvl-2"> · {% trans "Marché" %}</a>
+            <div class="{% if menu_selected == 'planet_market' %}d-block{% else %}d-none{% endif %}">
+                <a href="/game/planet/purchases/?id={{ profile.planet.id }}" class="menu-lvl-3 {% if submenu_selected == 'planet_purchases' %}selected{% endif %}"> · {% trans "Achat" %}</a>
+                <a href="/game/planet/sales/?id={{ profile.planet.id }}" class="menu-lvl-3 {% if submenu_selected == 'planet_sales' %}selected{% endif %}"> · {% trans "Vente" %}</a>
+            </div>
+            <a href="/game/mail/inbox/" class="menu-lvl-1"><span>{% trans "Communication" %}</span><i class="fas fa-angle-double-down"></i></a>
+            <a href="/game/profile/overview/" class="menu-lvl-2 {% if menu_selected == 'profile_overview' %}selected{% endif %}"> · {% trans "Infos nations" %}</a>
+            <a href="/game/mail/inbox/" class="menu-lvl-2"> · {% trans "Messagerie" %} {% if profile.unread_mail_count > 0 %}({{ profile.unread_mail_count }}){% endif %}</a>
+            <div class="{% if menu_selected == 'mail' %}d-block{% else %}d-none{% endif %}">
+                <a href="/game/mail/inbox/" class="menu-lvl-3 {% if submenu_selected == 'mail_inbox' %}selected{% endif %}"> · {% trans "Reçus" %}</a>
+                <a href="/game/mail/outbox/" class="menu-lvl-3 {% if submenu_selected == 'mail_outbox' %}selected{% endif %}"> · {% trans "Envoyés" %}</a>
+                <a href="/game/mail/creation/" class="menu-lvl-3 {% if submenu_selected == 'mail_creation' %}selected{% endif %}"> · {% trans "Ecrire" %}</a>
+                <a href="/game/mail/blacklist/" class="menu-lvl-3 {% if submenu_selected == 'mail_blacklist' %}selected{% endif %}"> · {% trans "Joueurs ignorés" %}</a>
+            </div>
+            <a href="/game/profile/reports/" class="menu-lvl-2 {% if menu_selected == 'profile_reports' %}selected{% endif %}"> · {% trans "Rapports" %} {% if profile.unread_report_count > 0 %}({{ profile.unread_report_count }}){% endif %}</a>
+            <a href="/game/chat/overview/" class="menu-lvl-2 {% if menu_selected == 'chat' %}selected{% endif %}"> · {% trans "Salons" %}</a>
+            <a href="/game/profile/notes/" class="menu-lvl-2 {% if menu_selected == 'profile_notes' %}selected{% endif %}"> · {% trans "Notes" %}</a>
+            <a href="/game/mercenary/spying/" class="menu-lvl-1"><span>{% trans "Mercenaires" %}</span><i class="fas fa-angle-double-down"></i></a>
+            <a href="/game/mercenary/spying/" class="menu-lvl-2 {% if menu_selected == 'mercenary_spying' %}selected{% endif %}"> · {% trans "Espionnage" %}</a>
+            <a href="/game/help/resources/" class="menu-lvl-1"><span>{% trans "Aide" %}</span><i class="fas fa-angle-double-down"></i></a>
+            <a href="/game/help/resources/" class="menu-lvl-2 {% if menu_selected == 'help' %}selected{% endif %}"> · {% trans "Aide" %}</a>
+            <a href="https://discord.gg/9RHUEhw" target="_blank" class="menu-lvl-2"> · {% trans "Discord" %}</a>
+            <a href="/game/profile/options/" class="menu-lvl-1"><span>{% trans "Compte" %}</span><i class="fas fa-angle-double-down"></i></a>
+            <a href="/game/profile/options/" class="menu-lvl-2 {% if menu_selected == 'profile_options' %}selected{% endif %}"> · {% trans "Options" %}</a>
+            <a href="/game/logout/" class="menu-lvl-2"> · {% trans "Déconnexion" %}</a>
         </div>
     </div>
     <div id="page">

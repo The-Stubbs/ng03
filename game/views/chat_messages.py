@@ -9,6 +9,10 @@ class View(ActionView):
     
     template_name = 'game/chat_messages.html'
     success_url = '/game/chat/messages/'
+    
+    tab_selected = None
+    menu_selected = None
+    submenu_selected = None
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):
