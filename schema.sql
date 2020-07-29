@@ -6078,5 +6078,50 @@ CREATE VIEW ng03.vw_starting_orientations AS
 ALTER TABLE ng03.vw_starting_orientations OWNER TO exileng;
 
 --------------------------------------------------------------------------------
+
+CREATE VIEW ng03.vw_layout_profile AS
+    SELECT gm_profiles.id,
+        gm_profiles.credit_count,
+        gm_profiles.prestige_count
+    FROM ng03.gm_profiles;
+   
+ALTER TABLE ng03.vw_layout_profile OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE VIEW ng03.vw_layout_planet AS
+    SELECT gm_planets.id
+        gm_planets.galaxy_id,
+        gm_planets.sector,
+        gm_planets.planet
+    FROM ng03.gm_planets;
+   
+ALTER TABLE ng03.vw_layout_planet OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE VIEW ng03.vw_header_planet AS
+    SELECT gm_planets.id,
+        gm_planets.ore_count::integer AS ore_count
+    FROM gm_planets;
+   
+ALTER TABLE ng03.vw_header_planet OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE VIEW ng03.vw_header_planets AS
+    SELECT gm_planets.id,
+        gm_planets.profile_id,
+        gm_planets.name,
+        gm_planets.galaxy_id,
+        gm_planets.sector,
+        gm_planets.planet
+    FROM gm_planets
+    WHERE gm_planets.floor > 0 AND gm_planets.space > 0
+    ORDER BY gm_planets.galaxy_id, gm_planets.sector, gm_planets.planet;
+  
+ALTER TABLE ng03.vw_header_planets OWNER TO exileng;
+
+--------------------------------------------------------------------------------
 -- PostgreSQL database
 --------------------------------------------------------------------------------
