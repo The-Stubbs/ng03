@@ -1461,6 +1461,8 @@ BEGIN
     
     UPDATE gm_profiles SET pseudo = _name, orientation_id = _orientation_id WHERE id = _profile_id;
     
+    DELETE FROM gm_profile_researches WHERE profile_id = _profile_id AND research_id IN ('rs_orientation_scientist', 'rs_orientation_soldier', 'rs_orientation_merchant');
+    
     IF _orientation_id = 'or_scientist' THEN INSERT INTO gm_profile_researches(profile_id, research_id) VALUES(_profile_id, 'rs_orientation_scientist');
     ELSEIF _orientation_id = 'or_soldier' THEN INSERT INTO gm_profile_researches(profile_id, research_id) VALUES(_profile_id, 'rs_orientation_soldier');
     ELSEIF _orientation_id = 'or_merchant' THEN INSERT INTO gm_profile_researches(profile_id, research_id) VALUES(_profile_id, 'rs_orientation_merchant');
@@ -1695,7 +1697,7 @@ BEGIN
     SELECT INTO gm_planet * FROM gm_planets
         INNER JOIN gm_galaxies ON (gm_galaxies.id = gm_planets.galaxy_id)
         WHERE profile_id IS NULL
-          AND gm_galaxies.id = _profile_id
+          AND galaxy_id = _galaxy_id
           AND planet % 2 = 0
           AND (sector % 10 = 0 OR sector % 10 = 1 OR sector <= 10 OR sector > 90)
           AND floor > 0 AND space > 0
@@ -1705,7 +1707,7 @@ BEGIN
     
     PERFORM ua_profile_fleet_start_moving(gm_profile_fleets.profile_id, gm_profile_fleets.id, _planet_get_nearest(gm_profile_fleets.profile_id, gm_planets.id))
     FROM gm_planets
-        INNER JOIN gm_profile_fleets ON (gm_profile_fleets.action <> -1 AND gm_profile_fleets.action <> 1 AND gm_profile_fleets.planet_id = gm_planets.id AND gm_profile_fleets.profile_id <> gm_planets.profile_id)
+        INNER JOIN gm_profile_fleets ON (gm_profile_fleets.current_waypoint_id IS NULL AND gm_profile_fleets.planet_id = gm_planets.id AND gm_profile_fleets.profile_id <> gm_planets.profile_id)
     WHERE gm_planets.id = gm_planet.id;
     
     PERFORM _planet_clear(gm_planet.id);
@@ -3132,11 +3134,11 @@ BEGIN
     
     DELETE FROM gm_profile_commanders WHERE profile_id = _profile_id;
 
-    IF gm_profile.orientation = 'or_soldier' THEN
-        INSERT INTO gm_profile_commanders(profile_id, engaging_date, points, mod_fleet_shield, mod_fleet_handling, mod_fleet_tracking_speed, mod_fleet_damage)
+    IF gm_profile.orientation_id = 'or_soldier' THEN
+        INSERT INTO gm_profile_commanders(profile_id, engaging_date, point_count, mod_fleet_shield, mod_fleet_handling, mod_fleet_tracking, mod_fleet_damage)
             VALUES(_profile_id, now(), 10, 1.10, 1.10, 1.10, 1.10);
     ELSE
-        INSERT INTO gm_profile_commanders(profile_id, engaging_date, points)
+        INSERT INTO gm_profile_commanders(profile_id, engaging_date, point_count)
             VALUES(_profile_id, now(), 15);
     END IF;
 END;$$;
@@ -3190,6 +3192,75 @@ BEGIN
 END;$$;
 
 ALTER FUNCTION ng03._fleet_get_real_signature(_fleet_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03._planet_get_nearest(_profile_id integer, _planet_id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+	gm_planet record;
+    
+    res integer;
+    
+BEGIN
+	SELECT INTO gm_planet * FROM gm_planets WHERE id = _planet_id;
+
+	SELECT INTO res id FROM gm_planets
+        WHERE profile_id = _profile_id AND galaxy_id = gm_planet.galaxy_id AND floor > 0 AND space > 0
+        ORDER BY _planet_get_distance(sector, planet, gm_planet.sector, gm_planet.planet) ASC LIMIT 1;
+	IF FOUND THEN RETURN res; END IF;
+
+	SELECT INTO res id FROM gm_planets
+        WHERE profile_id IS NULL AND galaxy_id = gm_planet.galaxy_id AND NOT sector IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 21, 30, 31, 40, 41, 50, 51, 60, 61, 70, 71, 80, 81, 90, 91)
+        ORDER BY _planet_get_distance(sector, planet, gm_planet.sector, gm_planet.planet) ASC LIMIT 1;
+	IF FOUND THEN RETURN res; END IF;
+
+	RETURN -1;
+END;$$;
+
+ALTER FUNCTION ng03._planet_get_nearest(_profile_id integer, _planet_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03._planet_clear(_planet_id integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+    DELETE FROM gm_planet_building_pendings WHERE planet_id = _planet_id;
+    DELETE FROM gm_planet_buildings USING dt_buildings WHERE planet_id = _planet_id AND building_id = dt_buildings.id AND NOT dt_buildings.category_id = 'cat_bd_modifier';
+
+    DELETE FROM gm_planet_ship_pendings WHERE planet_id = _planet_id;
+    DELETE FROM gm_planet_ships WHERE planet_id = _planet_id;
+
+    DELETE FROM gm_planet_energy_transfers WHERE planet_id_1 = _planet_id OR planet_id_2 = _planet_id;
+
+    UPDATE gm_planets SET
+        profile_id = null, name = '', commander_id = null,
+        ore_count = 0, hydro_count = 0,
+        worker_count = 0, scientist_count = 0, soldier_count = 0,
+        production_last_date = now(),
+        ore_price = 0, hydro_price = 0
+    WHERE id = _planet_id;
+    
+END;$$;
+
+ALTER FUNCTION ng03._planet_clear(_planet_id integer) OWNER TO exileng;
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION ng03._commander_generate_name() RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+    RETURN (SELECT id FROM dt_commander_firstnames ORDER BY random() LIMIT 1) || ' ' || (SELECT id FROM dt_commander_lastnames ORDER BY random() LIMIT 1);
+    
+END;$$;
+
+ALTER FUNCTION ng03._commander_generate_name() OWNER TO exileng;
 
 --------------------------------------------------------------------------------
 -- TABLES
@@ -5166,7 +5237,7 @@ CREATE TABLE ng03.gm_profile_commanders (
     created_by character varying DEFAULT 'system' NOT NULL,
     id integer DEFAULT nextval('ng03.gm_profile_commanders_id_seq'::regclass) NOT NULL,
     profile_id integer NOT NULL,
-    name character varying NOT NULL,
+    name character varying DEFAULT ng03._commander_generate_name() NOT NULL,
     point_count smallint DEFAULT 10 NOT NULL,
     salary integer DEFAULT 0 NOT NULL,
     engaging_date timestamp with time zone,
