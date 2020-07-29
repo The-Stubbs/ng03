@@ -15,7 +15,44 @@
     	<title>[ng03] ExileNG{% if menu_selected %}
     	-
     	    {% if menu_selected == 'empire_overview' %}{% trans "Vue d'ensemble" %}
-    	    {% elif menu_selected == '' %}{% trans "" %}
+    	    {% elif menu_selected == 'empire_upkeep' %}{% trans "Coût d'entretien" %}
+    	    {% elif menu_selected == 'commander_overview' %}{% trans "Commandants" %}
+    	    {% elif submenu_selected == 'empire_fleets' %}{% trans "Flottes" %}
+    	    {% elif submenu_selected == 'empire_orbiting' %}{% trans "Flottes en orbite" %}
+    	    {% elif submenu_selected == 'empire_parking' %}{% trans "Vaisseaux au sol" %}
+    	    {% elif submenu_selected == 'empire_stats' %}{% trans "Détruits / perdus" %}
+    	    {% elif menu_selected == 'empire_planets' %}{% trans "Planètes" %}
+    	    {% elif submenu_selected == 'empire_purchases' %}{% trans "Achats" %}
+    	    {% elif submenu_selected == 'empire_sales' %}{% trans "Ventes" %}
+    	    {% elif menu_selected == 'empire_researches' %}{% trans "Recherches" %}
+    	    {% elif submenu_selected == 'alliance_displaying' %}{% trans "Vue d'ensemble" %}
+    	    {% elif submenu_selected == 'alliance_overview' %}{% trans "Gestion" %}
+    	    {% elif submenu_selected == 'alliance_members' %}{% trans "Membres" %}
+    	    {% elif submenu_selected == 'alliance_naps' %}{% trans "PNA" %}
+    	    {% elif submenu_selected == 'alliance_tributes' %}{% trans "Tributs" %}
+    	    {% elif submenu_selected == 'alliance_wars' %}{% trans "Guerres" %}
+    	    {% elif submenu_selected == 'alliance_wallet' %}{% trans "Portefeuille" %}
+    	    {% elif submenu_selected == 'alliance_reports' %}{% trans "Rapports" %}
+    	    {% elif submenu_selected == 'alliance_invitations' %}{% trans "Invitations" %}
+    	    {% elif submenu_selected == 'alliance_creation' %}{% trans "Création" %}
+    	    {% elif menu_selected == 'map' %}{% trans "Carte spatiale" %}
+    	    {% elif menu_selected == 'ranking' %}{% trans "Classement" %}
+    	    {% elif menu_selected == 'mercenary_spying' %}{% trans "Espionnage" %}
+    	    {% elif menu_selected == 'planet_overview' %}{% trans "Vue d'ensemble" %}
+    	    {% elif menu_selected == 'planet_production' %}{% trans "Production" %}
+    	    {% elif menu_selected == 'planet_buildings' %}{% trans "Bâtiments" %}
+    	    {% elif menu_selected == 'planet_ships' %}{% trans "Vaisseaux" %}
+    	    {% elif menu_selected == 'planet_trainings' %}{% trans "Entraînements" %}
+    	    {% elif menu_selected == 'planet_orbit' %}{% trans "Orbite" %}
+    	    {% elif submenu_selected == 'planet_purchases' %}{% trans "Achat" %}
+    	    {% elif submenu_selected == 'planet_sales' %}{% trans "Vente" %}
+    	    {% elif menu_selected == 'mail' %}{% trans "Messagerie" %}
+    	    {% elif menu_selected == 'profile_reports' %}{% trans "Rapports" %}
+    	    {% elif menu_selected == 'chat' %}{% trans "Salons" %}
+    	    {% elif menu_selected == 'help' %}{% trans "Aide" %}
+    	    {% elif menu_selected == 'profile_overview' %}{% trans "Profile" %}
+    	    {% elif menu_selected == 'profile_notes' %}{% trans "Notes" %}
+    	    {% elif menu_selected == 'profile_options' %}{% trans "Options" %}
     	    {% endif %}
     	{% endif %}</title>
         <!--- -->

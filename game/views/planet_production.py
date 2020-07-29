@@ -16,6 +16,7 @@ class View(TemplateView):
     def get_context(self, request, cursor, **kwargs):
         #-----------------------------------------------------------------------
         context = super().get_context(request, cursor, **kwargs)
+        context = self.fill_header_planet(context, request, cursor)
         #-----------------------------------------------------------------------
         #-----------------------------------------------------------------------
         return context

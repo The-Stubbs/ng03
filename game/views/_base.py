@@ -106,7 +106,16 @@ class TemplateView(LoginRequiredMixin, ExileMixin, View):
         #-----------------------------------------------------------------------
         return context
         #-----------------------------------------------------------------------
-    
+
+    #---------------------------------------------------------------------------
+    def fill_header_planet(self, context, request, cursor):
+        #-----------------------------------------------------------------------
+        context['header'] = db_row(cursor, 'SELECT * FROM vw_header_planet WHERE id=' + str(self.profile['last_planet_id']))
+        context['header']['planets'] = db_rows(cursor, 'SELECT * FROM vw_header_planets WHERE profile_id=' + str(self.profile['id']))
+        #-----------------------------------------------------------------------
+        return context
+        #-----------------------------------------------------------------------
+        
 ################################################################################
 
 

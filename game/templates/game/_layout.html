@@ -1,6 +1,8 @@
 {% extends 'game/_base.html' %}
 
 {% load i18n %}
+{% load humanize %}
+{% load game_tags %}
 
 {% block wrapper %}
     <div id="menu">
@@ -95,6 +97,10 @@
     <div id="page">
         <div id="page-header">
             <div id="menu-toggler"><i class="fas fa-bars"></i></div>
+            <div class="flex-grow-1 d-flex align-items-center justify-content-md-center">
+                <span class="mr-3">{{ 'credit'|icon }} {{ profile.credit_count|intcomma }}</span>
+                <span class="mr-3">{{ 'prestige'|icon }} {{ profile.prestige_count|intcomma }}</span>
+            </div>
         </div>
         {% block page %}{% endblock %}
     </div>
