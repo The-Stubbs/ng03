@@ -11,9 +11,14 @@
             </div>
         </div>
         <div id="menu-content">
-            <a href="/game/empire/overview" class="menu-lvl-1"><span>{% trans "Empire" %}</span><i class="fas fa-angle-double-down"></i></a>
-            <a href="/game/empire/overview" class="menu-lvl-2 {% if menu_selected == 'empire_overview' %}selected{% endif %}"> · {% trans "Vue d'ensemble" %}</a>
-            <a href="/game/empire/upkeep" class="menu-lvl-2 {% if menu_selected == 'empire_upkeep' %}selected{% endif %}"> · {% trans "Coût d'entretien" %}</a>
+            <a href="/game/empire/overview/" class="menu-lvl-1"><span>{% trans "Empire" %}</span><i class="fas fa-angle-double-down"></i></a>
+            <a href="/game/empire/overview/" class="menu-lvl-2 {% if menu_selected == 'empire_overview' %}selected{% endif %}"> · {% trans "Vue d'ensemble" %}</a>
+            <a href="/game/empire/upkeep/" class="menu-lvl-2 {% if menu_selected == 'empire_upkeep' %}selected{% endif %}"> · {% trans "Coût d'entretien" %}</a>
+            <a href="/game/commander/overview/" class="menu-lvl-2 {% if menu_selected == 'commander_overview' %}selected{% endif %}"> · {% trans "Commandants" %}</a>
+            <a href="/game/empire/fleets/" class="menu-lvl-2"> · {% trans "Flottes" %}</a>
+            <div class="{% if menu_selected == 'empire_fleets' %}d-block{% else %}d-none{% endif %}">
+                <a href="/game/empire/fleets/" class="menu-lvl-3 {% if submenu_selected == 'empire_fleets' %}selected{% endif %}"> · {% trans "Flottes" %}</a>
+            </div>
         </div>
     </div>
     <div id="page">
