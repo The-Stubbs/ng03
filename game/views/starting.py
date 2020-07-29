@@ -30,12 +30,7 @@ class View(LoginRequiredMixin, View):
     #---------------------------------------------------------------------------
     def get(self, request, *args, **kwargs):
         #------------------------------------------------------------------------
-        cursor = connection.cursor()
-        context = {}
-        #------------------------------------------------------------------------
-        context['galaxies'] = db_rows(cursor, 'SELECT * FROM vw_starting_galaxies WHERE recommendation >= 0')
-        context['orientations'] = db_rows(cursor, 'SELECT * FROM vw_starting_orientations')
-        #------------------------------------------------------------------------
+        context = self.get_context_data(request)
         return render(request, self.template_name, context)
         #------------------------------------------------------------------------
     
@@ -59,8 +54,20 @@ class View(LoginRequiredMixin, View):
                 if result == 0: return HttpResponseRedirect(self.success_url)
                 else: messages.error(request, 'profile_reset_error' + str(result))
         #-----------------------------------------------------------------------
-        context = {}
+        context = self.get_context_data(request)
         return render(request, self.template_name, context)
         #-----------------------------------------------------------------------
+
+    #---------------------------------------------------------------------------
+    def get_context_data(self, request):
+        #------------------------------------------------------------------------
+        cursor = connection.cursor()
+        context = {}
+        #------------------------------------------------------------------------
+        context['galaxies'] = db_rows(cursor, 'SELECT * FROM vw_starting_galaxies WHERE recommendation >= 0')
+        context['orientations'] = db_rows(cursor, 'SELECT * FROM vw_starting_orientations')
+        #------------------------------------------------------------------------
+        return context
+        #------------------------------------------------------------------------
 
 ################################################################################

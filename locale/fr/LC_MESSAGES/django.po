@@ -18,15 +18,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-# orientation labels
+#: orientation labels
 msgid "or_scientist_label"
 msgstr "Scientifique"
-
 msgid "or_soldier_label"
 msgstr "Soldat"
-
 msgid "or_merchant_label"
 msgstr "Marchand"
+
+#: profile_init_errors
+msgid "profile_init_error-2"
+msgstr "Nom de nation invalide. Entre 2 et 12 caractères."
+msgid "profile_init_error-3"
+msgstr "Nom de nation non-autorisé."
+msgid "profile_init_error-4"
+msgstr "Nom de nation déjà utilisé."
+msgid "profile_init_error-5"
+msgstr "Orientation invalide."
+
+#: profile_reset_errors
+msgid "profile_reset_error-3"
+msgstr "Aucune planète disponible dans cette galaxie."
 
 #: game/templates/game/welcome.html:14
 msgid "Vaisseau de colonisation"
@@ -40,7 +52,7 @@ msgstr ""
 #: game/templates/game/welcome.html:20
 msgid ""
 "Lorsqu'il sera arrivé, vous pourrez coloniser la planète et commencer à "
-"foonder votre empire."
+"fonder votre empire."
 msgstr ""
 
 #: game/templates/game/welcome.html:25

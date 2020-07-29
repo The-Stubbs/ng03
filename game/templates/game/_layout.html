@@ -1,17 +1,43 @@
 {% extends 'game/_base.html' %}
 
+{% load i18n %}
+
 {% block wrapper %}
     <div id="menu">
         <div id="menu-header">
+            <div class="d-flex align-items-center justify-content-center py-2">
+                <img src="/static/logo.png"/>
+                <span class="c-normal mx-3">ng03</span>
+            </div>
+        </div>
+        <div id="menu-content">
+            <a href="/game/empire/overview/" class="menu-lvl-1"><span>{% trans "Empire" %}</span><i class="fas fa-angle-double-down"></i></a>
+            <a href="/game/empire/overview/" class="menu-lvl-2 {% if menu_selected == 'empire_overview' %}selected{% endif %}"> · {% trans "Vue d'ensemble" %}</a>
+            <a href="/game/empire/upkeep/" class="menu-lvl-2 {% if menu_selected == 'empire_upkeep' %}selected{% endif %}"> · {% trans "Coût d'entretien" %}</a>
+            <a href="/game/commander/overview/" class="menu-lvl-2 {% if menu_selected == 'commander_overview' %}selected{% endif %}"> · {% trans "Commandants" %}</a>
+            <a href="/game/empire/fleets/" class="menu-lvl-2"> · {% trans "Flottes" %}</a>
+            <div class="{% if menu_selected == 'empire_fleets' %}d-block{% else %}d-none{% endif %}">
+                <a href="/game/empire/fleets/" class="menu-lvl-3 {% if submenu_selected == 'empire_fleets' %}selected{% endif %}"> · {% trans "Flottes" %}</a>
+            </div>
         </div>
     </div>
     <div id="page">
         <div id="page-header">
+            <div id="menu-toggler"><i class="fas fa-bars"></i></div>
         </div>
         {% block page %}{% endblock %}
     </div>
-    <div id="aside">
-        <div id="aside-header">
-        </div>
-    </div>
+    <div id="overlay"></div>
+{% endblock %}
+
+{% block script %}
+    j("#menu-toggler").click(function() {
+        if (!j("#menu").hasClass("open")) { j("#menu").addClass("open"); }
+        if (!j("#overlay").hasClass("open")) { j("#overlay").addClass("open"); }
+    });
+    
+    j("#overlay").click(function() {
+        if (j("#menu").hasClass("open")) { j("#menu").removeClass("open"); }
+        if (j("#overlay").hasClass("open")) { j("#overlay").removeClass("open"); }
+    });
 {% endblock %}

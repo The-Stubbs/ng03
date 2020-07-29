@@ -8,7 +8,8 @@ from game.views._base import *
 class View(TemplateView):
     
     template_name = 'game/empire_overview.html'
-
+    menu_selected = 'empire_overview'
+    
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):
         #-----------------------------------------------------------------------
