@@ -11,8 +11,7 @@ class View(ActionView):
     success_url = '/game/planet/working/'
     
     tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'planet_production'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

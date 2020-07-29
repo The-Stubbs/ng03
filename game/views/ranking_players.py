@@ -10,8 +10,7 @@ class View(TemplateView):
     template_name = 'game/ranking_players.html'
     
     tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'ranking'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

@@ -10,9 +10,7 @@ class View(ActionView):
     template_name = 'game/mercenary_spying.html'
     success_url = '/game/mercenary/spying/'
     
-    tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'mercenary_spying'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

@@ -10,9 +10,7 @@ class View(ActionView):
     template_name = 'game/profile_options.html'
     success_url = '/game/profile/options/'
     
-    tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'profile_options'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

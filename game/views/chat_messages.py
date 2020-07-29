@@ -11,8 +11,7 @@ class View(ActionView):
     success_url = '/game/chat/messages/'
     
     tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'chat'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

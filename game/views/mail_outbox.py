@@ -9,9 +9,8 @@ class View(TemplateView):
     
     template_name = 'game/mail_outbox.html'
     
-    tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'mail'
+    submenu_selected = 'mail_outbox'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

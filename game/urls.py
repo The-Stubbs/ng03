@@ -116,6 +116,7 @@ urlpatterns = [
 	#---------------------------------------------------------------------------
     path('alliance/announce/', alliance_announce.View.as_view()),
     path('alliance/creation/', alliance_creation.View.as_view()),
+    path('alliance/displaying/', alliance_displaying.View.as_view()),
     path('alliance/gifts/', alliance_gifts.View.as_view()),
     path('alliance/invitations/', alliance_invitations.View.as_view()),
     path('alliance/members/', alliance_members.View.as_view()),
@@ -126,7 +127,6 @@ urlpatterns = [
     path('alliance/reports/', alliance_reports.View.as_view()),
     path('alliance/requests/', alliance_requests.View.as_view()),
     path('alliance/tributes/', alliance_tributes.View.as_view()),
-    path('alliance/view/', alliance_view.View.as_view()),
     path('alliance/wallet/', alliance_wallet.View.as_view()),
     path('alliance/wars/', alliance_wars.View.as_view()),
 	#---------------------------------------------------------------------------

@@ -7,11 +7,10 @@ from game.views._base import *
 ################################################################################
 class View(TemplateView):
     
-    template_name = 'game/empire_orbitting.html'
+    template_name = 'game/empire_orbiting.html'
     
-    tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'empire_fleets'
+    submenu_selected = 'empire_orbiting'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

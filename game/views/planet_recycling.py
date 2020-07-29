@@ -10,9 +10,8 @@ class View(ActionView):
     template_name = 'game/planet_recycling.html'
     success_url = '/game/planet/recycling/'
     
-    tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'planet_ships'
+    submenu_selected = 'planet_recycling'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

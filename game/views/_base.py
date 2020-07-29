@@ -101,8 +101,8 @@ class TemplateView(LoginRequiredMixin, ExileMixin, View):
         if self.menu_selected: context['menu_selected'] = self.menu_selected
         if self.submenu_selected: context['submenu_selected'] = self.submenu_selected
         #-----------------------------------------------------------------------
-        context['profile'] = db_row(cursor, 'SELECT * FROM vw_layout_profile WHERE profile_id=' + str(self.profile['id']))
-        context['profile']['planet'] = db_row(cursor, 'SELECT * FROM vw_layout_planet WHERE planet_id=' + str(self.profile['last_planet_id']))
+        context['profile'] = db_row(cursor, 'SELECT * FROM vw_layout_profile WHERE id=' + str(self.profile['id']))
+        context['profile']['planet'] = db_row(cursor, 'SELECT * FROM vw_layout_planet WHERE id=' + str(self.profile['last_planet_id']))
         #-----------------------------------------------------------------------
         return context
         #-----------------------------------------------------------------------

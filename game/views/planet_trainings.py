@@ -7,12 +7,10 @@ from game.views._base import *
 ################################################################################
 class View(ActionView):
     
-    template_name = 'game/planet_training.html'
-    success_url = '/game/planet/training/'
+    template_name = 'game/planet_trainings.html'
+    success_url = '/game/planet/trainings/'
     
-    tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    menu_selected = 'planet_trainings'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

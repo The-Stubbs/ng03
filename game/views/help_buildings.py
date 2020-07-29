@@ -9,9 +9,8 @@ class View(TemplateView):
     
     template_name = 'game/help_buildings.html'
     
-    tab_selected = None
-    menu_selected = None
-    submenu_selected = None
+    tab_selected = 'buildings'
+    menu_selected = 'help'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):

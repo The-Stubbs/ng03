@@ -7,9 +7,10 @@ from game.views._base import *
 ################################################################################
 class View(TemplateView):
     
-    template_name = 'game/map_universe.html'
+    template_name = 'game/help_resources.html'
     
-    menu_selected = 'map'
+    tab_selected = 'resources'
+    menu_selected = 'help'
 
     #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):
