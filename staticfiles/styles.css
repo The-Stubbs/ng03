@@ -164,16 +164,17 @@ a.menu-lvl-3:hover { text-decoration: none; }
 /* FORM */
 
 .control {
-    padding: 2px 5px;
+    padding: 2px 10px;
     color: #ffffff;
     background-color: #555555;
     border: 1px solid #888888; border-radius: .125rem;
 }
+select.control { padding: 2px 5px; }
 
 /* BUTTON */
 
 .button {
-    padding: 2px 5px;
+    padding: 2px 10px;
     color: #ffffff;
     background-color: #555555;
     border: 1px solid #888888; border-radius: .125rem;
