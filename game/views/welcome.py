@@ -37,7 +37,7 @@ class View(LoginRequiredMixin, View):
         #-----------------------------------------------------------------------
         if action == 'create':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT ua_profile_create(' + str(request.user.id) + ',' + sql_str(request.META.get('REMOTE_ADDR')) + ',' + sql_str(request.META.get('HTTP_USER_AGENT')) + ')')
+            result = db_result(cursor, 'SELECT profileua__create(' + str(request.user.id) + ',' + sql_str(request.META.get('REMOTE_ADDR')) + ',' + sql_str(request.META.get('HTTP_USER_AGENT')) + ')')
             if result == 0: return HttpResponseRedirect(self.success_url)
             else: messages.error(request, 'profile_create_error' + str(result))
         #-----------------------------------------------------------------------
