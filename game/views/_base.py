@@ -43,6 +43,9 @@ class ExileMixin:
         #-----------------------------------------------------------------------
         db_execute(cursor, 'UPDATE gm_profiles SET last_activity_date=now() WHERE id=' + str(self.profile['id']))
         #-----------------------------------------------------------------------
+        if self.profile['alliance_rank_id']:
+            self.alliance_rights = db_row(cursor, 'SELECT * FROM gm_alliance_ranks WHERE id=' + str(self.profile['alliance_rank_id']))
+        #-----------------------------------------------------------------------
         return super().dispatch(request, *args, **kwargs)
         #-----------------------------------------------------------------------
    
@@ -102,7 +105,6 @@ class TemplateView(LoginRequiredMixin, ExileMixin, View):
         if self.submenu_selected: context['submenu_selected'] = self.submenu_selected
         #-----------------------------------------------------------------------
         context['profile'] = db_row(cursor, 'SELECT * FROM vw_layout_profile WHERE id=' + str(self.profile['id']))
-        context['profile']['planet'] = db_row(cursor, 'SELECT * FROM vw_layout_planet WHERE id=' + str(self.profile['last_planet_id']))
         #-----------------------------------------------------------------------
         return context
         #-----------------------------------------------------------------------

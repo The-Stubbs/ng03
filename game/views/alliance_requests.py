@@ -15,10 +15,30 @@ class View(ActionView):
     submenu_selected = None
 
     #---------------------------------------------------------------------------
+    def dispatch(self, request, *args, **kwargs):
+        #-----------------------------------------------------------------------
+        if not self.profile['alliance_id']: return HttpResponseRedirect('/game/empire/overview/')
+        if not self.oAllianceRights("can_ask_money"): return HttpResponseRedirect('/game/empire/overview/')
+        #-----------------------------------------------------------------------
+        return super().dispatch(request, *args, **kwargs)
+        #-----------------------------------------------------------------------
+
+    #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):
         #-----------------------------------------------------------------------
         context = super().get_context(request, cursor, **kwargs)
         #-----------------------------------------------------------------------
+        query = "SELECT credits, description, result" &_
+                " FROM alliances_wallet_requests" &_
+                " WHERE allianceid=" & AllianceId & " AND userid=" & UserId
+        context['request'] = db_result(cursor, query)
+        #-----------------------------------------------------------------------
+        if oAllianceRights("can_accept_money_requests"):
+            query = "SELECT r.id, datetime, login, r.credits, r.description" &_
+                    " FROM alliances_wallet_requests r" &_
+                    "	INNER JOIN users ON users.id=r.userid" &_
+                    " WHERE allianceid=" & AllianceId & " AND result IS NULL"
+            context['requests'] = db_results(cursor, query)            
         #-----------------------------------------------------------------------
         return context
         #-----------------------------------------------------------------------

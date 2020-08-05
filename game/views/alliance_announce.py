@@ -15,10 +15,19 @@ class View(ActionView):
     submenu_selected = 'alliance_overview'
 
     #---------------------------------------------------------------------------
+    def dispatch(self, request, *args, **kwargs):
+        #-----------------------------------------------------------------------
+        if not self.profile['alliance_id']: return HttpResponseRedirect('/game/empire/overview/')
+        #-----------------------------------------------------------------------
+        return super().dispatch(request, *args, **kwargs)
+        #-----------------------------------------------------------------------
+
+    #---------------------------------------------------------------------------
     def get_context(self, request, cursor, **kwargs):
         #-----------------------------------------------------------------------
         context = super().get_context(request, cursor, **kwargs)
         #-----------------------------------------------------------------------
+        context['data'] = db_result(cursor, 'SELECT announce, defcon FROM gm_alliances WHERE id=' + str(self.profile['alliance_id']))
         #-----------------------------------------------------------------------
         return context
         #-----------------------------------------------------------------------
@@ -28,9 +37,11 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'save':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT ua_alliance_update_announce(' + ')')
-            if result == 0: return self.success()
-            else: messages.error(request, 'error_' + str(result))
+            motd = request.POST.get('motd').strip()
+            defcon = get_int(request.POST.get('defcon', 5))
+            #-------------------------------------------------------------------
+            db_execute(cursor, 'UPDATE gm_alliances SET defcon=' + str('defcon') + ', announce=' + sql_str(motd) + ' WHERE id= ' + str(self.profile['alliance_id']))
+            return self.success()
         #-----------------------------------------------------------------------
         return self.failed()
         #-----------------------------------------------------------------------

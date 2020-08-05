@@ -18,6 +18,8 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         context = super().get_context(request, cursor, **kwargs)
         #-----------------------------------------------------------------------
+        if self.profile['can_join_alliance']: context['can_create'] = True
+        else: context['cant_create'] = True
         #-----------------------------------------------------------------------
         return context
         #-----------------------------------------------------------------------
@@ -27,9 +29,13 @@ class View(ActionView):
         #-----------------------------------------------------------------------
         if action == 'create':
             #-------------------------------------------------------------------
-            result = db_result(cursor, 'SELECT ua_alliance_create(' + ')')
+            tag = request.POST.get('tag').strip()
+            name = request.POST.get('name').strip()
+            description = request.POST.get('description').strip()
+            #-------------------------------------------------------------------
+            result = db_result(cursor, 'SELECT ua_alliance_create(' + self.profile['id'] + ',' + sql_str(name) + ',' + sql_str(tag) + ',' + sql_str(description) + ')')
             if result == 0: return self.success()
-            else: messages.error(request, 'error_' + str(result))
+            else: messages.error(request, 'error_alliance_create_' + str(result))
         #-----------------------------------------------------------------------
         return self.failed()
         #-----------------------------------------------------------------------
