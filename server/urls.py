@@ -10,11 +10,13 @@ from django.views.generic.base import RedirectView
 ################################################################################
 urlpatterns = [
 	#---------------------------------------------------------------------------
-	path('',                RedirectView.as_view(url='/game/empire/overview/')),
-    path('favicon.ico',     RedirectView.as_view(url='/static/favicon.ico')),
+	path('',                RedirectView.as_view(url='/game/')),
     #---------------------------------------------------------------------------
     path('impersonate/',    include('impersonate.urls')),
-    path('game/',           include('game.urls')),
+    path('game/',           include('web_game.urls')),
     #---------------------------------------------------------------------------
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] \
++ static('/favicon.ico', document_root=settings.STATIC_ROOT + '/favicon.ico') \
++ static('/assets/', document_root=settings.STATIC_ROOT + '/assets') \
++ static('/scripts/', document_root=settings.STATIC_ROOT + '/scripts')
 ################################################################################

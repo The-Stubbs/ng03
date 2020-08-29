@@ -1,0 +1,65 @@
+{% extends 'layout.html' %}
+
+{% load humanize %}
+
+{% block content %}
+<script>function LinkFleet(id, name){ if(id != "") document.write('<a href="fleet.asp?id=' + id + '">'+name+'</a>'); else document.write(name); }</script>
+
+<div id="reports">
+
+{% if tabnav %}
+<div>
+<ul class="htabs">
+	{% if tabnav_000 %}<li{% if tabnav_000_selected %} class="active"{% endif %}><a href="?cat=0">Tout{% if tabnav_000_new %}&nbsp;({{total_newreports}}){% endif %}</a></li>{% endif %}
+	{% if tabnav_100 %}<li{% if tabnav_100_selected %} class="active"{% endif %}><a href="?cat=1">Alliance{% if tabnav_100_new %}&nbsp;({{tabnav_100_newreports}}){% endif %}</a></li>{% endif %}
+	{% if tabnav_200 %}<li{% if tabnav_200_selected %} class="active"{% endif %}><a href="?cat=2">Combats{% if tabnav_200_new %}&nbsp;({{tabnav_200_newreports}}){% endif %}</a></li>{% endif %}
+	{% if tabnav_300 %}<li{% if tabnav_300_selected %} class="active"{% endif %}><a href="?cat=3">Développement{% if tabnav_300_new %}&nbsp;({{tabnav_300_newreports}}){% endif %}</a></li>{% endif %}
+	{% if tabnav_400 %}<li{% if tabnav_400_selected %} class="active"{% endif %}><a href="?cat=4">Flottes{% if tabnav_400_new %}&nbsp;({{tabnav_400_newreports}}){% endif %}</a></li>{% endif %}
+	{% if tabnav_500 %}<li{% if tabnav_500_selected %} class="active"{% endif %}><a href="?cat=5">Echanges{% if tabnav_500_new %}&nbsp;({{tabnav_500_newreports}}){% endif %}</a></li>{% endif %}
+	{% if tabnav_600 %}<li{% if tabnav_600_selected %} class="active"{% endif %}><a href="?cat=6">Colonisations{% if tabnav_600_new %}&nbsp;({{tabnav_600_newreports}}){% endif %}</a></li>{% endif %}
+	{% if tabnav_700 %}<li{% if tabnav_700_selected %} class="active"{% endif %}><a href="?cat=7">Événements{% if tabnav_700_new %}&nbsp;({{tabnav_700_newreports}}){% endif %}</a></li>{% endif %}
+	{% if tabnav_800 %}<li{% if tabnav_800_selected %} class="active"{% endif %}><a href="?cat=8">Mercenaires{% if tabnav_800_new %}&nbsp;({{tabnav_800_newreports}}){% endif %}</a></li>{% endif %}
+</ul>
+</div>
+{% endif %}
+<table class="default" width="100%">
+{% for message in messages %}
+<tr class="item{% if message.new %}highlight{% endif %}">
+	<td width="1%" valign="top"><img src="{{PATH_IMAGES}}/reports/{{message.type}}.jpg" width="64" height="64" class="report"></td>
+	<td width="90%" valign="top">
+	<div class="subject">{{message.date}}{% if message.nation %} | <a href="nation.asp?name={{message.nation}}">{{message.nation}}</a>{% endif %} |
+	{% if message.type == 300 %}Eurêka !
+	{% elif message.type == 310 %}Production et coût d'entretien.
+	{% elif message.type == 320 %}Un commandant a récemment eu une augmentation
+	{% elif message.type == 400 %}Flotte arrivée à destination.
+	{% else %}{{message.type}}
+	{% endif %}
+	</div>
+	
+	<div class="body">
+	{% if message.type == 300 %}Nos scientifiques ont terminé la recherche sur "{{message.researchname}}".<br/>
+	Ils sont prêts pour de <a href="/game/research/">nouvelles recherches</a>.
+	{% elif message.type == 310 %}Les coûts d'entretien et de fonctionnement concernant la dernière période s'élèvent à <img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" width="16" height="16"> {{message.credits|intcomma}}.<br/><br/>
+	<table class=clear>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/upkeep_commander.gif" class="res" width="16" height="16">Commandants: {{message.upkeep_commanders|intcomma}}</td></tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/planet.gif" class="res" width="16" height="16">Planètes: {{message.upkeep_planets|intcomma}}</td></tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/scientists.gif" class="res" width="16" height="16">Scientifiques: {{message.upkeep_scientists|intcomma}}</td></tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/soldiers.gif" class="res" width="16" height="16">Soldats: {{message.upkeep_soldiers|intcomma}}</td></tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux: {{message.upkeep_ships|intcomma}}</td></tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux en position: {{message.upkeep_ships_in_position|intcomma}}</td></tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux posés: {{message.upkeep_ships_parked|intcomma}}</td></tr>
+	</table><br/><br/>
+	Nos infrastructures ont généré <img src="{{PATH_IMAGES}}/interface/prestige.gif" class="res" width="16" height="16"> {{message.scientists|intcomma}} et <img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" width="16" height="16"> {{message.soldiers|intcomma}}
+	{% elif message.type == 320 %}Le commandant {{message.commandername}} s'est récemment distingué et a obtenu une promotion. Vous devriez vous rendre sur la page de gestion des commandants afin de lui attribuer son nouveau point de compétence.
+	{% elif message.type == 400 %}La flotte <script>LinkFleet('{{message.fleetid}}','{{message.fleetname}}')</script> est arrivée aux alentours de la planète <a href="map.asp?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.
+	{% else %}{{message.type}}
+	{% endif %}
+	</div>
+	</td>
+</tr>
+{% empty %}
+<tr class="header" ><td colspan="2">Aucun rapport</td></tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}

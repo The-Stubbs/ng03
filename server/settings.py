@@ -24,7 +24,7 @@ DEFAULT_FROM_EMAIL = 'freddec.exileng@gmail.com'
 #-------------------------------------------------------------------------------
 LOGIN_URL = 'https://exileng.com'
 #-------------------------------------------------------------------------------
-IMPERSONATE = { 'REDIRECT_URL': '/game/empire/overview/', }
+IMPERSONATE = { 'REDIRECT_URL': '/game/', }
 ################################################################################
 
 
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'impersonate',
     #---------------------------------------------------------------------------
     'jobs',
-    'game',
+    'web_game',
     #---------------------------------------------------------------------------
 ]
 ################################################################################
@@ -79,7 +79,7 @@ ROOT_URLCONF = 'server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'web_game/game/templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -110,7 +110,7 @@ DATABASES = {
         'PORT': '',
         'ATOMIC_REQUESTS': True,
         'OPTIONS': {
-            'options': '-c search_path=ng03,public'
+            'options': '-c search_path=exile_s03,static,ng03,public'
         },
     }
 }
@@ -139,7 +139,5 @@ USE_I10N = True
 
 
 ################################################################################
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale'), ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'web_game')
 ################################################################################
