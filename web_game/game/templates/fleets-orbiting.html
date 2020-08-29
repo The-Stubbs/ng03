@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block content %}
+<div id="fleets">
+<table class="default" width="450">
+<tr class="header">
+	<td>Planète</td><td>Flottes</td>
+</tr>
+
+{% if planet %}
+<tr class="smallitem">
+	<td><b><a href="/game/orbit/?planet={{planetid}}">{{planetname}}</a>&nbsp;<a href="/game/map/?g={{g}}&s={{s}}&p={{p}}">({{g}}.{{s}}.{{p}})</a></b></td>
+	<td align=left>{% if fleet %}<a title="Écrire à {{fleetowner}}" href="/game/mails/?subject=À propos de la flotte {{fleetname}}&to={{fleetowner}}" class={% if ally %}ally{% endif %}{% if friend %}friend{% endif %}{% if enemy %}enemy{% endif %}>{% if alliance %}[{{tag}}]{% endif %} {{fleetname}} ({{fleetsignature|intcomma}})</a><br/>{% endfor %}</td>
+</tr>
+{% endfor %}
+{% if nofleets %}
+<tr class="smallitem">
+	<td colspan="3" align="center">Aucune flotte étrangère en orbite de nos planètes</td>
+</tr>
+{% endnofleets %}
+</table>
+</div>
+{% endblock %}

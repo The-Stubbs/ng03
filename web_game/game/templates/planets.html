@@ -1,0 +1,122 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block content %}
+<div id="planets">
+<table class="default" width="100%">
+<tr class="header">
+	<td><a href="?col=0{% if r0 %}&r=0{% endr0 %}">#</a> <a href="?col=1{% if r1 %}&r=1{% endif %}">Planète</a></td>
+	<td width='1%'><a href="?col=5{% if r5 %}&r=1{% endif %}" title="Contrôle de la planète">C.</a></td>
+	<td>Production</td>
+	<td>Effectifs</td>
+	<td>Entretien</td>
+	<td>Occupation</td>
+</tr>
+
+{% if planet %}
+<tr class="smallitem{% if highlight %}highlight{% endhighlight %}">
+<td align="left">
+		<table cellpadding="0" cellspacing="0" class="clear">
+		<tr>
+			<td rowspan=5><img src="{{PATH_IMAGES}}/planets/p{{planet_img}}.gif" class="smallplanet" width=64 height=64></td>
+			<td nowrap><b><a href="/game/planet/?planet={{planet_id}}">{{planet_name}}</a> <a href="/game/map/?g={{g}}&s={{s}}&p={{p}}">({{g}}.{{s}}.{{p}})</a></b></td>
+		</tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallicon" title="Commandant" width=10 height=6>{% if commander %}<a href="/game/commanders/#{{commander_name}}">{{commander_name}}</a>{% endcommander %}{% if nocommander %}-{% endnocommander %}</td></tr>
+		<tr><td><a href="/game/buildings/?planet={{planet_id}}">Infrastructures</a> (<img src="{{PATH_IMAGES}}/interface/workers_idle.gif" class="idleworkers" width=12 height=12 title="oisifs"><span class="green">{{workers_idle|intcomma}}</span>)</td></tr>
+		<tr><td><a href="/game/shipyard/?planet={{planet_id}}">Chantier spatial</a></td></tr>
+		</table>
+</td>
+<td align="left" width='1%'>
+	<img src="{{PATH_IMAGES}}/interface/uv{{mood_level}}.gif" title="{{mood}}%" alt="{{mood}}%" width="16" height="35"><br/>
+	<span class={% if mood_plus %}"prod">+{% endmood_plus %}{% if mood_minus %}"negprod">{% endmood_minus %}{{mood_delta}}</span>
+</td>
+
+<td align="left">
+	<table class="clear">
+	<tr><td><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16></td>
+		<td nowrap align="right"><span{% if medium_ore %} class=med2{% endmedium_ore %}{% if high_ore %} class=high2{% endhigh_ore %}>{{ore|intcomma}}</span></td>
+		<td>/</td>
+		<td nowrap align="right"><span{% if medium_ore %} class=med2{% endmedium_ore %}{% if high_ore %} class=high2{% endhigh_ore %}>{{ore_capacity|intcomma}}</span></td>
+		<td>(<span class={% if normal_ore_production %}prod{% endnormal_ore_production %}{% if medium_ore_production %}medprod{% endmedium_ore_production %}>+{{ore_production|intcomma}}</span>)</td>
+	</tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16></td>
+		<td nowrap align="right"><span{% if medium_hydrocarbon %} class=med2{% endmedium_hydrocarbon %}{% if high_hydrocarbon %} class=high2{% endhigh_hydrocarbon %}>{{hydrocarbon|intcomma}}</span></td>
+		<td>/</td>
+		<td nowrap align="right"><span{% if medium_hydrocarbon %} class=med2{% endmedium_hydrocarbon %}{% if high_hydrocarbon %} class=high2{% endhigh_hydrocarbon %}>{{hydrocarbon_capacity|intcomma}}</span></td>
+		<td>(<span class={% if normal_hydrocarbon_production %}prod{% endnormal_hydrocarbon_production %}{% if medium_hydrocarbon_production %}medprod{% endmedium_hydrocarbon_production %}>+{{hydrocarbon_production|intcomma}}</span>)</td>
+	</tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/energy.gif" title="Énergie" width=16 height=16></td>
+		<td nowrap align="right"><span{% if medium_energy %} class=med2{% endmedium_energy %}{% if high_energy %} class=high2{% endhigh_energy %}>{{energy|intcomma}}</span></td>
+		<td>/</td>
+		<td nowrap align="right"><span{% if medium_energy %} class=med2{% endmedium_energy %}{% if high_energy %} class=high2{% endhigh_energy %}>{{energy_capacity|intcomma}}</span></td>
+		<td>(<span class={% if normal_energy_production %}prod>+{% endnormal_energy_production %}{% if medium_energy_production %}medprod>+{% endmedium_energy_production %}{% if negative_energy_production %}negprod>{% endnegative_energy_production %}{{energy_production|intcomma}}</span>)</td>
+	</tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width=16 height=16></td>
+		<td nowrap align="right"><span class={% if credits_plus %}"prod">+{% endcredits_plus %}{% if credits_minus %}"negprod">{% endcredits_minus %}{{credits|intcomma}}</span></td>
+		<td></td>
+		<td nowrap align="right"><img src="{{PATH_IMAGES}}/interface/prestige.gif" title="Prestige" class="icon" width=16 height=16> {{prestige|intcomma}}</td>
+		<td></td>
+	</tr>
+	</table>
+</td>
+
+<td align="left">
+	<table class="clear">
+	<tr>
+		<td><a href="/game/production/?planet={{planet_id}}"><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width="16" height="16"></a></td>
+		<td align="right">{{workers|intcomma}}</td>
+		<td>/</td>
+		<td align="right">{{workers_capacity|intcomma}}</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><a href="/game/training/?planet={{planet_id}}"><img src="{{PATH_IMAGES}}/interface/scientists.gif" title="Scientifiques" width="16" height="16"></a></td>
+		<td align="right">{{scientists|intcomma}}</td>
+		<td>/</td>
+		<td align="right">{{scientists_capacity|intcomma}}</td>
+		<td>{% if scientists_training %}(<span class="prod">+{{scientists_training}}</span>){% endscientists_training %}</td>
+	</tr>
+	<tr>
+		<td><a href="/game/training/?planet={{planet_id}}"><img src="{{PATH_IMAGES}}/interface/soldiers.gif" title="Soldats" width="16" height="16"></a></td>
+		<td align="right">{{soldiers|intcomma}}</td>
+		<td>/</td>
+		<td align="right">{{soldiers_capacity|intcomma}}</td>
+		<td>{% if soldiers_training %}(<span class="prod">+{{soldiers_training}}</span>){% endsoldiers_training %}</td>
+	</tr>
+	</table>
+</td>
+
+<td align="left">
+	<table class="clear">
+	<tr{% if workers_low %} class="low"{% endworkers_low %}><td><a href="/game/production/?planet={{planet_id}}"><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width="16" height="16"></a></td>
+		<td align="right">{{upkeep_workers|intcomma}}</td>
+	</tr>
+	<tr><td><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width="16" height="16"></td>
+		<td align="right">{{upkeep_credits|intcomma}}</td>
+	</tr>
+	<tr{% if soldiers_low %} class="low"{% endsoldiers_low %}><td><a href="/game/training/?planet={{planet_id}}"><img src="{{PATH_IMAGES}}/interface/soldiers.gif" title="Soldats" width="16" height="16"></a></td>
+		<td align="right">{{upkeep_soldiers|intcomma}}</td>
+	</tr>
+	</table>
+</td>
+
+<td align="left">
+	<table class="clear">
+	<tr>
+		<td><img src="{{PATH_IMAGES}}/interface/floor.gif" title="Terrain" width=16 height=16></td>
+		<td align="right">{{floor_occupied|intcomma}}</td>
+		<td>/</td>
+		<td align="right">{{floor_capacity|intcomma}}</td>
+	</tr>
+	<tr>
+		<td><img src="{{PATH_IMAGES}}/interface/space.gif" title="Espace" width=16 height=16></td>
+		<td align="right">{{space_occupied|intcomma}}</td>
+		<td>/</td>
+		<td align="right">{{space_capacity|intcomma}}</td>
+	</tr>
+	</table>
+</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}

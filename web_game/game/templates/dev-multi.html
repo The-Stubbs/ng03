@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block content %}
+<form method="get" action="?">
+<table class="default">
+<tr class="title"><td colspan="4">Multi-compte</td></tr>
+{% if item %}<tr class="item{% if samebrowserid %}del{% endsamebrowserid %}">
+
+<td>[{{alliance1}}]<a href="/game/nation/?name={{login}}">{{login}}</a> [<a href="/game/dev-playas/?player={{login}}">I</a>]{% if can_ban_multi %} [<a href="/game/dev-options/?action=ban&reason=Multicompte&reasonpublic=Suspension+pour+multicompte&submit=Envoyer&userid={{userid}}&close=1" target=_blank>multi</a>] [<a href="/game/dev-options/?action=ban&reason=Exploit&reasonpublic=Suspension+pour+exploitation+de+bug&submit=Envoyer&userid={{userid}}&close=1" target=_blank>exploit</a>]{% endcan_ban_multi %}<br/><a href="https://www.dnsstuff.com/tools/tracert.ch?ip={{address}}" target=_blank>{{address}}</a>/{{forwarded_address}} ({{browserid}})<br/>{{browser}}<br/>Reg: {{regdate:d}}<br/>Email: {{email}}{% if samealliance %}<br/>don: {{given1|intcomma}} / pris:{{taken1|intcomma}}{% endsamealliance %}<br/>FROM: {{timestamp:d}} {% if disconnected %}TO {{disconnected:d}}{% enddisconnected %}</td>
+<td>&gt; {{sent_to:n!0}}<br/>&lt; {{received_from:n!0}}<br/><a href="dev-connections/?u1={{userid}}&u2={{userid2}}">Compare</a></td>
+<td>[{{alliance2}}]<a href="/game/nation/?name={{login2}}">{{login2}}</a> [<a href="/game/dev-playas/?player={{login2}}">I</a>]{% if can_ban_multi2 %} [<a href="/game/dev-options/?action=ban&reason=Multicompte&reasonpublic=Suspension+pour+multicompte&submit=Envoyer&userid={{userid2}}&close=1" target=_blank>multi</a>] [<a href="/game/dev-options/?action=ban&reason=Exploit&reasonpublic=Suspension+pour+exploitation+de+bug&submit=Envoyer&userid={{userid2}}&close=1" target=_blank>exploit</a>]{% endcan_ban_multi2 %}<br/><a href="https://www.dnsstuff.com/tools/tracert.ch?ip={{address2}}" target=_blank>{{address2}}</a>/{{forwarded_address2}} ({{browserid2}})<br/>{{browser2}}<br/>Reg: {{regdate2:d}}<br/>Email: {{email2}}{% if samealliance %}<br/>don: {{given2|intcomma}} / pris:{{taken2|intcomma}}{% endsamealliance %}<br/>FROM: {{timestamp2:d}} {% if disconnected2 %}TO {{disconnected2:d}}{% enddisconnected2 %}</td>
+<td>{% if samepassword %}Même password{% endsamepassword %}{% if samealliance %}<br/>Même alliance{% endsamealliance %}<br/></td>
+
+</tr>{% endfor %}
+</table>
+</form>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block content %}
+<div id="mails">
+<table class="default" width="100%">
+
+<tr class="title"><td colspan=2>Messages envoyés</td></tr>
+
+{% if nav %}<tr class="nav"><td colspan=2 align=left>Page {{page_display}}, Messages {{min}}-{{max}}. Aller à
+{% if p %}&nbsp;{% if link %}<a href="?a=sent&start={{page_link}}">{% endlink %}{% if selected %}<span class="selected">{% endif %}{{page_id}}{% if selected %}</span>{% endif %}{% if link %}</a>{% endlink %}{% endfor %}.
+</td></tr>{% endif %}
+
+{% if mail %}
+<tr id="mail{{index}}" class="item{% if new_mail %}highlight{% endnew_mail %}">
+	<td width="1%" rowspan=1 align=center valign=top nowrap>
+	{% if reply %}<a href="?to={{sent_to}}" title="Nouveau message à {{sent_to}}">{% endreply %}
+	{% if avatar %}<img src="{{avatar_url}}" width=64 height=64 class="avatar">{% endavatar %}
+	{% if noavatar %}<img src="{{PATH_IMAGES}}/interface/noavatar.gif" width=64 height=64 class="avatar">{% endnoavatar %}<br><b>{% if admins %}Administrateurs{% endadmins %}{% if alliance %}Alliance{% endif %}{% if nation %}{{sent_to}}{% endnation %}</b>
+	{% if reply %}</a>
+	{% if alliance %}<br/><a href="/game/alliance/?tag={{alliancetag}}">[{{alliancetag}}]</a><br/>{% endif %}{% endreply %}
+	</td>
+	<td width="90%" valign=top>
+	<div class="subject">
+	{{date:dd/mm/yyyy hh:nn:ss}} | {{subject}}{% if money %} | Somme envoyée : <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width=16 height=16> {{moneyamount|intcomma}}{% endmoney %}</div>
+	<div class="body">{% if html %}{{body}}{% endhtml %}{% if bbcode %}{{bodybb|bbcode}}{% endbbcode %}</div>
+	</td>
+</tr>
+{% endfor %}
+
+{% if nav %}<tr class="nav"><td colspan=2 align=left>Page {{page_display}}, Messages {{min}}-{{max}}. Aller à
+{% if p %}&nbsp;{% if link %}<a href="?a=sent&start={{page_link}}">{% endlink %}{% if selected %}<span class="selected">{% endif %}{{page_id}}{% if selected %}</span>{% endif %}{% if link %}</a>{% endlink %}{% endfor %}.
+</td></tr>{% endif %}
+{% if nomails %}<tr><td colspan=2 align=center>Aucun</td></tr>{% endnomails %}
+
+</table>
+</div>
+{% endblock %}

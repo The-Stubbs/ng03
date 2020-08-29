@@ -1,0 +1,90 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block content %}
+<div id="adminstats">
+
+{% if tabnav %}
+<div style="width:650px">
+<ul class="htabs">
+     {% if 0 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=0">Galaxies</a></li>{% end0 %}
+     {% if 1 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=1">Général</a></li>{% end1 %}
+     {% if 2 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=2">Alliances production</a></li>{% end2 %}
+     {% if 3 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=3">Stats serveur</a></li>{% end3 %}
+</ul>
+</div>
+{% endif %}
+{% if galaxies %}
+<div id="stats">
+<table class="default" width="650">
+<tr class="header"><td>galaxie</td><td>Colonies</td><td>vortex</td></tr>
+{% if galaxy %}
+<tr class="smallitem"><td>{{galaxy}}</td><td nowrap>{{colonies|intcomma}} / {{planets|intcomma}} ({{colonies_pct:0.000}}%)</td><td nowrap>{{vortex|intcomma}}</td></tr>
+{% endfor %}
+</table>
+</div>
+{% endgalaxies %}
+{% if general %}
+<div id="stats">
+<table class="default" width="650">
+<tr class="smallitem"><td><span class="label">Joueurs: </span><span class="value">{{players|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Joueurs récemment connectés: </span><span class="value">{{recent_players|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Colonies: </span><span class="value">{{colonies|intcomma}} / {{planets|intcomma}} : {{colonized:0.000}}%</span></td></tr>
+<tr class="smallitem"><td><span class="label">Moyenne de colonies par joueur: </span><span class="value">{{colonies_per_player:0.00}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Joueur avec le plus de colonies: </span><span class="value">{{max_colonies|intcomma}} - <a href="/game/nations/?name={{max_colonies_playername}}">{{max_colonies_playername}}</a></span></td></tr>
+
+<tr class="smallitem"><td><span class="label">Bâtiments: </span><span class="value">{{buildings|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Moyenne de bâtiments par colonie: </span><span class="value">{{buildings_average|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Constructions en cours: </span><span class="value">{{buildings_pending|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Moyenne de constructions en cours par planète: </span><span class="value">{{buildings_pending_average|intcomma}}</span></td></tr>
+
+<tr class="smallitem"><td><span class="label">Scientifiques: </span><span class="value">{{scientists|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Soldats: </span><span class="value">{{soldiers|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Travailleurs: </span><span class="value">{{workers|intcomma}}</span></td></tr>
+
+
+<tr class="smallitem"><td><span class="label">Flottes: </span><span class="value">{{fleets|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Vaisseaux: </span><span class="value">{{ships|intcomma}} ({{ships_signature|intcomma}})</span></td></tr>
+<tr class="smallitem"><td><span class="label">Moyenne de vaisseaux par flotte: </span><span class="value">{{ships_average|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Vaisseaux non affectés: </span><span class="value">{{ships_not_in_fleet|intcomma}} ({{ships_not_in_fleet_signature|intcomma}}) : {{ships_not_in_fleet_percent:0.00}}% des vaisseaux</span></td></tr>
+<tr class="smallitem"><td><span class="label">Flottes en patrouille: </span><span class="value">{{fleets_patrolling|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Flottes en déplacement: </span><span class="value">{{fleets_moving|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Flottes en train de recycler: </span><span class="value">{{fleets_recycling|intcomma}}</span></td></tr>
+
+<tr class="smallitem"><td><span class="label">Combats aujourd'hui: </span><span class="value">{{battles|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Invasions aujourd'hui: </span><span class="value">{{invasions|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Alertes aujourd'hui: </span><span class="value">{{alerts|intcomma}}</span></td></tr>
+
+<tr class="smallitem"><td><span class="label">Pubs affichées: </span><span class="value">{{displayed_ads|intcomma}} : {{ads_pct:0.00}}%</span></td></tr>
+<tr class="smallitem"><td><span class="label">Pages affichées: </span><span class="value">{{displayed_pages|intcomma}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">Joueurs bloquant les pubs: </span><span class="value">{{players_blocking_ads|intcomma}}/{{players|intcomma}} : {{players_blocking_ads_pct:0.00}}%</span></td></tr>
+</table>
+</div>
+{% endgeneral %}
+{% if alliances_production %}
+<div id="stats">
+<table class="default" width="650">
+<tr class="header"><td>Alliance</td><td>Minerai</td><td>Hydrocarbure</td></tr>
+{% if alliance %}
+<tr class="smallitem"><td>[{{tag}}]{{name}}</td><td nowrap>{{ore|intcomma}} ({{ore_pct:0.000}}%)</td><td nowrap>{{hydrocarbon|intcomma}} ({{hydrocarbon_pct:0.000}}%)</td></tr>
+{% endfor %}
+</table>
+</div>
+{% endalliances_production %}
+{% if server %}
+<table class="default" width="650">
+<tr class="category"><td>Cache refresh</td></tr>
+<tr class="smallitem"><td><span class="label">db_buildings: </span><span class="value">{{db_buildings|intcomma}} - {{db_buildings_lastupdate}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">db_buildings_req: </span><span class="value">{{db_buildings_req|intcomma}} - {{db_buildings_req_lastupdate}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">db_ships: </span><span class="value">{{db_ships|intcomma}} - {{db_ships_lastupdate}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">db_ships_req: </span><span class="value">{{db_ships_req|intcomma}} - {{db_ships_req_lastupdate}}</span></td></tr>
+<tr class="smallitem"><td><span class="label">db_research: </span><span class="value">{{db_research|intcomma}} - {{db_research_lastupdate}}</span></td></tr>
+</table>
+<table class="default" width="650">
+<tr class="category"><td colspan="4">Update procedures</td></tr>
+{% if procedure %}
+<tr class="item{% if error %}del{% enderror %}"><td>{% if disabled %}<s>{% enddisabled %}{{procedure}}{% if disabled %}</s>{% enddisabled %}</td><td>{{last_runtime}}</td><td>{{last_result}}&nbsp;</td><td>{{average_executetime}}</td></tr>
+{% endfor %}
+</table>
+{% endserver %}
+</div>
+{% endblock %}

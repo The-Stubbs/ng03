@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block content %}
+<div id="fleets_ships_stats">
+<table class="default" width="800">
+<tr class="header"><td>Vaisseau</td><td width=100>Détruits</td><td width=100>Perdus</td></tr>
+
+{% if no_ship %}
+<tr><td colspan="3"><p class="error">Vous n'avez détruit et/ou perdu aucun vaisseau.</p></td></tr>
+{% endno_ship %}
+
+{% if category %}
+<tr class="category">
+	<td colspan="3">
+	{% if category10 %}Vaisseaux utilitaires{% endif %}
+	{% if category11 %}Vaisseaux de déploiement{% endcategory11 %}
+	{% if category15 %}Vaisseaux tactiques{% endcategory15 %}
+	{% if category20 %}Vaisseaux légers{% endcategory20 %}
+	{% if category30 %}Corvettes{% endcategory30 %}
+	{% if category40 %}Frégates{% endcategory40 %}
+	{% if category50 %}Croiseurs{% endcategory50 %}
+	{% if category60 %}Dreadnought{% endcategory60 %}
+	{% if category80 %}Titan{% endcategory80 %}
+	{% if category90 %}Plateforme de défense{% endcategory90 %}
+	&nbsp;
+	</td>
+</tr>
+
+{% if ship %}
+<tr align="right" class="item">
+<td nowrap align="left"><a href="/game/help/?cat=ships#{{id}}"><b>{{name}}</b></a></td>
+<td align="right">{{killed|intcomma}}</td>
+<td align="right">{{lost|intcomma}}</td>
+</tr>
+{% endfor %}
+
+{% endfor %}
+
+{% if total %}
+<tr><td class="clear">&nbsp;</td><td align="right">{{kills|intcomma}}</td><td align="right">{{losses|intcomma}}</td></tr>
+{% endtotal %}
+
+</table>
+</div>
+{% endblock %}

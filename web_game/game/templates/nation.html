@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block content %}
+<form method="get" action="/game/nation/">{% csrf_token %}
+<table class="default">
+
+<tr class="title"><td colspan="2"><b>Saisissez le nom d'une nation :</b>&nbsp;
+<input type="text" size="14" maxlength="14" name="name" value=""><br/>
+</td></tr>
+
+<tr class="item">
+	<td align="center" colspan="2">
+		<table class="clear">
+			<tr>
+				<td>
+					{% if avatar %}<img src="{{avatar_url}}" width=64 height=64 class="avatar">{% endavatar %}
+					{% if noavatar %}<img src="{{PATH_IMAGES}}/interface/noavatar.gif" width=64 height=64 class="avatar">{% endnoavatar %}
+				</td>
+				<td valign="top">{% if alliance %}<a href="/game/alliance/?tag={{alliancetag}}" class="{% if self %}self{% endif %}{% if ally %}ally{% endif %}{% if friend %}friend{% endif %}{% if enemy %}enemy{% endif %}">[{{alliancetag}}]</a>&nbsp;{% endif %}<span class="{% if self %}self{% endif %}{% if ally %}ally{% endif %}{% if friend %}friend{% endif %}{% if enemy %}enemy{% endif %}">{{name}}</span>, 
+				{% if alliance %}{{rank_label}}{% endif %}{% if noalliance %}indépendant{% endnoalliance %}
+				<br/>
+				Date d'arrivée:&nbsp;{{regdate:d}}<br/>
+				<br/>
+				{% if sendmail %}<a href="/game/mails/?a=new&b={{name}}" title="Nouveau message à {{name}}">Envoyer un message</a>{% endsendmail %}
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+
+{% if description %}<tr class="item"><td colspan="2"><p>{{description|bbcode}}</p></td></tr>{% enddescription %}
+
+{% if alliances %}
+<tr class="category"><td>Alliance</td><td>Rallié</td></tr>
+{% if item %}
+<tr class="item"><td>[{{history_tag}}] {{history_name}}</td><td>De {{joined:d}} à {{left:d}}</td></tr>
+{% endfor %}
+{% endalliances %}
+
+{% if allied %}
+<tr class="category"><td>Planètes colonisées</td><td>Flottes</td></tr>
+<tr class="item" valign="top">
+	<td>
+		<table class="clear">
+		{% if planet %}
+		<tr>
+			<td><a href="/game/map/?g={{g}}&s={{s}}" title="Localiser la planète {{planetname}}">{{planetname}}&nbsp;({{g}}.{{s}}.{{p}})</a></td>
+		</tr>
+		{% endfor %}
+		{% if noplanets %}
+		<tr>
+			<td>Aucune planète</td>
+		</tr>
+		{% endnoplanets %}
+		</table>
+	</td>
+	<td>
+		<table class="clear" width="100%">
+		{% if fleet %}
+		<tr>
+			<td nowrap>{% if owned %}<a href="/game/fleet/?id={{fleetid}}">{% endowned %}{% if ally %}<span class="ally">{% endif %}{{fleetname}}{% if owned %}</a>{% endowned %}{% if ally %}</span>{% endif %}&nbsp;({{signature|intcomma}})</td>
+			<td><script>putplanet("{{planetid}}","{{planetname}}","{{g}}","{{s}}","{{p}}",{{relation}});</script></td>
+		<td nowrap>
+		{% if recycling %}
+		Recyclage - (<script>putcountdown1({{time}}, 'Cycle terminé', '/game/nation/?')</script>)
+		{% endrecycling %}
+		{% if patrolling %}En patrouille{% endpatrolling %}
+		{% if fighting %}En combat{% endfighting %}
+		{% if moving %}En transit vers <script>putplanet("{{t_planetid}}","{{t_planetname}}","{{t_g}}","{{t_s}}","{{t_p}}",{{t_relation}});</script> - (<script>putcountdown1({{time}}, 'Arrivé', '/game/nation/')</script>)
+		{% endmoving %}
+		</td>
+
+			
+		</tr>
+		{% endfor %}
+		{% if nofleets %}
+		<tr>
+			<td>Aucune flotte</td>
+		</tr>
+		{% endnofleets %}
+		</table>
+	</td>
+</tr>
+{% endallied %}
+
+</table>
+</form>
+{% endblock %}

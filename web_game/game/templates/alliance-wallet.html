@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block content %}
+<table width=750>
+<tr>
+<td align=center>
+	<div>
+	<table class="default">
+	<tr class="item"><td>
+	<table class="clear">
+		<tr>
+			<td align=left rowspan=4><img src="{{PATH_IMAGES}}/interface/wallet.jpg" class="wallet" width=64 height=64></td>
+			<td>Solde: {{credits|intcomma}}</td>
+		</tr>
+		<tr><td>Dernière 24 heures: {{last24h|intcomma}}</td></tr>
+		<tr><td>Taxes: {{tax:0.0}}%{% if notax %} (exonéré){% endnotax %}</td></tr>
+	</table>
+	</td></tr>
+	</table>
+	</div>
+
+	<ul class="htabs">
+		{% if cat1 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=1">Journal</a></li>{% endcat1 %}
+		{% if cat2 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=2">Financement</a></li>{% endcat2 %}
+		{% if cat3 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=3">Don</a></li>{% endcat3 %}
+		{% if cat4 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=4">Taxes</a></li>{% endcat4 %}
+	</ul>
+	</div>
+
+	<div>
+	{{content}}
+	</div>
+</td>
+</tr>
+</table>
+{% endblock %}
