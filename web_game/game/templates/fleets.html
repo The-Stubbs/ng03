@@ -13,11 +13,11 @@ tiptext = $("hinttext");
 /* <![CDATA[ */
 
 var resources = [];
-resources[1] = {{ image:'ore', label:'Minerai' }};
-resources[2] = {{ image:'hydrocarbon', label:'Hydrocarbure' }};
-resources[3] = {{ image:'workers', label:'Travailleurs' }};
-resources[4] = {{ image:'scientists', label:'Scientifiques' }};
-resources[5] = {{ image:'soldiers', label:'Soldats' }};
+resources[1] = { image:'ore', label:'Minerai' };
+resources[2] = { image:'hydrocarbon', label:'Hydrocarbure' };
+resources[3] = { image:'workers', label:'Travailleurs' };
+resources[4] = { image:'scientists', label:'Scientifiques' };
+resources[5] = { image:'soldiers', label:'Soldats' };
 
 var categories = [];
 var activeCategory = 0;
@@ -239,7 +239,7 @@ function column(id, name) {
 }
 
 // when a countdown finishes, make the list be refreshed on next tab change
-function counterFinished(c){{ lastUpdate = null; }}
+function counterFinished(c){ lastUpdate = null; }
 
 function displayFleetList(list) {
 	var ships = 0;
@@ -290,7 +290,7 @@ function displayFleetList(list) {
 		z+= '</td>';
 
 		z+= '<td><img src="{{PATH_IMAGES}}/interface/commander.gif" width="10" height="6" class="smallicon" title="Commandant">';
-		if(fleet.commandername != '')
+		if(fleet.commandername != '' && fleet.commandername != 'None')
 			z+= '<a href="/game/commanders/#'+escape(fleet.commandername)+'">' + fleet.commandername + '</a>';
 		else
 			z+= '-';
@@ -331,7 +331,7 @@ function displayCategory(category) {
 	obj.style.display = 'none';
 
 	if(lastUpdate == null || new Date().getTime() - lastUpdate > 20000){
-		var url = scriptPath + "/game/fleets_handler/?a=list";
+		var url = "/game/fleets_handler/?a=list";
 
 		openURL(url, retrieveFleetListResponse);
 
@@ -371,17 +371,17 @@ function makeDraggable(item, fleetid) {
 	item.onmousedown = function(ev){
 		dropCategory = null;
 		dragObject = $fleet(fleetid);
-		{% if t %}//quand la sourie bouge faire apparaitre le tooltip (la function du	tooltip fait deja tout le travail pour nous :-){% endt %}
+		{% if t %}//quand la sourie bouge faire apparaitre le tooltip (la function du	tooltip fait deja tout le travail pour nous :-){% endif %}
 		document.onmousemove = function(e){
 			positiontip(e);
 		}
-		{% if t %}// enlever le onmouseout function comme sa on est sur que le tooltip reste coller au pointer{% endt %}
+		{% if t %}// enlever le onmouseout function comme sa on est sur que le tooltip reste coller au pointer{% endif %}
 		item.onmouseout = function(){
 		}
-		{% if t %}//quand la sourie et depresser hide le tooltip et remetre la function sur le onmouseout event{% endt %}
+		{% if t %}//quand la sourie et depresser hide le tooltip et remetre la function sur le onmouseout event{% endif %}
 		document.onmouseup = function(){
 			hideddrivetip();
-			item.onmouseout = function(){{hideddrivetip()}};
+			item.onmouseout = function(){hideddrivetip()};
 		}
 		ev.cancelBubble = true;
 		return false;
@@ -408,7 +408,7 @@ function mouseDown(){
 
 function mouseUp(){
 	if(dragObject != null && dropCategory != null){
-		var url = scriptPath + "/game/fleets_handler/?a=setcat&id=" + dragObject.id + "&old=" + dragObject.category + "&new=" + dropCategory;
+		var url = "/game/fleets_handler/?a=setcat&id=" + dragObject.id + "&old=" + dragObject.category + "&new=" + dropCategory;
 
 		openURL(url, evalResponse);
 	}
@@ -507,7 +507,7 @@ function createCategoryResponse(req){
 
 function createCategory(){
 	var name = $('categoryname').value;
-	var url = scriptPath + "/game/fleets_handler/?a=newcat&name=" + encodeURIComponent(name);
+	var url = "/game/fleets_handler/?a=newcat&name=" + encodeURIComponent(name);
 
 	for(var x in categories)
 		if(categories[x] && categories[x].id != null && (categories[x].name.toLowerCase() == name.toLowerCase())) {
@@ -523,7 +523,7 @@ function createCategory(){
 
 function renameCategory(id){
 	var name = $('editcat'+id).value;
-	var url = scriptPath + '/game/fleets_handler/?a=rencat&id=' + id + '&name=' + encodeURIComponent(name);
+	var url = '/game/fleets_handler/?a=rencat&id=' + id + '&name=' + encodeURIComponent(name);
 
 	for(var x in categories)
 		if(categories[x] && x!=id && categories[x].id != null && (categories[x].name.toLowerCase() == name.toLowerCase())) {
@@ -574,35 +574,12 @@ Pour supprimer une catégorie, double cliquez sur l'onglet et spécifiez un nouv
 /* <![CDATA[ */
 addCategory(-1, 'Sans catégorie');
 addCategory(0, 'Tout');
-{% if category %}
-addCategory({{id}}, {{label:quote}});
+{% for category in categories %}
+addCategory({{category.id}}, '{{category.label}}');
 {% endfor %}
 {{list}}
 displayCategory(activeCategory);
 /*  %}> */
 </script>
-{% endmaster %}
-
-{% if list %}
-fleetList = [];
-{% if fleet %}
-fleetList.push(new Fleet({{id}},{{name:quote}},{{category}},{{stance}},{{size}},{{signature}},{{cargo_load}},{{cargo_capacity}},"{{action}}",{{time}},{{commandername:quote}},
-				new Planet({{planetid}},{{planetname:quote}},{{relation}},"{{g}}","{{s}}","{{p}}"),
-				new Planet({{t_planetid}},{{t_planetname:quote}},{{t_relation}},"{{t_g}}","{{t_s}}","{{t_p}}"),
-				new Array(0{% if ship %},new Ship({{ship_label:quote}},{{ship_quantity}}){% endship %}),
-				new Array(0{% if resource %},new Resource({{res_id}},{{res_quantity}}){% endresource %}) ));
-{% endfor %}
-displayCategory(activeCategory);
-{% endlist %}
-{% if fleet_category_changed %}
-setFleetCategory({{id}},{{old}},{{new}});
-{% endfleet_category_changed %}
-
-{% if category %}
-addCategory({{id}}, {{label:quote}});
-{% endfor %}
-
-{% if category_name_invalid %}
-alert('Nom de catégorie invalide');
-{% endcategory_name_invalid %}
+{% endif %}
 {% endblock %}

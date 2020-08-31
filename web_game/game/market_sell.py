@@ -11,23 +11,26 @@ class View(GlobalView):
 
         self.selected_menu = "merchants.sell"
 
-        ExecuteOrder()
+        self.ExecuteOrder()
 
-        DisplayMarket()
+        return self.DisplayMarket()
 
     # display market for current player's planets
     def DisplayMarket(self):
 
-        self.request.session.get("details") = "Display market : retrieve prices"
+        self.request.session["details"] = "Display market : retrieve prices"
 
         # get market template
 
         content = GetTemplate(self.request, "market-sell")
 
-        planet = request.GET.get("planet").strip()
-        if planet != "": planet = " AND v.id=" + dosql(planet)
+        planet = ToInt(self.request.GET.get("planet", "").strip(), 0)
+        if planet != 0:
+            planet_query = " AND v.id=" + str(planet)
+            content.AssignValue("get_planet", planet)
+        else: planet_query = ""
 
-        self.request.session.get("details") = "list planets"
+        self.request.session["details"] = "list planets"
 
         # retrieve ore, hydrocarbon, sales quantities on the planet
 
@@ -36,7 +39,7 @@ class View(GlobalView):
                 " (sp_market_price((sp_get_resource_price(0, galaxy)).sell_ore, planet_stock_ore))," + \
                 " (sp_market_price((sp_get_resource_price(0, galaxy)).sell_hydrocarbon, planet_stock_hydrocarbon))" + \
                 " FROM vw_planets AS v" + \
-                " WHERE floor > 0 AND v.ownerid="+UserId + planet + \
+                " WHERE floor > 0 AND v.ownerid="+str(self.UserId) + planet_query + \
                 " ORDER BY v.id"
         oRss = oConnExecuteAll(query)
 
@@ -44,101 +47,93 @@ class View(GlobalView):
         count = 0
         i = 1
         list = []
+        content.AssignValue("m_planets", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            p_img = 1+(oRs[9] + oRs[0]) mod 21
-            if p_img < 10: p_img = "0" + p_img
+            p_img = 1+(oRs[9] + oRs[0]) % 21
+            if p_img < 10: p_img = "0" + str(p_img)
 
-            item["index", i
+            item["index"] = i
 
-            item["planet_img", p_img
+            item["planet_img"] = p_img
 
-            item["planet_id", oRs[0]
-            item["planet_name", oRs[1]
-            item["g", oRs[2]
-            item["s", oRs[3]
-            item["p", oRs[4]
+            item["planet_id"] = oRs[0]
+            item["planet_name"] = oRs[1]
+            item["g"] = oRs[2]
+            item["s"] = oRs[3]
+            item["p"] = oRs[4]
 
-            item["planet_ore", oRs[5]
-            item["planet_hydrocarbon", oRs[6]
+            item["planet_ore"] = oRs[5]
+            item["planet_hydrocarbon"] = oRs[6]
 
-            item["planet_ore_capacity", oRs[7]
-            item["planet_hydrocarbon_capacity", oRs[8]
+            item["planet_ore_capacity"] = oRs[7]
+            item["planet_hydrocarbon_capacity"] = oRs[8]
 
-            item["planet_ore_production", oRs[10]
-            item["planet_hydrocarbon_production", oRs[11]
+            item["planet_ore_production"] = oRs[10]
+            item["planet_hydrocarbon_production"] = oRs[11]
 
-            item["ore_price", oRs[12]
-            item["hydrocarbon_price", oRs[13]
+            item["ore_price"] = oRs[12]
+            item["hydrocarbon_price"] = oRs[13]
 
-            item["ore_price2", Replace(oRs[12], ",", ".")
-            item["hydrocarbon_price2", Replace(oRs[13], ",", ".")
+            item["ore_price2"] = str(oRs[12]).replace( ",", ".")
+            item["hydrocarbon_price2"] = str(oRs[13]).replace(",", ".")
 
             # if ore/hydrocarbon quantity reach their capacity in less than 4 hours
-            if oRs[5] > oRs[7]-4*oRs[10]: content.Parse("planet.high_ore_capacity"
-            if oRs[6] > oRs[8]-4*oRs[11]: content.Parse("planet.high_hydrocarbon_capacity"
+            if oRs[5] > oRs[7]-4*oRs[10]: item["high_ore_capacity"] = True
+            if oRs[6] > oRs[8]-4*oRs[11]: item["high_hydrocarbon_capacity"] = True
 
-            item["ore_max", min(10000, fix(oRs[5]/1000))
-            item["hydrocarbon_max", min(10000, fix(oRs[6]/1000))
+            item["ore_max"] = min(10000, int(oRs[5]/1000))
+            item["hydrocarbon_max"] = min(10000, int(oRs[6]/1000))
 
-            content.AssignValue("selling_price", 0
+            item["selling_price"] = 0
 
             count = count + 1
 
-            if oRs[0] = str(self.CurrentPlanet): content.Parse("planet.highlight"
-
-            content.Parse("planet"
+            if oRs[0] == self.CurrentPlanet: item["highlight"] = True
 
             i = i + 1
 
-        if planet != "":
+        if planet_query != "":
             self.showHeader = True
             self.selected_menu = "market.sell"
 
-            content.Parse("planetid"
+            content.Parse("planetid")
         else:
             self.FillHeaderCredits(content)
-            content.AssignValue("total", total
-            content.Parse("totalprice"
+            content.AssignValue("total", total)
+            content.Parse("totalprice")
 
-        if count > 0: content.Parse("sell"
+        if count > 0: content.Parse("sell")
 
         return self.Display(content)
 
     # execute sell orders
     def ExecuteOrder(self):
 
-        if request.GET.get("a") != "sell": return
+        if self.request.GET.get("a") != "sell": return
 
-        self.request.session.get("details") = "Execute orders"
+        self.request.session["details"] = "Execute orders"
 
         # retrieve the prices given when we last asked for the market prices
         #RetrievePrices()
 
         # for each planet owned, check what the player sells
-        query = "SELECT id FROM nav_planet WHERE ownerid="+UserId
-        oRs = oConnExecute(query)
+        query = "SELECT id FROM nav_planet WHERE ownerid="+str(self.UserId)
+        planetsArray = oConnExecute(query)
 
-        planetsArray = oRs.GetRows()
-        planetsCount = UBound(planetsArray, 2)
-
-        # set the timeout : 2 seconds per planet
-        Server.ScriptTimeout = Server.ScriptTimeout + planetsCount*2
-
-        for i = 0 to planetsCount
-            planetid = planetsArray(0, i)
+        for i in planetsArray:
+            planetid = i
 
             # retrieve ore + hydrocarbon quantities
-            ore = ToInt(request.POST.get("o" + planetid), 0)
-            hydrocarbon = ToInt(request.POST.get("h" + planetid), 0)
+            ore = ToInt(self.request.POST.get("o" + str(planetid)), 0)
+            hydrocarbon = ToInt(self.request.POST.get("h" + str(planetid)), 0)
 
             if ore > 0 or hydrocarbon > 0:
-                query = "SELECT sp_market_sell(" + str(self.UserId) + "," + planetid + "," + ore*1000 + "," + hydrocarbon*1000 + ")"
-                self.request.session.get("details") = query
+                query = "SELECT sp_market_sell(" + str(self.UserId) + "," + str(planetid) + "," + str(ore*1000) + "," + str(hydrocarbon*1000) + ")"
+                self.request.session["details"] = query
                 oConnDoQuery(query)
-                self.request.session.get("details") = "done:"+query
+                self.request.session["details"] = "done:"+query
 
-        if request.POST.get("rel") != 1: log_notice "market-sell.asp", "hidden value is missing from form data", 1
-
+        if self.request.POST.get("rel") != 1: self.log_notice("market-sell.asp", "hidden value is missing from form data", 1)

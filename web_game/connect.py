@@ -55,7 +55,7 @@ class View(LoginRequiredMixin, ExileMixin, View):
             Session.LCID = resultData.lcid;
             '''
             
-            rs = oConnExecute('SELECT id, lastplanetid, privilege, resets FROM sp_account_connect(' + str(350) + ', 1036,' + dosql(self.ipaddress) + ',' + dosql(self.forwardedfor) + ',' + dosql(self.useragent) + ',' + str(self.browserid) + ')');
+            rs = oConnExecute('SELECT id, lastplanetid, privilege, resets FROM sp_account_connect(' + str(request.user.id) + ', 1036,' + dosql(self.ipaddress) + ',' + dosql(self.forwardedfor) + ',' + dosql(self.useragent) + ',' + str(self.browserid) + ')');
 
             request.session[sUser] = rs[0]
             request.session[sPlanet] = rs[1]
@@ -72,6 +72,8 @@ class View(LoginRequiredMixin, ExileMixin, View):
             '''
             Application("usersession" + rs(0).Value) = Session.SessionID;
             '''
+            
+            oConnDoQuery('UPDATE users SET login=' + dosql(request.user.username) + ' WHERE id=' + str(rs[0]))
             
             if(rs[2] == -3):
                 return HttpResponseRedirect("/game/wait/")

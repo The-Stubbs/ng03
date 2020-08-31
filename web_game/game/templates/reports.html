@@ -32,6 +32,8 @@
 	{% elif message.type == 310 %}Production et coût d'entretien.
 	{% elif message.type == 320 %}Un commandant a récemment eu une augmentation
 	{% elif message.type == 400 %}Flotte arrivée à destination.
+	{% elif message.type == 501 %}Cargaison reçue.
+	{% elif message.type == 600 %}Nouvelle planète.
 	{% else %}{{message.type}}
 	{% endif %}
 	</div>
@@ -52,6 +54,19 @@
 	Nos infrastructures ont généré <img src="{{PATH_IMAGES}}/interface/prestige.gif" class="res" width="16" height="16"> {{message.scientists|intcomma}} et <img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" width="16" height="16"> {{message.soldiers|intcomma}}
 	{% elif message.type == 320 %}Le commandant {{message.commandername}} s'est récemment distingué et a obtenu une promotion. Vous devriez vous rendre sur la page de gestion des commandants afin de lui attribuer son nouveau point de compétence.
 	{% elif message.type == 400 %}La flotte <script>LinkFleet('{{message.fleetid}}','{{message.fleetname}}')</script> est arrivée aux alentours de la planète <a href="map.asp?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.
+	{% elif message.type == 501 %}Une flotte de <a href="nation.asp?name={{message.username}}">{{message.username}}</a> vient de décharger des ressources sur notre planète <a href="buildings.asp?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
+	<script>if({{message.ore}} > 0 || {{message.hydrocarbon}} > 0) {
+	document.write('Nos stocks ont augmenté de '); if({{message.ore}} > 0){ document.write('{{message.ore|intcomma}} unités de minerai'); if({{message.hydrocarbon}} > 0) document.write(" et de {{message.hydrocarbon|intcomma}} unités d'hydrocarbure");} else document.write("{{message.hydrocarbon|intcomma}} unités d'hydrocarbure"); document.write('.<br/>'); }
+	if({{message.scientists}}>0 || {{message.soldiers}}>0 || {{message.workers}} > 0) {
+		document.write('Nous notons'+(({{message.ore}}>0 || {{message.hydrocarbon}}>0)?' aussi':'') +' l\'arrivée de personnel : ');
+		if({{message.scientists}}>0) document.write('{{message.scientists|intcomma}} scientifiques, ');
+		if({{message.soldiers}}>0) document.write('{{message.soldiers|intcomma}} soldats, ');
+		if({{message.workers}}>0) document.write('{{message.workers|intcomma}} travailleurs, ');
+		document.write('ils se sont parfaitement intégrés et travaillent désormais sous nos ordres.');
+		}
+	</script>
+	{% elif message.type == 600 %}Nous occupons désormais la planète <a href="map.asp?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
+	Nous devrions vérifier les installations et <a href="buildings.asp?planet={{message.planetid}}">construire les bâtiments</a> dont nous avons besoin.
 	{% else %}{{message.type}}
 	{% endif %}
 	</div>

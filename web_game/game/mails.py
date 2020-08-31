@@ -2,6 +2,8 @@
 
 from web_game.game._global import *
 
+from web_game.lib.accounts import *
+
 class View(GlobalView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,141 +11,140 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        from web_game.lib.accounts import *
-
         self.selected_menu = "mails"
 
-        compose = False
-        mailto = ""
-        mailsubject = ""
-        mailbody = ""
-        moneyamount = 0
-        bbcode = False
+        self.compose = False
+        self.mailto = ""
+        self.mailsubject = ""
+        self.mailbody = ""
+        self.moneyamount = 0
+        self.bbcode = False
+        self.sendmail_status = ""
 
         # new email
-        if request.POST.get("compose") != "":
-            compose = True
-        elif request.GET.get("to") != "":
-            mailto = request.GET.get("to")
-            mailsubject = request.GET.get("subject")
-            compose = True
-        elif request.GET.get("a") = "new":
+        if request.POST.get("compose", "") != "":
+            self.compose = True
+        elif request.GET.get("to", "") != "":
+            self.mailto = request.GET.get("to", "")
+            self.mailsubject = request.GET.get("subject", "")
+            self.compose = True
+        elif request.GET.get("a", "") == "new":
 
-            mailto = request.GET.get("b")
-            if mailto == "": mailto = request.GET.get("to")
-            mailsubject = request.GET.get("subject")
-            compose = True
+            self.mailto = request.GET.get("b", "")
+            if self.mailto == "": self.mailto = request.GET.get("to", "")
+            self.mailsubject = request.GET.get("subject", "")
+            self.compose = True
 
         # reply
-        elif request.GET.get("a") = "reply":
+        elif request.GET.get("a", "") == "reply":
 
             Id = ToInt(request.GET.get("mailid"), 0)
 
-            query = "SELECT sender, subject, body FROM messages WHERE ownerid=" + str(self.UserId) + " AND id=" + Id + " LIMIT 1"
-            self.request.session.get("details") = query
+            query = "SELECT sender, subject, body FROM messages WHERE ownerid=" + str(self.UserId) + " AND id=" + str(Id) + " LIMIT 1"
+            self.request.session["details"] = query
             oRs = oConnExecute(query)
 
             if oRs:
 
-                mailto = oRs[0]
+                self.mailto = oRs[0]
 
                 # adds 'Re: # to new reply
 
-                if InStr(1, oRs[1], "Re:", 1) > 0:
-                    mailsubject = oRs[1]
+                if "Re:" in oRs[1]:
+                    self.mailsubject = oRs[1]
                 else:
-                    mailsubject = "Re: " + oRs[1]
+                    self.mailsubject = "Re: " + oRs[1]
 
-                mailbody = quote_mail("> " + oRs[2] + vbCRLF)
+                self.mailbody = self.quote_mail("> " + oRs[2] + "\n")
 
-                compose = True
+                self.compose = True
 
         # send email
-        elif request.POST.get("sendmail") != "" and not IsImpersonating():
+        elif request.POST.get("sendmail", "") != "" and not self.IsImpersonating():
 
-            compose = True
+            self.compose = True
 
-            mailto = request.POST.get("to").strip()
-            mailsubject = request.POST.get("subject").strip()
-            mailbody = request.POST.get("message").strip()
+            self.mailto = request.POST.get("to", "").strip()
+            self.mailsubject = request.POST.get("subject", "").strip()
+            self.mailbody = request.POST.get("message", "").strip()
 
-            if request.POST.get("sendcredits") = 1:
-                moneyamount = ToInt(request.POST.get("amount"), 0)
+            if request.POST.get("sendcredits") == 1:
+                self.moneyamount = ToInt(request.POST.get("amount"), 0)
             else:
-                moneyamount = 0
+                self.moneyamount = 0
 
-            bbcode = request.POST.get("bbcode") = 1
+            self.bbcode = request.POST.get("self.bbcode") == 1
 
-            if mailbody == "":
-                sendmail_status = "mail_empty"
+            if self.mailbody == "":
+                self.sendmail_status = "mail_empty"
             else:
                 if request.POST.get("type") == "admins":
-                    mailto = ":admins"
-                    moneyamount = 0
+                    self.mailto = ":admins"
+                    self.moneyamount = 0
                 elif request.POST.get("type") == "alliance":
                     # send the mail to all members of the alliance except
-                    mailto = ":alliance"
-                    moneyamount = 0
+                    self.mailto = ":alliance"
+                    self.moneyamount = 0
 
-                if mailto == "":
-                    sendmail_status = "mail_missing_to"
+                if self.mailto == "":
+                    self.sendmail_status = "mail_missing_to"
                 else:
-                oRs = oConnExecute("SELECT sp_send_message("+ str(self.UserId) + "," + dosql(mailto) + "," + dosql(mailsubject) + "," + dosql(mailbody) + "," + moneyamount + "," + bbcode + ")")
+                    oRs = oConnExecute("SELECT sp_send_message("+ str(self.UserId) + "," + dosql(self.mailto) + "," + dosql(self.mailsubject) + "," + dosql(self.mailbody) + "," + self.moneyamount + "," + self.bbcode + ")")
 
                     if oRs[0] != 0:
                         if oRs[0] == 1:
-                            sendmail_status = "mail_unknown_from" # from not found
+                            self.sendmail_status = "mail_unknown_from" # from not found
                         elif oRs[0] == 2:
-                            sendmail_status = "mail_unknown_to" # to not found
+                            self.sendmail_status = "mail_unknown_to" # to not found
                         elif oRs[0] == 3:
-                            sendmail_status = "mail_same" # send to same person
+                            self.sendmail_status = "mail_same" # send to same person
                         elif oRs[0] == 4:
-                            sendmail_status = "not_enough_credits" # not enough credits
+                            self.sendmail_status = "not_enough_credits" # not enough credits
                         elif oRs[0] == 9:
-                            sendmail_status = "blocked" # messages are blocked
+                            self.sendmail_status = "blocked" # messages are blocked
 
                     else:
-                        sendmail_status = "mail_sent"
+                        self.sendmail_status = "mail_sent"
 
-                        mailsubject = ""
-                        mailbody = ""
-                        moneyamount = 0
+                        self.mailsubject = ""
+                        self.mailbody = ""
+                        self.moneyamount = 0
 
         # delete selected emails
-        elif request.POST.get("delete") != "":
+        elif request.POST.get("delete", "") != "":
 
             # build the query of which mails to delete
             query = "False"
 
-            for each mailid in request.POST.get("checked_mails")
-                query = query + " OR id=" + dosql(mailid)
+            for mailid in request.POST.getlist("checked_mails"):
+                query = query + " OR id=" + mailid
 
             if query != "False":
-                oConnDoQuery("UPDATE messages SET deleted=True WHERE (" + query + ") AND ownerid = " + userid
+                oConnDoQuery("UPDATE messages SET deleted=True WHERE (" + query + ") AND ownerid = " + str(self.UserId))
 
-        if request.GET.get("a") = "ignore":
-            oConnExecute("SELECT sp_ignore_sender(" + str(self.UserId) + "," + dosql(request.GET.get("user")) + ")"
+        if request.GET.get("a", "") == "ignore":
+            oConnExecute("SELECT sp_ignore_sender(" + str(self.UserId) + "," + dosql(request.GET.get("user")) + ")")
 
-            return_ignored_users
+            return self.return_ignored_users
 
-        if request.GET.get("a") = "unignore":
-            oConnDoQuery("DELETE FROM messages_ignore_list WHERE userid=" + str(self.UserId) + " AND ignored_userid=(SELECT id FROM users WHERE lower(login)=lower(" + dosql(request.GET.get("user")) + "))"
+        if request.GET.get("a", "") == "unignore":
+            oConnDoQuery("DELETE FROM messages_ignore_list WHERE userid=" + str(self.UserId) + " AND ignored_userid=(SELECT id FROM users WHERE lower(login)=lower(" + dosql(request.GET.get("user")) + "))")
 
-            return_ignored_users()
+            return self.return_ignored_users()
 
-        if compose:
-            display_compose_form mailto, mailsubject, mailbody, moneyamount
-        elif request.GET.get("a") = "ignorelist":
-            display_ignore_list
-        elif request.GET.get("a") = "unignorelist":
-            for each mailto in request.POST.get("unignore")
-                oConnDoQuery("DELETE FROM messages_ignore_list WHERE userid=" + str(self.UserId) + " AND ignored_userid=" + dosql(mailto)
+        if self.compose:
+            return self.display_compose_form(self.mailto, self.mailsubject, self.mailbody, self.moneyamount)
+        elif request.GET.get("a") == "ignorelist":
+            return self.display_ignore_list()
+        elif request.GET.get("a") == "unignorelist":
+            for self.mailto in request.POST.getlist("unignore"):
+                oConnDoQuery("DELETE FROM messages_ignore_list WHERE userid=" + str(self.UserId) + " AND ignored_userid=" + dosql(self.mailto))
 
-            display_ignore_list
-        elif request.GET.get("a") = "sent":
-            display_mails_sent
+            return self.display_ignore_list()
+        elif request.GET.get("a") == "sent":
+            return self.display_mails_sent()
         else:
-            display_mails
+            return self.display_mails()
     #
     # display mails received by the player
     #
@@ -158,48 +159,51 @@ class View(GlobalView):
         #
         # Retrieve the offset from where to begin the display
         #
-        offset = ToInt(request.GET.get("start"), 0)
+        offset = ToInt(self.request.GET.get("start"), 0)
         if offset > 50: offset=50
 
         search_cond = ""
         if self.request.session.get(sPrivilege) < 100: search_cond = "not deleted AND "
 
         # get total number of mails that could be displayed
-        query = "SELECT count(1) FROM messages WHERE "+search_cond+" ownerid = " + userid
+        query = "SELECT count(1) FROM messages WHERE "+search_cond+" ownerid = " + str(self.UserId)
         oRs = oConnExecute(query)
         size = int(oRs[0])
-        nb_pages = Int(size/displayed)
+        nb_pages = int(size/displayed)
         if nb_pages*displayed < size: nb_pages = nb_pages + 1
         if offset >= nb_pages: offset = nb_pages-1
 
-        content.AssignValue("offset", offset
+        content.AssignValue("offset", offset)
 
         if nb_pages > 50: nb_pages=50
 
-        #if nb_pages <= 10: display all links only if there are a few pages
-            for i = 1 to nb_pages
-                content.AssignValue("page_id", i
-                content.AssignValue("page_link", i-1
+        #display all links only if there are a few pages
+        list = []
+        content.AssignValue("ps", list)
+        for i in range(1, nb_pages+1):
+            item = {}
+            list.append(item)
+            
+            item["page_id"] = i
+            item["page_link"] = i-1
 
-                if i != offset+1:
-                    content.Parse("nav.p.link"
-                else:
-                    content.Parse("nav.p.selected"
-
-                content.AssignValue("offset", offset
-                content.Parse("nav.p"
-
-            content.AssignValue("min", offset*displayed+1
-            if offset+1 = nb_pages:
-                content.AssignValue("max", size
+            if i != offset+1:
+                item["link"] = True
             else:
-                content.AssignValue("max", (offset+1)*displayed
+                item["selected"] = True
 
-            content.AssignValue("page_display", offset+1
-        #
+            item["offset"] = offset
+
+        content.AssignValue("min", offset*displayed+1)
+        if offset+1 == nb_pages:
+            content.AssignValue("max", size)
+        else:
+            content.AssignValue("max", (offset+1)*displayed)
+
+        content.AssignValue("page_display", offset+1)
 
         #display only if there are more than 1 page
-        if nb_pages > 1: content.Parse("nav"
+        if nb_pages > 1: content.Parse("nav")
 
         query = "SELECT sender, subject, body, datetime, messages.id, read_date, avatar_url, users.id, messages.credits," + \
                 " users.privilege, bbcode, owner, messages_ignore_list.added, alliances.tag"+ \
@@ -209,72 +213,69 @@ class View(GlobalView):
                 "    LEFT JOIN messages_ignore_list ON (userid=" + str(self.UserId) + " AND ignored_userid = users.id)" + \
                 " WHERE " + search_cond + " ownerid = " + str(self.UserId) + \
                 " ORDER BY datetime DESC, messages.id DESC" + \
-                " OFFSET " + (offset*displayed) + " LIMIT "+displayed
+                " OFFSET " + str(offset*displayed) + " LIMIT "+str(displayed)
         oRss = oConnExecuteAll(query)
 
         i = 0
         list = []
+        content.AssignValue("mails", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            item["index", i
-            item["from", oRs[0]
-            item["subject", oRs[1]
-            item["date", oRs[3]
+            item["index"] = i
+            item["from"] = oRs[0]
+            item["subject"] = oRs[1]
+            item["date"] = oRs[3]
 
             if oRs[10]:
-                item["bodybb", oRs[2]
-                content.Parse("mail.bbcode"
+                item["bodybb"] = oRs[2]
+                item["bbcode"] = True
             else:
-                item["body", replace(server.HTMLEncode(oRs[2]), vbCRLF, "<br/>")
-                content.Parse("mail.html"
+                item["body"] = oRs[2].replace("\n", "<br/>")
+                item["html"] = True
 
-            item["mailid", oRs[4]
-            item["moneyamount" , oRs[8]
+            item["mailid"] = oRs[4]
+            item["moneyamount"] = oRs[8]
 
-            if oRs[8] > 0: content.Parse("mail.money" # sender has given money
+            if oRs[8] > 0: item["money"] = True # sender has given money
 
-            if oRs[9] >= 500: content.Parse("mail.from_admin"
+            if oRs[9] and oRs[9] >= 500: item["from_admin"] = True
 
             if oRs[6] == None or oRs[6] == "":
-                content.Parse("mail.noavatar"
+                item["noavatar"] = True
             else:
-                item["avatar_url", oRs[6]
-                content.Parse("mail.avatar"
+                item["avatar_url"] = oRs[6]
+                item["avatar"] = True
 
-            if oRs[5] == None: content.Parse("mail.new_mail" # if there is no value for read_date: it is a new mail
+            if oRs[5] == None: item["new_mail"] = True # if there is no value for read_date: it is a new mail
 
             if oRs[7]:
                 # allow the player to block/ignore another player
                 if oRs[12]:
-                    content.Parse("mail.reply.ignored"
+                    item["ignored"] = True
                 else:
-                    content.Parse("mail.reply.ignore"
+                    item["ignore"] = True
 
                 if oRs[13]:
-                    item["alliancetag", oRs[13]
-                    content.Parse("mail.reply.alliance"
+                    item["alliancetag"] = oRs[13]
+                    item["alliance"] = True
 
-                content.Parse("mail.reply"
+                item["reply"] = True
 
             if oRs[11] == ":admins":
-                content.Parse("mail.to_admins"
+                item["to_admins"] = True
             elif oRs[11] == ":alliance":
-                content.Parse("mail.to_alliance"
+                item["to_alliance"] = True
 
-            if self.request.session.get(sPrivilege) > 100: content.Parse("mail.admin"
-
-            content.Parse("mail"
+            if self.request.session.get(sPrivilege) > 100: item["admin"] = True
 
             i = i + 1
 
-            oRs.movenext
+        if i == 0: content.Parse("nomails")
 
-        if i == 0: content.Parse("nomails"
-
-        if not IsImpersonating:
-        oRs = oConnDoQuery("UPDATE messages SET read_date = now() WHERE ownerid = " + str(self.UserId) + " AND read_date is None" )
+        if not self.IsImpersonating():
+            oRs = oConnDoQuery("UPDATE messages SET read_date = now() WHERE ownerid = " + str(self.UserId) + " AND read_date IS NULL" )
 
         return self.Display(content)
 
@@ -292,44 +293,47 @@ class View(GlobalView):
         #
         # Retrieve the offset from where to begin the display
         #
-        offset = ToInt(request.GET.get("start"), 0)
+        offset = ToInt(self.request.GET.get("start"), 0)
         if offset > 50: offset=50
 
-        messages_filter = "datetime > now()-INTERVAL '2 weeks# AND "
+        messages_filter = "datetime > now()-INTERVAL '2 weeks' AND "
 
         # get total number of mails that could be displayed
-        query = "SELECT count(1) FROM messages WHERE "+messages_filter+"senderid = " + userid
+        query = "SELECT count(1) FROM messages WHERE "+messages_filter+"senderid = " + str(self.UserId)
         oRs = oConnExecute(query)
         size = int(oRs[0])
-        nb_pages = Int(size/displayed)
+        nb_pages = int(size/displayed)
         if nb_pages*displayed < size: nb_pages = nb_pages + 1
 
         if nb_pages > 50: nb_pages=50
 
-        #if nb_pages <= 10: display all links only if there are a few pages
-            for i = 1 to nb_pages
-                item["page_id", i
-                item["page_link", i-1
+        #display all links only if there are a few pages
+        list = []
+        content.AssignValue("ps", list)
+        for i in range(1, nb_pages+1):
+            item = {}
+            list.append(item)
+            
+            item["page_id"] = i
+            item["page_link"] = i-1
 
-                if i != offset+1:
-                    content.Parse("nav.p.link"
-                else:
-                    content.Parse("nav.p.selected"
-
-                item["offset", offset
-                content.Parse("nav.p"
-
-            item["min", offset*displayed+1
-            if offset+1 = nb_pages:
-                item["max", size
+            if i != offset+1:
+                item["link"] = True
             else:
-                item["max", (offset+1)*displayed
+                item["selected"] = True
 
-            content.AssignValue("page_display", offset+1
-        #
+            item["offset"] = offset
+
+        content.AssignValue("min", offset*displayed+1)
+        if offset+1 == nb_pages:
+            content.AssignValue("max", size)
+        else:
+            content.AssignValue("max", (offset+1)*displayed)
+
+        content.AssignValue("page_display", offset+1)
 
         #display only if there are more than 1 page
-        if nb_pages > 1: content.Parse("nav"
+        if nb_pages > 1: content.Parse("nav")
 
         query = "SELECT messages.id, owner, avatar_url, datetime, subject, body, messages.credits, users.id, bbcode, alliances.tag"+ \
                 " FROM messages" + \
@@ -338,62 +342,59 @@ class View(GlobalView):
                 " WHERE "+messages_filter+"senderid = " + str(self.UserId) + \
                 " ORDER BY datetime DESC"
 
-        query = query + " OFFSET "+(offset*displayed)+" LIMIT "+displayed
+        query = query + " OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
 
         oRss = oConnExecuteAll(query)
 
         i = 0
         list = []
+        content.AssignValue("mails", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            item["index", i
-            item["sent_to", oRs[1]
+            item["index"] = i
+            item["sent_to"] = oRs[1]
 
             if oRs[1] == ":admins":
-                content.Parse("mail.admins"
+                item["admins"] = True
             elif oRs[1] == ":alliance":
-                content.Parse("mail.alliance"
+                item["alliance"] = True
             else:
-                content.Parse("mail.nation"
+                item["nation"] = True
 
-            item["date", oRs[3]
-            item["subject", oRs[4]
+            item["date"] = oRs[3]
+            item["subject"] = oRs[4]
 
-            if oRs["bbcode"):
-                item["bodybb", oRs[5]
-                content.Parse("mail.bbcode"
+            if oRs["self.bbcode"]:
+                item["bodybb"] = oRs[5]
+                item["bbcode"] = True
             else:
-                item["body", replace(server.HTMLEncode(oRs[5]), vbCRLF, "<br/>")
-                content.Parse("mail.html"
+                item["body"] = oRs[5].replace("\n", "<br/>")
+                item["html"] = True
 
-            item["mailid", oRs[0]
-            item["moneyamount", oRs[6]
+            item["mailid"] = oRs[0]
+            item["self.moneyamount"] = oRs[6]
 
             if oRs[6] > 0: # sender has given money
-                content.Parse("mail.money"
+                item["money"] = True
 
             if oRs[2] == None or oRs[2] == "":
-                content.Parse("mail.noavatar"
+                item["noavatar"] = True
             else:
-                item["avatar_url", oRs[2]
-                content.Parse("mail.avatar"
+                item["avatar_url"] = oRs[2]
+                item["avatar"] = True
 
             if oRs[7]:
                 if oRs[9]:
-                    item["alliancetag", oRs[9]
-                    content.Parse("mail.reply.alliance"
+                    item["alliancetag"] = oRs[9]
+                    item["alliance"] = True
 
-                content.Parse("mail.reply"
-
-            content.Parse("mail"
+                item["reply"] = True
 
             i = i + 1
 
-            oRs.movenext
-
-        if i == 0: content.Parse("nomails"
+        if i == 0: content.Parse("nomails")
 
         return self.Display(content)
 
@@ -402,24 +403,24 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "mail-ignorelist")
 
-        oRss = oConnExecuteAll("SELECT ignored_userid, sp_get_user(ignored_userid), added, blocked FROM messages_ignore_list WHERE userid=" + userid)
+        oRss = oConnExecuteAll("SELECT ignored_userid, sp_get_user(ignored_userid), added, blocked FROM messages_ignore_list WHERE userid=" + str(self.UserId))
 
         i = 0
         list = []
+        content.AssignValue("ignorednations", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            item["index", i
-            item["userid", oRs[0]
-            item["name", oRs[1]
-            item["added", oRs[2]
-            item["blocked", oRs[3]
-            content.Parse("ignorednation"
+            item["index"] = i
+            item["userid"] = oRs[0]
+            item["name"] = oRs[1]
+            item["added"] = oRs[2]
+            item["blocked"] = oRs[3]
 
             i = i + 1
 
-        if i == 0: content.Parse("noignorednations"
+        if i == 0: content.Parse("noignorednations")
 
         return self.Display(content)
 
@@ -433,16 +434,16 @@ class View(GlobalView):
             item = {}
             list.append(item)
             
-            item["user", oRs[0]
-            content.Parse("ignored_user"
+            item["user"] = oRs[0]
+            content.Parse("ignored_user")
 
-        response.write content.Output
+        response.write(content.Output)
 
     # quote reply
     def quote_mail(self, body):
-        quote_mail = Replace(body, vbCRLF, vbCRLF + "> ") + vbCRLF + vbCRLF
 
-    sendmail_status=""
+        self.sendmail_status=""
+        return body.replace("\n", "\n" + "> ") + "\n\n"
 
     # fill combobox with previously sent to
     def display_compose_form(self, mailto, subject, body, credits):
@@ -460,55 +461,54 @@ class View(GlobalView):
             item = {}
             list.append(item)
             
-            item["to_user", oRs[0]
-            content.parse "to"
+            item["to_user"] = oRs[0]
+            content.Parse("to")
 
             oRs.movenext
 
-        if mailto == ":admins":
-            content.Parse("sendadmins.selected"
+        if self.mailto == ":admins":
+            content.Parse("sendadmins_selected")
 
-            content.Parse("hidenation"
-            content.Parse("send_credits.hide"
-            mailto = ""
-        elif mailto == ":alliance":
-            content.Parse("sendalliance.selected"
+            content.Parse("hidenation")
+            content.Parse("send_credits_hide")
+            self.mailto = ""
+        elif self.mailto == ":alliance":
+            content.Parse("sendalliance_selected")
 
-            content.Parse("hidenation"
-            content.Parse("send_credits.hide"
-            mailto = ""
+            content.Parse("hidenation")
+            content.Parse("send_credits_hide")
+            self.mailto = ""
         else:
-            content.Parse("nation_selected"
+            content.Parse("nation_selected")
 
         if (self.oAllianceRights):
-            if self.oAllianceRights["can_mail_alliance"]: content.Parse("sendalliance"
+            if self.oAllianceRights["can_mail_alliance"]: content.Parse("sendalliance")
 
-        if hasAdmins: content.Parse("sendadmins"
+        if hasAdmins: content.Parse("sendadmins")
 
         # if is a payed account, append the autosignature text to message body
-        if self.oPlayerInfo["paid"):
+        if self.oPlayerInfo["paid"]:
             oRs = oConnExecute("SELECT autosignature FROM users WHERE id="+userid)
             if oRs:
                 body = body  + oRs[0]
 
         # re-assign previous values
-        content.AssignValue("mailto", mailto
-        content.AssignValue("subject", subject
-        content.AssignValue("message", body
-        content.AssignValue("credits", credits
+        content.AssignValue("mailto", mailto)
+        content.AssignValue("subject", subject)
+        content.AssignValue("message", body)
+        content.AssignValue("mail_credits", credits)
 
         #retrieve player's credits
-        oRs = oConnExecute("SELECT credits, now()-game_started > INTERVAL '2 weeks# AND security_level >= 3 FROM users WHERE id="+str(self.UserId))
-        content.AssignValue("player_credits", oRs[0]
-        if oRs[1]: content.Parse("send_credits"
+        oRs = oConnExecute("SELECT credits, now()-game_started > INTERVAL '2 weeks' AND security_level >= 3 FROM users WHERE id="+str(self.UserId))
+        content.AssignValue("player_credits", oRs[0])
+        if oRs[1]: content.Parse("send_credits")
 
-        if sendmail_status != "":
-            content.Parse("error." + sendmail_status
-            content.Parse("error"
+        if self.sendmail_status != "":
+            content.Parse(self.sendmail_status)
+            content.Parse("error")
 
-        if bbcode: content.Parse("bbcode"
+        if self.bbcode: content.Parse("bbcode")
 
         self.FillHeaderCredits(content)
 
         return self.Display(content)
-

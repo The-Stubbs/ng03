@@ -200,7 +200,8 @@ class View(GlobalView):
         else:
             content.Parse("unassigncommander")
 
-            content.AssignValue("commanderid", oRs[9])
+            content.AssignValue("commanderid", oRs[8])
+            content.AssignValue("commandername", oRs[9])
             content.Parse("commander")
 
         content.AssignValue("fleet_leadership", oRs[55])
@@ -698,12 +699,12 @@ class View(GlobalView):
             
         elif self.request.POST.get("action") == "assigncommander":
             # assign new commander
-            if self.request.POST.get("commander") != 0:
-                commanderid = dosql(request.POST.get("commander"))
+            if ToInt(self.request.POST.get("commander"), 0) != 0:
+                commanderid = dosql(self.request.POST.get("commander"))
                 oConnExecute("SELECT sp_commanders_assign(" + str(self.fleet_owner_id) + "," + str(commanderid) + ",NULL," + str(fleetid) + ")")
             else:
                 # unassign current fleet commander
-                oConnExecute("UPDATE fleets SET commanderid=None WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+                oConnDoQuery("UPDATE fleets SET commanderid=null WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
 
             oConnExecute("SELECT sp_update_fleet_bonus(" + str(fleetid) + ")")
         elif self.request.POST.get("action") == "move":

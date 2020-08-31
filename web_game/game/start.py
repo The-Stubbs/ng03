@@ -1,144 +1,112 @@
 # -*- coding: utf-8 -*-
 
-from web_game.game._global import *
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.utils import timezone
+from django.views import View
 
-class View(GlobalView):
+from web_game.lib.exile import *
+from web_game.lib.template import *
+from web_game.lib.accounts import *
+
+class View(ExileMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        <!--#include virtual="/lib/exile.asp"-->
-        <!--#include virtual="/lib/template.asp"-->
-        from web_game.lib.accounts import *
+        if not registration["enabled"] or (registration["until"] != None and timezone.now() > registration["until"]):
+            content = GetTemplate(self.request, "start-closed")
+            return render(self.request, content.template, content.data)
 
-        <script language="JScript" runat="server">
-        def process() {
-            if(!registration.enabled || (registration.until != None ++ new Date().getTime() > registration.until.getTime())) {
-                var content = GetTemplate(self.request, "start-closed");
-                content.Parse("");
-                Response.write(content.Output());
-                ();
-            }
+        result = 0
 
-            var result = 0;
+        self.UserId = int(request.session.get("user"))
+        galaxy = int(request.POST.get("galaxy", 0))
+        if galaxy == None: galaxy = 0
 
-            var userId = Number(Session("user"));
-            var galaxy = Number(request.POST.get('galaxy').item);
-            if(isNaN(galaxy)) galaxy = 0;
+        if not self.UserId:
+            return HttpResponseRedirect("/")
 
-            if(isNaN(userId)) {
-                Response.redirect("/");
-                ();
-            }
+        # check if it is the first login of the player
+        rs = oConnExecute("SELECT login FROM users WHERE resets=0 AND id=" + str(self.UserId))
+        if not rs:
+            return HttpResponseRedirect("/")
 
-            // check if it is the first login of the player
-            var rs = oConnExecute("SELECT login FROM users WHERE resets=0 AND id=" + userId);
-            if(rs.EOF) {
-                Response.redirect("/");
-                ();
-            }
+        userName = rs[0]
 
-            var userName = rs(0).value;
+        newName = request.POST.get('name', '')
+        if newName != "":
+            # try to rename user and catch any error
+            try:
+                if isValidName(newName):
+                    oConnDoQuery("UPDATE users SET login=" + dosql(newName) + " WHERE id=" + str(self.UserId))
+                    userName = newName
+                else:
+                    result = 11
+            except e:
+                result = 10
 
-            if(userName == None) {
-                var newName = toStr(request.POST.get('name').item);
-                if(newName != "") {
-                    // try to rename user and catch any error
-                    try {
-                        if(isValidName(newName)) {
-                            oConnDoQuery("UPDATE users SET login=" + dosql(newName) + " WHERE id=" + userId)
-                            userName = newName;
-                        }
-                        else:
-                            result = 11;
-                    } catch(e) {
-                        result = 10;
-                    }
-                }
-            }
+        if result == 0:
+            orientation = int(request.POST.get("orientation", 0))
+            allowed = False
 
-            if(result == 0) {
-                var orientation = Number(request.POST.get("orientation").item);
-                var allowed = False;
+            for i in allowedOrientations:
+                if i == orientation:
+                    allowed = True
+                    break
 
-                for(var i = 0; i < allowedOrientations.length; i++)
-                    if(allowedOrientations[i] == orientation) {
-                        allowed = True;
-                        break;
-                    }
+            if allowed:
+                oConnDoQuery("UPDATE users SET orientation=" + str(orientation) + " WHERE id=" + str(self.UserId))
 
-                if(allowed) {
-                    oConn.BeginTrans();
+                rs = oConnExecute("SELECT sp_reset_account(" + str(self.UserId) + "," + str(galaxy) + ")")
+                result = rs[0]
 
-                    oConnDoQuery("UPDATE users SET orientation=" + orientation + " WHERE id=" + userId)
+                if result == 0:
+    
+                    if orientation == 1:    # merchant
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",10,1)")
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",11,1)")
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",12,1)")
+    
+                    elif orientation == 2:    # military
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",20,1)")
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",21,1)")
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",22,1)")
+    
+                    elif orientation == 3:    # scientist
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",30,1)")
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",31,1)")
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",32,1)")
+    
+                    elif orientation == 4:    # war lord
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",40,1)")
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",12,1)")
+                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",32,1)")
+    
+                    oConnExecute("SELECT sp_update_researches(" + str(self.UserId) + ")")
+    
+                    return HttpResponseRedirect("/game/overview/")
 
-                    var rs = oConnExecute("SELECT sp_reset_account(" + str(self.UserId) + "," + galaxy + ")");
-                    result = rs(0).value;
+        # display start page
+        content = GetTemplate(self.request, "start")
+        content.AssignValue("login", userName)
 
-                    try {
-                        if(result != 0)
-                            throw 0;
+        for i in allowedOrientations:
+            content.Parse("orientation_" + str(i))
 
-                        if orientation == 1:    # merchant
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",10,1)")
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",11,1)")
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",12,1)")
+        rss = oConnExecuteAll("SELECT id, recommended FROM sp_get_galaxy_info(" + str(self.UserId) + ")")
 
-                        elif orientation == 2:    # military
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",20,1)")
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",21,1)")
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",22,1)")
+        list = []
+        content.AssignValue("galaxies", list)
+        for rs in rss:
+            item = {}
+            list.append(item)
+            item["id"] = rs[0]
+            item["recommendation"] = rs[1]
 
-                        elif orientation == 3:    # scientist
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",30,1)")
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",31,1)")
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",32,1)")
+        if result != 0:
+            content.Parse("error_" + str(result))
 
-                        elif orientation == 4:    # war lord
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",40,1)")
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",12,1)")
-                            oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",32,1)")
-
-                        oConnExecute("SELECT sp_update_researches(" + str(self.UserId) + ")")
-
-                        oConn.CommitTrans();
-
-                        Response.redirect("/game/overview.asp");
-                        ();
-                    } catch(e) {
-                        oConn.RollbackTrans();
-                    }
-                }
-            }
-
-            // display start page
-            var content = GetTemplate(self.request, "start");
-            content.AssignValue("login", userName);
-
-            for(var i = 0; i < allowedOrientations.length; i++)
-                content.Parse("orientation_" + allowedOrientations[i]);
-
-            var rs = oConnExecute("SELECT id, recommended FROM sp_get_galaxy_info(" + str(self.UserId) + ")");
-
-            while(!rs.EOF) {
-                content.AssignValue("id", rs(0).value);
-                content.AssignValue("recommendation", rs(1).value);
-                content.Parse("galaxies.galaxy");
-                rs.MoveNext();
-            }
-
-            content.Parse("galaxies");
-
-            if(result != 0)
-                content.Parse("error_" + result);
-
-            content.Parse("");
-
-            Response.write(content.Output());
-        }
-        </script>
-
-        process
-
+        return render(self.request, content.template, content.data)

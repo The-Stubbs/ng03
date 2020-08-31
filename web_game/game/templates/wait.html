@@ -24,8 +24,8 @@
 		<div id="holidays">VAISSEAU DE COLONISATION</div>
 		<div id="playername">{{login}}</div>
 		<br/>
-		Votre vaisseau de colonisation est en route vers sa planète de destination.<br/>
-		Lorsqu'il sera arrivé, vous pourrez coloniser la planète et commencer à fonder votre empire.<br/>
+		Votre vaisseau de colonisation est en route vers sa planÃ¨te de destination.<br/>
+		Lorsqu'il sera arrivÃ©, vous pourrez coloniser la planÃ¨te et commencer Ã  fonder votre empire.<br/>
 		<br/>
 		<br/>
 		<div align="center">
@@ -34,11 +34,11 @@
 		<form method="post" action="?">{% csrf_token %}
 			<input type="submit" name="unlock" value="Coloniser">
 		</form>
-		{% endunlock %}
+		{% endif %}
 		{% if cant_unlock %}
-		Temps restant avant arrivée: <script type="text/javascript">putcountdown1({{remaining_time_before_unlock}},"", "");</script><br/>
+		Temps restant avant arrivÃ©e: <script type="text/javascript">putcountdown1({{remaining_time_before_unlock}},"", "");</script><br/>
 		<script type="text/javascript">putcountdown2({{remaining_time_before_unlock}},"", "<br/><form method='post' action='?'>{% csrf_token %}<input type='submit' name='unlock' value='Coloniser'></form>");</script>
-		{% endcant_unlock %}
+		{% endif %}
 		</div>
 
 		</div>

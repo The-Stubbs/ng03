@@ -14,12 +14,12 @@ class View(GlobalView):
         tag = request.GET.get("tag")
 
         if tag and tag != "":
-            return DisplayAlliance(tag)
+            return self.DisplayAlliance(tag)
         else:
             if self.AllianceId == None:
                 return HttpResponseRedirect("/game/alliance-invitations/")
             else:
-                return DisplayAlliance(None)
+                return self.DisplayAlliance(None)
 
     def DisplayAlliance(self, alliance_tag):
 
@@ -122,13 +122,13 @@ class View(GlobalView):
                 for oRs in oRss:
                     item = {}
                     members = 0
-                    content.AssignValue("rank_label", oRs[1]
+                    item["rank_label"] = oRs[1]
 
                     query = "SELECT login" + \
                             " FROM users" + \
-                            " WHERE alliance_id=" + str(alliance_id) + " AND alliance_rank = " + dosql(oRs[0]) + \
+                            " WHERE alliance_id=" + str(alliance_id) + " AND alliance_rank = " + str(oRs[0]) + \
                             " ORDER BY upper(login)"
-                    oMembersRss = oConnExecute(query)
+                    oMembersRss = oConnExecuteAll(query)
 
                     item["members"] = []
                     for oMembersRs in oMembersRss:

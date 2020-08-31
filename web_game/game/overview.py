@@ -61,13 +61,13 @@ class View(GlobalView):
             oRs = None
 
         if oRs:
-            content.Parse("defcon_" + oRs[3])
+            content.Parse("defcon_" + str(oRs[3]))
             content.Parse("defcon")
 
-            content.AssignValue("MotD", oRs[0])
-            content.Parse("motd")
+            content.AssignValue("motd", oRs[0])
+            content.Parse("announce")
 
-            content.AssignValue("alliance_rank_label", self.oAllianceRights("label"))
+            content.AssignValue("alliance_rank_label", self.oAllianceRights["label"])
             content.AssignValue("alliance_tag", oRs[1])
             content.AssignValue("alliance_name", oRs[2])
             content.Parse("alliance")

@@ -21,8 +21,8 @@ class View(GlobalView):
         self.planet_error = e_no_error
 
         if request.POST.get("action") == "assigncommander":
-            if request.POST.get("commander") != 0: # assign selected commander
-                query = "SELECT * FROM sp_commanders_assign(" + str(self.UserId) + "," + dosql(request.POST.get("commander")) + "," + str(self.CurrentPlanet) + ",null)"
+            if ToInt(request.POST.get("commander"), 0) != 0: # assign selected commander
+                query = "SELECT * FROM sp_commanders_assign(" + str(self.UserId) + "," + str(ToInt(request.POST.get("commander"), 0)) + "," + str(self.CurrentPlanet) + ",null)"
                 oConnDoQuery(query)
             else:
                 # unassign current planet commander
@@ -30,7 +30,7 @@ class View(GlobalView):
                 oConnDoQuery(query)
 
         elif request.POST.get("action") == "rename":
-            if not IsValidObjectName(request.POST.get("name")):
+            if not isValidObjectName(request.POST.get("name")):
                 self.planet_error = self.e_rename_bad_name
             else:
                 query = "UPDATE nav_planet SET name=" + dosql(request.POST.get("name")) + \
@@ -38,17 +38,17 @@ class View(GlobalView):
 
                 oConnDoQuery(query)
 
-                InvalidatePlanetList()
+                self.InvalidatePlanetList()
 
         elif request.POST.get("action") == "firescientists":
             amount = ToInt(request.POST.get("amount"), 0)
-            oConnExecute("SELECT sp_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + amount + ",0,0)")
+            oConnExecute("SELECT sp_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + str(amount) + ",0,0)")
         elif request.POST.get("action") == "firesoldiers":
             amount = ToInt(request.POST.get("amount"), 0)
-            oConnExecute("SELECT sp_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + "0," + amount + ",0)")
+            oConnExecute("SELECT sp_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + "0," + str(amount) + ",0)")
         elif request.POST.get("action") == "fireworkers":
             amount = ToInt(request.POST.get("amount"), 0)
-            oConnExecute("SELECT sp_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + "0,0," + amount + ")")
+            oConnExecute("SELECT sp_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + "0,0," + str(amount) + ")")
 
         elif request.POST.get("action") == "abandon":
             oConnExecute("SELECT sp_abandon_planet(" + str(self.UserId) + "," + str(self.CurrentPlanet) + ")")
@@ -57,8 +57,8 @@ class View(GlobalView):
 
         elif request.POST.get("action") == "resources_price":
             query = "UPDATE nav_planet SET" + \
-                    " buy_ore = GREATEST(0, LEAST(1000, " + dosql(ToInt(request.POST.get("buy_ore"), 0)) + "))" + \
-                    " ,buy_hydrocarbon = GREATEST(0, LEAST(1000, " + dosql(ToInt(request.POST.get("buy_hydrocarbon"), 0)) + "))" + \
+                    " buy_ore = GREATEST(0, LEAST(1000, " + str(ToInt(request.POST.get("buy_ore"), 0)) + "))" + \
+                    " ,buy_hydrocarbon = GREATEST(0, LEAST(1000, " + str(ToInt(request.POST.get("buy_hydrocarbon"), 0)) + "))" + \
                     " WHERE ownerid=" + str(self.UserId) + " AND id=" + str(self.CurrentPlanet)
             oConnDoQuery(query)
 
@@ -90,9 +90,9 @@ class View(GlobalView):
             content.AssignValue("planet_name", oRs[1])
             content.AssignValue("planet_img", self.planetimg(oRs[0], oRs[18]))
 
-            content.AssignValue("g", oRs[2])
-            content.AssignValue("s", oRs[3])
-            content.AssignValue("p", oRs[4])
+            content.AssignValue("pla_g", oRs[2])
+            content.AssignValue("pla_s", oRs[3])
+            content.AssignValue("pla_p", oRs[4])
 
             content.AssignValue("floor_occupied", oRs[5])
             content.AssignValue("floor", oRs[6])
@@ -122,7 +122,7 @@ class View(GlobalView):
             # retrieve commander assigned to this planet
             if oRs[16]:
                 oCmdRs = oConnExecute("SELECT name FROM commanders WHERE ownerid="+str(self.UserId)+" AND id="+str(oRs[16]))
-                content.AssignValue("commander", oCmdRs[0])
+                content.AssignValue("commandername", oCmdRs[0])
                 CmdId = oRs[16]
                 content.Parse("commander")
             else:
@@ -181,9 +181,9 @@ class View(GlobalView):
                 else:
                     item["unavailable"] = True
                     
-        if len(cmd_nones) > 0: cmd_groups.append(cmd_nones)
-        if len(cmd_fleets) > 0: cmd_groups.append(cmd_fleets)
-        if len(cmd_planets) > 0: cmd_groups.append(cmd_planets)
+        if len(cmd_nones['cmds']) > 0: cmd_groups.append(cmd_nones)
+        if len(cmd_fleets['cmds']) > 0: cmd_groups.append(cmd_fleets)
+        if len(cmd_planets['cmds']) > 0: cmd_groups.append(cmd_planets)
 
         # view current buildings constructions
         query = "SELECT buildingid, remaining_time, destroying" + \

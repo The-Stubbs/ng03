@@ -17,9 +17,9 @@ class View(GlobalView):
         sLeaveCost = "leavealliancecost"
 
         leave_status = ""
-        invitation_status = ""
-        action = request.GET.get("a").strip()
-        alliance_tag = request.GET.get("tag").strip()
+        self.invitation_status = ""
+        action = request.GET.get("a", "").strip()
+        alliance_tag = request.GET.get("tag", "").strip()
 
         if action == "accept":
             oRs = oConnExecute("SELECT sp_alliance_accept_invitation(" + str(self.UserId) + "," + dosql(alliance_tag) + ")")
@@ -28,9 +28,9 @@ class View(GlobalView):
                 return HttpResponseRedirect("/game/alliance/")
 
             elif oRs[0] == 4:
-                invitation_status = "max_members_reached"
+                self.invitation_status = "max_members_reached"
             elif oRs[0] == 6:
-                invitation_status = "cant_rejoin_previous_alliance"
+                self.invitation_status = "cant_rejoin_previous_alliance"
 
         elif action == "decline":
             oConnExecute("SELECT sp_alliance_decline_invitation(" + str(self.UserId) + "," + dosql(alliance_tag) + ")")
@@ -58,7 +58,7 @@ class View(GlobalView):
                 " WHERE userid=" + str(self.UserId) + " AND NOT declined" + \
                 " ORDER BY created DESC"
 
-        oRs = oConnExecute(query)
+        oRss = oConnExecuteAll(query)
 
         i = 0
         list = []
@@ -86,7 +86,7 @@ class View(GlobalView):
             i = i + 1
         content.AssignValue("invitations", list)
 
-        if invitation_status != "": content.Parse(invitation_status)
+        if self.invitation_status != "": content.Parse(self.invitation_status)
 
         if i == 0: content.Parse("noinvitations")
 
@@ -98,8 +98,8 @@ class View(GlobalView):
 
             oRs = oConnExecute("SELECT sp_alliance_get_leave_cost(" + str(self.UserId) + ")")
 
-            self.request.session.get(sLeaveCost) = oRs[0]
-            if self.request.session.get(sLeaveCost) < 2000: self.request.session.get(sLeaveCost) = 0
+            self.request.session[sLeaveCost] = oRs[0]
+            if self.request.session.get(sLeaveCost) < 2000: self.request.session[sLeaveCost] = 0
 
             content.AssignValue("credits", self.request.session.get(sLeaveCost))
 

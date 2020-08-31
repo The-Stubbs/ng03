@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 
-from web_game.game._global import *
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views import View
 
-class View(GlobalView):
+from web_game.lib.exile import *
+from web_game.lib.template import *
+
+class View(ExileMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        <!--#include virtual="/lib/exile.asp"-->
-        <!--#include virtual="/lib/template.asp"-->
-
-        UserId = ToInt(Session("user"), "")
+        self.UserId = ToInt(self.request.session.get("user"), "")
 
         if self.UserId == "":
             return HttpResponseRedirect("/")
 
-        set content = GetTemplate(self.request, "wait")
+        content = GetTemplate(self.request, "wait")
 
         # retrieve remaining time
         query = "SELECT login, COALESCE(date_part('epoch', ban_expire-now()), 0) AS remaining_time FROM users WHERE /*privilege=-3 AND*/ id=" + str(self.UserId)
@@ -27,20 +29,21 @@ class View(GlobalView):
         if oRs == None:
             return HttpResponseRedirect("/")
 
+        remainingTime = oRs[1]
+        
         # check to unlock holidays mode
-        action = request.POST.get("unlock")
+        action = request.POST.get("unlock", "")
 
         if action != "" and remainingTime < 0:
-            oConnDoQuery("UPDATE users SET privilege=0 WHERE ban_expire < now() AND id="+UserId, , 128
+            oConnDoQuery("UPDATE users SET privilege=0 WHERE ban_expire < now() AND id="+str(self.UserId))
             return HttpResponseRedirect("/game/start/")
 
-        content.AssignValue("login", oRs[0]
-        content.AssignValue("remaining_time_before_unlock", int(oRs[1])
+        content.AssignValue("login", oRs[0])
+        content.AssignValue("remaining_time_before_unlock", int(oRs[1]))
 
         if remainingTime < 0:
-            content.Parse("unlock"
+            content.Parse("unlock")
         else:
-            content.Parse("cant_unlock"
+            content.Parse("cant_unlock")
 
-        Response.write content.Output
-
+        return render(self.request, content.template, content.data)

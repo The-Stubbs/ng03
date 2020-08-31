@@ -557,6 +557,10 @@ class GlobalView(ExileMixin, View):
                 " FROM users" +\
                 " WHERE id=" + str(self.UserId)
         self.oPlayerInfo = oConnRow(query)
+        
+        # check account still exists or that the player didn't connect with another account meanwhile
+        if self.oPlayerInfo == None:
+            return HttpResponseRedirect("/") # Redirect to home page
     
         self.SecurityLevel = self.oPlayerInfo["security_level"]
         self.displayAlliancePlanetName = self.oPlayerInfo["display_alliance_planet_name"]
@@ -570,10 +574,6 @@ class GlobalView(ExileMixin, View):
                 self.log_notice("login cookie", "Last browser login cookie : \"" + self.request.COOKIES.get("login", "") + "\"", 1)
                 
                 self.request.COOKIES["login"] = self.oPlayerInfo["login"]
-        
-        # check account still exists or that the player didn't connect with another account meanwhile
-        if self.oPlayerInfo == None:
-            return HttpResponseRedirect("/") # Redirect to home page
 
         if self.IsPlayerAccount():
             # Redirect to locked page
@@ -597,7 +597,7 @@ class GlobalView(ExileMixin, View):
                     " can_manage_description, can_manage_announce, can_see_members_info, can_use_alliance_radars, can_order_other_fleets" +\
                     " FROM alliances_ranks" +\
                     " WHERE allianceid=" + str(self.AllianceId) + " AND rankid=" + str(self.AllianceRank)
-            self.oAllianceRights = oConnExecute(query)
+            self.oAllianceRights = oConnRow(query)
     
             if self.oAllianceRights == None:
                 self.oAllianceRights = None
@@ -635,7 +635,7 @@ class GlobalView(ExileMixin, View):
         #
         self.CurrentPlanet = self.request.session.get(sPlanet, "")
     
-        if self.CurrentPlanet != "":
+        if self.CurrentPlanet != None:
             # check if the planet still belongs to the player
             oRs = oConnExecute("SELECT galaxy, sector FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(self.CurrentPlanet) + " AND ownerid=" + str(self.UserId))
             if oRs:
@@ -647,7 +647,7 @@ class GlobalView(ExileMixin, View):
             self.InvalidatePlanetList()
     
         # there is no active planet, select the first planet available
-        oRs = oConnExecute("SELECT id, galaxy, sector FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserID) + " LIMIT 1")
+        oRs = oConnExecute("SELECT id, galaxy, sector FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId) + " LIMIT 1")
     
         # if player owns no planets then the game is over
         if oRs == None:

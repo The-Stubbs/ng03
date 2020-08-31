@@ -3,7 +3,7 @@
 {% block content %}
 <div id="market">
 <script>
-	var planets=new Array(0{% if planet %}{% if can_buy %},new Array({{planet_id}},{{ore_max}},{{hydrocarbon_max}},{{price_ore}},{{price_hydrocarbon}}){% endcan_buy %}{% endplanet %});
+	var planets=new Array(0{% for planet in m_planets %}{% if planet.can_buy %},new Array({{planet.planet_id}},{{planet.ore_max}},{{planet.hydrocarbon_max}},{{planet.price_ore}},{{planet.price_hydrocarbon}}){% endif %}{% endfor %});
 
 	function updateprice(id)
 	{
@@ -13,11 +13,11 @@
 		var planet=planets[id];
 
 		ore_q=getval("o"+planet[0]);
-		if(ore_q > planet[1]) {{ ore_q=planet[1]; setval("o"+planet[0], planet[1]); }}
+		if(ore_q > planet[1]) { ore_q=planet[1]; setval("o"+planet[0], planet[1]); }
 		var ore_price=planet[3];
 
 		hydro_q=getval("h"+planet[0]);
-		if(hydro_q > planet[2]) {{ hydro_q=planet[2]; setval("h"+planet[0], planet[2]); }}
+		if(hydro_q > planet[2]) { hydro_q=planet[2]; setval("h"+planet[0], planet[2]); }
 		var hydro_price=planet[4];
 
 		var price = ore_q*ore_price + hydro_q*hydro_price;
@@ -28,7 +28,7 @@
 			obj.innerHTML = formatnumber(price);
 {% if totalprice %}
 			computetotal();
-{% endtotalprice %}
+{% endif %}
 		}
 	}
 {% if totalprice %}
@@ -45,74 +45,74 @@
 		var obj = $("total");
 		obj.innerHTML = formatnumber(total);
 	}
-{% endtotalprice %}
+{% endif %}
 </script>
 
-<form method="post" action="?a=buy{% if planetid %}&planet={{planet_id}}{% endplanetid %}">{% csrf_token %}
+<form method="post" action="?a=buy{% if planetid %}&planet={{planet_id}}{% endif %}">{% csrf_token %}
 <input type="hidden" name="rel" value="1">
 
 <table class="default" width=750>
 <tr class="title"><td colspan=3>Achat de ressources</td></tr>
-<tr class="header"><td>Planète</td><td>Ressources</td><td width=100>Total</td>{% if rem %}<td>Temps estimé</td>{% endrem %}</tr>
-{% if planet %}
-<tr valign=middle class="item{% if highlight %}highlight{% endhighlight %}">
+<tr class="header"><td>Planète</td><td>Ressources</td><td width=100>Total</td>{% if rem %}<td>Temps estimé</td>{% endif %}</tr>
+{% for planet in m_planets %}
+<tr valign=middle class="item{% if planet.highlight %}highlight{% endif %}">
 	<td nowrap>
 		<table cellpadding=0 cellspacing=0 class="clear">
 		<tr>
-			<td rowspan=3><img src="{{PATH_IMAGES}}/planets/p{{planet_img}}.gif" class="smallplanet" width="64" height="64"></td>
-			<td nowrap colspan=2><b><a href="/game/planet/?planet={{planet_id}}">{{planet_name}}</a> <a href="/game/map/?g={{g}}&s={{s}}&p={{p}}">({{g}}.{{s}}.{{p}})</a></b></td>
+			<td rowspan=3><img src="{{PATH_IMAGES}}/planets/p{{planet.planet_img}}.gif" class="smallplanet" width="64" height="64"></td>
+			<td nowrap colspan=2><b><a href="/game/planet/?planet={{planet.planet_id}}">{{planet.planet_name}}</a> <a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planet.p}}">({{planet.g}}.{{planet.s}}.{{planet.p}})</a></b></td>
 		</tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16></td><td align="left" nowrap>{% if high_ore_capacity %}<span class="high2">{% endhigh_ore_capacity %}{{planet_ore|intcomma}} / {{planet_ore_capacity|intcomma}}{% if high_ore_capacity %}</span>{% endhigh_ore_capacity %} (<span class=prod>+{{planet_ore_production|intcomma}}</span>)</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16></td><td align=left nowrap>{% if high_hydrocarbon_capacity %}<span class="high2">{% endhigh_hydrocarbon_capacity %}{{planet_hydrocarbon|intcomma}} / {{planet_hydrocarbon_capacity|intcomma}}{% if high_hydrocarbon_capacity %}</span>{% endhigh_hydrocarbon_capacity %} (<span class=prod>+{{planet_hydrocarbon_production|intcomma}}</span>)</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16></td><td align="left" nowrap>{% if planet.high_ore_capacity %}<span class="high2">{% endif %}{{planet.planet_ore|intcomma}} / {{planet.planet_ore_capacity|intcomma}}{% if planet.high_ore_capacity %}</span>{% endif %} (<span class=prod>+{{planet.planet_ore_production|intcomma}}</span>)</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16></td><td align=left nowrap>{% if planet.high_hydrocarbon_capacity %}<span class="high2">{% endif %}{{planet.planet_hydrocarbon|intcomma}} / {{planet.planet_hydrocarbon_capacity|intcomma}}{% if planet.high_hydrocarbon_capacity %}</span>{% endif %} (<span class=prod>+{{planet.planet_hydrocarbon_production|intcomma}}</span>)</td></tr>
 		</table>
 	</td>
 	<td>
-		{% if can_buy %}
-		<table cellpadding=0 cellspacing=2 class="clear"{% if buy %} width="100%"{% endbuy %}>
+		{% if planet.can_buy %}
+		<table cellpadding=0 cellspacing=2 class="clear"{% if planet.buy %} width="100%"{% endif %}>
 		<tr>
 			<td width=16><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width="16" height="16"></td>
-			<td{% if buy %} width="1%" nowrap{% endbuy %}>{% if buy %}<input type="text" id=o{{planet_id}} name=o{{planet_id}} value="{{ore}}" onkeyup="updateprice({{index}})" size="3" maxlength="4"> x1000 (<img src="{{PATH_IMAGES}}/interface/credits.gif" class="icon" title="Credits" width="16" height="16"> {{price_ore}}){% endbuy %}{% if buying %}{{buying_ore|intcomma}}{% endbuying %}</td>
-			{% if buy %}
-			<td align=left><a href="javascript:setval('o{{planet_id}}', {{ore_max}}); updateprice({{index}})">max</a></td>
-			<td><a href="javascript:setval('o{{planet_id}}', 0); setval('h{{planet_id}}', 0); updateprice({{index}})">Rien</a></td>{% endbuy %}
+			<td{% if planet.buy %} width="1%" nowrap{% endif %}>{% if planet.buy %}<input type="text" id=o{{planet.planet_id}} name=o{{planet.planet_id}} value="{{planet.ore}}" onkeyup="updateprice({{planet.index}})" size="3" maxlength="4"> x1000 (<img src="{{PATH_IMAGES}}/interface/credits.gif" class="icon" title="Credits" width="16" height="16"> {{planet.price_ore}}){% endif %}{% if planet.buying %}{{planet.buying_ore|intcomma}}{% endif %}</td>
+			{% if planet.buy %}
+			<td align=left><a href="javascript:setval('o{{planet.planet_id}}', {{planet.ore_max}}); updateprice({{planet.index}})">max</a></td>
+			<td><a href="javascript:setval('o{{planet.planet_id}}', 0); setval('h{{planet.planet_id}}', 0); updateprice({{planet.index}})">Rien</a></td>{% endif %}
 		</tr>
 		<tr>
 			<td width=16><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16></td>
-			<td{% if buy %} width="1%" nowrap{% endbuy %}>{% if buy %}<input type="text" id=o{{planet_id}} name=h{{planet_id}} value="{{hydrocarbon}}" onkeyup="updateprice({{index}})" size="3" maxlength="4"> x1000 (<img src="{{PATH_IMAGES}}/interface/credits.gif" class="icon" title="Credits" width="16" height="16"> {{price_hydrocarbon}}){% endbuy %}{% if buying %}{{buying_hydrocarbon|intcomma}}{% endbuying %}</td>
-			{% if buy %}
-			<td align=left><a href="javascript:setval('h{{planet_id}}', {{hydrocarbon_max}}); updateprice({{index}})">max</a></td>
-			<td><a href="javascript:setval('o{{planet_id}}', {{ore_max}}); setval('h{{planet_id}}', {{hydrocarbon_max}}); updateprice({{index}})">Tout</a></td>{% endbuy %}
+			<td{% if planet.buy %} width="1%" nowrap{% endif %}>{% if planet.buy %}<input type="text" id=o{{planet.planet_id}} name=h{{planet.planet_id}} value="{{planet.hydrocarbon}}" onkeyup="updateprice({{planet.index}})" size="3" maxlength="4"> x1000 (<img src="{{PATH_IMAGES}}/interface/credits.gif" class="icon" title="Credits" width="16" height="16"> {{planet.price_hydrocarbon}}){% endif %}{% if planet.buying %}{{planet.buying_hydrocarbon|intcomma}}{% endif %}</td>
+			{% if planet.buy %}
+			<td align=left><a href="javascript:setval('h{{planet.planet_id}}', {{planet.hydrocarbon_max}}); updateprice({{planet.index}})">max</a></td>
+			<td><a href="javascript:setval('o{{planet.planet_id}}', {{planet.ore_max}}); setval('h{{planet.planet_id}}', {{planet.hydrocarbon_max}}); updateprice({{planet.index}})">Tout</a></td>{% endif %}
 		</tr>
 		</table>
-		{% endcan_buy %}
-		{% if cant_buy_enemy %}
+		{% endif %}
+		{% if planet.cant_buy_enemy %}
 		<table cellpadding="0" cellspacing="2" class="clear" width="100%">
 		<tr><td align="center">Impossible d'acheter tant que<br/> des vaisseaux ennemis orbitent<br/> autour de la planète</td></tr>
 		</table>
-		{% endcant_buy_enemy %}
-		{% if cant_buy_workers %}
+		{% endif %}
+		{% if planet.cant_buy_workers %}
 		<table cellpadding=0 cellspacing=2 class="clear" width="100%">
 		<tr><td align="center">Impossible d'acheter, nous n'avons pas assez de personnel pour s'occuper des marchandises et des transactions avec les marchands</td></tr>
 		</table>
-		{% endcant_buy_workers %}
-		{% if cant_buy_merchants %}
+		{% endif %}
+		{% if planet.cant_buy_merchants %}
 		<table cellpadding=0 cellspacing=2 class="clear" width="100%">
 		<tr><td align="center">Impossible d'acheter, cette galaxie n'est pas desservie par les marchands</td></tr>
 		</table>
-		{% endcant_buy_merchants %}
+		{% endif %}
 		</td>
-	<td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Credits" width=16 height=16><span id="totalprice{{planet_id}}">{{buying_price|intcomma}}</span></td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Credits" width=16 height=16><span id="totalprice{{planet.planet_id}}">{{planet.buying_price|intcomma}}</span></td>
 </tr>
 {% endfor %}
 {% if totalprice %}
 <tr><td colspan=2 align=right>Total</td><td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Credits" width=16 height=16><span id="total">0</span></td></tr>
-{% endtotalprice %}
+{% endif %}
 {% if buy %}
 <tr><td colspan=3 align=center><input type="submit" value="Acheter"></td></tr>
-{% endbuy %}
+{% endif %}
 </table>
 </form>
 
-{% if totalprice %}<script>computetotal();</script>{% endtotalprice %}
-{% endblock %}
+{% if totalprice %}<script>computetotal();</script>{% endif %}
 </div>
+{% endblock %}

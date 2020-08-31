@@ -309,7 +309,7 @@ En attente (<script>putcountdown1({{time}}, 'Terminé', '?id={{fleetid}}')</scri
 <tr><td nowrap>Commandement</td>
 <td id="cmdref">
 <div class=left>{{fleet_leadership|intcomma}}/{{fleet_size|intcomma}}, Efficacité: {{fleet_commander_efficiency}}%</div>
-<div class=left>&nbsp;&nbsp;<img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallres" width=10 height=6 title="Commandant">{% if nocommander %}-{% endif %}{% if commander %}{{commander}}{% endif %}</div>
+<div class=left>&nbsp;&nbsp;<img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallres" width=10 height=6 title="Commandant">{% if nocommander %}-{% endif %}{% if commander %}{{commandername}}{% endif %}</div>
 <div class=right><a href="#" onclick="return show('cmdref','commandersbox')">Changer</a></div>
 </td></tr>
 

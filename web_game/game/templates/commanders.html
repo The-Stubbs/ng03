@@ -17,13 +17,13 @@ function confirmTrain(prestige) {
 
 <div id="commanders">
 
-{% if commanders %}
-{% if commander %}
-<div id="renamebox{{id}}" class="hidden">
+{% if commander_list %}
+{% for commander in commander_list %}
+<div id="renamebox{{commander.id}}" class="hidden">
 	<form action='?' method='get'>
 	<input type='hidden' name='a' value='rename'>
-	<input type='hidden' name='id' value='{{id}}'>
-	<input type='text' class="editbox" name='name' size=28 maxlength=32 value='{{name}}'>
+	<input type='hidden' name='id' value='{{commander.id}}'>
+	<input type='text' class="editbox" name='name' size=28 maxlength=32 value='{{commander.name}}'>
 	&nbsp;<input type='submit' value='OK' class="submitok">
 	&nbsp;<img src='{{PATH_IMAGES}}/interface/close.gif' width=12 height=12 title='Fermer' class=close onclick='hide();'>
 	</form>
@@ -31,55 +31,55 @@ function confirmTrain(prestige) {
 {% endfor %}
 {% endif %}
 
-{% if commanders %}
+{% if commander_list %}
 <table class=default width=600>
-<tr class=title><td colspan=2>Les commandants de votre empire ({{commanders}}/{{max_commanders}})</td></tr>
+<tr class=title><td colspan=2>Les commandants de votre empire ({{commander_list|length}}/{{max_commanders}})</td></tr>
 <tr class=header><td width=220>Commandant</td><td>Compétences</td></tr>
 
-{% if commander %}
+{% for commander in commander_list %}
 <tr class=smallitem>
 	<td valign="top">
-	<div class=left id="renameref{{id}}"><img src="{{PATH_IMAGES}}/interface/commander.gif" width=10 height=6 class="smallicon" title="Commandant"><a name="{{name}}" onclick="return show('renameref{{id}}','renamebox{{id}}')">{{name}}</a></div>
-	<div class=right>{% if can_fire %}<a href="?a=fire&id={{id}}" onclick="return confirmFireCommander({{name:quote}})">Renvoyer</a>{% endcan_fire %}{% if cant_fire %}<span class="cant_fire">Renvoyer</span>{% endcant_fire %}</div>
+	<div class=left id="renameref{{commander.id}}"><img src="{{PATH_IMAGES}}/interface/commander.gif" width=10 height=6 class="smallicon" title="Commandant"><a name="{{commander.name}}" onclick="return show('renameref{{commander.id}}','renamebox{{commander.id}}')">{{commander.name}}</a></div>
+	<div class=right>{% if commander.can_fire %}<a href="?a=fire&id={{commander.id}}" onclick="return confirmFireCommander('{{commander.name}}')">Renvoyer</a>{% endif %}{% if commander.cant_fire %}<span class="cant_fire">Renvoyer</span>{% endif %}</div>
 	<div class=clear></div>
 	<table class=clear style="margin-left:22px">
-	<tr><td>Salaire:</td><td><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{salary|intcomma}}</td></tr>
-	<tr><td>Incorporé:</td><td>{{recruited:dd mmm yyyy}}</td></tr>
+	<tr><td>Salaire:</td><td><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{commander.salary|intcomma}}</td></tr>
+	<tr><td>Incorporé:</td><td>{{commander.recruited}}</td></tr>
 	<tr><td>Affectation:</td><td nowrap>
-	{% if not_assigned %}Aucune{% endnot_assigned %}
-	{% if planet_command %}<img src="{{PATH_IMAGES}}/interface/planet.gif" width=16 height=16 class=res title="Planète"><script>putplanet("{{planetid}}","{{commandment}}","{{g}}","{{s}}","{{p}}",2);</script>{% endplanet_command %}
-	{% if fleet_command %}<img src="{{PATH_IMAGES}}/interface/fleets.gif" width=16 height=16 class=res title="Flotte"><a href="/game/fleet/?id={{fleetid}}">{{commandment}}</a>{% endfleet_command %}
+	{% if commander.not_assigned %}Aucune{% endif %}
+	{% if commander.planet_command %}<img src="{{PATH_IMAGES}}/interface/planet.gif" width=16 height=16 class=res title="Planète"><script>putplanet("{{commander.planetid}}","{{commander.commandment}}","{{commander.g}}","{{commander.s}}","{{commander.p}}",2);</script>{% endif %}
+	{% if commander.fleet_command %}<img src="{{PATH_IMAGES}}/interface/fleets.gif" width=16 height=16 class=res title="Flotte"><a href="/game/fleet/?id={{commander.fleetid}}">{{commander.commandment}}</a>{% endif %}
 	</td></tr>
 	</table>
 	</td>
 	<td valign=top>
 	<table class=clear>
-	{% if bonus %}<tr><td class="{% if positive %}plus{% endpositive %}{% if negative %}minus{% endnegative %}">
-	{% if description14 %}Production : Minerai{% enddescription14 %}
-	{% if description15 %}Production : Hydrocarbure{% enddescription15 %}
-	{% if description16 %}Production : Énergie{% enddescription16 %}
-	{% if description17 %}Formation : Travailleurs{% enddescription17 %}
-	{% if description18 %}Flottes : Vitesse{% enddescription18 %}
-	{% if description19 %}Flottes : Bouclier{% enddescription19 %}
-	{% if description20 %}Flottes : Manœuvrabilité{% enddescription20 %}
-	{% if description21 %}Flottes : Acquisition cibles{% enddescription21 %}
-	{% if description22 %}Flottes : Dégats augmentés{% enddescription22 %}
-	{% if description23 %}Flottes : Réduction signature{% enddescription23 %}
-	{% if description24 %}Bâtiments : Vitesse construction{% enddescription24 %}
-	{% if description25 %}Vaisseaux : Vitesse construction{% enddescription25 %}
-	&nbsp;{{bonus}}%</td></tr>
+	{% for bonus in commander.bonuses %}<tr><td class="{% if bonus.positive %}plus{% endif %}{% if bonus.negative %}minus{% endif %}">
+	{% if bonus.description14 %}Production : Minerai{% endif %}
+	{% if bonus.description15 %}Production : Hydrocarbure{% endif %}
+	{% if bonus.description16 %}Production : Énergie{% endif %}
+	{% if bonus.description17 %}Formation : Travailleurs{% endif %}
+	{% if bonus.description18 %}Flottes : Vitesse{% endif %}
+	{% if bonus.description19 %}Flottes : Bouclier{% endif %}
+	{% if bonus.description20 %}Flottes : Manœuvrabilité{% endif %}
+	{% if bonus.description21 %}Flottes : Acquisition cibles{% endif %}
+	{% if bonus.description22 %}Flottes : Dégats augmentés{% endif %}
+	{% if bonus.description23 %}Flottes : Réduction signature{% endif %}
+	{% if bonus.description24 %}Bâtiments : Vitesse construction{% endif %}
+	{% if bonus.description25 %}Vaisseaux : Vitesse construction{% endif %}
+	&nbsp;{{bonus.bonus}}%</td></tr>
 	{% endfor %}
-	{% if levelup %}<tr><td><a href="?a=skills&id={{id}}">Répartir les {{points}} points de compétences restants</a></td></tr>{% endlevelup %}
-	{% if train %}<tr><td><a href="?a=train&id={{id}}" onclick="return confirmTrain('{{prestige|intcomma}}')">Entrainement intensif pour <img src="{{PATH_IMAGES}}/interface/prestige.gif" width="16" height="16" class="res" title="Prestige">{{prestige|intcomma}}</a></td></tr>{% endtrain %}
-	{% if cant_train %}<tr><td>Vous ne pouvez entrainer ce commandant qu'une fois par jour</td></tr>{% endcant_train %}
-	{% if cant_train_anymore %}<tr><td>Vous ne pouvez pas entrainer ce commandant plus</td></tr>{% endcant_train_anymore %}
+	{% if commander.levelup %}<tr><td><a href="?a=skills&id={{commander.id}}">Répartir les {{commander.points}} points de compétences restants</a></td></tr>{% endif %}
+	{% if commander.train %}<tr><td><a href="?a=train&id={{commander.id}}" onclick="return confirmTrain('{{commander.prestige|intcomma}}')">Entrainement intensif pour <img src="{{PATH_IMAGES}}/interface/prestige.gif" width="16" height="16" class="res" title="Prestige">{{commander.prestige|intcomma}}</a></td></tr>{% endif %}
+	{% if commander.cant_train %}<tr><td>Vous ne pouvez entrainer ce commandant qu'une fois par jour</td></tr>{% endif %}
+	{% if commander.cant_train_anymore %}<tr><td>Vous ne pouvez pas entrainer ce commandant plus</td></tr>{% endif %}
 	</table>
 	</td>
 </tr>
 {% endfor %}
-{% if nocommander %}<tr><td colspan=2 align=center>Aucun actuellement</td></tr>{% endnocommander %}
+{% if commanders_nocommander %}<tr><td colspan=2 align=center>Aucun actuellement</td></tr>{% endif %}
 </table>
-{% if recruitcommander %}Vous pouvez recruter un nouveau commandant.<br/><a href="?a=new">Veuillez remplir le profil que vous recherchez ici</a>.{% endrecruitcommander %}
+{% if recruitcommander %}Vous pouvez recruter un nouveau commandant.<br/><a href="?a=new">Veuillez remplir le profil que vous recherchez ici</a>.{% endif %}
 {% endif %}
 
 {% if available_commanders %}
@@ -89,42 +89,42 @@ function confirmTrain(prestige) {
 <tr class="title"><td colspan="2">Commandants pouvant être recrutés</td></tr>
 <tr class="header"><td width="220">Commandant</td><td>Compétences</td></tr>
 
-{% if commander %}
+{% for commander in available_commanders %}
 <tr class="smallitem">
 	<td valign="top">
-	<div class=left><img src="{{PATH_IMAGES}}/interface/commander.gif" width=10 height=6 class="smallicon" title="Commandant"><a name="{{name}}">{{name}}</a></div>
-	<div class=right>{% if can_engage %}<a href="?a=engage&id={{id}}" onclick="return confirmEngageCommander({{name:quote}})">Embaucher</a>{% endcan_engage %}{% if cant_engage %}<span class="cant_engage">Embaucher</span>{% endcant_engage %}</div><div class=clear></div>
+	<div class=left><img src="{{PATH_IMAGES}}/interface/commander.gif" width=10 height=6 class="smallicon" title="Commandant"><a name="{{commander.name}}">{{commander.name}}</a></div>
+	<div class=right>{% if commander.can_engage %}<a href="?a=engage&id={{commander.id}}" onclick="return confirmEngageCommander('{{commander.name}}')">Embaucher</a>{% endif %}{% if commander.cant_engage %}<span class="cant_engage">Embaucher</span>{% endif %}</div><div class=clear></div>
 	<table class=clear style="margin-left:22px">
-	<tr><td>Salaire:</td><td><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{salary|intcomma}}</td></tr>
-	<tr><td>Repéré le:</td><td>{{added:dd mmm yyyy}}</td></tr>
+	<tr><td>Salaire:</td><td><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{commander.salary|intcomma}}</td></tr>
+	<tr><td>Repéré le:</td><td>{{commander.added}}</td></tr>
 	</table>
 	</td>
 	<td valign="top">
 	<table class="clear">
-	{% if bonus %}<tr><td class="{% if positive %}plus{% endpositive %}{% if negative %}minus{% endnegative %}">
-	{% if description14 %}Production : Minerai{% enddescription14 %}
-	{% if description15 %}Production : Hydrocarbure{% enddescription15 %}
-	{% if description16 %}Production : Énergie{% enddescription16 %}
-	{% if description17 %}Formation : Travailleurs{% enddescription17 %}
-	{% if description18 %}Flottes : Vitesse{% enddescription18 %}
-	{% if description19 %}Flottes : Bouclier{% enddescription19 %}
-	{% if description20 %}Flottes : Manœuvrabilité{% enddescription20 %}
-	{% if description21 %}Flottes : Acquisition cibles{% enddescription21 %}
-	{% if description22 %}Flottes : Dégats augmentés{% enddescription22 %}
-	{% if description23 %}Flottes : Réduction signature{% enddescription23 %}
-	{% if description24 %}Bâtiments : Vitesse construction{% enddescription24 %}
-	{% if description25 %}Vaisseaux : Vitesse construction{% enddescription25 %}
-	&nbsp;{{bonus}}%</td></tr>
+	{% for bonus in commander.bonuses %}<tr><td class="{% if bonus.positive %}plus{% endif %}{% if bonus.negative %}minus{% endif %}">
+	{% if bonus.description14 %}Production : Minerai{% endif %}
+	{% if bonus.description15 %}Production : Hydrocarbure{% endif %}
+	{% if bonus.description16 %}Production : Énergie{% endif %}
+	{% if bonus.description17 %}Formation : Travailleurs{% endif %}
+	{% if bonus.description18 %}Flottes : Vitesse{% endif %}
+	{% if bonus.description19 %}Flottes : Bouclier{% endif %}
+	{% if bonus.description20 %}Flottes : Manœuvrabilité{% endif %}
+	{% if bonus.description21 %}Flottes : Acquisition cibles{% endif %}
+	{% if bonus.description22 %}Flottes : Dégats augmentés{% endif %}
+	{% if bonus.description23 %}Flottes : Réduction signature{% endif %}
+	{% if bonus.description24 %}Bâtiments : Vitesse construction{% endif %}
+	{% if bonus.description25 %}Vaisseaux : Vitesse construction{% endif %}
+	&nbsp;{{bonus.bonus}}%</td></tr>
 	{% endfor %}
-	{% if levelup %}<tr><td>{{points}} points de compétences restants à distribuer</td></tr>{% endlevelup %}
+	{% if commander.levelup %}<tr><td>{{commander.points}} points de compétences restants à distribuer</td></tr>{% endif %}
 	</table>
 	</td>
 </tr>
 {% endfor %}
-{% if nocommander %}<tr><td colspan="2" align="center">Aucun actuellement</td></tr>{% endnocommander %}
+{% if available_commanders_nocommander %}<tr><td colspan="2" align="center">Aucun actuellement</td></tr>{% endif %}
 </table>
 
-{% endavailable_commanders %}
+{% endif %}
 </div>
 
 {% if editcommander %}
@@ -210,5 +210,5 @@ function addskill(name,label,increase,value,max) {
 </table>
 </form>
 </div>
-{% endeditcommander %}
+{% endif %}
 {% endblock %}

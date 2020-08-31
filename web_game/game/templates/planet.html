@@ -81,13 +81,13 @@ function confirmWorkers(id) { return window.confirm('Êtes-vous sûr de vouloir 
 </tr>
 <tr>
 	<td>Localisation</td>
-	<td><a href="/game/map/?g={{g}}&s={{s}}">{{g}}.{{s}}.{{p}}</a></td>
+	<td><a href="/game/map/?g={{pla_g}}&s={{pla_s}}">{{pla_g}}.{{pla_s}}.{{pla_p}}</a></td>
 </tr>
 <tr>
 	<td>Commandant</td>
 
 	<td id="cmdref">
-	<div style="float:left"><img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallicon" width=10 height=6 title="Commandant">{% if nocommander %}-{% endif %}{% if commander %}{{commander}}{% endif %}</div>
+	<div style="float:left"><img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallicon" width=10 height=6 title="Commandant">{% if nocommander %}-{% endif %}{% if commander %}{{commandername}}{% endif %}</div>
 	<div align="right"><a href="#" title="Affecter un nouveau commandant" onclick="return show('cmdref','commandersbox')">Changer</a></div></td>
 </tr>
 <tr>
@@ -165,9 +165,9 @@ function confirmWorkers(id) { return window.confirm('Êtes-vous sûr de vouloir 
 <td>
 	<table class="clear" width="100%">
 
-	{% if building %}
+	{% for building in buildings %}
 	<tr>
-		<td>{% if destroy %}<span class="destroy">Destruction de {% endif %}<a href="/game/buildings/#{{buildingid}}" {% if destroy %} class="destroy" {% endif %} title="Voir les infrastructures">{{building}}</a> (<script>putcountdown1({{time}}, "terminé", "/game/buildings/#{{buildingid}}");</script>){% if destroy %}</span>{% endif %}</td>
+		<td>{% if building.destroy %}<span class="destroy">Destruction de {% endif %}<a href="/game/buildings/#{{building.buildingid}}" {% if building.destroy %} class="destroy" {% endif %} title="Voir les infrastructures">{{building.building}}</a> (<script>putcountdown1({{building.time}}, "terminé", "/game/buildings/#{{building.buildingid}}");</script>){% if building.destroy %}</span>{% endif %}</td>
 	</tr>
 	{% endfor %}
 	{% if nobuilding %}
@@ -191,9 +191,9 @@ function confirmWorkers(id) { return window.confirm('Êtes-vous sûr de vouloir 
 <tr class="item">
 <td>
 	<table class="clear" width="100%">
-	{% if ship %}
+	{% for ship in ships %}
 	<tr>
-		<td>{% if recycle %}Recyclage de {% endif %}<a href="/game/shipyard/#{{shipid}}" title="Voir le chantier spatial">{{ship}}</a> (<script>putcountdown1({{time}}, "terminé", "/game/shipyard/#{{shipid}}");</script>)</td>
+		<td>{% if ship.recycle %}Recyclage de {% endif %}<a href="/game/shipyard/#{{ship.shipid}}" title="Voir le chantier spatial">{{ship.ship}}</a> (<script>putcountdown1({{ship.time}}, "terminé", "/game/shipyard/#{{ship.shipid}}");</script>)</td>
 	</tr>
 	{% endfor %}
 	{% if noship %}
@@ -217,20 +217,20 @@ function confirmWorkers(id) { return window.confirm('Êtes-vous sûr de vouloir 
 <td>
 	<table class="clear" width="100%">
 
-	{% if fleet %}
+	{% for fleet in fleets %}
 	<tr>
-		<td nowrap>{% if owner %}<a class="self" href="/game/fleet/?id={{id}}" title="Inspecter la flotte {{name}}">{{name}}</a>{% endowner %}
-			{% if ally %}<span class="ally"><b>{{name}}</b></span>{% endif %}
-			{% if friend %}<span class="friend"><b>{{name}}</b></span>{% endif %}
-			{% if enemy %}<span class="enemy"><b>{{name}}</b></span>{% endif %} ({{signature|intcomma}})
+		<td nowrap>{% if fleet.owner %}<a class="self" href="/game/fleet/?id={{fleet.id}}" title="Inspecter la flotte {{fleet.name}}">{{fleet.name}}</a>{% endif %}
+			{% if fleet.ally %}<span class="ally"><b>{{fleet.name}}</b></span>{% endif %}
+			{% if fleet.friend %}<span class="friend"><b>{{fleet.name}}</b></span>{% endif %}
+			{% if fleet.enemy %}<span class="enemy"><b>{{fleet.name}}</b></span>{% endif %} ({{fleet.signature|intcomma}})
 		</td>
 		<td>
-		{% if fighting %}<span class="fighting">En combat</span>{% endfighting %}
-		{% if patrolling %}En patrouille{% endpatrolling %}
+		{% if fleet.fighting %}<span class="fighting">En combat</span>{% endif %}
+		{% if fleet.patrolling %}En patrouille{% endif %}
 		</td>
 
 		<td>
-		<img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallicon" width=10 height=6 title="Commandant">{% if nocommander %}-{% endnocommander %}{% if commander %}<a href="/game/commanders/#{{commandername}}">{{commandername}}</a>{% endcommander %}
+		<img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallicon" width=10 height=6 title="Commandant">{% if fleet.nocommander %}-{% endif %}{% if commander %}<a href="/game/commanders/#{{fleet.commandername}}">{{fleet.commandername}}</a>{% endif %}
 		</td>
 	</tr>
 	{% endfor %}
@@ -238,7 +238,7 @@ function confirmWorkers(id) { return window.confirm('Êtes-vous sûr de vouloir 
 	<tr>
 		<td><a href="/game/orbit/" title="Voir l'orbite de la planète">Aucune flotte près de la planète</a></td>
 	</tr>
-	{% endnofleet %}
+	{% endif %}
 	</table>
 </td></tr>
 </table>

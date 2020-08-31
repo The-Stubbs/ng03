@@ -24,15 +24,15 @@ class View(GlobalView):
         oRss = oConnExecuteAll(query)
 
         list = []
+        content.AssignValue("categories", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            item["id", oRs[0]
-            item["label", oRs[1]
-            content.Parse("master.category"
+            item["id"] = oRs[0]
+            item["label"] = oRs[1]
 
-        content.Parse("master"
+        content.Parse("master")
 
         return self.Display(content)
 
