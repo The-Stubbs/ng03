@@ -21,6 +21,7 @@ class GlobalView(ExileMixin, View):
     pageTerminated = False
     displayAlliancePlanetName = True
     pagelogged = False
+    selected_menu = ""
     
     def pre_dispatch(self, request, *args, **kwargs):
         
@@ -282,20 +283,19 @@ class GlobalView(ExileMixin, View):
                 " FROM planet_buildings INNER JOIN db_buildings ON (db_buildings.id=buildingid AND db_buildings.is_planet_element)" +\
                 " WHERE planetid="+str(self.CurrentPlanet)+\
                 " ORDER BY upper(db_buildings.label)"
-        oRs = oConnExecute(query)
+        oRs = oConnExecuteAll(query)
     
         i = 0
         if oRs:
             for item in oRs:
-                tpl_header.AssignValue("name", getBuildingLabel(item[0]))
-    
+
                 if i % 3 == 0:
-                    tpl_header.Parse("special.special1")
+                    tpl_header.AssignValue("special1", getBuildingLabel(item[0]))
                 elif i % 3 == 1:
-                    tpl_header.Parse("special.special2")
+                    tpl_header.AssignValue("special2", getBuildingLabel(item[0]))
                 else:
-                    tpl_header.Parse("special.special3")
-                    tpl_header.Parse("special")
+                    tpl_header.AssignValue("special3", getBuildingLabel(item[0]))
+                    tpl_header.AssignValue("special")
         
                 i = i + 1
     

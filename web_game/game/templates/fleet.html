@@ -303,7 +303,7 @@ En attente (<script>putcountdown1({{time}}, 'Terminé', '?id={{fleetid}}')</scri
 
 <tr><td nowrap>Attitude</td><td>
 <div class=left>{% if attack %}<img src="{{PATH_IMAGES}}/interface/stance_attack.gif" class="stance" alt="Attaque" width="10" height="10">Attaquer à vue{% endif %}{% if defend %}<img src="{{PATH_IMAGES}}/interface/stance_defend.gif" class="stance" alt="Riposte" width="10" height="10">Riposter aux attaques{% endif %} </div>
-<div class=right>{% if setstance %}<a href="?id={{fleetid}}&action={% if attack %}attack{% endif %}{% if defend %}defend{% endif %}">{% if attack %}Attaquer{% endif %}{% if defend %}Riposter{% endif %}</a>{% endif %}{% if cant_setstance %}<span class="error" title="Les flottes non armées ne peuvent attaquer">Attaquer</span>{% endif %}</div>
+<div class=right>{% if setstance %}<a href="?id={{fleetid}}&action={% if setstance_attack %}attack{% endif %}{% if setstance_defend %}defend{% endif %}">{% if setstance_attack %}Attaquer{% endif %}{% if setstance_defend %}Riposter{% endif %}</a>{% endif %}{% if cant_setstance %}<span class="error" title="Les flottes non armées ne peuvent attaquer">Attaquer</span>{% endif %}</div>
 </td></tr>
 
 <tr><td nowrap>Commandement</td>
@@ -477,7 +477,7 @@ function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
 <td>
 
 <table class=default width="100%">
-<tr class="category"><td>{{fleetname}} ({{fleet_signature|intcomma}}){% if manage %} - <a href="fleet-ships.asp?id={{fleetid}}">Gérer vaisseaux</a>{% endif %}{% if split %} - <a href="fleet-split.asp?id={{fleetid}}">Scinder</a>{% endif %}</tr>
+<tr class="category"><td>{{fleetname}} ({{fleet_signature|intcomma}}){% if manage %} - <a href="/game/fleet-ships/?id={{fleetid}}">Gérer vaisseaux</a>{% endif %}{% if split %} - <a href="/game/fleet-split/?id={{fleetid}}">Scinder</a>{% endif %}</tr>
 {% for ship in shiplist %}
 <tr>
 <td nowrap><div class=left><a href="help.asp?cat=ships#{{ship.id}}" onmouseover="ddrivetip(descShip({{ship.id}}))" onmouseout="hideddrivetip()"><b>{{ship.name}}</b></a> x{{ship.quantity|intcomma}}</div>

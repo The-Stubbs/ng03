@@ -256,9 +256,9 @@ class View(GlobalView):
         # if the fleet can be set to attack (firepower > 0)
         if oRs[43]:
             if oRs[2]:
-                content.Parse("defend")
+                content.Parse("setstance_defend")
             else:
-                content.Parse("attack")
+                content.Parse("setstance_attack")
 
             content.Parse("setstance")
         else:
@@ -714,13 +714,13 @@ class View(GlobalView):
             self.MoveFleet(fleetid)
 
         if self.request.GET.get("action") == "share":
-            oConnExecute("UPDATE fleets SET shared=not shared WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+            oConnDoQuery("UPDATE fleets SET shared=not shared WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
         elif self.request.GET.get("action") == "abandon":
             oConnExecute("SELECT sp_abandon_fleet(" + str(self.UserId) + "," + str(fleetid) + ")")
         elif self.request.GET.get("action") == "attack":
-            oConnExecute("UPDATE fleets SET attackonsight=firepower > 0 WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+            oConnDoQuery("UPDATE fleets SET attackonsight=firepower > 0 WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
         elif self.request.GET.get("action") == "defend":
-            oConnExecute("UPDATE fleets SET attackonsight=False WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+            oConnDoQuery("UPDATE fleets SET attackonsight=False WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
         elif self.request.GET.get("action") == "recycle":
             oRs = oConnExecute("SELECT sp_start_recycling(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
             if oRs[0] == -2:

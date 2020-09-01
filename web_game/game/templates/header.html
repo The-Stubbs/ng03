@@ -33,7 +33,7 @@ table.tableheader td { padding-right:8px; }
 		<td nowrap><img src="{{PATH_IMAGES}}/interface/floor.gif" title="Terrain" width=16 height=16 class=res>{{floor_occupied|intcomma}} / {{floor|intcomma}}</td>
 {% if special %}
 		<td>
-			{% if special1 %}<div class="left"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{{name}}</div>{% endif %}
+			{% if special1 %}<div class="left"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{{special1}}</div>{% endif %}
 		</td>
 {% endif %}
 		<td rowspan=3>&nbsp;<a href="#" onclick="nextplanet(); return false;"><img src="{{PATH_IMAGES}}/interface/right.gif" title="Planète suivante" width=10 height=34></a></td>
@@ -45,7 +45,7 @@ table.tableheader td { padding-right:8px; }
 		<td nowrap><img src="{{PATH_IMAGES}}/interface/space.gif" title="Espace" width=16 height=16 class=res>{{space_occupied|intcomma}} / {{space|intcomma}}</td>
 {% if special %}
 		<td>
-			{% if special2 %}<div class="left"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{name}</div>{% endif %}
+			{% if special2 %}<div class="left"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{{special2}}</div>{% endif %}
 		</td>
 {% endif %}
 	</tr>
@@ -56,7 +56,7 @@ table.tableheader td { padding-right:8px; }
 		<td nowrap></td>
 {% if special %}
 		<td>
-			{% if special3 %}<div class="left"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{name}</div>{% endif %}
+			{% if special3 %}<div class="left"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{{special3}}</div>{% endif %}
 		</td>
 {% endif %}
 	</tr>

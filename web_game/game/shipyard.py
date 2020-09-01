@@ -268,8 +268,8 @@ class View(GlobalView):
                         ship["building"] = getBuildingLabel(i[1])
                         ship["buildingsrequired"] = True
         
-        content.AssignValue("categories", categories)
         if count == 0: content.Parse("no_shipyard")
+        else: content.AssignValue("categories", categories)
         
         if buildable > 0: content.Parse("build")
         else: content.Parse("nobuild")

@@ -372,7 +372,7 @@ class View(GlobalView):
                 "    LEFT JOIN alliances ON (users.alliance_id=alliances.id)" + \
                 " WHERE galaxy=" + str(galaxy) + " AND sector=" + str(sector) + \
                 " ORDER BY planet"
-        oRss = oConnExecute(query)
+        oRss = oConnExecuteAll(query)
 
         # in then there is no planets, redirect player to the map of the galaxies
         if oRss == None:
@@ -389,7 +389,7 @@ class View(GlobalView):
             if rel == rAlliance and not self.hasRight("can_use_alliance_radars"):
                 rel = rWar
 
-            if rel == rFriend and not oRs[26]:
+            if rel == rFriend and not oRs[25]:
                 rel = rWar
 
             displayElements = False # hasElements is True if the planet has some particularities like magnetic cloud or sun radiation ..
@@ -406,56 +406,57 @@ class View(GlobalView):
             
             planet['fleets'] = []
             fleetcount = 0
-            for i in fleetsArray:
-                if i[0] == planetid:
-
-                    # display fleets on : 
-                    #    alliance and own planets 
-                    #    planets where we got a fleet or (a fleet of an alliance member and can_use_alliance_radars)
-                    #    planets that our radar can detect
-                    if (self.hasRight("can_use_alliance_radars") and ( (rel >= rAlliance) or i[5] )) or radarstrength > oRs[9] or i[10]:
-
-                        fleet = {}
-                        fleetcount = fleetcount + 1
-
-                        fleet["fleetid"] = 0
-
-                        fleet["fleetname"] = i[2]
-                        fleet["relation"] = i[3]
-                        fleet["fleetowner"] = i[8]
-
-                        if (oRs[5] > rFriend) or (i[3] > rFriend) or (radarstrength > oRs[9]) or (i[5] and oRs[9] == 0):
-                            fleet["signature"] = i[4]
-                        else:
-                            fleet["signature"] = -1
-
-                        if i[6]: fleet["fleeing"] = True
-
-                        if i[7] == None:
-                            fleet["alliancetag"] = ""
-                        else:
-                            fleet["alliancetag"] = i[7]
-
-                        if i[3] == rSelf:
-                            fleet["fleetid"] = i[1]
-
-                            allyfleetcount = allyfleetcount + 1
-                            friendfleetcount = friendfleetcount + 1
-                        elif i[3] == rAlliance:
-                            allyfleetcount = allyfleetcount + 1
-                            friendfleetcount = friendfleetcount + 1
-
-                            if self.hasRight("can_order_other_fleets") and fleetsArray(9, i):
+            if fleetsArray:
+                for i in fleetsArray:
+                    if i[0] == planetid:
+    
+                        # display fleets on : 
+                        #    alliance and own planets 
+                        #    planets where we got a fleet or (a fleet of an alliance member and can_use_alliance_radars)
+                        #    planets that our radar can detect
+                        if (self.hasRight("can_use_alliance_radars") and ( (rel >= rAlliance) or i[5] )) or radarstrength > oRs[9] or i[10]:
+    
+                            fleet = {}
+                            fleetcount = fleetcount + 1
+    
+                            fleet["fleetid"] = 0
+    
+                            fleet["fleetname"] = i[2]
+                            fleet["relation"] = i[3]
+                            fleet["fleetowner"] = i[8]
+    
+                            if (oRs[5] > rFriend) or (i[3] > rFriend) or (radarstrength > oRs[9]) or (i[5] and oRs[9] == 0):
+                                fleet["signature"] = i[4]
+                            else:
+                                fleet["signature"] = -1
+    
+                            if i[6]: fleet["fleeing"] = True
+    
+                            if i[7] == None:
+                                fleet["alliancetag"] = ""
+                            else:
+                                fleet["alliancetag"] = i[7]
+    
+                            if i[3] == rSelf:
                                 fleet["fleetid"] = i[1]
-
-                        elif i[3] == rFriend:
-                            friendfleetcount = friendfleetcount + 1
-                        else:
-                            # if planet is owned by the player: increase enemy fleet
-                            enemyfleetcount = enemyfleetcount + 1
-
-                        planet['fleets'].append(fleet)
-
+    
+                                allyfleetcount = allyfleetcount + 1
+                                friendfleetcount = friendfleetcount + 1
+                            elif i[3] == rAlliance:
+                                allyfleetcount = allyfleetcount + 1
+                                friendfleetcount = friendfleetcount + 1
+    
+                                if self.hasRight("can_order_other_fleets") and fleetsArray(9, i):
+                                    fleet["fleetid"] = i[1]
+    
+                            elif i[3] == rFriend:
+                                friendfleetcount = friendfleetcount + 1
+                            else:
+                                # if planet is owned by the player: increase enemy fleet
+                                enemyfleetcount = enemyfleetcount + 1
+    
+                            planet['fleets'].append(fleet)
+    
             planet["planetid"] = planetid
             planet["planet"] = oRs[1]
             planet["relation"] = oRs[5]

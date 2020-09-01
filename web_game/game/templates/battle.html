@@ -9,26 +9,26 @@
 <tr class="header">
 <td>Flotte</td><td>Vaisseaux</td><td>Perdus</td><td>Détruits</td><td>Après combat</td>
 
-{% if opponent %}
-<tr class="category {% if self %}self{% endif %}{% if friend %}friend{% endif %}{% if ally %}ally{% endif %}{% if enemy %}enemy{% endif %}"><td>{% if attack %}<img src="{{PATH_IMAGES}}/interface/stance_attack.gif" alt="Attaque" class="stance">{% endif %}{% if defend %}<img src="{{PATH_IMAGES}}/interface/stance_defend.gif" alt="Rispote" class="stance">{% endif %}<a href="?id={{battleid}}&v={{view}}{% if public %}&by={{userid}}&key={{key}}{% endif %}" class="{% if self %}self{% endif %}{% if friend %}friend{% endif %}{% if ally %}ally{% endif %}{% if enemy %}enemy{% endif %}">{% if alliance %}[{{alliancetag}}] {% endif %}{{opponent}}{% if won %} (vainqueur){% endwon %}</a></td><td>{{ships}}</td><td>{{lost}}</td><td>{{killed}}</td><td>{{after}}</td></tr>
-{% if fleet %}
-<tr class="category {% if self %}self{% endif %}{% if friend %}friend{% endif %}{% if ally %}ally{% endif %}{% if enemy %}enemy{% endif %}"><td>{{fleet}} (B:{{mod_shield}} M:{{mod_handling}} C:{{mod_tracking_speed}} D:{{mod_damage}})</td><td>{{ships}}</td><td>{{lost}}</td><td>{{killed}}</td><td>{{after}}</td></tr>
-{% if ship %}
+{% for opponent in opponents %}
+<tr class="category {% if opponent.self %}self{% endif %}{% if opponent.friend %}friend{% endif %}{% if opponent.ally %}ally{% endif %}{% if opponent.enemy %}enemy{% endif %}"><td>{% if opponent.attack %}<img src="{{PATH_IMAGES}}/interface/stance_attack.gif" alt="Attaque" class="stance">{% endif %}{% if opponent.defend %}<img src="{{PATH_IMAGES}}/interface/stance_defend.gif" alt="Rispote" class="stance">{% endif %}<a href="?id={{battleid}}&v={{opponent.view}}{% if opponent.public %}&by={{opponent.userid}}&key={{key}}{% endif %}" class="{% if opponent.self %}self{% endif %}{% if opponent.friend %}friend{% endif %}{% if opponent.ally %}ally{% endif %}{% if opponent.enemy %}enemy{% endif %}">{% if opponent.alliance %}[{{opponent.alliancetag}}] {% endif %}{{opponent.name}}{% if opponent.won %} (vainqueur){% endif %}</a></td><td>{{opponent.count}}</td><td>{{opponent.lost}}</td><td>{{opponent.killed}}</td><td>{{opponent.after}}</td></tr>
+{% for fleet in opponent.fleets %}
+<tr class="category {% if fleet.self %}self{% endif %}{% if fleet.friend %}friend{% endif %}{% if fleet.ally %}ally{% endif %}{% if fleet.enemy %}enemy{% endif %}"><td>{{fleet.name}} (B:{{fleet.mod_shield}} M:{{fleet.mod_handling}} C:{{fleet.mod_tracking_speed}} D:{{fleet.mod_damage}})</td><td>{{fleet.count}}</td><td>{{fleet.lost}}</td><td>{{fleet.killed}}</td><td>{{fleet.after}}</td></tr>
+{% for ship in fleet.ships %}
 <tr class="smallitem">
 <td><span class="dot">&middot;</span>
-{% if name %}{{label}}{% endname %}
-{% if category10 %}Vaisseaux utilitaires{% endif %}
-{% if category11 %}Vaisseaux de déploiement{% endcategory11 %}
-{% if category15 %}Vaisseaux tactiques{% endcategory15 %}
-{% if category20 %}Vaisseaux légers{% endcategory20 %}
-{% if category30 %}Corvettes{% endcategory30 %}
-{% if category40 %}Frégates{% endcategory40 %}
-{% if category50 %}Croiseurs{% endcategory50 %}
-{% if category60 %}Dreadnought{% endcategory60 %}
-{% if category80 %}Titan{% endcategory80 %}
-{% if category90 %}Plateforme de défense{% endcategory90 %}
+{% if ship.label %}{{ship.label}}{% endif %}
+{% if ship.category10 %}Vaisseaux utilitaires{% endif %}
+{% if ship.category11 %}Vaisseaux de déploiement{% endif %}
+{% if ship.category15 %}Vaisseaux tactiques{% endif %}
+{% if ship.category20 %}Vaisseaux légers{% endif %}
+{% if ship.category30 %}Corvettes{% endif %}
+{% if ship.category40 %}Frégates{% endif %}
+{% if ship.category50 %}Croiseurs{% endif %}
+{% if ship.category60 %}Dreadnought{% endif %}
+{% if ship.category80 %}Titan{% endif %}
+{% if ship.category90 %}Plateforme de défense{% endif %}
 </td>
-<td>{{ships}}</td><td>{{lost}}</td><td>{% if killed %}{{killed_name}} x{{killed_count|intcomma}}<br/>{% endfor %}{% if killed_total %}Total: {{killed}}{% endkilled_total %}{% if killed_zero %}0{% endkilled_zero %}</td><td>{{after}}</td></tr>
+<td>{{ship.ships}}</td><td>{{ship.lost}}</td><td>{% for kill in ship.kills %}{{kill.killed_name}} x{{kill.killed_count|intcomma}}<br/>{% endfor %}{% if ship.killed_total %}Total: {{ship.killed}}{% endif %}{% if ship.killed_zero %}0{% endif %}</td><td>{{ship.after}}</td></tr>
 {% endfor %}
 {% endfor %}
 <tr class="smallitem"><td colspan=5>&nbsp;</td></tr>

@@ -651,7 +651,7 @@ function displayRadar() {
 			displaySector(new Array(0
 				{% for planet in locations %},new Array('{% if planet.planet %}{{planet.planet_img}}{% endif %}{% if planet.vortex %}vortex{% endif %}{% if planet.asteroids %}asteroids{% endif %}{% if planet.clouds %}clouds{% endif %}', '{{planet.alliancetag}}','{{planet.planetid}}','{{planet.ownername}}','{{planet.planetname}}',{{planet.relation}},{{planet.radarstrength}},{{planet.radarjamming}},'{{planet.ore|intcomma}}','{{planet.hydrocarbon|intcomma}}','{{planet.floor}}','{{planet.space}}', '{{planet.a_ore}}','{{planet.a_hydrocarbon}}','{{planet.vortex_strength}}',{% if planet.frozen %}true{% endif %}{% if planet.active %}false{% endif %},{{planet.parked}}
 				,new Array({% if planet.orbit %}0{% for fleet in planet.fleets %},new Array({{fleet.fleetid}},'{{fleet.fleetname}}','{{fleet.alliancetag}}','{{fleet.fleetowner}}',{{fleet.relation}},{{fleet.signature}},0{% if fleet.fleeing %}1{% endif %}){% endfor %}{% endif %})
-				,new Array({% for element in planet.elements %}0{% if element.element %},'{{element.element}}'{% endif %}{% endfor %})
+				,new Array({% if planet.elements %}0{% for element in planet.elements %},'{{element.element}}'{% endfor %}{% endif %})
 				,'{{planet.buy_ore|intcomma}}','{{planet.buy_hydrocarbon|intcomma}}'
 				){% endfor %}
 			));
