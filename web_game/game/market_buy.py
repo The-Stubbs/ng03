@@ -21,8 +21,8 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "market-buy")
 
-        planet = self.request.GET.get("planet", "").strip()
-        if planet != "": planet = " AND v.id=" + dosql(planet)
+        get_planet = self.request.GET.get("planet", "").strip()
+        if get_planet != "": get_planet = " AND v.id=" + dosql(get_planet)
 
         self.request.session["details"] = "list planets"
 
@@ -39,7 +39,7 @@ class View(GlobalView):
                 " (sp_get_resource_price(" + str(self.UserId) + ", v.galaxy)).buy_hydrocarbon AS p_hydrocarbon" + \
                 " FROM vw_planets AS v" + \
                 "    LEFT JOIN market_purchases AS m ON (m.planetid=v.id)" + \
-                " WHERE floor > 0 AND v.ownerid="+str(self.UserId) + planet + \
+                " WHERE floor > 0 AND v.ownerid="+str(self.UserId) + get_planet + \
                 " ORDER BY v.id"
         oRss = oConnExecuteAll(query)
 
@@ -115,15 +115,13 @@ class View(GlobalView):
 
             if oRs[0] == self.CurrentPlanet: item["highlight"] = True
 
-            content.Parse("planet")
-
             i = i + 1
 
-        if planet != "":
+        if get_planet != "":
             self.showHeader = True
             self.selected_menu = "market.buy"
 
-            content.Parse("planetid")
+            content.AssignValue("get_planet", self.request.GET.get("planet", ""))
         else:
             self.FillHeaderCredits(content)
             content.AssignValue("total", total)
@@ -136,16 +134,16 @@ class View(GlobalView):
     # execute buy orders
     def ExecuteOrder(self):
 
-        if self.request.GET.get("a") != "buy": return
+        if self.request.GET.get("a", "") != "buy": return
 
         self.request.session["details"] = "Execute orders"
 
         # for each planet owned, check what the player buys
         query = "SELECT id FROM nav_planet WHERE ownerid="+str(self.UserId)
-        planetsArray = oConnExecute(query)
+        planetsArray = oConnExecuteAll(query)
 
         for i in planetsArray:
-            planetid = i
+            planetid = i[0]
 
             # retrieve ore + hydrocarbon quantities
             ore = ToInt(self.request.POST.get("o" + str(planetid)), 0)

@@ -12,10 +12,13 @@ from web_game.game import alliance
 from web_game.game import alliance_create
 from web_game.game import alliance_invitations
 from web_game.game import battle
+from web_game.game import battle_view
 from web_game.game import buildings
 from web_game.game import commanders
 from web_game.game import fleet
 from web_game.game import fleet_trade
+from web_game.game import fleet_ships
+from web_game.game import fleet_split
 from web_game.game import fleets
 from web_game.game import fleets_handler
 from web_game.game import mails
@@ -25,11 +28,15 @@ from web_game.game import market_sell
 from web_game.game import orbit
 from web_game.game import overview
 from web_game.game import planet
+from web_game.game import planets
 from web_game.game import production
+from web_game.game import ranking_alliances
+from web_game.game import ranking_players
 from web_game.game import reports
 from web_game.game import research
-from web_game.game import training
 from web_game.game import shipyard
+from web_game.game import training
+from web_game.game import upkeep
 from web_game.game import start
 from web_game.game import wait
 
@@ -47,13 +54,21 @@ urlpatterns = [
 	#---------------------------------------------------------------------------
     path('alliance-create/', alliance_create.View.as_view()),
     path('alliance-invitations/', alliance_invitations.View.as_view()),
+    path('alliance-manage/', not_implemented.View.as_view()),
+    path('alliance-members/', not_implemented.View.as_view()),
+    path('alliance-naps/', not_implemented.View.as_view()),
+    path('alliance-reports/', not_implemented.View.as_view()),
+    path('alliance-tributes/', not_implemented.View.as_view()),
+    path('alliance-wallet/', not_implemented.View.as_view()),
+    path('alliance-wars/', not_implemented.View.as_view()),
     path('alliance/', alliance.View.as_view()),
+    path('battle-view/', battle_view.View.as_view()),
     path('battle/', battle.View.as_view()),
     path('buildings/', buildings.View.as_view()),
     path('chat/', not_implemented.View.as_view()),
     path('commanders/', commanders.View.as_view()),
-    path('fleet-ships/', not_implemented.View.as_view()),
-    path('fleet-split/', not_implemented.View.as_view()),
+    path('fleet-ships/', fleet_ships.View.as_view()),
+    path('fleet-split/', fleet_split.View.as_view()),
     path('fleet-trade/', fleet_trade.View.as_view()),
     path('fleet/', fleet.View.as_view()),
     path('fleets_handler/', fleets_handler.View.as_view()),
@@ -72,17 +87,17 @@ urlpatterns = [
     path('orbit/', orbit.View.as_view()),
     path('options/', not_implemented.View.as_view()),
     path('overview/', overview.View.as_view()),
-    path('planets/', not_implemented.View.as_view()),
+    path('planets/', planets.View.as_view()),
     path('planet/', planet.View.as_view()),
     path('production/', production.View.as_view()),
-    path('ranking-alliances/', not_implemented.View.as_view()),
-    path('ranking-players/', not_implemented.View.as_view()),
+    path('ranking-alliances/', ranking_alliances.View.as_view()),
+    path('ranking-players/', ranking_players.View.as_view()),
     path('reports/', reports.View.as_view()),
     path('research/', research.View.as_view()),
     path('shipyard/', shipyard.View.as_view()),
     path('start/', start.View.as_view()),
     path('training/', training.View.as_view()),
-    path('upkeep/', not_implemented.View.as_view()),
+    path('upkeep/', upkeep.View.as_view()),
     path('wait/', wait.View.as_view()),
 	#---------------------------------------------------------------------------
 ]

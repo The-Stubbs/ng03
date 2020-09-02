@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from math import sqrt
+
 from web_game.game._global import *
 from web_game.lib.accounts import *
 
@@ -145,22 +147,22 @@ class View(GlobalView):
                 " ORDER BY p.id, destroying, remaining_time DESC"
         oRs = oConnExecuteAll(query)
 
-        if oRs: lastplanet=0
+        lastplanet = -1
 
         constructionyards = []
         items = 0
         for item in oRs:
             if item[0] != lastplanet:
                 planet = {"buildings":[]}
-                constructionyards.append(planet)
                 lastplanet = item[0]
                 items = 0
 
-            planet["planetid"] = item[0]
-            planet["planetname"] = item[1]
-            planet["galaxy"] = item[2]
-            planet["sector"] = item[3]
-            planet["planet"] = item[4]
+                planet["planetid"] = item[0]
+                planet["planetname"] = item[1]
+                planet["galaxy"] = item[2]
+                planet["sector"] = item[3]
+                planet["planet"] = item[4]
+                constructionyards.append(planet)
 
             if item[5]:
                 building = {}
@@ -170,6 +172,7 @@ class View(GlobalView):
 
                 if item[7]:
                     building["destroy"] = True
+                    
                 planet["buildings"].append(building)
 
                 items = items + 1
@@ -194,6 +197,7 @@ class View(GlobalView):
             items = 0
             for item in oRs:
                 if item[0] != lastplanet:
+                    planet = {}
                     shipyards.append(planet)
                     lastplanet = item[0]
 

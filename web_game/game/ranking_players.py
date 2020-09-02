@@ -19,38 +19,23 @@ class View(GlobalView):
         #
         # Setup search by Alliance and Nation query string
         #
-        if False:
-            searchbyA = request.GET.get("a")
-            if searchbyA != "":
-                content.AssignValue("param_a", searchbyA
-
-                searchbyA = dosql("%"+searchbyA+"%")
-                searchbyA = " AND alliance_id IN (SELECT id FROM alliances WHERE upper(alliances.name) LIKE upper("+searchbyA+") OR upper(alliances.tag) LIKE upper("+searchbyA+"))"
-            else:
-                searchbyA = ""
-
-            searchbyN = ""'request.GET.get("n")
-            if searchbyN != "":
-                content.AssignValue("param_n", searchbyN
-
-                searchbyN = dosql("%"+searchbyN+"%")
-                searchbyN = " AND upper(login) LIKE upper("+searchbyN+") "
-            else:
-                searchbyN = ""
+        searchbyA = ""
+        searchbyN = ""
 
         searchby = searchbyA + searchbyN
 
         # if the page is a search result, add the search params to column ordering links
-        if searchby != "": content.Parse("search_params"
+        if searchby != "": content.Parse("search_params")
 
         #
         # Setup column ordering
         #
-        col = ToInt(request.GET.get("col"), 3)
+        col = ToInt(self.request.GET.get("col"), 3)
         if col < 1 or col > 4: col = 3
 
+        reversed = False
         if col == 1:
-            orderby = "== WHEN score_visibility=2 OR v.id="+str(self.UserId)+": upper(login) else: '# END, upper(login)"
+            orderby = "CASE WHEN score_visibility=2 OR v.id="+str(self.UserId)+"THEN upper(login) ELSE '' END, upper(login)"
         elif col == 2:
             orderby = "upper(alliances.name)"
         elif col == 3:
@@ -60,15 +45,15 @@ class View(GlobalView):
             orderby = "v.score_prestige"
             reversed = True
 
-        if request.GET.get("r") != "":
+        if self.request.GET.get("r", "") != "":
             reversed = not reversed
         else:
-            content.Parse("r" + col
+            content.Parse("r" + str(col))
 
         if reversed: orderby = orderby + " DESC"
         orderby = orderby + ", upper(login)"
 
-        content.AssignValue("sort_column", col
+        content.AssignValue("sort_column", col)
 
         #
         # get the score of the tenth user to only show the avatars of the first 10 players
@@ -89,7 +74,7 @@ class View(GlobalView):
         #
         # Retrieve the offset from where to begin the display
         #
-        offset = ToInt(request.GET.get("start"), -1)
+        offset = ToInt(self.request.GET.get("start"), -1)
 
         if offset < 0:
             query = "SELECT v.id" + \
@@ -103,6 +88,7 @@ class View(GlobalView):
             for oRs in oRss:
                 if oRs[0] == self.UserId:
                     found = True
+                    break
 
                 index = index +1
 
@@ -114,14 +100,14 @@ class View(GlobalView):
         query = "SELECT count(1) FROM vw_players WHERE True "+searchby
         oRs = oConnExecute(query)
         size = int(oRs[0])
-        nb_pages = Int(size/displayed)
+        nb_pages = int(size/displayed)
         if nb_pages*displayed < size: nb_pages = nb_pages + 1
         if offset >= nb_pages: offset = nb_pages-1
         if offset < 0: offset = 0
 
-        content.AssignValue("page_displayed", offset+1
-        content.AssignValue("page_first", offset*displayed+1
-        content.AssignValue("page_last", min(size, (offset+1)*displayed)
+        content.AssignValue("page_displayed", offset+1)
+        content.AssignValue("page_first", offset*displayed+1)
+        content.AssignValue("page_last", min(size, (offset+1)*displayed))
 
         idx_from = offset+1 - 10
         if idx_from < 1: idx_from = 1
@@ -129,96 +115,97 @@ class View(GlobalView):
         idx_to = offset+1 + 10
         if idx_to > nb_pages: idx_to = nb_pages
 
-        for i = 1 to nb_pages
-            if (i=1) or (i >= idx_from and i <= idx_to) or (i mod 10 = 0):
-            content.AssignValue("page_id", i
-            content.AssignValue("page_link", i-1
-
-            if i-1 != offset:
-                if searchby != "": content.Parse("nav.p.link.search_params"
-                if request.GET.get("r") != "": content.Parse("nav.p.link.reversed"
-
-                content.Parse("nav.p.link"
-            else:
-                content.Parse("nav.p.selected"
-
-            content.Parse("nav.p"
+        list = []
+        content.AssignValue("ps", list)
+        for i in range(1, nb_pages+1):
+            if (i==1) or (i >= idx_from and i <= idx_to) or (i % 10 == 0):
+                item = {}
+                list.append(item)
+                
+                item["page_id"] = i
+                item["page_link"] = i-1
+    
+                if i-1 != offset:
+                    if searchby != "": item["search_params"] = True
+                    if self.request.GET.get("r", "") != "": item["reversed"] = True
+    
+                    item["link"] = True
+                else:
+                    item["selected"] = True
 
         #display only if there are more than 1 page
-        if nb_pages > 1: content.Parse("nav"
+        if nb_pages > 1: content.Parse("nav")
 
         # Retrieve players to display
         query = "SELECT login, v.score, v.score_prestige," + \
                 "COALESCE(date_part('day', now()-lastactivity), 15), alliances.name, alliances.tag, v.id, avatar_url, v.alliance_id, v.score-v.previous_score AS score_delta," + \
-                "v.score >= " + TenthUserScore + " OR score_visibility = 2 OR (score_visibility = 1 AND alliance_id IS NOT None AND alliance_id="+sqlvalue(self.AllianceId)+") OR v.id="+UserId + \
+                "v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.AllianceId))+") OR v.id="+str(self.UserId) + \
                 " FROM vw_players v" + \
-                "    LEFT JOIN alliances ON ((v.score >= " + TenthUserScore + " OR score_visibility = 2 OR v.id="+str(self.UserId)+" OR (score_visibility = 1 AND alliance_id IS NOT None AND alliance_id="+sqlvalue(self.AllianceId)+")) AND alliances.id=v.alliance_id)" + \
+                "    LEFT JOIN alliances ON ((v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR v.id="+str(self.UserId)+" OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.AllianceId))+")) AND alliances.id=v.alliance_id)" + \
                 " WHERE True "+searchby + \
-                " ORDER BY "+orderby+" OFFSET "+(offset*displayed)+" LIMIT "+displayed
+                " ORDER BY "+orderby+" OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
         oRss = oConnExecuteAll(query)
 
-        if oRs == None: content.Parse("noresult"
+        if oRs == None: content.Parse("noresult")
 
         i = 1
         list = []
+        content.AssignValue("players", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            content.AssignValue("place", offset*displayed+i
-            content.AssignValue("name", oRs[0]
+            item["place"] = offset*displayed+i
+            item["username"] = oRs[0]
 
-            visible = oRs[10] 'or self.request.session.get(sprivilege) > 100# or TenthUserScore <= oRs[1]
+            visible = oRs[10]
 
-            if visible and not isnull(oRs[4]):
-                content.AssignValue("alliancename", oRs[4]
-                content.AssignValue("alliancetag", oRs[5]
-                content.Parse("player.alliance"
+            if visible and oRs[4]:
+                item["alliancename"] = oRs[4]
+                item["alliancetag"] = oRs[5]
+                item["alliance"] = True
             else:
-                content.Parse("player.noalliance"
+                item["noalliance"] = True
 
-            content.AssignValue("score", oRs[1]
-            content.AssignValue("score_battle", oRs[2]
+            item["score"] = oRs[1]
+            item["score_battle"] = oRs[2]
             if visible:
-                content.AssignValue("score_delta", oRs[9]
-                if oRs[9] > 0: content.Parse("player.plus"
-                if oRs[9] < 0: content.Parse("player.minus"
+                item["score_delta"] = oRs[9]
+                if oRs[9] > 0: item["plus"] = True
+                if oRs[9] < 0: item["minus"] = True
             else:
-                content.AssignValue("score_delta", ""
+                item["score_delta"] = ""
 
-            content.AssignValue("stat_colonies", oRs[2]
-            content.AssignValue("last_login", oRs[3]
+            item["stat_colonies"] = oRs[2]
+            item["last_login"] = oRs[3]
 
             if oRs[3] <= 7:
-                content.Parse("player.recently"
+                item["recently"] = True
             elif oRs[3] <= 14:
-                content.Parse("player.1weekplus"
+                item["1weekplus"] = True
             elif oRs[3] > 14:
-                content.Parse("player.2weeksplus"
+                item["2weeksplus"] = True
 
             if visible:
-                if oRs[6] = self.UserId:
-                    content.Parse("player.self"
-                elif oRs[8] = self.AllianceId:
-                    content.Parse("player.ally"
+                if oRs[6] == self.UserId:
+                    item["self"] = True
+                elif self.AllianceId and oRs[8] == self.AllianceId:
+                    item["ally"] = True
 
                 # show avatar only if top 10
                 if oRs[1] >= TenthUserScore:
                     if oRs[7] == None or oRs[7] == "":
-                        content.Parse("player.top10avatar.noavatar"
+                        item["noavatar"] = True
                     else:
-                        content.AssignValue("avatar_url", oRs[7]
-                        content.Parse("player.top10avatar.avatar"
+                        item["avatar_url"] = oRs[7]
+                        item["avatar"] = True
 
-                    content.Parse("player.top10avatar"
+                    item["top10avatar"] = True
 
-                content.Parse("player.name"
+                item["name"] = True
             else:
-                content.Parse("player.name_na"
-
-            content.Parse("player"
+                item["name_na"] = True
 
             i = i + 1
 
         return self.Display(content)
-

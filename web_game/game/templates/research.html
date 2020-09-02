@@ -56,7 +56,7 @@ function putlevel(level,levels,inprogress){
 {% for research in category.researches %}
 <tr class="smallitem">
 
-<td><a href="help.asp?cat=research#{{research.id}}" onmouseover="ddrivetip(description{{research.id}})" onmouseout="hideddrivetip()"><b>{{research.name}}</b></a></td>
+<td><a href="/game/help/?cat=research#{{research.id}}" onmouseover="ddrivetip(description{{research.id}})" onmouseout="hideddrivetip()"><b>{{research.name}}</b></a></td>
 <td align=center>
 {% if research.cost %}<img src="{{PATH_IMAGES}}/interface/credits.gif" class=icon title="Crédits" width=16 height=16> {{research.credits|intcomma}}{% endif %}
 {% if research.nocost %}-{% endif %}

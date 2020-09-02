@@ -8069,7 +8069,7 @@ CREATE TABLE exile_s03.battles_fleets (
     owner_id integer,
     owner_name character varying(16) NOT NULL,
     fleet_id integer,
-    fleet_name character varying(18) NOT NULL,
+    fleet_name character varying(18),
     attackonsight boolean DEFAULT true NOT NULL,
     won boolean DEFAULT false NOT NULL,
     mod_shield smallint DEFAULT 0 NOT NULL,

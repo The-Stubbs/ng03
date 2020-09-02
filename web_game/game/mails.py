@@ -89,7 +89,7 @@ class View(GlobalView):
                 if self.mailto == "":
                     self.sendmail_status = "mail_missing_to"
                 else:
-                    oRs = oConnExecute("SELECT sp_send_message("+ str(self.UserId) + "," + dosql(self.mailto) + "," + dosql(self.mailsubject) + "," + dosql(self.mailbody) + "," + self.moneyamount + "," + self.bbcode + ")")
+                    oRs = oConnExecute("SELECT sp_send_message("+ str(self.UserId) + "," + dosql(self.mailto) + "," + dosql(self.mailsubject) + "," + dosql(self.mailbody) + "," + str(self.moneyamount) + "," + str(self.bbcode) + ")")
 
                     if oRs[0] != 0:
                         if oRs[0] == 1:
@@ -366,7 +366,7 @@ class View(GlobalView):
             item["date"] = oRs[3]
             item["subject"] = oRs[4]
 
-            if oRs["self.bbcode"]:
+            if oRs[5]:
                 item["bodybb"] = oRs[5]
                 item["bbcode"] = True
             else:
@@ -462,9 +462,7 @@ class View(GlobalView):
             list.append(item)
             
             item["to_user"] = oRs[0]
-            content.Parse("to")
-
-            oRs.movenext
+            item["to"] = True 
 
         if self.mailto == ":admins":
             content.Parse("sendadmins_selected")

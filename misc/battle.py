@@ -9,13 +9,14 @@ from django.utils import timezone
 
 class TBattle:
     
-    FRounds = 0
-    FPlayers = []
-    FKillList = []
-    FGroupList = []
-    FBattleEnd = None
-    FBattleStart = None
-    FEnemyShipsRemaining = 0
+    def __init__(self):
+        self.FRounds = 0
+        self.FPlayers = []
+        self.FKillList = []
+        self.FGroupList = []
+        self.FBattleEnd = None
+        self.FBattleStart = None
+        self.FEnemyShipsRemaining = 0
 
     def AddShips(self, Ownerid, Fleetid, Shipid, Hull, Shield, Handling, weapon_ammo, weapon_tracking_speed, weapon_turrets, weapon_damage, Mods, Resistances, Quantity, FireAtWill, Tech):
         P = self.GetPlayer(Ownerid)
@@ -150,11 +151,11 @@ class TBattle:
             player.NewRound()
 
     def SetRelation(self, Ownerid1, Ownerid2):
-        P1 = GetPlayer(Ownerid1)
-        P2 = GetPlayer(Ownerid2)
+        P1 = self.GetPlayer(Ownerid1)
+        P2 = self.GetPlayer(Ownerid2)
 
-        P1.self.FEnemies.Remove(P2)
-        P2.self.FEnemies.Remove(P1)
+        P1.FEnemies.remove(P2)
+        P2.FEnemies.remove(P1)
 
     def ShipDestroyed(self, Target, ByGroup):
         Target.ShipDestroyed()
@@ -199,11 +200,11 @@ def GetChanceToHit(WeaponTracking, TargetHandling, Tech, TargetTech):
 
     while Tech < TargetTech:
         ChanceHit = ChanceHit * 0.85
-        Inc(Tech)
+        Tech += 1
 
     while Tech > TargetTech:
         ChanceHit = ChanceHit * 1.10
-        Dec(Tech)
+        Tech -= 1
 
     if ChanceDodge < 0: ChanceDodge = 0
     if ChanceDodge > 0.90: ChanceDodge = 0.90
@@ -258,9 +259,9 @@ def AverageHitsToKill(WeaponDamage, WeaponTrackingSpeed, TargetHull, TargetShiel
 
 def AverageHitsOn(WeaponDamage, WeaponTrackingSpeed, TargetHull, TargetShield, TargetHandling, TargetResistance, Tech, TargetTech):
     total_hp = TargetHull + TargetShield
-    damage = Min(GetWeaponDamage(WeaponDamage, TargetResistance), total_hp)
+    damage = min(GetWeaponDamage(WeaponDamage, TargetResistance), total_hp)
 
-    Result = Max(damage, 0.00001) * GetChanceToHit(WeaponTrackingSpeed, TargetHandling, Tech, TargetTech)
+    return max(damage, 0.00001) * GetChanceToHit(WeaponTrackingSpeed, TargetHandling, Tech, TargetTech)
 
 class TPlayer:
 
@@ -348,13 +349,14 @@ class TPlayer:
 
 class TShipsGroup:
 
-    FHit = 0
-    FDamages = 0
-    FKillList = []
-    FCurrentTarget = None
-    FChangeTargetIn = 0
-    
     def __init__(self, Owner, Fleetid, ShipId, Hull, Shield, Handling, Weapon_ammo, Weapon_tracking_speed, Weapon_turrets, Weapon_damage, Mods, Resistances, Quantity, Tech):
+        
+        self.FHit = 0
+        self.FDamages = 0
+        self.FKillList = []
+        self.FCurrentTarget = None
+        self.FChangeTargetIn = 0
+        
         self.FOwner = Owner
         self.FId = ShipId
 
@@ -367,6 +369,7 @@ class TShipsGroup:
         self.FShipLoss = 0
 
         self.FKilled = 0
+        self.FMiss = 0
 
         # Assign ship stats
         self.FFleetid = Fleetid

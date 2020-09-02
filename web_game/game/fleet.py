@@ -16,6 +16,7 @@ class View(GlobalView):
         self.action_result = ""
         self.move_fleet_result = ""
         self.can_command_alliance_fleets = -1
+        self.can_install_building = False
 
         if self.AllianceId and self.hasRight("can_order_other_fleets"):
             self.can_command_alliance_fleets = self.AllianceId
@@ -376,7 +377,7 @@ class View(GlobalView):
                 else:
                     content.Parse("recycle")
 
-                can_install_building = ((oRs[15] == None) or (oRs[17] >= rHostile)) and (oRs[40] == None)
+                self.can_install_building = ((oRs[15] == None) or (oRs[17] >= rHostile)) and (oRs[40] == None)
 
                 # assign buildings that can be installed
                 # only possible if not moving, not engaged, planet is owned by self or by nobody and is not a vortex
@@ -427,7 +428,7 @@ class View(GlobalView):
                 #
 
                 # retrieve planet list
-
+                index = 0
                 hasAPlanetSelected = False
 
                 planetListArray = checkPlanetListCache(self.request.session)
@@ -436,6 +437,7 @@ class View(GlobalView):
                     for i in planetListArray:
                         planet = {}
                         
+                        planet["index"] = index
                         planet["name"] = i[1]
                         planet["to_g"] = i[2]
                         planet["to_s"] = i[3]
@@ -446,6 +448,8 @@ class View(GlobalView):
                             hasAPlanetSelected = True
 
                         planetgroup.append(planet)
+                        index += 1
+                        
                     content.AssignValue("planetgroup", planetgroup)
 
                 #
@@ -463,6 +467,7 @@ class View(GlobalView):
                 fleetgroup = []
                 for list_oRs in list_oRss:
                     fleet = {}
+                    fleet["index"] = index
                     fleet["fleet_name"] = list_oRs[0]
                     fleet["to_g"] = list_oRs[2]
                     fleet["to_s"] = list_oRs[3]
@@ -471,6 +476,7 @@ class View(GlobalView):
                     if list_oRs[1] == oRs[10] and not hasAPlanetSelected: fleet["selected"] = True
 
                     fleetgroup.append(fleet)
+                    index += 1
                     showGroup = True
 
                 if showGroup: content.AssignValue("fleetgroup", fleetgroup)
@@ -493,6 +499,7 @@ class View(GlobalView):
                 merchantplanetsgroup = []
                 for list_oRs in list_oRss:
                     merchant = {}
+                    merchant["index"] = index
                     merchant["to_g"] = list_oRs[1]
                     merchant["to_s"] = list_oRs[2]
                     merchant["to_p"] = list_oRs[3]
@@ -500,6 +507,7 @@ class View(GlobalView):
                     if list_oRs[0] == oRs[10] and not hasAPlanetSelected: merchant["selected"] = True
 
                     merchantplanetsgroup.append(merchant)
+                    index += 1
                     showGroup = True
 
                 if showGroup: content.AssignValue("merchantplanetsgroup", merchantplanetsgroup)
@@ -593,7 +601,7 @@ class View(GlobalView):
             ship["ship_droppods"] = oRs["droppods"]
 
             if oRs["buildingid"]:
-                if can_install_building and oRs["can_build"]:
+                if self.can_install_building and oRs["can_build"]:
                     ship["install"] = True
                 else:
                     ship["cant_install"] = True

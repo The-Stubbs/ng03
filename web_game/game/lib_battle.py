@@ -44,7 +44,7 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
             " WHERE battleid=" + str(battleid) + \
             " GROUP BY fleet_id, shipid, destroyed_shipid" + \
             " ORDER BY sum(count) DESC"
-    killsArray = oConnExecute(query)
+    killsArray = oConnExecuteAll(query)
 
     query = "SELECT owner_name, fleet_name, shipid, shipcategory, shiplabel, count, lost, killed, won, relation1, owner_id , relation2, fleet_id, attacked, mod_shield, mod_handling, mod_tracking_speed, mod_damage, alliancetag" + \
             " FROM sp_get_battle_result(" + str(battleid) + "," + str(creator) + "," + str(pointofview) + ")"
@@ -77,8 +77,6 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
                 if oRs[18]:
                     opponent["alliancetag"] = oRs[18]
                     opponent["alliance"] = True
-                    
-                    lastTag = tag
                     
                 if oRs[11] == rSelf: opponent["self"] = True
                 elif oRs[11] == rAlliance: opponent["ally"] = True
@@ -121,10 +119,10 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
                     
                     category = oRs[3]
                     if category != lastCategory:
-                        ship = { }
+                        ship = { "ships":0, "lost":0, "killed":0, "after":0 }
                         fleet['ships'].append(ship)
                         
-                        ship["category" + str(lastCategory)] = True
+                        ship["category" + str(category)] = True
                         
                         lastCategory = category
                 
@@ -145,7 +143,7 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
                     
                     killed = 0
                     for i in killsArray:
-                        if oRs[12] == i[1] and oRs[2] == i[0]:
+                        if oRs[12] == i[0] and oRs[2] == i[1]:
                             kill = {}
                             ship['kills'].append(kill)
                             

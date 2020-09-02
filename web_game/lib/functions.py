@@ -24,7 +24,7 @@ def ToStr(s):
 
 def ToInt(s, defaultValue):
     if(s == "" or s == None): return defaultValue
-    i = int(s)
+    i = int(float(s))
     if i == None:
         return defaultValue
     return i

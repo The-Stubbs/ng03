@@ -2,14 +2,14 @@
 
 from web_game.game._global import *
 
+from web_game.lib.accounts import *
+
 class View(GlobalView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
-
-        from web_game.lib.accounts import *
 
         self.selected_menu = "nation"
 
@@ -37,10 +37,10 @@ class View(GlobalView):
 
     def display_nation(self):
 
-        nation = request.GET.get("name").strip()
+        nation = request.GET.get("name", "").strip()
 
         # if no nation is given: display info on the current player
-        if nation == "":    nation = self.oPlayerInfo["login")
+        if nation == "": nation = self.oPlayerInfo["login")
 
         content = GetTemplate(self.request, "nation")
 
@@ -56,7 +56,7 @@ class View(GlobalView):
 
         if oRs == None:
             if nation != "":
-                display_nation_search(nation)
+                return self.display_nation_search(nation)
             else:
                 return HttpResponseRedirect("/game/nation/")
 

@@ -121,10 +121,10 @@ class View(GlobalView):
 
         # for each planet owned, check what the player sells
         query = "SELECT id FROM nav_planet WHERE ownerid="+str(self.UserId)
-        planetsArray = oConnExecute(query)
+        planetsArray = oConnExecuteAll(query)
 
         for i in planetsArray:
-            planetid = i
+            planetid = i[0]
 
             # retrieve ore + hydrocarbon quantities
             ore = ToInt(self.request.POST.get("o" + str(planetid)), 0)
@@ -133,7 +133,7 @@ class View(GlobalView):
             if ore > 0 or hydrocarbon > 0:
                 query = "SELECT sp_market_sell(" + str(self.UserId) + "," + str(planetid) + "," + str(ore*1000) + "," + str(hydrocarbon*1000) + ")"
                 self.request.session["details"] = query
-                oConnDoQuery(query)
+                oRs = oConnExecute(query)
                 self.request.session["details"] = "done:"+query
 
         if self.request.POST.get("rel") != 1: self.log_notice("market-sell.asp", "hidden value is missing from form data", 1)

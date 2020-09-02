@@ -12,18 +12,18 @@
 </td></tr>{% endif %}
 
 {% for mail in mails %}
-<tr id="mail{{index}}" class="item{% if new_mail %}highlight{% endif %}">
+<tr id="mail{{mail.index}}" class="item{% if mail.new_mail %}highlight{% endif %}">
 	<td width="1%" rowspan=1 align=center valign=top nowrap>
-	{% if reply %}<a href="?to={{sent_to}}" title="Nouveau message à {{sent_to}}">{% endif %}
-	{% if avatar %}<img src="{{avatar_url}}" width=64 height=64 class="avatar">{% endif %}
-	{% if noavatar %}<img src="{{PATH_IMAGES}}/interface/noavatar.gif" width=64 height=64 class="avatar">{% endif %}<br><b>{% if admins %}Administrateurs{% endif %}{% if alliance %}Alliance{% endif %}{% if nation %}{{sent_to}}{% endif %}</b>
-	{% if reply %}</a>
-	{% if alliance %}<br/><a href="/game/alliance/?tag={{alliancetag}}">[{{alliancetag}}]</a><br/>{% endif %}{% endif %}
+	{% if mail.reply %}<a href="?to={{mail.sent_to}}" title="Nouveau message à {{mail.sent_to}}">{% endif %}
+	{% if mail.avatar %}<img src="{{mail.avatar_url}}" width=64 height=64 class="avatar">{% endif %}
+	{% if mail.noavatar %}<img src="{{PATH_IMAGES}}/interface/noavatar.gif" width=64 height=64 class="avatar">{% endif %}<br><b>{% if mail.admins %}Administrateurs{% endif %}{% if mail.alliance %}Alliance{% endif %}{% if mail.nation %}{{mail.sent_to}}{% endif %}</b>
+	{% if mail.reply %}</a>
+	{% if mail.alliance %}<br/><a href="/game/alliance/?tag={{mail.alliancetag}}">[{{mail.alliancetag}}]</a><br/>{% endif %}{% endif %}
 	</td>
 	<td width="90%" valign=top>
 	<div class="subject">
-	{{date}} | {{subject}}{% if money %} | Somme envoyée : <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width=16 height=16> {{moneyamount|intcomma}}{% endif %}</div>
-	<div class="body">{% if html %}{{body}}{% endif %}{% if bbcode %}{{bodybb|bbcode}}{% endif %}</div>
+	{{mail.date}} | {{mail.subject}}{% if mail.money %} | Somme envoyée : <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width=16 height=16> {{mail.moneyamount|intcomma}}{% endif %}</div>
+	<div class="body">{% if mail.html %}{{mail.body}}{% endif %}{% if mail.bbcode %}{{mail.bodybb|bbcode}}{% endif %}</div>
 	</td>
 </tr>
 {% endfor %}

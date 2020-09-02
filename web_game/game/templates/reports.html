@@ -29,11 +29,15 @@
 	<td width="90%" valign="top">
 	<div class="subject">{{message.date}}{% if message.nation %} | <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a>{% endif %} |
 	{% if message.type == 200 %}Rapport de bataille.
+	{% elif message.type == 201 %}Rapport de bataille (vainqueur).
 	{% elif message.type == 300 %}Eurêka !
 	{% elif message.type == 310 %}Production et coût d'entretien.
 	{% elif message.type == 320 %}Un commandant a récemment eu une augmentation
 	{% elif message.type == 400 %}Flotte arrivée à destination.
+	{% elif message.type == 401 %}Récolteurs pleins.
+	{% elif message.type == 403 %}Détection d'une flotte.
 	{% elif message.type == 501 %}Cargaison reçue.
+	{% elif message.type == 503 %}Vente effectuée.
 	{% elif message.type == 600 %}Nouvelle planète.
 	{% elif message.type == 752 %}Découverte de riches filons de minerai !
 	{% elif message.type == 754 %}Découverte de riches gisements d'hydrocarbure !
@@ -43,6 +47,8 @@
 	
 	<div class="body">
     {% if message.type == 200 %}Une bataille a eu lieu près de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
+	Vous pouvez accéder au <a href="/game/battle/?id={{message.battleid}}&v={{message.ownerid}}">rapport du combat</a>.
+	{% elif message.type == 201 %}Une bataille a eu lieu près de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Vous pouvez accéder au <a href="/game/battle/?id={{message.battleid}}&v={{message.ownerid}}">rapport du combat</a>.
 	{% elif message.type == 300 %}Nos scientifiques ont terminé la recherche sur "{{message.researchname}}".<br/>
 	Ils sont prêts pour de <a href="/game/research/">nouvelles recherches</a>.
@@ -59,6 +65,8 @@
 	Nos infrastructures ont généré <img src="{{PATH_IMAGES}}/interface/prestige.gif" class="res" width="16" height="16"> {{message.scientists|intcomma}} et <img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" width="16" height="16"> {{message.soldiers|intcomma}}
 	{% elif message.type == 320 %}Le commandant {{message.commandername}} s'est récemment distingué et a obtenu une promotion. Vous devriez vous rendre sur la page de gestion des commandants afin de lui attribuer son nouveau point de compétence.
 	{% elif message.type == 400 %}La flotte <script>LinkFleet('{{message.fleetid}}','{{message.fleetname}}')</script> est arrivée aux alentours de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.
+	{% elif message.type == 401 %}Les récolteurs de la flotte <script>LinkFleet('{{message.fleetid}}','{{message.fleetname}}')</script> ne peuvent plus recycler car leurs soutes sont pleines. Videz leurs soutes avant de recycler à nouveau.
+	{% elif message.type == 403 %}Une flotte de la nation <a href="/game/nation/?name={{message.username}}">{{message.username}}</a> vient d'être détectée à proximité de notre planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.
 	{% elif message.type == 501 %}Une flotte de <a href="/game/nation/?name={{message.username}}">{{message.username}}</a> vient de décharger des ressources sur notre planète <a href="/game/buildings/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	<script>if({{message.ore}} > 0 || {{message.hydrocarbon}} > 0) {
 	document.write('Nos stocks ont augmenté de '); if({{message.ore}} > 0){ document.write('{{message.ore|intcomma}} unités de minerai'); if({{message.hydrocarbon}} > 0) document.write(" et de {{message.hydrocarbon|intcomma}} unités d'hydrocarbure");} else document.write("{{message.hydrocarbon|intcomma}} unités d'hydrocarbure"); document.write('.<br/>'); }
@@ -70,6 +78,20 @@
 		document.write('ils se sont parfaitement intégrés et travaillent désormais sous nos ordres.');
 		}
 	</script>
+	{% elif message.type == 503 %}Suite au dépôt de 
+	<script>
+		var s = "";
+
+		if({{message.ore}} > 0) s += '{{message.ore|intcomma}} unités de minerai';
+		if({{message.hydrocarbon}} > 0) s += (s!=''?', ':'')+'{{message.hydrocarbon|intcomma}} unités d\'hydrocarbure'; 
+		
+		if({{message.scientists}} > 0) s += (s!=''?', ':'')+'{{message.scientists|intcomma}} scientifiques';
+		if({{message.soldiers}} > 0) s += (s!=''?', ':'')+'{{message.soldiers|intcomma}} soldats';
+		if({{message.workers}} > 0) s += (s!=''?', ':'')+'{{message.workers|intcomma}} travailleurs';
+		document.write(s);
+	</script> 
+	
+	sur une de leurs planètes, les marchands nous ont payé la somme de <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{message.credits|intcomma}} crédits.
 	{% elif message.type == 600 %}Nous occupons désormais la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Nous devrions vérifier les installations et <a href="/game/buildings/?planet={{message.planetid}}">construire les bâtiments</a> dont nous avons besoin.
 	{% elif message.type == 752 %}De riches filons de minerai ont été découverts sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production de minerai est augmentée.

@@ -64,7 +64,7 @@ function writeBuilding(id,name,quantity,status,o,o2,h,h2,w,w2,e,e2,f,f2,s,s2,rem
 			'<td align=center><img src="{{PATH_IMAGES}}/buildings/'+id+'.jpg" width=64 height=64 class="building" onmouseover="ddrivetip(desc('+idx+'))" onmouseout="hideddrivetip()"></td>'+
 			'<td nowrap align=left valign=top>'+
 
-			'<div style="margin-bottom:5px"><table class=clear width="100%"><tr><td><a href="help.asp?cat=buildings#'+id+'" onmouseover="ddrivetip(desc('+idx+'))" onmouseout="hideddrivetip()"><b>'+name+'</b></a></td><td align=right>x'+quantity+'</td></tr></table></div>'+
+			'<div style="margin-bottom:5px"><table class=clear width="100%"><tr><td><a href="/game/help/?cat=buildings#'+id+'" onmouseover="ddrivetip(desc('+idx+'))" onmouseout="hideddrivetip()"><b>'+name+'</b></a></td><td align=right>x'+quantity+'</td></tr></table></div>'+
 			'<table class="clear" width="200">'+
 			'<tr><td width="1%"><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16></td><td width=50 align=right'+(o2>0?' class="notenough"':'')+'>'+o+'</td><td width="1%"><img src="{{PATH_IMAGES}}/interface/spacer.gif" width=4></td>'+
 			'<td width="1%"><img src="{{PATH_IMAGES}}/interface/workers_idle.gif" title="Travailleurs" width=12 height=12></td><td width=40 align=right'+(w2>0?' class="notenough"':'')+'>'+w+'</td><td width="1%"><img src="{{PATH_IMAGES}}/interface/spacer.gif" width=4></td>'+

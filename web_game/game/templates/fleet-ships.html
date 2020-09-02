@@ -51,15 +51,15 @@ function submitchanges() {
 <table class="default">
 	<tr class="title"><td colspan="6">{{fleetname}} - Gestion des vaisseaux</td></tr>
 	<tr class="header"><td>Vaisseau</td><td>Cargo</td><td>Quantité</td><td>Retirer</td><td>Au sol</td><td>Ajouter</td></tr>
-	{% if ship %}
+	{% for ship in shiplist %}
 	<tr>
-		<td>{{name}}</td>
-		<td align=right>{{cargo_capacity|intcomma}}</td>
-		<td align=right>{{quantity|intcomma}}</td>
-		<td><input type="text" id="removeship{{id}}" name="removeship{{id}}" size=8> <a href="javascript:setval('removeship{{id}}', {{quantity}})">max</a></td>
-		<td align=right>{{available|intcomma}}</td>
-		<td><input type="text" id="addship{{id}}" name="addship{{id}}" size=8> <a href="javascript:setval('addship{{id}}', {{available}})">max</a></td>
-		<script>ships.push(new Array({{id}},{{cargo_capacity}},{{quantity}},{{available}}));</script>
+		<td>{{ship.name}}</td>
+		<td align=right>{{ship.cargo_capacity|intcomma}}</td>
+		<td align=right>{{ship.quantity|intcomma}}</td>
+		<td><input type="text" id="removeship{{ship.id}}" name="removeship{{ship.id}}" size=8> <a href="javascript:setval('removeship{{ship.id}}', {{ship.quantity}})">max</a></td>
+		<td align=right>{{ship.available|intcomma}}</td>
+		<td><input type="text" id="addship{{ship.id}}" name="addship{{ship.id}}" size=8> <a href="javascript:setval('addship{{ship.id}}', {{ship.available}})">max</a></td>
+		<script>ships.push(new Array({{ship.id}},{{ship.cargo_capacity}},{{ship.quantity}},{{ship.available}}));</script>
 	</tr>
 	{% endfor %}
 	<tr>

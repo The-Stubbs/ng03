@@ -259,12 +259,12 @@ function getRelationClass(rel) {
 
 function Fl(id,name,tag,owner,rel,signature,fleeing) {
 	if(rel==2 || id != 0)
-		var s= '<a title="Inspecter la flotte '+name+'" href="fleet.asp?id=' + id + '" class="self">'+(tag!=''?'['+tag+'] ':'')+name+'</a>';
+		var s= '<a title="Inspecter la flotte '+name+'" href="/game/fleet/?id=' + id + '" class="self">'+(tag!=''?'['+tag+'] ':'')+name+'</a>';
 	else
 	{
 		var c = getRelationClass(rel);
 
-		var s = '<a title="Écrire à '+owner+'" href="mails.asp?subject=À propos de la flotte '+name+'&to='+owner+'" class="' + c+ '">' +(tag!=''?'['+tag+'] ':'')+name+'</a>';
+		var s = '<a title="Écrire à '+owner+'" href="/game/mails/?subject=À propos de la flotte '+name+'&to='+owner+'" class="' + c+ '">' +(tag!=''?'['+tag+'] ':'')+name+'</a>';
 	}
 
 	if(signature > 0)
@@ -285,7 +285,7 @@ function descOrbit(idx,planetid,rel,parked) {
 
 	if(parked > 0) {
 		if(rel == 2)
-			s += '<a href="orbit.asp?planet='+planetid+'" class="' + getRelationClass(rel) + '">Au sol: ' + formatnumber(parked) + '</a>';
+			s += '<a href="/game/orbit/?planet='+planetid+'" class="' + getRelationClass(rel) + '">Au sol: ' + formatnumber(parked) + '</a>';
 		else
 			s += '<span class="' + getRelationClass(rel) + '">Au sol: ' + formatnumber(parked) + '</span>';
 	}
@@ -440,12 +440,12 @@ function loc(img,alliancetag,id,owner,name,rel,radar,jammer,ore,hydrocarbon,floo
 
 		var n='';
 
-		if(alliancetag != '') n+='<a href="alliance.asp?tag='+alliancetag+'" class="'+c+'">['+alliancetag+']</a>';
+		if(alliancetag != '') n+='<a href="/game/alliance/?tag='+alliancetag+'" class="'+c+'">['+alliancetag+']</a>';
 
 		if(rel==2)
 		{
 			if(floor>0 && space>0)
-				n+= '<a href="planet.asp?planet='+id+'" class="'+c+'" title="Inspecter la planète '+name+'">'+name+'</a>';
+				n+= '<a href="/game/planet/?planet='+id+'" class="'+c+'" title="Inspecter la planète '+name+'">'+name+'</a>';
 			else
 				n+= '<span class="'+c+'">'+name+'</span>';
 		}
@@ -459,7 +459,7 @@ function loc(img,alliancetag,id,owner,name,rel,radar,jammer,ore,hydrocarbon,floo
 			if(owner=='')
 				n+= '<span class="'+c+'" title="Planète occupée">Occupée</span>';
 			else
-				n+= '<a href="nation.asp?name='+owner+'" class="'+c+'" title="Voir les informations sur '+owner+'">'+name+'</a>';
+				n+= '<a href="/game/nation/?name='+owner+'" class="'+c+'" title="Voir les informations sur '+owner+'">'+name+'</a>';
 		}
 
 		if(n=='') n = '&nbsp;';
@@ -498,12 +498,12 @@ function r(rel,tag,owner,fleetid,fleet,sig,f_id,f_name,f_g,f_s,f_p,f_rel,t_id,t_
 	var c = getRelationClass(rel);
 
 	var s = '<tr class="smallitem"><td>';
-	if(tag != '') s+= '<a href="alliance.asp?tag='+tag+'" class='+c+'>['+tag+']</a> ';
-	s+= '<a href="nation.asp?name='+owner+'" title="Voir les informations sur '+owner+'" class="'+c+'">'+owner+'</a></td><td>';
+	if(tag != '') s+= '<a href="/game/alliance/?tag='+tag+'" class='+c+'>['+tag+']</a> ';
+	s+= '<a href="/game/nation/?name='+owner+'" title="Voir les informations sur '+owner+'" class="'+c+'">'+owner+'</a></td><td>';
 	if(rel==2)
-		s+= '<a href="fleet.asp?id='+fleetid+'" class="self">'+fleet+'</a>';
+		s+= '<a href="/game/fleet/?id='+fleetid+'" class="self">'+fleet+'</a>';
 	else
-		s+= '<a href="mails.asp?to='+owner+'" class="'+c+'" title="Envoyer un message à '+owner+'">'+fleet+'</a>';
+		s+= '<a href="/game/mails/?to='+owner+'" class="'+c+'" title="Envoyer un message à '+owner+'">'+fleet+'</a>';
 
 	if(sig > 0)
 		s+= ' ('+formatnumber(sig)+')';
@@ -526,7 +526,7 @@ function r(rel,tag,owner,fleetid,fleet,sig,f_id,f_name,f_g,f_s,f_p,f_rel,t_id,t_
 	s+= '</td><td>'
 	
 	if(losing)
-		s+= 'Perte du signal :&nbsp;<script>putcountdown1('+time+', "Signal perdu", "overview.asp");</'+'script>';
+		s+= 'Perte du signal :&nbsp;<script>putcountdown1('+time+', "Signal perdu", "/game/overview/");</'+'script>';
 	else
 		s+= '<script>putcountdown1('+time+', "Arrivé", "overview.asp");</'+'script>';
 		
@@ -629,21 +629,21 @@ function displayRadar() {
 	<div id="mapsector">
 	<table>
 	<tr class="border">
-		<td><img src="{{PATH_IMAGES}}/map/arrow_nw.gif" class=arrow onclick="openSector({galaxy},{sector0})"></td>
-		<td align=center class=borderup><img src="{{PATH_IMAGES}}/map/arrow_n.gif" class=arrow onclick="openSector({galaxy},{sector1})"></td>
-		<td><img src="{{PATH_IMAGES}}/map/arrow_ne.gif" class=arrow onclick="openSector({galaxy},{sector2})"></td>
+		<td><img src="{{PATH_IMAGES}}/map/arrow_nw.gif" class=arrow onclick="openSector({{galaxy}},{{sector0}})"></td>
+		<td align=center class=borderup><img src="{{PATH_IMAGES}}/map/arrow_n.gif" class=arrow onclick="openSector({{galaxy}},{{sector1}})"></td>
+		<td><img src="{{PATH_IMAGES}}/map/arrow_ne.gif" class=arrow onclick="openSector({{galaxy}},{{sector2}})"></td>
 	</tr>
 	<tr>
-		<td valign="middle" class="borderleft"><img src="{{PATH_IMAGES}}/map/arrow_w.gif" class=arrow onclick="openSector({galaxy},{sector7})"></td>
+		<td valign="middle" class="borderleft"><img src="{{PATH_IMAGES}}/map/arrow_w.gif" class=arrow onclick="openSector({{galaxy}},{{sector7}})"></td>
 		<td>
 		<div class="map" id="mapsectorview"></div>
 		</td>
-		<td valign="middle" class="borderright"><img src="{{PATH_IMAGES}}/map/arrow_e.gif" class=arrow onclick="openSector({galaxy},{sector3})"></td>
+		<td valign="middle" class="borderright"><img src="{{PATH_IMAGES}}/map/arrow_e.gif" class=arrow onclick="openSector({{galaxy}},{{sector3}})"></td>
 	</tr>
 	<tr class="border">
-		<td><img src="{{PATH_IMAGES}}/map/arrow_sw.gif" class=arrow onclick="openSector({galaxy},{sector6})"></td>
-		<td align="center" class="borderdown"><img src="{{PATH_IMAGES}}/map/arrow_s.gif" class=arrow onclick="openSector({galaxy},{sector5})"></td>
-		<td><img src="{{PATH_IMAGES}}/map/arrow_se.gif" class=arrow onclick="openSector({galaxy},{sector4})"></td>
+		<td><img src="{{PATH_IMAGES}}/map/arrow_sw.gif" class=arrow onclick="openSector({{galaxy}},{{sector6}})"></td>
+		<td align="center" class="borderdown"><img src="{{PATH_IMAGES}}/map/arrow_s.gif" class=arrow onclick="openSector({{galaxy}},{{sector5}})"></td>
+		<td><img src="{{PATH_IMAGES}}/map/arrow_se.gif" class=arrow onclick="openSector({{galaxy}},{{sector4}})"></td>
 	</tr>
 	</table>
 	</div>

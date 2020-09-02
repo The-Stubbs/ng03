@@ -389,7 +389,7 @@ class View(GlobalView):
             if rel == rAlliance and not self.hasRight("can_use_alliance_radars"):
                 rel = rWar
 
-            if rel == rFriend and not oRs[25]:
+            if rel == rFriend and not oRs[25] and oRs[3] != 3:
                 rel = rWar
 
             displayElements = False # hasElements is True if the planet has some particularities like magnetic cloud or sun radiation ..

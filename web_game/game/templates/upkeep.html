@@ -3,12 +3,12 @@
 {% block content %}
 <div id=upkeep>
 <table class=default width=600>
-<tr class=header><td>Élément</td><td colspan=2>Coût</td>{% if t %}<td>Multiplicateur</td>{% endt %}<td>Coût estimé</td></tr>
+<tr class=header><td>Élément</td><td colspan=2>Coût</td>{% if t %}<td>Multiplicateur</td>{% endif %}<td>Coût estimé</td></tr>
 
 <tr class=smallitem>
 	<td><img src="{{PATH_IMAGES}}/interface/upkeep_commander.gif" class=res title="commandant" width=16 height=16>Commandants ({{commanders_quantity|intcomma}})</td>
 	<td colspan=2 align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16>{{commanders_salary|intcomma}}</td>
-{% if t %}	<td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16>{{commanders_cost|intcomma}}</td>{% endt %}
+{% if t %}	<td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16>{{commanders_cost|intcomma}}</td>{% endif %}
 	<td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16>{{commanders_estimated_cost|intcomma}}</td>
 </tr>
 <tr class=smallitem>

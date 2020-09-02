@@ -14,9 +14,9 @@ class View(GlobalView):
         else:
             self.selected_menu = "alliance.invitations"
 
-        sLeaveCost = "leavealliancecost"
+        self.sLeaveCost = "leavealliancecost"
 
-        leave_status = ""
+        self.leave_status = ""
         self.invitation_status = ""
         action = request.GET.get("a", "").strip()
         alliance_tag = request.GET.get("tag", "").strip()
@@ -35,13 +35,13 @@ class View(GlobalView):
         elif action == "decline":
             oConnExecute("SELECT sp_alliance_decline_invitation(" + str(self.UserId) + "," + dosql(alliance_tag) + ")")
         elif action == "leave":
-            if self.request.session.get(sLeaveCost) and request.POST.get("leave") == 1:
-                oRs = oConnExecute("SELECT sp_alliance_leave(" + str(self.UserId) + "," + self.request.session.get(sLeaveCost) + ")")
+            if self.request.session.get(self.sLeaveCost) and request.POST.get("leave") == 1:
+                oRs = oConnExecute("SELECT sp_alliance_leave(" + str(self.UserId) + "," + self.request.session.get(self.sLeaveCost) + ")")
                 if oRs[0] == 0:
                     return HttpResponseRedirect("/game/alliance/")
 
             else:
-                leave_status = "not_enough_credits"
+                self.leave_status = "not_enough_credits"
 
         return self.DisplayInvitations()
 
@@ -98,14 +98,14 @@ class View(GlobalView):
 
             oRs = oConnExecute("SELECT sp_alliance_get_leave_cost(" + str(self.UserId) + ")")
 
-            self.request.session[sLeaveCost] = oRs[0]
-            if self.request.session.get(sLeaveCost) < 2000: self.request.session[sLeaveCost] = 0
+            self.request.session[self.sLeaveCost] = oRs[0]
+            if self.request.session.get(self.sLeaveCost) < 2000: self.request.session[self.sLeaveCost] = 0
 
-            content.AssignValue("credits", self.request.session.get(sLeaveCost))
+            content.AssignValue("credits", self.request.session.get(self.sLeaveCost))
 
-            if self.request.session.get(sLeaveCost) > 0: content.Parse("charges")
+            if self.request.session.get(self.sLeaveCost) > 0: content.Parse("charges")
 
-            if leave_status != "": content.Parse(leave_status)
+            if self.leave_status != "": content.Parse(self.leave_status)
 
             content.Parse("leave")
 

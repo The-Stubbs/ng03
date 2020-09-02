@@ -19,26 +19,18 @@ class View(GlobalView):
         #
         # search by parameter
         #
-        searchby = request.GET.get("a")
-        if searchby != "":
-            # if the page is a search result, add the search params to ordering column links
-            item["param_a", searchby
-            content.Parse("search_params"
-
-            searchby = dosql("%"+searchby+"%")
-            searchby = " AND alliance_id IN (SELECT id FROM alliances WHERE upper(alliances.name) LIKE upper("+searchby+") OR upper(alliances.tag) LIKE upper("+searchby+"))"
-        else:
-            searchby = ""
+        searchby = ""
 
         #
         # ordering column
         #
-        col = ToInt(request.GET.get("col"), 1)
+        col = ToInt(self.request.GET.get("col"), 1)
         if col < 1 or col > 7: col = 1
 
         # hide scores
-        if col = 2 or col = 5: col = 1
-
+        if col == 2 or col == 5: col = 1
+        
+        reversed = False
         if col == 1:
             orderby = "upper(alliances.name)"
         elif col == 3:
@@ -52,22 +44,22 @@ class View(GlobalView):
         elif col == 7:
             orderby = "upper(alliances.tag)"
 
-        if request.GET.get("r") != "":
+        if self.request.GET.get("r", "") != "":
             reversed = not reversed
         else:
-            content.Parse("r" + col
+            content.Parse("r" + str(col))
 
         if reversed: orderby = orderby + " DESC"
         orderby = orderby + ", upper(alliances.name)"
 
-        content.AssignValue("sort_column", col
+        content.AssignValue("sort_column", col)
 
         #
         # start offset
         #
 
         #offset = request.GET.get("start")
-        offset = ToInt(request.GET.get("start"), -1)
+        offset = ToInt(self.request.GET.get("start"), -1)
 
         if offset < 0: offset = 0
 
@@ -85,20 +77,20 @@ class View(GlobalView):
 
         query = "SELECT alliances.id, alliances.tag, alliances.name, alliances.score, count(*) AS members, sum(planets) AS planets," + \
                 " int4(alliances.score / count(*)) AS score_average, alliances.score-alliances.previous_score as score_delta," + \
-                " created, EXISTS(SELECT 1 FROM alliances_naps WHERE allianceid1=alliances.id AND allianceid2=" + sqlValue(self.AllianceId) + ")," + \
-                " max_members, EXISTS(SELECT 1 FROM alliances_wars WHERE (allianceid1=alliances.id AND allianceid2=" + sqlValue(self.AllianceId) + ") OR (allianceid1=" + sqlValue(self.AllianceId) + " AND allianceid2=alliances.id))" + \
+                " created, EXISTS(SELECT 1 FROM alliances_naps WHERE allianceid1=alliances.id AND allianceid2=" + str(sqlValue(self.AllianceId)) + ")," + \
+                " max_members, EXISTS(SELECT 1 FROM alliances_wars WHERE (allianceid1=alliances.id AND allianceid2=" + str(sqlValue(self.AllianceId)) + ") OR (allianceid1=" + str(sqlValue(self.AllianceId)) + " AND allianceid2=alliances.id))" + \
                 " FROM users INNER JOIN alliances ON alliances.id=alliance_id" + \
                 " WHERE alliances.visible"+searchby + \
                 " GROUP BY alliances.id, alliances.name, alliances.tag, alliances.score, alliances.previous_score, alliances.created, alliances.max_members" + \
                 " ORDER BY "+orderby+ \
-                " OFFSET "+(offset*displayed)+" LIMIT "+displayed
+                " OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
         oRss = oConnExecuteAll(query)
 
-        if oRs == None: content.Parse("noresult"
+        if oRs == None: content.Parse("noresult")
 
-        content.AssignValue("page_displayed", offset+1
-        content.AssignValue("page_first", offset*displayed+1
-        content.AssignValue("page_last", min(size, (offset+1)*displayed)
+        content.AssignValue("page_displayed", offset+1)
+        content.AssignValue("page_first", offset*displayed+1)
+        content.AssignValue("page_last", min(size, (offset+1)*displayed))
 
         idx_from = offset+1 - 10
         if idx_from < 1: idx_from = 1
@@ -106,53 +98,54 @@ class View(GlobalView):
         idx_to = offset+1 + 10
         if idx_to > nb_pages: idx_to = nb_pages
 
-        for i = 1 to nb_pages
-            if (i=1) or (i >= idx_from and i <= idx_to) or (i mod 10 = 0):
-            content.AssignValue("page_id", i
-            content.AssignValue("page_link", i-1
-
-            if i-1 != offset:
-                if searchby != "": content.Parse("nav.p.link.search_params"
-                if request.GET.get("r") != "": content.Parse("nav.p.link.reversed"
-
-                content.Parse("nav.p.link"
-            else:
-                content.Parse("nav.p.selected"
-
-            content.Parse("nav.p"
+        list = []
+        content.AssignValue("ps", list)
+        for i in range(1, nb_pages+1):
+            if (i==1) or (i >= idx_from and i <= idx_to) or (i % 10 == 0):
+                item = {}
+                list.append(item)
+                
+                item["page_id"] = i
+                item["page_link"] = i-1
+    
+                if i-1 != offset:
+                    if searchby != "": item["search_params"] = True
+                    if request.GET.get("r") != "": item["reversed"] = True
+    
+                    item["link"] = True
+                else:
+                    item["selected"] = True
 
         #display only if there are more than 1 page
-        if nb_pages > 1: content.Parse("nav"
+        if nb_pages > 1: content.Parse("nav")
 
         i = 1
         list = []
+        content.AssignValue("alliances", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            item["place", offset*displayed+i
-            item["tag", oRs[1]
-            item["name", oRs[2]
-            item["score", oRs[3]
-            item["score_average", oRs[6]
-            item["score_delta", oRs[7]
-            item["members", oRs[4]
-            item["stat_colonies", oRs[5]
-            item["created", oRs[8]
-            item["max_members", oRs[10]
+            item["place"] = offset*displayed+i
+            item["tag"] = oRs[1]
+            item["name"] = oRs[2]
+            item["score"] = oRs[3]
+            item["score_average"] = oRs[6]
+            item["score_delta"] = oRs[7]
+            item["members"] = oRs[4]
+            item["stat_colonies"] = oRs[5]
+            item["created"] = oRs[8]
+            item["max_members"] = oRs[10]
 
-            if oRs[6] > 0: content.Parse("alliance.plus"
-            if oRs[6] < 0: content.Parse("alliance.minus"
+            if oRs[6] > 0: item["plus"] = True
+            if oRs[6] < 0: item["minus"] = True
 
-            if oRs[0] = self.AllianceId: content.Parse("alliance.playeralliance"
+            if self.AllianceId and oRs[0] == self.AllianceId: item["playeralliance"] = True
             if oRs[9]:
-                content.Parse("alliance.nap"
+                item["nap"] = True
             elif oRs[11]:
-                content.Parse("alliance.war"
-
-            content.Parse("alliance"
+                item["war"] = True
 
             i = i + 1
 
         return self.Display(content)
-

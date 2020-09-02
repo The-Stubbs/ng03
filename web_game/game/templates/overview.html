@@ -128,13 +128,13 @@ function sig(signature){
 <tr class="category"><td>Bâtiments en construction</td><td>Vaisseaux en construction</td></tr>
 <tr class="item" valign="top">
 <td width="50%">
-	{% for planet in constructionyards %}
+	{% for item in constructionyards %}
 		<table class="clear" cellpadding="0" cellspacing="0">
-		<tr valign="top"><td><a href="/game/buildings/?planet={{planet.planetid}}">{{planet.planetname}} ({{planet.galaxy}}.{{planet.sector}}.{{planet.planet}}) : </a></td><td>
-			{% for building in planet.buildings %}
-			<div>{% if building.destroy %}<span class="destroy">Destruction de {% endif %}{{building.building}} (<script>putcountdown1({{building.time}}, "Terminé", "/game/buildings/?planet={{planet.planetid}}#{{building.buildingid}}");</script>){% if building.destroy %}</span>{% endif %}</div>
+		<tr valign="top"><td><a href="/game/buildings/?planet={{item.planetid}}">{{item.planetname}} ({{item.galaxy}}.{{item.sector}}.{{item.planet}}) : </a></td><td>
+			{% for building in item.buildings %}
+			<div>{% if building.destroy %}<span class="destroy">Destruction de {% endif %}{{building.building}} (<script>putcountdown1({{building.time}}, "Terminé", "/game/buildings/?planet={{item.planetid}}#{{building.buildingid}}");</script>){% if building.destroy %}</span>{% endif %}</div>
 			{% empty %}
-			<div><a href="/game/buildings/?planet={{planet.planetid}}" title="Voir les infrastructures">Aucune construction en cours</a></div>
+			<div><a href="/game/buildings/?planet={{item.planetid}}" title="Voir les infrastructures">Aucune construction en cours</a></div>
 			{% endfor %}
 		</td></tr>
 		</table>

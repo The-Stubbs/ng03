@@ -20,10 +20,11 @@ class View(GlobalView):
         #
         # Setup column ordering
         #
-        col = ToInt(request.GET.get("col"), 0)
+        col = ToInt(self.request.GET.get("col"), 0)
 
         if col < 0 or col > 4: col = 0
 
+        reversed = False
         if col == 0:
             orderby = "id"
         elif col == 1:
@@ -37,10 +38,10 @@ class View(GlobalView):
         elif col == 5:
             orderby = "mood"
 
-        if request.GET.get("r") != "":
+        if self.request.GET.get("r", "") != "":
             reversed = not reversed
         else:
-            content.Parse("r" + col
+            content.Parse("r" + str(col))
 
         if reversed: orderby = orderby + " DESC"
         orderby = orderby + ", upper(name)"
@@ -64,160 +65,152 @@ class View(GlobalView):
                 " ORDER BY "+orderby
 
         oRss = oConnExecuteAll(query)
-
         
-            list = []
-            for oRs in oRss:
-                item = {}
-                list.append(item)
-                
-                mood_delta = 0
+        list = []
+        content.AssignValue("page_planets", list)
+        for oRs in oRss:
+            item = {}
+            list.append(item)
+            
+            mood_delta = 0
 
-            item["planet_img", planetimg(oRs[0], oRs[29])
+            item["planet_img"] = self.planetimg(oRs[0], oRs[29])
 
-            item["planet_id", oRs[0]
-            item["planet_name", oRs[1]
+            item["planet_id"] = oRs[0]
+            item["planet_name"] = oRs[1]
 
-            item["g", oRs[2]
-            item["s", oRs[3]
-            item["p", oRs[4]
+            item["g"] = oRs[2]
+            item["s"] = oRs[3]
+            item["p"] = oRs[4]
 
                 # ore
-            item["ore", oRs[5]
-            item["ore_production", oRs[6]
-            item["ore_capacity", oRs[7]
+            item["ore"] = oRs[5]
+            item["ore_production"] = oRs[6]
+            item["ore_capacity"] = oRs[7]
 
-                # compute ore level : ore / capacity
-                ore_level = getpercent(oRs[5], oRs[7], 10)
+            # compute ore level : ore / capacity
+            ore_level = self.getpercent(oRs[5], oRs[7], 10)
 
-                if ore_level >= 90:
-                content.Parse("planet.high_ore"
-                elif ore_level >= 70:
-                content.Parse("planet.medium_ore"
-                else:
-                content.Parse("planet.normal_ore"
+            if ore_level >= 90:
+                item["high_ore"] = True
+            elif ore_level >= 70:
+                item["medium_ore"] = True
+            else:
+                item["normal_ore"] = True
 
-                # hydrocarbon
-            item["hydrocarbon", oRs[8]
-            item["hydrocarbon_production", oRs[9]
-            item["hydrocarbon_capacity", oRs[10]
+            # hydrocarbon
+            item["hydrocarbon"] = oRs[8]
+            item["hydrocarbon_production"] = oRs[9]
+            item["hydrocarbon_capacity"] = oRs[10]
 
-                # compute hydrocarbon level : hydrocarbon / capacity
-                hydrocarbon_level = getpercent(oRs[8], oRs[10], 10)
+            # compute hydrocarbon level : hydrocarbon / capacity
+            hydrocarbon_level = self.getpercent(oRs[8], oRs[10], 10)
 
-                if hydrocarbon_level >= 90:
-                content.Parse("planet.high_hydrocarbon"
-                elif hydrocarbon_level >= 70:
-                content.Parse("planet.medium_hydrocarbon"
-                else:
-                content.Parse("planet.normal_hydrocarbon"
+            if hydrocarbon_level >= 90:
+                item["high_hydrocarbon"] = True
+            elif hydrocarbon_level >= 70:
+                item["medium_hydrocarbon"] = True
+            else:
+                item["normal_hydrocarbon"] = True
 
-                # energy
-            item["energy", oRs[31]
-            item["energy_production", oRs[13]
-            item["energy_capacity", oRs[14]
+            # energy
+            item["energy"] = oRs[31]
+            item["energy_production"] = oRs[13]
+            item["energy_capacity"] = oRs[14]
 
-                # compute energy level : energy / capacity
-                energy_level = getpercent(oRs[31], oRs[14], 10)
+            # compute energy level : energy / capacity
+            energy_level = self.getpercent(oRs[31], oRs[14], 10)
 
-            content.Parse("planet.normal_energy"
+            item["normal_energy"] = True
 
-                credits = oRs["credits_production") + (oRs["credits_random_production") / 2)# - (oRs["upkeep") / 24)
+            credits = oRs[37] + (oRs[38] / 2)
 
-            item["credits", credits
-                if credits < 0:
-                content.Parse("planet.credits_minus"
-                else:
-                content.Parse("planet.credits_plus"
+            item["credits"] = credits
+            if credits < 0:
+                item["credits_minus"] = True
+            else:
+                item["credits_plus"] = True
 
-            item["prestige", oRs["production_prestige")
+            item["prestige"] = oRs[35]
 
-                if oRs[13] < 0:
-                content.Parse("planet.negative_energy_production"
-                elif oRs[32] >= 0 and oRs[23] >= oRs[28]:
-                content.Parse("planet.normal_energy_production"
-                else:
-                content.Parse("planet.medium_energy_production"
+            if oRs[13] < 0:
+                item["negative_energy_production"] = True
+            elif oRs[32] >= 0 and oRs[23] >= oRs[28]:
+                item["normal_energy_production"] = True
+            else:
+                item["medium_energy_production"] = True
 
-                # workers
-            item["workers", oRs[23]
-            item["workers_idle", oRs[11]
-            item["workers_capacity", oRs[12]
+            # workers
+            item["workers"] = oRs[23]
+            item["workers_idle"] = oRs[11]
+            item["workers_capacity"] = oRs[12]
 
-                # soldiers
-            item["soldiers", oRs[24]
-            item["soldiers_capacity", oRs[25]
-            item["soldiers_training", oRs["soldiers_training")
-                if oRs["soldiers_training") > 0: .Parse "planet.soldiers_training"
+            # soldiers
+            item["soldiers"] = oRs[24]
+            item["soldiers_capacity"] = oRs[25]
+            item["soldiers_training"] = oRs[36]
 
-                 # scientists
-            item["scientists", oRs[26]
-            item["scientists_capacity", oRs[27]
-            item["scientists_training", oRs["scientists_training")
-                if oRs["scientists_training") > 0: .Parse "planet.scientists_training"
+            # scientists
+            item["scientists"] = oRs[26]
+            item["scientists_capacity"] = oRs[27]
+            item["scientists_training"] = oRs[35]
 
-                if oRs[23] < oRs[28]: .Parse "planet.workers_low"
+            if oRs[23] < oRs[28]: item["workers_low"] = True
 
-                if oRs[24]*250 < oRs[23]+oRs[26]: .Parse "planet.soldiers_low"
+            if oRs[24]*250 < oRs[23]+oRs[26]: item["soldiers_low"] = True
 
-                # mood
-                if oRs[30] > 100:
-                item["mood", 100
-                else:
-                item["mood", oRs[30]
+            # mood
+            if oRs[30] > 100:
+                item["mood"] = 100
+            else:
+                item["mood"] = oRs[30]
 
-                moodlevel = round(oRs[30] / 10) * 10
-                if moodlevel > 100: moodlevel = 100
+            moodlevel = round(oRs[30] / 10) * 10
+            if moodlevel > 100: moodlevel = 100
 
-            item["mood_level", moodlevel
+            item["mood_level"] = moodlevel
 
-                if (oRs[19]): mood_delta = mood_delta + 1
+            if (oRs[19]): mood_delta = mood_delta + 1
 
-                if oRs[24]*250 >= oRs[23]+oRs[26]:
-                    mood_delta = mood_delta + 2
-                else:
-                    mood_delta = mood_delta - 1
+            if oRs[24]*250 >= oRs[23]+oRs[26]:
+                mood_delta = mood_delta + 2
+            else:
+                mood_delta = mood_delta - 1
 
-            item["mood_delta", mood_delta
-                if mood_delta > 0:
-                content.Parse("planet.mood_plus"
-                else:
-                content.Parse("planet.mood_minus"
+            item["mood_delta"] = mood_delta
+            if mood_delta > 0:
+                item["mood_plus"] = True
+            else:
+                item["mood_minus"] = True
 
-                # planet stats
-            item["floor_capacity", oRs[15]
-            item["floor_occupied", oRs[16]
+            # planet stats
+            item["floor_capacity"] = oRs[15]
+            item["floor_occupied"] = oRs[16]
 
-            item["space_capacity", oRs[17]
-            item["space_occupied", oRs[18]
+            item["space_capacity"] = oRs[17]
+            item["space_occupied"] = oRs[18]
 
-                if oRs[19]:
-                item["commander_id", oRs[19]
-                item["commander_name", oRs[20]
-                content.Parse("planet.commander"
-                else:
-                content.Parse("planet.nocommander"
+            if oRs[19]:
+                item["commander_id"] = oRs[19]
+                item["commander_name"] = oRs[20]
+                item["commander"] = True
+            else:
+                item["nocommander"] = True
 
-                if oRs[21] >= 0 and oRs[23] >= oRs[28]:
-                content.Parse("planet.normal_ore_production"
-                else:
-                content.Parse("planet.medium_ore_production"
+            if oRs[21] >= 0 and oRs[23] >= oRs[28]:
+                item["normal_ore_production"] = True
+            else:
+                item["medium_ore_production"] = True
 
-                if oRs[22] >= 0 and oRs[23] >= oRs[28]:
-                content.Parse("planet.normal_hydrocarbon_production"
-                else:
-                content.Parse("planet.medium_hydrocarbon_production"
+            if oRs[22] >= 0 and oRs[23] >= oRs[28]:
+                item["normal_hydrocarbon_production"] = True
+            else:
+                item["medium_hydrocarbon_production"] = True
 
-            item["upkeep_credits", oRs["upkeep")
-            item["upkeep_workers", oRs["workers_for_maintenance")
-            item["upkeep_soldiers", fix((oRs[23]+oRs[26]) / 250)
+            item["upkeep_credits"] = oRs[33]
+            item["upkeep_workers"] = oRs[28]
+            item["upkeep_soldiers"] = int((oRs[23]+oRs[26]) / 250)
 
-                if oRs[0] = str(self.CurrentPlanet): .Parse "planet.highlight"
-
-            content.Parse("planet"
-
-        content.Parse(""
-        end with
+            if oRs[0] == self.CurrentPlanet: item["highlight"] = True
 
         return self.Display(content)
-

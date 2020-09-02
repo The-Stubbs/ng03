@@ -82,7 +82,7 @@ function openCargo(){ setCargoMsg('Ouverture du cargo en cours ...'); openURL("/
 function transferResources(){
 	var params = "&load_ore=" + getval("load_ore") + "&load_hydrocarbon="+getval("load_hydrocarbon") + "&load_scientists="+getval("load_scientists")  + "&load_soldiers="+getval("load_soldiers") + "&load_workers="+getval("load_workers")+
 				"&unload_ore=" + getval("unload_ore") + "&unload_hydrocarbon=" + getval("unload_hydrocarbon") + "&unload_scientists=" + getval("unload_scientists")  + "&unload_soldiers=" + getval("unload_soldiers") + "&unload_workers=" + getval("unload_workers");
-	openURL("/game/fleet-trade.asp?id={{fleetid}}&a=open"+params, evalResponse);
+	openURL("/game/fleet-trade/?id={{fleetid}}&a=open"+params, evalResponse);
 
 	setCargoMsg('Transfert des ressources en cours ...');
 
@@ -354,7 +354,7 @@ En attente (<script>putcountdown1({{time}}, 'Terminé', '?id={{fleetid}}')</scri
 <td>
 <div class=left>{{fleet_real_signature|intcomma}} (détectée: {{fleet_signature|intcomma}})</div>
 {% if split %}
-<div class=right><a href="fleet-split.asp?id={{fleetid}}">Scinder</a></div>
+<div class=right><a href="/game/fleet-split/?id={{fleetid}}">Scinder</a></div>
 {% endif %}
 </td></tr>
 
@@ -402,15 +402,15 @@ function fillDest(obj){
 }
 function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
 {% if planetgroup %}
-{% if location %}d({{index}},'{{name}}',{{to_g}},{{to_s}},{{to_p}});{% endif %}
+{% for location in planetgroup %}d({{location.index}},'{{location.name}}',{{location.to_g}},{{location.to_s}},{{location.to_p}});{% endfor %}
 {% endif %}
 
 {% if fleetgroup %}
-{% if location %}d({{index}},'{{fleet_name}}',{{to_g}},{{to_s}},{{to_p}});{% endif %}
+{% for location in fleetgroup %}d({{location.index}},'{{location.name}}',{{location.to_g}},{{location.to_s}},{{location.to_p}});{% endfor %}
 {% endif %}
 
 {% if merchantplanetsgroup %}
-{% if location %}d({{index}},'',{{to_g}},{{to_s}},{{to_p}});{% endif %}
+{% for location in merchantplanetsgroup %}d({{location.index}},'',{{location.to_g}},{{location.to_s}},{{location.to_p}});{% endfor %}
 {% endif %}
 </script>
 
@@ -430,13 +430,13 @@ function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
 
 		<select name="planetlist" tabindex="1" onchange="fillDest(this)">
 			{% if planetgroup %}<optgroup label="Planètes">
-			{% if location %}<option{% if selected %} selected{% endif %}>{{name}} ({{to_g}}.{{to_s}}.{{to_p}})</option>{% endif %}
+			{% for location in planetgroup %}<option{% if location.selected %} selected{% endif %}>{{location.name}} ({{location.to_g}}.{{location.to_s}}.{{location.to_p}})</option>{% endfor %}
 			</optgroup>{% endif %}
 			{% if fleetgroup %}<optgroup label="Vers Flottes">
-			{% if location %}<option{% if selected %} selected{% endif %}>{{fleet_name}} ({{to_g}}.{{to_s}}.{{to_p}})</option>{% endif %}
+			{% for location in fleetgroup %}<option{% if location.selected %} selected{% endif %}>{{location.fleet_name}} ({{location.to_g}}.{{location.to_s}}.{{location.to_p}})</option>{% endfor %}
 			</optgroup>{% endif %}
 			{% if merchantplanetsgroup %}<optgroup label="Planètes marchandes">
-			{% if location %}<option{% if selected %} selected{% endif %}>Marchand ({{to_g}}.{{to_s}}.{{to_p}})</option>{% endif %}
+			{% for location in merchantplanetsgroup %}<option{% if location.selected %} selected{% endif %}>Marchand ({{location.to_g}}.{{location.to_s}}.{{location.to_p}})</option>{% endfor %}
 			</optgroup>{% endif %}
 		</select>
 	</td>
@@ -480,7 +480,7 @@ function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
 <tr class="category"><td>{{fleetname}} ({{fleet_signature|intcomma}}){% if manage %} - <a href="/game/fleet-ships/?id={{fleetid}}">Gérer vaisseaux</a>{% endif %}{% if split %} - <a href="/game/fleet-split/?id={{fleetid}}">Scinder</a>{% endif %}</tr>
 {% for ship in shiplist %}
 <tr>
-<td nowrap><div class=left><a href="help.asp?cat=ships#{{ship.id}}" onmouseover="ddrivetip(descShip({{ship.id}}))" onmouseout="hideddrivetip()"><b>{{ship.name}}</b></a> x{{ship.quantity|intcomma}}</div>
+<td nowrap><div class=left><a href="/game/help/?cat=ships#{{ship.id}}" onmouseover="ddrivetip(descShip({{ship.id}}))" onmouseout="hideddrivetip()"><b>{{ship.name}}</b></a> x{{ship.quantity|intcomma}}</div>
 	{% if ship.install %}
 	<div class=right>&nbsp;<a href="?id={{fleetid}}&action=install&s={{ship.id}}">Déployer</a></div>
 	{% endif %}
@@ -502,7 +502,7 @@ var fleet{{fleet.id}}="<table width='100%'><tr><td><div id='stats'><div><span cl
 </script>
 <tr><td><a href="?id={{fleet.id}}" onmouseover="ddrivetip(fleet{{fleet.id}},200)" onmouseout="hideddrivetip()">{{fleet.name}}</a> ({{fleet.signature|intcomma}}){% if fleet.merge %} - <a href="?id={{fleetid}}&action=merge&with={{fleet.id}}">absorber</a>{% endif %}</td></tr>
 {% else %}
-<tr><td><a title="Écrire à {{fleet.owner}}" href="mails.asp?subject=À propos de la flotte {{fleet.name}}&to={{fleet.owner}}" class="{% if fleet.ally %}ally{% endif %}{% if fleet.friend %}friend{% endif %}{% if fleet.enemy %}enemy{% endif %}">{% if fleet.alliance %}[{{fleet.tag}}] {% endif %}{{fleet.name}}</a> (<script>document.write(({{fleet.signature}}>0)?'{{fleet.signature|intcomma}}':'indéterminé'); </script>)</td></tr>
+<tr><td><a title="Écrire à {{fleet.owner}}" href="/game/mails/?subject=À propos de la flotte {{fleet.name}}&to={{fleet.owner}}" class="{% if fleet.ally %}ally{% endif %}{% if fleet.friend %}friend{% endif %}{% if fleet.enemy %}enemy{% endif %}">{% if fleet.alliance %}[{{fleet.tag}}] {% endif %}{{fleet.name}}</a> (<script>document.write(({{fleet.signature}}>0)?'{{fleet.signature|intcomma}}':'indéterminé'); </script>)</td></tr>
 {% endif %}
 {% endfor %}
 
