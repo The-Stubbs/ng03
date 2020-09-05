@@ -42,66 +42,68 @@ class View(GlobalView):
             query = query + " AND type = "+ str(cat) + " ORDER BY datetime DESC LIMIT 200"
 
         oRss = oConnExecuteAll(query)
-        content.Parse(str(cat)+"00_selected"
+        content.Parse("tabnav_"+str(cat)+"00_selected")
         if oRss == None: content.Parse("noreports")
-
-        #
-        # List the reports returned by the query
-        #
-        list = []
-        content.AssignValue('reports', list)
-        for oRs in oRss:
-            item = {}
-            list.append(item)
-            
-            item["ownerid"] = oRs[29]
-            item["invitedusername"] = oRs[30]
-            item["nation"] = oRs[31]
-            item["nation"] = True
-
-            item["type"] = oRs[0]*100+oRs[1]
-            item["date"] = oRs[2]
-
-            item["battleid"] = oRs[3]
-            item["fleetid"] = oRs[4]
-            item["fleetname"] = oRs[5]
-            item["planetid"] = oRs[6]
-
-            if oRs[14] in [rHostile, rWar]:
-                item["planetname"] = oRs[15]
-            elif oRs[14] in [rFriend, rAlliance, rSelf]:
-                item["planetname"] = oRs[7]
-            else:
-                item["planetname"] = ""
-
-                # assign planet coordinates
-            if oRs[8]:
-                item["g"] = oRs[8]
-                item["s"] = oRs[9]
-                item["p"] = oRs[10]
-
-            item["researchid"] = oRs[11]
-            if (oRs[11]): item["researchname"] = getResearchLabel(oRs[11])
-
-            item["ore"] = oRs[16]
-            item["hydrocarbon"] = oRs[17]
-            item["credits"] = oRs[18]
-
-            item["scientists"] = oRs[19]
-            item["soldiers"] = oRs[20]
-            item["workers"] = oRs[21]
-
-            item["username"] = oRs[22]
-            item["alliancetag"] = oRs[23]
-            item["alliancename"] = oRs[24]
-            item["invasionid"] = oRs[25]
-            item["spyid"] = oRs[26]
-            item["spykey"] = oRs[27]
-
-            item["description"] = oRs[28]
-
-            if (oRs[32]): item["building"] = getBuildingLabel(oRs[32])
-
+        else:
+            #
+            # List the reports returned by the query
+            #
+            list = []
+            content.AssignValue('messages', list)
+            for oRs in oRss:
+                reportType = oRs[0]*100+oRs[1]
+                if reportType != 133:
+                    
+                    item = {}
+                    list.append(item)
+                    
+                    item["ownerid"] = oRs[29]
+                    item["invitedusername"] = oRs[30]
+                    item["nation"] = oRs[31]
+        
+                    item["type"] = oRs[0]*100+oRs[1]
+                    item["date"] = oRs[2]
+        
+                    item["battleid"] = oRs[3]
+                    item["fleetid"] = oRs[4]
+                    item["fleetname"] = oRs[5]
+                    item["planetid"] = oRs[6]
+        
+                    if oRs[14] in [rHostile, rWar]:
+                        item["planetname"] = oRs[15]
+                    elif oRs[14] in [rFriend, rAlliance, rSelf]:
+                        item["planetname"] = oRs[7]
+                    else:
+                        item["planetname"] = ""
+        
+                        # assign planet coordinates
+                    if oRs[8]:
+                        item["g"] = oRs[8]
+                        item["s"] = oRs[9]
+                        item["p"] = oRs[10]
+        
+                    item["researchid"] = oRs[11]
+                    if (oRs[11]): item["researchname"] = getResearchLabel(oRs[11])
+        
+                    item["ore"] = oRs[16]
+                    item["hydrocarbon"] = oRs[17]
+                    item["credits"] = oRs[18]
+        
+                    item["scientists"] = oRs[19]
+                    item["soldiers"] = oRs[20]
+                    item["workers"] = oRs[21]
+        
+                    item["username"] = oRs[22]
+                    item["alliancetag"] = oRs[23]
+                    item["alliancename"] = oRs[24]
+                    item["invasionid"] = oRs[25]
+                    item["spyid"] = oRs[26]
+                    item["spykey"] = oRs[27]
+        
+                    item["description"] = oRs[28]
+        
+                    if (oRs[32]): item["building"] = getBuildingLabel(oRs[32])
+    
         content.Parse("tabnav_000")
         content.Parse("tabnav_100")
         content.Parse("tabnav_200")

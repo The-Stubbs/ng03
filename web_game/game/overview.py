@@ -133,9 +133,9 @@ class View(GlobalView):
 
             oRs2 = oConnExecute("SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0) FROM fleets WHERE ownerid=" + str(self.UserId))
 
-            content.AssignValue("stat_workers", oRs[3] + oRs[0])
-            content.AssignValue("stat_scientists", oRs[4] + oRs[1])
-            content.AssignValue("stat_soldiers", oRs[5] + oRs[2])
+            content.AssignValue("stat_workers", oRs[3] + oRs2[0])
+            content.AssignValue("stat_scientists", oRs[4] + oRs2[1])
+            content.AssignValue("stat_soldiers", oRs[5] + oRs2[2])
 
         #
         # view current buildings constructions

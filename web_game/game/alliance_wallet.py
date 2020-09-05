@@ -15,51 +15,51 @@ class View(GlobalView):
         self.e_not_enough_money = 1
         self.e_can_give_money_after_a_week = 2
 
-        money_error = self.e_no_error
+        self.money_error = self.e_no_error
 
         if self.AllianceId == None:
             return HttpResponseRedirect("/game/overview/")
 
         #
-        # accept/deny money request
+        # accept/deny money self.request
         #
-        action = request.GET.get("a")
-        id = request.GET.get("id")
+        action = self.request.GET.get("a", "")
+        id = self.request.GET.get("id", "")
 
         if action == "accept":
-            oConnExecute("SELECT sp_alliance_money_accept(" + str(self.UserId) + "," + dosql(id) + ")"
+            oConnExecute("SELECT sp_alliance_money_accept(" + str(self.UserId) + "," + dosql(id) + ")")
         elif action == "deny":
-            oConnExecute("SELECT sp_alliance_money_deny(" + str(self.UserId) + "," + dosql(id) + ")"
+            oConnExecute("SELECT sp_alliance_money_deny(" + str(self.UserId) + "," + dosql(id) + ")")
 
         #
-        # player gives or requests credits
+        # player gives or self.requests credits
         #
         credits = ToInt(request.POST.get("credits"), 0)
-        description = request.POST.get("description").strip()
+        description = self.request.POST.get("description", "").strip()
 
-        if request.POST.get("cancel") != "":
+        if self.request.POST.get("cancel", "") != "":
             credits = 0
             description = ""
             oConnExecute("SELECT sp_alliance_money_request("+str(self.UserId)+","+str(credits)+","+dosql(description)+")")
 
         if credits != 0:
-            if request.POST.get("request") != "":
-                oConnExecute("SELECT sp_alliance_money_request("+str(self.UserId)+","+dosql(credits)+","+dosql(description)+")")
-            elif request.POST.get("give") != "" and (credits > 0):
+            if self.request.POST.get("request", "") != "":
+                oConnExecute("SELECT sp_alliance_money_request("+str(self.UserId)+","+str(credits)+","+dosql(description)+")")
+            elif self.request.POST.get("give") != "" and (credits > 0):
 
-                if can_give_money():
-                    oRs = oConnExecute("SELECT sp_alliance_transfer_money("+str(self.UserId)+","+dosql(credits)+","+dosql(description)+",0)")
-                    if oRs[0] != 0: money_error = self.e_not_enough_money
+                if self.can_give_money():
+                    oRs = oConnExecute("SELECT sp_alliance_transfer_money("+str(self.UserId)+","+str(credits)+","+dosql(description)+",0)")
+                    if oRs[0] != 0: self.money_error = self.e_not_enough_money
                 else:
-                    money_error = self.e_can_give_money_after_a_week
+                    self.money_error = self.e_can_give_money_after_a_week
 
         #
         # change of tax rates
         #
-        taxrates = ToInt(request.POST.get("taxrates"), "")
+        taxrates = request.POST.get("taxrates", "")
 
         if taxrates != "":
-            connExecuteRetryNoRecords "SELECT sp_alliance_set_tax("+str(self.UserId)+","+dosql(taxrates)+")"
+            connExecuteRetryNoRecords("SELECT sp_alliance_set_tax("+str(self.UserId)+","+dosql(taxrates)+")")
 
         #
         # retrieve which page is displayed
@@ -82,40 +82,39 @@ class View(GlobalView):
 
     def can_give_money(self):
 
-        oRs = oConnExecute("SELECT game_started < now() - INTERVAL '2 weeks# FROM users WHERE id=" + str(self.UserId))
+        oRs = oConnExecute("SELECT game_started < now() - INTERVAL '2 weeks' FROM users WHERE id=" + str(self.UserId))
 
-        can_give_money = oRs and oRs[0]
+        return oRs and oRs[0]
 
     #
     # Display the wallet page
     #
     def DisplayPage(self, tpl, cat):
-        content = GetTemplate(self.request, "alliance-wallet")
 
-        content.AssignValue("walletpage", cat)
+        tpl.AssignValue("walletpage", cat)
 
         oRs = oConnExecute("SELECT credits, tax FROM alliances WHERE id=" + str(self.AllianceId))
-        content.AssignValue("credits", oRs[0])
-        content.AssignValue("tax", oRs[1]/10)
+        tpl.AssignValue("credits", oRs[0])
+        tpl.AssignValue("tax", oRs[1]/10)
 
-        if self.oPlayerInfo["planets"] < 2: content.Parse("notax")
+        if self.oPlayerInfo["planets"] < 2: tpl.Parse("notax")
 
         oRs = oConnExecute("SELECT COALESCE(sum(credits), 0) FROM alliances_wallet_journal WHERE allianceid=" + str(self.AllianceId) + " AND datetime >= now()-INTERVAL '24 hours'")
-        content.AssignValue("last24h", oRs[0])
+        tpl.AssignValue("last24h", oRs[0])
 
-        if money_error == self.e_not_enough_money:
-            content.Parse("not_enough_money")
-        elif money_error == self.e_can_give_money_after_a_week:
-            content.Parse("can_give_money_after_a_week")
+        if self.money_error == self.e_not_enough_money:
+            tpl.Parse("not_enough_money")
+        elif self.money_error == self.e_can_give_money_after_a_week:
+            tpl.Parse("can_give_money_after_a_week")
 
-        content.Parse("cat"+str(cat)+"_selected")
+        tpl.Parse("cat"+str(cat)+"_selected")
 
-        content.Parse("cat1")
-        if self.oAllianceRights["can_ask_money"]: content.Parse("cat2")
-        content.Parse("cat3")
-        if self.oAllianceRights["can_change_tax_rate"]: content.Parse("cat4")
+        tpl.Parse("cat1")
+        if self.oAllianceRights["can_ask_money"]: tpl.Parse("cat2")
+        tpl.Parse("cat3")
+        if self.oAllianceRights["can_change_tax_rate"]: tpl.Parse("cat4")
 
-        return self.Display(content)
+        return self.Display(tpl)
 
     #
     # Display a journal of the last money operations
@@ -125,9 +124,10 @@ class View(GlobalView):
         content = GetTemplate(self.request, "alliance-wallet-journal")
         content.AssignValue("walletpage", cat)
 
-        col = request.GET.get("col")
+        col = ToInt(self.request.GET.get("col"), 0)
         if col < 1 or col > 4: col = 1
 
+        reversed = False
         if col == 1:
             orderby = "datetime"
             reversed = True
@@ -145,7 +145,7 @@ class View(GlobalView):
         elif col == 6:
             orderby = "upper(description)"
 
-        if request.GET.get("r") != "":
+        if self.request.GET.get("r", "") != "":
             reversed = not reversed
         else:
             content.Parse("r" + str(col))
@@ -153,17 +153,17 @@ class View(GlobalView):
         if reversed: orderby = orderby + " DESC"
         orderby = orderby + ", datetime DESC"
 
-        if request.POST.get("refresh") != "":
-            displayGiftsRequests = request.POST.get("gifts") == 1
-            displaySetTax = request.POST.get("settax") == 1
-            displayTaxes = request.POST.get("taxes") == 1
-            displayKicksBreaks = request.POST.get("kicksbreaks") == 1
+        if self.request.POST.get("refresh", "") != "":
+            displayGiftsRequests = ToInt(self.request.POST.get("gifts"), 0) == 1
+            displaySetTax = ToInt(self.request.POST.get("settax"), 0) == 1
+            displayTaxes = ToInt(self.request.POST.get("taxes"), 0) == 1
+            displayKicksBreaks = ToInt(self.request.POST.get("kicksbreaks"), 0) == 1
 
             query = "UPDATE users SET" + \
-                    " wallet_display[1]=" + displayGiftsRequests + \
-                    " ,wallet_display[2]=" + displaySetTax + \
-                    " ,wallet_display[3]=" + displayTaxes + \
-                    " ,wallet_display[4]=" + displayKicksBreaks + \
+                    " wallet_display[1]=" + str(displayGiftsRequests) + \
+                    " ,wallet_display[2]=" + str(displaySetTax) + \
+                    " ,wallet_display[3]=" + str(displayTaxes) + \
+                    " ,wallet_display[4]=" + str(displayKicksBreaks) + \
                     " WHERE id=" + str(self.UserId)
             oConnDoQuery(query)
         else:
@@ -201,7 +201,7 @@ class View(GlobalView):
 
         oRss = oConnExecuteAll(query)
 
-        if oRs == None: content.Parse("noentries")
+        if oRss == None: content.Parse("noentries")
 
         i = 1
         list = []
@@ -210,7 +210,7 @@ class View(GlobalView):
             item = {}
             list.append(item)
             
-            item["date", oRs[0]
+            item["date"] = oRs[0]
 
             if oRs[2] > 0:
                 item["income"] = oRs[2]
@@ -221,36 +221,36 @@ class View(GlobalView):
 
             item["description"] = oRs[3]
             item["source"] = oRs[4]
-            item["destination"] = oRs[5]
+            item["destination"] = oRs[5] if oRs[5] else ""
 
             if oRs[6] == 0: # gift
-                content.Parse("gift")
+                item["gift"] = True
             elif oRs[6] == 1: # tax
-                content.Parse("tax")
+                item["tax"] = True
             elif oRs[6] == 2:
-                content.Parse("member_left")
+                item["member_left"] = True
             elif oRs[6] == 3:
-                content.Parse("money_request")
+                item["money_request"] = True
             elif oRs[6] == 4:
-                item["description"] = int(oRs[3])/10 + " %"
-                content.Parse("taxchanged")
+                item["description"] = str(int(oRs[3])/10) + " %"
+                item["taxchanged"] = True
             elif oRs[6] == 5:
-                content.Parse("member_kicked")
+                item["member_kicked"] = True
             elif oRs[6] == 10:
-                content.Parse("nap_broken")
+                item["nap_broken"] = True
             elif oRs[6] == 11:
-                content.Parse("nap_broken")
+                item["nap_broken"] = True
             elif oRs[6] == 12:
-                content.Parse("war_cost")
+                item["war_cost"] = True
             elif oRs[6] == 20:
-                content.Parse("tribute")
+                item["tribute"] = True
 
         return self.DisplayPage(content, cat)
 
     #
-    # Display the requests page
-    # Allow a player to request money from his alliance
-    # Treasurer and Leader can see the list of request and accept/deny them
+    # Display the self.requests page
+    # Allow a player to self.request money from his alliance
+    # Treasurer and Leader can see the list of self.request and accept/deny them
     #
     def DisplayRequests(self, cat):
         content = GetTemplate(self.request, "alliance-wallet-requests")
@@ -278,14 +278,16 @@ class View(GlobalView):
         content.Parse("request")
 
         if self.oAllianceRights["can_accept_money_requests"]:
-            # List money requests
+            # List money self.requests
             query = "SELECT r.id, datetime, login, r.credits, r.description" + \
                     " FROM alliances_wallet_requests r" + \
                     "    INNER JOIN users ON users.id=r.userid" + \
-                    " WHERE allianceid=" + str(self.AllianceId) + " AND result IS None"
+                    " WHERE allianceid=" + str(self.AllianceId) + " AND result IS NULL"
 
             oRss = oConnExecuteAll(query)
-
+            
+            content.Parse("list")
+            
             i = 0
             list = []
             content.AssignValue("requests", list)
@@ -315,7 +317,7 @@ class View(GlobalView):
         oRs = oConnExecute("SELECT credits FROM users WHERE id=" + str(self.UserId))
         content.AssignValue("player_credits", oRs[0])
 
-        if can_give_money():
+        if self.can_give_money():
             content.Parse("can_give")
         else:
             content.Parse("can_give_after_a_week")
@@ -330,8 +332,10 @@ class View(GlobalView):
                     " WHERE allianceid="+str(self.AllianceId)+" AND type=0 AND datetime >= now()-INTERVAL '1 week'" + \
                     " ORDER BY datetime DESC"
             oRss = oConnExecuteAll(query)
-
-            if oRs == None: content.Parse("noentries")
+            
+            content.Parse("list")
+            
+            if oRss == None: content.Parse("noentries")
 
             list = []
             content.AssignValue("entries", list)
@@ -352,7 +356,7 @@ class View(GlobalView):
     def DisplayTaxRates(self, cat):
 
         content = GetTemplate(self.request, "alliance-wallet-taxrates")
-        content.AssignValue("walletpage", cat
+        content.AssignValue("walletpage", cat)
 
         oRs = oConnExecute("SELECT tax FROM alliances WHERE id=" + str(self.AllianceId))
         tax = oRs[0]

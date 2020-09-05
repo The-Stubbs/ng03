@@ -14,11 +14,11 @@ function showKick(name)
 {% endif %}
 
 var ranks = new Array();
-{% if rank %}
-ranks[{{rank_id}}] = {{rank_label:quotehtml}};
+{% for rank in ranks %}
+ranks[{{rank.rank_id}}] = '{{rank.rank_label}}';
 {% endfor %}
 
-function showSubmit(){{ $("SubmitChanges").className = "item"; }}
+function showSubmit(){ $("SubmitChanges").className = "item"; }
 
 function displayStatus(id,rank,manage,kick){
 	var s = '';
@@ -45,8 +45,8 @@ function displayStatus(id,rank,manage,kick){
 	{% if nav %}
 	<div>
 	<ul class="htabs">
-		{% if cat1 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=1">Membres</a></li>{% endif %}
-		{% if cat2 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=2">Invitations</a></li>{% endif %}
+		{% if cat1 %}<li{% if cat1_selected %} class="active"{% endif %}><a href="?cat=1">Membres</a></li>{% endif %}
+		{% if cat2 %}<li{% if cat2_selected %} class="active"{% endif %}><a href="?cat=2">Invitations</a></li>{% endif %}
 	</ul>
 	</div>
 	{% endif %}
@@ -67,36 +67,36 @@ function displayStatus(id,rank,manage,kick){
 <td><a href="?cat={{cat}}&col=7{% if r7 %}&r=7{% endif %}">Statut</a></td>
 </tr>
 
-{% if player %}
-<tr><td>{{place}}. <a href="/game/nation/?name={{name}}" title="Afficher les infos sur {{name}}">{{name}}</a><br/><span class="grey">{% if orientation1 %}Marchand{% endif %}{% if orientation2 %}Militaire{% endif %}{% if orientation3 %}Scientifique{% endif %}{% if orientation4 %}Seigneur de guerre{% endif %}</span></td>
+{% for player in players %}
+<tr><td>{{player.place}}. <a href="/game/nation/?name={{player.name}}" title="Afficher les infos sur {{player.name}}">{{player.name}}</a><br/><span class="grey">{% if player.orientation1 %}Marchand{% endif %}{% if player.orientation2 %}Militaire{% endif %}{% if player.orientation3 %}Scientifique{% endif %}{% if player.orientation4 %}Seigneur de guerre{% endif %}</span></td>
 <td align="right">
-{% if score %}{{score|intcomma}}<br/><span{% if plus %} class="plus"{% endif %}{% if minus %} class="minus"{% endif %}>{% if plus %}+{% endif %}{{score_delta|intcomma}}</span>{% endif %}
-{% if score_na %}<span class="grey">Non publié</span>{% endif %}
+{% if player.scoreshown %}{{player.score|intcomma}}<br/><span{% if player.score_plus %} class="plus"{% endif %}{% if player.score_minus %} class="minus"{% endif %}>{% if player.score_plus %}+{% endif %}{{player.score_delta|intcomma}}</span>{% endif %}
+{% if player.score_na %}<span class="grey">Non publié</span>{% endif %}
 </td>
-<td align="right">{{stat_colonies}}</td>
-<td align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="res" width="16" height="16">{% if lowcredits %}<span class="low">{% endif %}{{credits|intcomma}}{% if lowcredits %}</span>{% endif %}</td>
+<td align="right">{{player.stat_colonies}}</td>
+<td align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="res" width="16" height="16">{% if player.lowcredits %}<span class="low">{% endif %}{{player.credits|intcomma}}{% if player.lowcredits %}</span>{% endif %}</td>
 <td align="right">
-{% if banned %}<span class="banned">Compte suspendu</span>{% endif %}
-{% if onholidays %}<span class="onholidays">En vacances</span>{% endif %}
-{% if online %}<span class="recent">En ligne</span>{% endif %}
-{% if less1h %}<span class="recent">&lt; 1 heure</span>{% endif %}
-{% if hours %}<span class="recent">{{hours}} heure(s)</span>{% endif %}
-{% if days %}<span class="fewdays">{{days}} jour(s)</span>{% endif %}
-{% if 1weekplus %}<span class="fewweeks">&gt;1 semaine</span>{% endif %}
-{% if 2weeksplus %}<span class="fewweeks">&gt;2 semaines</span>{% endif %}
+{% if player.banned %}<span class="banned">Compte suspendu</span>{% endif %}
+{% if player.onholidays %}<span class="onholidays">En vacances</span>{% endif %}
+{% if player.online %}<span class="recent">En ligne</span>{% endif %}
+{% if player.less1h %}<span class="recent">&lt; 1 heure</span>{% endif %}
+{% if player.hours %}<span class="recent">{{player.hours_delay}} heure(s)</span>{% endif %}
+{% if player.days %}<span class="fewdays">{{player.days_delay}} jour(s)</span>{% endif %}
+{% if player.1weekplus %}<span class="fewweeks">&gt;1 semaine</span>{% endif %}
+{% if player.2weeksplus %}<span class="fewweeks">&gt;2 semaines</span>{% endif %}
 </td>
-<td>{{joined}}</td>
-<td id="statusref{{id}}">
-<script>displayStatus({{id}},{{rank}},0{% if manage %}1{% endmanage %},0{% if kick %}1{% endif %});</script>
-{% if kick %} - <span id="kick{{id}}" onclick="return showKick({{id}});"><a href="?#">Exclure</a></span><span id="kickConfirm{{id}}" class="hidden">Coût: <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="res" width="16" height="16">{{kick_price|intcomma}}&nbsp;<a href="?cat={{cat}}&a=kick&name={{name}}">Confirmer</a></span>{% endif %}
-{% if leaving %}&nbsp;<span class="warning">Quitte: <script>putcountdown1({{leaving_time}}, "Terminé", "?cat={{cat}}");</script></span>{% endif %}
+<td>{{player.joined}}</td>
+<td id="statusref{{player.id}}">
+<script>displayStatus({{player.id}},{{player.rank}},0{% if player.manage %}1{% endif %},0{% if player.kick %}1{% endif %});</script>
+{% if player.kick %} - <span id="kick{{player.id}}" onclick="return showKick({{player.id}});"><a href="?#">Exclure</a></span><span id="kickConfirm{{player.id}}" class="hidden">Coût: <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="res" width="16" height="16">{{player.kick_price|intcomma}}&nbsp;<a href="?cat={{cat}}&a=kick&name={{player.name}}">Confirmer</a></span>{% endif %}
+{% if player.leaving %}&nbsp;<span class="warning">Quitte: <script>putcountdown1({{player.leaving_time}}, "Terminé", "?cat={{cat}}");</script></span>{% endif %}
 </td>
 </tr>
 {% endfor %}
 
 <tr>
 <td class="justhidden"></td>
-<td align="right">{% if score %}{{total_score|intcomma}}<br/><span{% if plus %} class="plus"{% endif %}{% if minus %} class="minus"{% endif %}>{% if plus %}+{% endif %}{{total_score_delta|intcomma}}</span>{% endif %}
+<td align="right">{% if score %}{{total_score|intcomma}}<br/><span{% if total_plus %} class="plus"{% endif %}{% if total_minus %} class="minus"{% endif %}>{% if total_plus %}+{% endif %}{{total_score_delta|intcomma}}</span>{% endif %}
 {% if score_na %}<span class="grey">Non publié</span>{% endif %}
 </td>
 <td align="right">{{total_colonies|intcomma}}</td>
@@ -133,8 +133,8 @@ function displayStatus(id,rank,manage,kick){
 <tr class="title"><td colspan=4>Invitations de ralliement en cours...</td></tr>
 <tr class="header"><td>Nation</td><td>Date d'invitation</td><td>Invité par</td><td>Réponse</td></tr>
 
-{% if invitation %}
-<tr class="smallitem"><td>{{name}}</td><td>{{date}}</td><td>{{recruiter}}&nbsp;</td><td>{% if waiting %}En attente{% endif %}{% if declined %}Refusée{% endif %}</td></tr>
+{% for invitation in invits %}
+<tr class="smallitem"><td>{{invitation.name}}</td><td>{{invitation.date}}</td><td>{{invitation.recruiter}}&nbsp;</td><td>{% if invitation.waiting %}En attente{% endif %}{% if invitation.declined %}Refusée{% endif %}</td></tr>
 {% endfor %}
 
 {% if noinvitations %}

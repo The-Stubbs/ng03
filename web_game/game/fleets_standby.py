@@ -25,31 +25,31 @@ class View(GlobalView):
                 " ORDER BY nav_planet.id, shipid"
         oRss = oConnExecuteAll(query)
 
-        if oRs == None:
-            content.Parse("noships"
+        if oRss == None:
+            content.Parse("noships")
         else:
-            lastplanetid = oRs[0]
+            lastplanetid = -1
 
             list = []
+            content.AssignValue("planets", list)
             for oRs in oRss:
-                item = {}
-                list.append(item)
                 
                 if oRs[0] != lastplanetid:
-                    content.Parse("planet"
+                    planet = { "ships":[] }
+                    list.append(planet)
+                    
                     lastplanetid = oRs[0]
 
-                item["planetid", oRs[0]
-                item["planetname", oRs[1]
-                item["g", oRs[2]
-                item["s", oRs[3]
-                item["p", oRs[4]
-                item["ship", getShipLabel(oRs[5])
-                item["quantity", oRs[6]
-
-                content.Parse("planet.ship"
-
-            content.Parse("planet"
+                    planet["planetid"] = oRs[0]
+                    planet["planetname"] = oRs[1]
+                    planet["g"] = oRs[2]
+                    planet["s"] = oRs[3]
+                    planet["p"] = oRs[4]
+                    
+                item = {}
+                planet["ships"].append(item)
+                
+                item["ship"] = getShipLabel(oRs[5])
+                item["quantity"] = oRs[6]
 
         return self.Display(content)
-

@@ -1,10 +1,11 @@
 {% extends 'layout.html' %}
+{% load tz %}
 {% load humanize %}
 {% block content %}
 {% if chat %}
 <script>
 var chatInstance = {{chatinstance}};
-var chatDateTime = new Date({{now:yyyy}},{{now:m}}-1,{{now:d }},{{now:h }},{{now:n }},{{now:s}},{{now:z}});
+var chatDateTime = new Date(new Date({{now|timezone:"Europe/Paris"|date:"Y"}},{{now|timezone:"Europe/Paris"|date:"m"}}-1,{{now|timezone:"Europe/Paris"|date:"d"}},{{now|timezone:"Europe/Paris"|date:"H"}},{{now|timezone:"Europe/Paris"|date:"i"}},{{now|timezone:"Europe/Paris"|date:"s"}},{{now|date:"z"}}));
 var pageLocation = location.href;
 
 var days=['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
@@ -30,7 +31,7 @@ var Smileys={
 	list:[],
 	add:function() {
 		for(var i=1; i<arguments.length; i++)
-			this.list.push([arguments[0], arguments[i %});
+			this.list.push([arguments[0], arguments[i]]);
 	},
 	get:function(smiley) {
 		for(var i=0; i<this.list.length; i++)
@@ -61,7 +62,7 @@ function formatLine(author,line)
 {
 	var smileys = 0;
 
-	highlight = line.indexOf({{login:quote}}, 0) > -1;
+	highlight = line.indexOf('{{login}}', 0) > -1;
 	words = line.split(" ");
 
 	for(i=0;i<words.length;i++)
@@ -89,7 +90,7 @@ function formatLine(author,line)
 			words[i] = addWbr(words[i]);
 	}
 
-	if(author == {{login:quote}})
+	if(author == '{{login}}')
 		return '<span class="player">' + words.join(' ') + '</span>';
 	else
 	if(highlight)
@@ -143,7 +144,7 @@ Chat.prototype = {
 		this.lastRefresh = new Date().getTime();
 		this.nextRefreshOnlineUsers = new Date().getTime() + 60000;
 
-		this.loaded = false; {% if comment %}// set to true once chat history has been filled{% endcomment %}
+		this.loaded = false; {% if comment %}// set to true once chat history has been filled{% endif %}
 
 		this.lastTo = '';
 		this.line = '';
@@ -156,9 +157,8 @@ Chat.prototype = {
 		this.tab = document.createElement('li');
 		this.tab.chat = this;
 
-		this.tab.innerHTML = '<a href="#" onclick="chatlist['+id+'].setActive(); return false;">' + name + 
-							 (canClose?'&nbsp;<img src="{{PATH_IMAGES}}/interface/closechat.gif" width="12" height="12" title="Fermer" class="close" onclick="chatlist['+id+'].close();">':'') +
-							 '</a>';
+		this.tab.innerHTML = '<a href="#" onclick="chatlist['+id+'].setActive(); return false;">' + name +
+							 (canClose?'&nbsp;<img src="{{PATH_IMAGES}}/interface/closechat.gif" width="12" height="12" title="Fermer" class="close" onclick="chatlist['+id+'].close();">':'') + '</a>';
 
 		tabs.insertBefore(this.tab, newtab);
 
@@ -329,7 +329,7 @@ Chat.prototype = {
 		this.users.push(new User(allianceTag, name, idleTime));
 	},
 
-	clearUsers: function() {{ this.users = []; }},
+	clearUsers: function() { this.users = []; },
 
 	display: function() {
 		this.loaded = true;
@@ -384,7 +384,6 @@ Chat.prototype = {
 					}
 					c.refreshed(); 
 				}
-
 		openURL(url, cb);
 	},
 
@@ -602,35 +601,9 @@ oChatLine = $('chatline');
 var allianceChat = addChat(0,'Alliance','',false,false);
 {% endif %}
 
-{% if join %}
-var chat = addChat({{id}},{{name:quote}},{{topic:quote}},true,true);
-{% if setactive %}chat.setActive();{% endsetactive %}
-{% endjoin %}
-{% if join_badpassword %}
-alert('Nom de salon ou mot de passe incorrect.');
-{% endjoin_badpassword %}
-{% if join_error %}
-alert('Impossible de rejoindre ce salon.');
-{% endjoin_error %}
-
-
-{% if refresh %}
-var chat = chatlist[{{chatid}}];
-if(chat) {
-	{% if line %}chat.addLine({{alliancetag:quote}}, {{author:quote}}, new Date({{datetime:yyyy}},{{datetime:m}}-1,{{datetime:d }},{{datetime:h }},{{datetime:n }},{{datetime:s}},{{datetime:z}}), {{line:quotehtml}});{% endfor %}
-	chat.display();
-
-{% if online_users %}
-	chat.clearUsers();
-	{% if user %}chat.addUser({{alliancetag:quote}}, {{user:quote}}, {{lastactivity}});{% endfor %}
-	chat.displayUsers();
-{% endonline_users %}
-
-}
-{% endrefresh %}
-
-{% if publicchats %}
-displayPublicChats([0{% if chat %},[{{name:quote}},{{topic:quote}},{{online}}]{% endif %}]);
+{% for join in joins %}
+var chat = addChat({{join.id}},'{{join.name}}','{{join.topic}}',true,true);
+{% if join.setactive %}chat.setActive();{% endif %}
 {% endfor %}
 
 {% if chat %}

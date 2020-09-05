@@ -7,11 +7,11 @@
 {% if tabnav %}
 <div>
 <ul class="htabs">
-     <li{% if general %} class="active"{% endgeneral %}><a href="/game/help/?">Aide générale</a></li>
-     <li{% if buildings %} class="active"{% endbuildings %}><a href="/game/help/?cat=buildings">Construction</a></li>
-     <li{% if research %} class="active"{% endresearch %} ><a href="/game/help/?cat=research">Recherche</a></li>
-     <li{% if ships %} class="active"{% endships %}><a href="/game/help/?cat=ships">Vaisseaux</a></li>
-     <li{% if tags %} class="active"{% endtags %}><a href="/game/help/?cat=tags">Balises</a></li>
+     <li{% if general %} class="active"{% endif %}><a href="/game/help/?">Aide générale</a></li>
+     <li{% if buildings %} class="active"{% endif %}><a href="/game/help/?cat=buildings">Construction</a></li>
+     <li{% if research %} class="active"{% endif %} ><a href="/game/help/?cat=research">Recherche</a></li>
+     <li{% if ships %} class="active"{% endif %}><a href="/game/help/?cat=ships">Vaisseaux</a></li>
+     <li{% if tags %} class="active"{% endif %}><a href="/game/help/?cat=tags">Balises</a></li>
 </ul>
 </div>
 {% endif %}
@@ -94,170 +94,170 @@
 		</div>
 	</td>
 </tr>
-{% endgeneral %}
+{% endif %}
 
 {% if buildings %}
 <tr class="header">
 	<td colspan="2">Bâtiment</td><td>Ressources</td><td>Occupation</td><td width="1%">Coût fonctionnement</td><td>Production</td><td>Stockage</td>
 </tr>
-{% if category %}
+{% for category in categories %}
 <tr class="category">
 	<td colspan="7">
-	{% if category10 %}Colonie{% endif %}
-	{% if category11 %}Construction{% endcategory11 %}
-	{% if category20 %}Production{% endcategory20 %}
-	{% if category21 %}Production de minerai{% endcategory21 %}
-	{% if category22 %}Production d'hydrocarbure{% endcategory22 %}
-	{% if category23 %}Production d'énergie{% endcategory23 %}
-	{% if category30 %}Ressources humaines{% endcategory30 %}
-	{% if category31 %}Stockage de minerai{% endcategory31 %}
-	{% if category32 %}Stockage d'hydrocarbure{% endcategory32 %}
-	{% if category33 %}Stockage d'énergie{% endcategory33 %}
-	{% if category40 %}Armement{% endcategory40 %}
-	{% if category80 %}Espace{% endcategory80 %}
-	{% if category90 %}Défense{% endcategory90 %}
-	{% if category100 %}Artéfacts et reliques{% endcategory100 %}
-	{% if category110 %}Evénements{% endcategory110 %}
+	{% if category.id == 10 %}Colonie{% endif %}
+	{% if category.id == 11 %}Construction{% endif %}
+	{% if category.id == 20 %}Production{% endif %}
+	{% if category.id == 21 %}Production de minerai{% endif %}
+	{% if category.id == 22 %}Production d'hydrocarbure{% endif %}
+	{% if category.id == 23 %}Production d'énergie{% endif %}
+	{% if category.id == 30 %}Ressources humaines{% endif %}
+	{% if category.id == 31 %}Stockage de minerai{% endif %}
+	{% if category.id == 32 %}Stockage d'hydrocarbure{% endif %}
+	{% if category.id == 33 %}Stockage d'énergie{% endif %}
+	{% if category.id == 40 %}Armement{% endif %}
+	{% if category.id == 80 %}Espace{% endif %}
+	{% if category.id == 90 %}Défense{% endif %}
+	{% if category.id == 100 %}Artéfacts et reliques{% endif %}
+	{% if category.id == 110 %}Evénements{% endif %}
 	</td>
 </tr>
-{% if building %}
+{% for building in category.buildings %}
 <tr class="item">
 	<td>
-		<img src="{{PATH_IMAGES}}/buildings/{{id}}.jpg" class="building" title="{{name}}" width="64" height="64">
+		<img src="{{PATH_IMAGES}}/buildings/{{building.id}}.jpg" class="building" title="{{building.name}}" width="64" height="64">
 	</td>
 	<td>
-		<a name="{{id}}"></a><div class="label">{{name}}</div><div class="description">{{description}}</div>
+		<a name="{{building.id}}"></a><div class="label">{{building.name}}</div><div class="description">{{building.description|safe}}</div>
 	</td>
 	<td align="right" valign=middle>
 		<table class="clear" width="100%">
-		<tr><td><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16></td><td align=right>{{ore|intcomma}}</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16></td><td align=right>{{hydrocarbon|intcomma}}</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/workers_idle.gif" title="Travailleurs" width=12 height=12></td><td align=right>{{workers|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16></td><td align=right>{{building.ore|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16></td><td align=right>{{building.hydrocarbon|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/workers_idle.gif" title="Travailleurs" width=12 height=12></td><td align=right>{{building.workers|intcomma}}</td></tr>
 		</table>
 	</td>
 	<td align="right" valign="middle">
 		<table class="clear" width="100%">
-		<tr><td><img src="{{PATH_IMAGES}}/interface/floor.gif" title="Terrain" width="16" height="16"></td><td align=right>{{floor|intcomma}}</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/space.gif" title="Espace" width="16" height="16"></td><td align=right>{{space|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/floor.gif" title="Terrain" width="16" height="16"></td><td align=right>{{building.floor|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/space.gif" title="Espace" width="16" height="16"></td><td align=right>{{building.space|intcomma}}</td></tr>
 		</table>
 	</td>
 	<td align="right" valign="middle">
 		<table class="clear" width="100%">
-		<tr><td><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width="16" height="16"></td><td align=right>{{upkeep_credits|intcomma}}</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/energy_available.gif" title="Energie" width="12" height="12"></td><td align=right>{{upkeep_energy|intcomma}}</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width="16" height="16"></td><td align=right>{{upkeep_workers|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width="16" height="16"></td><td align=right>{{building.upkeep_credits|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/energy_available.gif" title="Energie" width="12" height="12"></td><td align=right>{{building.upkeep_energy|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width="16" height="16"></td><td align=right>{{building.upkeep_workers|intcomma}}</td></tr>
 		</table>
 	</td>
 	<td align="right" valign="middle">
 		<table class="clear" width="100%">
-		{% if produce_ore %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width="16" height="16"></td><td align="right">{{ore_production|intcomma}}</td></tr>{% endproduce_ore %}
-		{% if produce_hydrocarbon %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width="16" height="16"></td><td align="right">{{hydrocarbon_production|intcomma}}</td></tr>{% endproduce_hydrocarbon %}
-		{% if produce_energy %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/energy.gif" title="Energie" width="16" height="16"></td><td align="right">{{energy_production|intcomma}}</td></tr>{% endproduce_energy %}
+		{% if building.produce_ore %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width="16" height="16"></td><td align="right">{{building.ore_production|intcomma}}</td></tr>{% endif %}
+		{% if building.produce_hydrocarbon %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width="16" height="16"></td><td align="right">{{building.hydrocarbon_production|intcomma}}</td></tr>{% endif %}
+		{% if building.produce_energy %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/energy.gif" title="Energie" width="16" height="16"></td><td align="right">{{building.energy_production|intcomma}}</td></tr>{% endif %}
 		</table>
 	</td>
 	<td align="right" valign="middle">
 		<table class="clear" width="100%">
-		{% if storage_ore %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width="16" height="16"></td><td align="right">{{ore_storage|intcomma}}</td></tr>{% endstorage_ore %}
-		{% if storage_hydrocarbon %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width="16" height="16"></td><td align="right">{{hydrocarbon_storage|intcomma}}</td></tr>{% endstorage_hydrocarbon %}
-		{% if storage_energy %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/energy.gif" title="Energie" width="16" height="16"></td><td align="right">{{energy_storage|intcomma}}</td></tr>{% endstorage_energy %}
+		{% if building.storage_ore %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width="16" height="16"></td><td align="right">{{building.ore_storage|intcomma}}</td></tr>{% endif %}
+		{% if building.storage_hydrocarbon %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width="16" height="16"></td><td align="right">{{building.hydrocarbon_storage|intcomma}}</td></tr>{% endif %}
+		{% if building.storage_energy %}<tr><td width="16"><img src="{{PATH_IMAGES}}/interface/energy.gif" title="Energie" width="16" height="16"></td><td align="right">{{building.energy_storage|intcomma}}</td></tr>{% endif %}
 		</table>
 	</td>
 </tr>
 {% endfor %}
 <tr class="clear"><td colspan="4">&nbsp;</td></tr>
 {% endfor %}
-{% endbuildings %}
+{% endif %}
 
 {% if research %}
 <tr class="header"><td>Recherche</td><td>Coût</td></tr>
-{% if category %}
+{% for category in categories %}
 <tr class="category"><td colspan="2">
-{% if category10 %}Technologies{% endif %}
-{% if category20 %}Industrie{% endcategory20 %}
-{% if category30 %}Empire{% endcategory30 %}
-{% if category40 %}Recherche{% endcategory40 %}
-{% if category50 %}Technologies militaires{% endcategory50 %}
-{% if category90 %}Vaisseaux spatiaux{% endcategory90 %}
+{% if category.id == 10 %}Technologies{% endif %}
+{% if category.id == 20 %}Industrie{% endif %}
+{% if category.id == 30 %}Empire{% endif %}
+{% if category.id == 40 %}Recherche{% endif %}
+{% if category.id == 50 %}Technologies militaires{% endif %}
+{% if category.id == 90 %}Vaisseaux spatiaux{% endif %}
 &nbsp;</td></tr>
-{% if research_subject %}
+{% for research in category.researches %}
 <tr class="item">
 	<td>
-		<a name="{{id}}"></a><div class="label">{{name}}</div><div class="description">{{description}}</div>
+		<a name="{{research.id}}"></a><div class="label">{{research.name}}</div><div class="description">{{research.description|safe}}</div>
 	</td>
-	<td nowrap align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{cost_credits:n!-}}</td>
+	<td nowrap align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{research.cost_credits|intcomma}}</td>
 </tr>
-{% endresearch_subject %}
+{% endfor %}
 <tr class="clear"><td colspan=2>&nbsp;</td></tr>
 {% endfor %}
-{% endfor %}
+{% endif %}
 
 {% if ships %}
 <tr class="header"><td>Vaisseau</td><td>Caractéristiques</td><td>Ressources</td></tr>
-{% if category %}
+{% for category in categories %}
 <tr class="category">
 	<td colspan="3">
-	{% if category10 %}Vaisseaux utilitaires{% endif %}
-	{% if category11 %}Vaisseaux de déploiement{% endcategory11 %}
-	{% if category15 %}Vaisseaux tactiques{% endcategory15 %}
-	{% if category20 %}Vaisseaux légers{% endcategory20 %}
-	{% if category30 %}Corvettes{% endcategory30 %}
-	{% if category40 %}Frégates{% endcategory40 %}
-	{% if category50 %}Croiseurs{% endcategory50 %}
-	{% if category60 %}Dreadnought{% endcategory60 %}
-	{% if category80 %}Titan{% endcategory80 %}
-	{% if category90 %}Plateforme de défense{% endcategory90 %}
+	{% if category.id == 10 %}Vaisseaux utilitaires{% endif %}
+	{% if category.id == 11 %}Vaisseaux de déploiement{% endif %}
+	{% if category.id == 15 %}Vaisseaux tactiques{% endif %}
+	{% if category.id == 20 %}Vaisseaux légers{% endif %}
+	{% if category.id == 30 %}Corvettes{% endif %}
+	{% if category.id == 40 %}Frégates{% endif %}
+	{% if category.id == 50 %}Croiseurs{% endif %}
+	{% if category.id == 60 %}Dreadnought{% endif %}
+	{% if category.id == 80 %}Titan{% endif %}
+	{% if category.id == 90 %}Plateforme de défense{% endif %}
 	&nbsp;
 	</td>
 </tr>
-{% if ship %}
+{% for ship in category.ships %}
 <tr valign="top" class="item">
 	<td>
-		<a name="{{id}}"></a>
-		<div class="label">{{name}}</div>
-		<div class="description">{{description}}</div>
+		<a name="{{ship.id}}"></a>
+		<div class="label">{{ship.name}}</div>
+		<div class="description">{{ship.description|safe}}</div>
 		<div class="required">Bâtiments requis</div>
-		<ul class="requirements">{% if buildingsrequired %}<li>{{building}}</li>{% endbuildingsrequired %}</ul>
+		<ul class="requirements">{% if ship.buildingsrequired %}<li>{{ship.building}}</li>{% endif %}</ul>
 		</div>
 		<div class="required">Entretien</div>
 			<br/>
-			<img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width="16" height="16" class="icon"> {{ship_upkeep|intcomma}}<br/>
+			<img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width="16" height="16" class="icon"> {{ship.ship_upkeep|intcomma}}<br/>
 		</div>
 	</td>
 	<td align="left" nowrap>
 		<div id="stats">
-			<span class=label>Signature: </span><span class=value>{{ship_signature|intcomma}}</span>
-			<br/><span class=label>Cargo: </span><span class=value>{{ship_cargo|intcomma}}</span>
-			<br/><span class=label>Vitesse: </span><span class=value>{{ship_speed|intcomma}}</span>
-			<br/><span class=label>Manœuvrabilité: </span><span class=value>{{ship_handling|intcomma}}</span>
-			<br/><span class=label>Stabilité: </span><span class=value>{{ship_required_vortex_strength|intcomma}}</span>
-			<br/><span class=label>Commandement: </span><span class=value>{{ship_leadership|intcomma}}</span>
-			{% if attack %}
-			<br/><span class=label>Puissance d'attaque: </span><span class=value>{{ship_turrets}}x{{ship_power}}</span>
-			<br/><span class=label>Ciblage: </span><span class=value>{{ship_tracking_speed|intcomma}}</span>{% endif %}
-			<br/><span class=label>Armure: </span><span class=value>{{ship_hull|intcomma}}</span>
-			{% if shield %}
-			<br/><span class=label>Bouclier: </span><span class=value>{{ship_shield|intcomma}}</span>{% endshield %}
-			{% if recycler_output %}
-			<br/><span class=label>Capacité de recyclage: </span><span class=value>{{ship_recycler_output|intcomma}}</span>{% endrecycler_output %}
-			{% if long_distance_capacity %}
-			<br/><span class=label>Capacité de saut intergalactique: </span><span class=value>{{ship_long_distance_capacity|intcomma}}</span>{% endlong_distance_capacity %}
-			{% if droppods %}
-			<br/><span class=label>Capacité d'invasion: </span><span class=value>{{ship_droppods|intcomma}}</span>{% enddroppods %}
+			<span class=label>Signature: </span><span class=value>{{ship.ship_signature|intcomma}}</span>
+			<br/><span class=label>Cargo: </span><span class=value>{{ship.ship_cargo|intcomma}}</span>
+			<br/><span class=label>Vitesse: </span><span class=value>{{ship.ship_speed|intcomma}}</span>
+			<br/><span class=label>Manœuvrabilité: </span><span class=value>{{ship.ship_handling|intcomma}}</span>
+			<br/><span class=label>Stabilité: </span><span class=value>{{ship.ship_required_vortex_strength|intcomma}}</span>
+			<br/><span class=label>Commandement: </span><span class=value>{{ship.ship_leadership|intcomma}}</span>
+			{% if ship.attack %}
+			<br/><span class=label>Puissance d'attaque: </span><span class=value>{{ship.ship_turrets}}x{{ship.ship_power}}</span>
+			<br/><span class=label>Ciblage: </span><span class=value>{{ship.ship_tracking_speed|intcomma}}</span>{% endif %}
+			<br/><span class=label>Armure: </span><span class=value>{{ship.ship_hull|intcomma}}</span>
+			{% if ship.shield %}
+			<br/><span class=label>Bouclier: </span><span class=value>{{ship.ship_shield|intcomma}}</span>{% endif %}
+			{% if ship.recycler_output %}
+			<br/><span class=label>Capacité de recyclage: </span><span class=value>{{ship.ship_recycler_output|intcomma}}</span>{% endif %}
+			{% if ship.long_distance_capacity %}
+			<br/><span class=label>Capacité de saut intergalactique: </span><span class=value>{{ship.ship_long_distance_capacity|intcomma}}</span>{% endif %}
+			{% if ship.droppods %}
+			<br/><span class=label>Capacité d'invasion: </span><span class=value>{{ship.ship_droppods|intcomma}}</span>{% endif %}
 	</td>
 
 	<td align="right">
 		<table class="clear" width="100%">
-		<tr><td><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width="16" height="16"></td><td align="right">{{ore|intcomma}}</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width="16" height="16"></td><td align="right">{{hydrocarbon|intcomma}}</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/energy.gif" title="Énergie" width="16" height="16"></td><td align="right">{{energy|intcomma}}</td></tr>
-		<tr><td><img src="{{PATH_IMAGES}}/interface/crew.gif" title="Équipage" width="16" height="16"></td><td align="right">{{crew|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width="16" height="16"></td><td align="right">{{ship.ore|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width="16" height="16"></td><td align="right">{{ship.hydrocarbon|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/energy.gif" title="Énergie" width="16" height="16"></td><td align="right">{{ship.energy|intcomma}}</td></tr>
+		<tr><td><img src="{{PATH_IMAGES}}/interface/crew.gif" title="Équipage" width="16" height="16"></td><td align="right">{{ship.crew|intcomma}}</td></tr>
 		</table>
 	</td>
 </tr>
 {% endfor %}
 <tr class="clear"><td colspan=2>&nbsp;</td></tr>
 {% endfor %}
-{% endships %}
+{% endif %}
 
 
 {% if tags %}
@@ -267,24 +267,24 @@
 	<br/>
 	Voici la liste des balises supportées et leur résultat:<br/>
 	<br/>
-[b]le texte{% endb] pour écrire <b>le texte en gras</b><br/>
-[i]le texte{% endi] pour écrire <i>le texte en italique</i><br/>
-[u]le texte{% endu] pour souligner <u>le texte</u><br/>
+[b]le texte[\b] pour écrire <b>le texte en gras</b><br/>
+[i]le texte[\i] pour écrire <i>le texte en italique</i><br/>
+[u]le texte[\u] pour souligner <u>le texte</u><br/>
 <br/>
-[color=#FF0000]rouge{% endcolor] pour écrire <span style="color:#FF0000">en rouge en utilisant un code de couleur</span><br/>
-[color=blue]bleu{% endcolor] pour écrire <span style="color: blue">en bleu en utilisant la couleur en anglais</span><br/>
+[color=#FF0000]rouge[\color] pour écrire <span style="color:#FF0000">en rouge en utilisant un code de couleur</span><br/>
+[color=blue]bleu[\color] pour écrire <span style="color: blue">en bleu en utilisant la couleur en anglais</span><br/>
 <br/>
-[url=https://www.exil.pw/]Exile{% endurl] pour créer un lien vers www.exil.pw en affichant <a href="https://www.exil.pw">Exile</a><br/>
-[url]https://www.exil.pw/{% endurl] pour créer un lien vers www.exil.pw en affichant <a href="https://www.exil.pw">www.exil.pw</a><br/>
+[url=https://www.exil.pw/]Exile[\url] pour créer un lien vers www.exil.pw en affichant <a href="https://www.exil.pw">Exile</a><br/>
+[url]https://www.exil.pw/[\url] pour créer un lien vers www.exil.pw en affichant <a href="https://www.exil.pw">www.exil.pw</a><br/>
 <br/>
-[img]https://img.exil.pw/interface/credits.gif{% endimg] pour afficher une image <img src="{{PATH_IMAGES}}/interface/credits.gif"/><br/>
+[img]https://img.exil.pw/interface/credits.gif[\img] pour afficher une image <img src="{{PATH_IMAGES}}/interface/credits.gif"/><br/>
 <br/>
 Il est possible d'imbriquer les balises :<br/>
 [u][b]mon texte{% endb]{% endu] écrira <u><b>"mon texte" en gras et souligné</b></u><br/>
 		
 	</td>
 </td>
-{% endtags %}
+{% endif %}
 
 </table>
 </div>

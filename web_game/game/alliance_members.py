@@ -14,49 +14,50 @@ class View(GlobalView):
         if self.AllianceId == None: return HttpResponseRedirect("/game/alliance/")
         if not self.oAllianceRights["leader"] and not self.oAllianceRights["can_see_members_info"]: return HttpResponseRedirect("/game/alliance/")
 
-        invitation_success = ""
+        self.invitation_success = ""
 
-        cat = request.GET.get("cat")
+        cat = ToInt(request.GET.get("cat"), 1)
         if cat != 1 and cat != 2: cat = 1
 
         #
         # Process actions
         #
-        action = request.GET.get("a").strip()
-        username = request.POST.get("name").strip()
+        action = request.GET.get("a", "").strip()
+        self.username = request.POST.get("name", "").strip()
 
         if cat == 1:
-            if self.oAllianceRights["leader"] and request.POST.get("submit") != "": self.SaveRanks()
+            if self.oAllianceRights["leader"] and request.POST.get("submit", "") != "": self.SaveRanks()
 
             if self.oAllianceRights["can_kick_player"]:
                 if action == "kick":
-                    username = request.GET.get("name").strip()
-                    oConnExecute("SELECT sp_alliance_kick_member("+str(self.UserId)+","+dosql(username)+")")
-
-        if cat == 2:
+                    self.username = request.GET.get("name").strip()
+                    oConnExecute("SELECT sp_alliance_kick_member("+str(self.UserId)+","+dosql(self.username)+")")
+        
+        if cat == 2 and self.username != "":
             if self.oAllianceRights["can_invite_player"]:
 
-                oRs = oConnExecute("SELECT sp_alliance_invite(" + str(self.UserId) + "," + dosql(username) + ")")
+                oRs = oConnExecute("SELECT sp_alliance_invite(" + str(self.UserId) + "," + dosql(self.username) + ")")
                 if oRs[0] == 0:
-                    invitation_success = "ok"
-                    username = ""
+                    self.invitation_success = "ok"
+                    self.username = ""
                 elif oRs[0] == 1:
-                    invitation_success = "norights"
+                    self.invitation_success = "norights"
                 elif oRs[0] == 2:
-                    invitation_success = "unknown"
+                    self.invitation_success = "unknown"
                 elif oRs[0] == 3:
-                    invitation_success = "already_member"
+                    self.invitation_success = "already_member"
                 elif oRs[0] == 5:
-                    invitation_success = "already_invited"
+                    self.invitation_success = "already_invited"
                 elif oRs[0] == 6:
-                    invitation_success = "impossible"
+                    self.invitation_success = "impossible"
 
-        return self.DisplayPage(cat)
+        return self.displayPage(cat)
 
-    def DisplayMembers(self, content):
-        col = ToInt(request.GET.get("col"), 1)
+    def displayMembers(self, content):
+        col = ToInt(self.request.GET.get("col"), 1)
         if col < 1 or col > 7: col = 1
 
+        reversed = False
         if col == 1:
             orderby = "upper(login)"
         elif col == 2:
@@ -79,7 +80,7 @@ class View(GlobalView):
             reversed = False
 
         ParseR = False
-        if request.GET.get("r") != "":
+        if self.request.GET.get("r") != "":
             reversed = not reversed
         else:
             ParseR = True
@@ -106,7 +107,7 @@ class View(GlobalView):
             item["rank_label"] = oRs[1]
 
         # list members
-        query = "SELECT login, CASE WHEN id="+str(self.UserId)+" OR score_visibility >=1: score else: 0 END AS score, int4((SELECT count(1) FROM nav_planet WHERE ownerid=users.id)) AS colonies," + \
+        query = "SELECT login, CASE WHEN id="+str(self.UserId)+" OR score_visibility >=1 THEN score ELSE 0 END AS score, int4((SELECT count(1) FROM nav_planet WHERE ownerid=users.id)) AS colonies," + \
                 " date_part('epoch', now()-lastactivity) / 3600, alliance_joined, alliance_rank, privilege, score-previous_score AS score_delta, id," + \
                 " sp_alliance_get_leave_cost(id), credits, score_visibility, orientation, COALESCE(date_part('epoch', leave_alliance_datetime-now()), 0)" + \
                 " FROM users" + \
@@ -140,13 +141,13 @@ class View(GlobalView):
             item["score"] = oRs[1]
             item["score_delta"] = oRs[7]
             item["stat_colonies"] = oRs[2]
-            item["hours"] = int(oRs[3])
-            item["days"] = int(oRs[3] / 24)
+            item["hours_delay"] = int(oRs[3])
+            item["days_delay"] = int(oRs[3] / 24)
             item["joined"] = oRs[4]
             item["rank"] = oRs[5]
             item["id"] = oRs[8]
 
-            item["orientation" + oRs[12]] = True
+            item["orientation" + str(oRs[12])] = True
 
             if oRs[5] > self.AllianceRank and self.oAllianceRights["can_kick_player"]:
                 item["kick_price"] = oRs[9]
@@ -161,9 +162,9 @@ class View(GlobalView):
                 totalScore = totalScore + oRs[1]
                 totalScoreDelta = totalScoreDelta + oRs[7]
 
-                if oRs[7] > 0: item["score.plus"] = True
-                if oRs[7] < 0: item["score.minus"] = True
-                item["score"] = True
+                if oRs[7] > 0: item["score_plus"] = True
+                if oRs[7] < 0: item["score_minus"] = True
+                item["scoreshown"] = True
             else:
                 item["score_na"] = True
 
@@ -209,8 +210,8 @@ class View(GlobalView):
         content.AssignValue("total_score_delta", totalScoreDelta)
 
         if totalScore != 0:
-            if totalScoreDelta > 0: content.Parse("score_plus")
-            if totalScoreDelta < 0: content.Parse("score_minus")
+            if totalScoreDelta > 0: content.Parse("total_plus")
+            if totalScoreDelta < 0: content.Parse("total_minus")
             content.Parse("score")
         else:
             content.Parse("score_na")
@@ -231,7 +232,7 @@ class View(GlobalView):
 
             i = 0
             list = []
-            content.AssignValue("invitations", list)
+            content.AssignValue("invits", list)
             for oRs in oRss:
                 item = {}
                 list.append(item)
@@ -240,17 +241,20 @@ class View(GlobalView):
                 item["date"] = oRs[1]
                 item["recruiter"] = oRs[2]
 
-                if oRs[3]: item["invitations.invitation.declined" else: item["invitations.invitation.waiting"
+                if oRs[3]: item["declined"] = True
+                else: item["waiting"] = True
 
                 i = i + 1
 
             if i == 0: content.Parse("noinvitations")
 
-            if invitation_success != "":
-                content.Parse(invitation_success)
+            if self.invitation_success != "":
+                content.Parse(self.invitation_success)
                 content.Parse("message")
 
-            content.AssignValue("player", username)
+            content.AssignValue("player", self.username)
+
+        content.Parse("invitations")
 
     #
     # Load template and display the right page
@@ -267,7 +271,7 @@ class View(GlobalView):
             self.displayInvitations(content)
 
         if self.oAllianceRights["can_invite_player"]:
-            content.Parse("cat" + cat + "_selected")
+            content.Parse("cat" + str(cat) + "_selected")
             content.Parse("cat1")
             content.Parse("cat2")
             content.Parse("nav")
@@ -283,9 +287,9 @@ class View(GlobalView):
 
         for oRs in oRss:
             query = " UPDATE users SET" + \
-                    " alliance_rank=" + ToInt(request.POST.get("player" + oRs[0]), 100) + \
-                    " WHERE id=" + oRs[0] + " AND alliance_id=" + str(self.AllianceId) + " AND (alliance_rank > 0 OR id=" + str(self.UserId) + ")"
+                    " alliance_rank=" + str(ToInt(self.request.POST.get("player" + str(oRs[0])), 100)) + \
+                    " WHERE id=" + str(oRs[0]) + " AND alliance_id=" + str(self.AllianceId) + " AND (alliance_rank > 0 OR id=" + str(self.UserId) + ")"
             oConnDoQuery(query)
 
         # if leader demotes himself
-        if ToInt(request.POST.get("player" + str(self.UserId)), 100) > 0: return HttpResponseRedirect("/game/alliance/")
+        if ToInt(self.request.POST.get("player" + str(self.UserId)), 100) > 0: return HttpResponseRedirect("/game/alliance/")

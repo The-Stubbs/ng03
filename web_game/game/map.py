@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from math import sqrt
+
 from web_game.game._global import *
 
 class View(GlobalView):
@@ -83,7 +85,7 @@ class View(GlobalView):
             if relation <= rFriend:
                 # compute how far our radar can detect fleets
                 # highest radar strength * width of a sector / speed * nbr of second in one hour
-                radarSpotting = sqr(radarstrength)*6*1000/oRs[6]*3600
+                radarSpotting = sqrt(radarstrength)*6*1000/oRs[6]*3600
 
                 if oRs[28] == 0:
                     if oRs[7] < radarSpotting:
@@ -95,7 +97,7 @@ class View(GlobalView):
                 elif oRs[29] == 0:
                     if oRs[27]-oRs[7] < radarSpotting:
                         #outgoing fleet is still detected by our radar
-                        loosing_time = Int(radarSpotting-(oRs[27]-oRs[7]))
+                        loosing_time = int(radarSpotting-(oRs[27]-oRs[7]))
                         display_to = False
                     else:
                         relation = -100
@@ -446,7 +448,7 @@ class View(GlobalView):
                                 allyfleetcount = allyfleetcount + 1
                                 friendfleetcount = friendfleetcount + 1
     
-                                if self.hasRight("can_order_other_fleets") and fleetsArray(9, i):
+                                if self.hasRight("can_order_other_fleets") and i[9]:
                                     fleet["fleetid"] = i[1]
     
                             elif i[3] == rFriend:
@@ -535,7 +537,7 @@ class View(GlobalView):
                     displayPlanetInfo = True
                     displayResources = True
                 elif rel == rAlliance:
-                    if displayAlliancePlanetName:
+                    if self.displayAlliancePlanetName:
                         planet["planetname"] = oRs[2]
                     else:
                         planet["planetname"] = ""

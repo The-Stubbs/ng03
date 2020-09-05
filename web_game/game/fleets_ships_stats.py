@@ -11,9 +11,7 @@ class View(GlobalView):
 
         self.selected_menu = "fleets_ships_stats"
 
-        retrieveShipsCache
-
-        ListShips()
+        return self.ListShips()
 
     # List all the available ships for construction
     def ListShips(self):
@@ -28,55 +26,40 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "fleets-ships-stats")
 
-        # number of items in category
-        itemCount = 0
-
-        if oRs:
-            category = oRs["category")
-            lastCategory = category
-
         count = 0
-        total_killed = 0
-        total_lost = 0
-        list = []
+        kills = 0
+        losses = 0
+        
+        cats = []
+        content.AssignValue("cats", cats)
+        
+        lastCategory = -1
         for oRs in oRss:
-            item = {}
-            list.append(item)
             
-            category = oRs["category")
+            if oRs[0] != lastCategory:
+                
+                cat = { "id":oRs[0], "ships":[], "kills":0, "losses":0 }
+                cats.append(cat)
+                
+                lastCategory = oRs[0]
 
-            if category != lastCategory:
-                if itemCount > 0:
-                    content.Parse("category.category" + lastcategory
-                    content.Parse("category"
+            item = {}
+            cat["ships"].append(item)
+            
+            item["id"] = oRs[1]
+            item["name"] = getShipLabel(oRs[1])
+            item["killed"] = oRs[2]
+            item["lost"] = oRs[3]
 
-                lastCategory = category
-
-                itemCount = 0
-
-            ShipId = oRs["shipid")
-
-            item["id", ShipId
-            item["name", getShipLabel(ShipId)
-            item["killed", oRs[2]
-            item["lost", oRs[3]
-
-            content.Parse("category.ship"
-
-            total_killed = total_killed + oRs[2]
-            total_lost = total_lost + oRs[3]
+            kills += oRs[2]
+            losses += oRs[3]
+            
             count = count + 1
-            itemCount = itemCount + 1
 
-        if itemCount > 0: content.Parse("category.category" + category
-
-        if count > 0:
-            content.Parse("category"
-
-            item["kills", total_killed
-            item["losses", total_lost
-            content.Parse("total"
-
-        if count == 0: content.Parse("no_ship"
+        if count == 0: content.Parse("no_ship")
+        else: content.Parse("total")
+        
+        content.AssignValue("kills", kills)
+        content.AssignValue("losses", losses)
 
         return self.Display(content)

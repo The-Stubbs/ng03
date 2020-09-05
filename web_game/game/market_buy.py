@@ -84,14 +84,14 @@ class View(GlobalView):
             item["price_ore"] = str(oRs[21]).replace(",", ".")
             item["price_hydrocarbon"] = str(oRs[22]).replace(",", ".")
 
-            if (oRs[12]):
+            if oRs[12] or oRs[13]:
                 item["buying_ore"] = oRs[12]
                 item["buying_hydrocarbon"] = oRs[13]
 
                 subtotal = oRs[12]/1000*oRs[14] + oRs[13]/1000*oRs[15]
                 total = total + subtotal
 
-                item["buying_price"] = subtotal
+                item["buying_price"] = int(subtotal)
 
                 item["buying"] = True
                 item["can_buy"] = True
@@ -124,7 +124,7 @@ class View(GlobalView):
             content.AssignValue("get_planet", self.request.GET.get("planet", ""))
         else:
             self.FillHeaderCredits(content)
-            content.AssignValue("total", total)
+            content.AssignValue("total", int(total))
             content.Parse("totalprice")
 
         if count > 0: content.Parse("buy")

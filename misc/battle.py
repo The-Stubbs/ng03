@@ -12,10 +12,13 @@ class TBattle:
     def __init__(self):
         self.FRounds = 0
         self.FPlayers = []
+        self.FLastLog = None
         self.FKillList = []
         self.FGroupList = []
+        self.FCombatLog = []
         self.FBattleEnd = None
         self.FBattleStart = None
+        self.FCombatLogEnabled = True
         self.FEnemyShipsRemaining = 0
 
     def AddShips(self, Ownerid, Fleetid, Shipid, Hull, Shield, Handling, weapon_ammo, weapon_tracking_speed, weapon_turrets, weapon_damage, Mods, Resistances, Quantity, FireAtWill, Tech):
@@ -85,7 +88,7 @@ class TBattle:
     def Fire(self, Ship, Target, ChanceToHit, Damage):
 
         Result = False
-
+        
         X = random()
         if X > ChanceToHit:
             Ship.FMiss += 1

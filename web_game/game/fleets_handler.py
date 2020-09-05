@@ -107,7 +107,7 @@ class View(ExileMixin, View):
             return ownerName
         else:
             if radar_strength > 0:
-                return ownerName
+                return ownerName if ownerName else ""
             else:
                 return ""
 

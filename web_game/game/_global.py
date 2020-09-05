@@ -59,7 +59,7 @@ class GlobalView(ExileMixin, View):
         if self.oAllianceRights == None:
             return True
         else:
-            return self.oAllianceRights["leader"] or self.oAllianceRight[right]
+            return self.oAllianceRights["leader"] or self.oAllianceRights[right]
     
     def getPlanetName(self, relation, radar_strength, ownerName, planetName):
         if relation == rSelf:
@@ -105,9 +105,9 @@ class GlobalView(ExileMixin, View):
     def log_notice(self, title, details, level):
         query = "INSERT INTO log_notices (username, title, details, url, level) VALUES(" +\
                 dosql(self.oPlayerInfo["login"]) + ", " +\
-                dosql(title) + "," +\
-                dosql(details) + "," +\
-                dosql(self.scripturl) + "," +\
+                dosql(title[:127]) + "," +\
+                dosql(details[:127]) + "," +\
+                dosql(self.scripturl[:127]) + "," +\
                 str(level) +\
                 ")"
         oConnDoQuery(query)

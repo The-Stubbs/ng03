@@ -2,6 +2,8 @@
 
 from web_game.game._global import *
 
+from web_game.lib.accounts import *
+
 class View(GlobalView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,21 +11,19 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        from web_game.lib.accounts import *
-
         self.selected_menu = "notes"
 
-        notes_status = ""
+        self.notes_status = ""
 
-        notes = request.POST.get("notes").strip()
+        notes = request.POST.get("notes", "").strip()
 
-        if request.POST.get("submit") != "":
+        if request.POST.get("submit", "") != "":
 
             if len(notes) <= 5100: # ok save info
-                oConnDoQuery("UPDATE users SET notes=" + dosql(notes) + " WHERE id = " + userid)
-                notes_status = "done"
+                oConnDoQuery("UPDATE users SET notes=" + dosql(notes) + " WHERE id = " + str(self.UserId))
+                self.notes_status = "done"
             else:
-                notes_status = "toolong"
+                self.notes_status = "toolong"
 
         return self.display_notes()
 
@@ -31,15 +31,14 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "notes")
 
-        content.AssignValue("maxlength", 5000
+        content.AssignValue("maxlength", 5000)
 
         oRs = oConnExecute("SELECT notes FROM users WHERE id = " + str(self.UserId) + " LIMIT 1" )
 
-        content.AssignValue("notes", oRs[0]
+        content.AssignValue("data_notes", oRs[0])
 
-        if notes_status != "":
-            content.Parse("error." + notes_status
-            content.Parse("error"
+        if self.notes_status != "":
+            content.Parse(self.notes_status)
+            content.Parse("error")
 
         return self.Display(content)
-

@@ -3,7 +3,7 @@
 {% load humanize %}
 
 {% block content %}
-<script>function LinkFleet(id, name){ if(id != "") document.write('<a href="/game/fleet/?id=' + id + '">'+name+'</a>'); else document.write(name); }</script>
+<script>function LinkFleet(id, name){ if(id != "None") document.write('<a href="/game/fleet/?id=' + id + '">'+name+'</a>'); else document.write(name); }</script>
 
 <div id="reports">
 
@@ -28,25 +28,46 @@
 	<td width="1%" valign="top"><img src="{{PATH_IMAGES}}/reports/{{message.type}}.jpg" width="64" height="64" class="report"></td>
 	<td width="90%" valign="top">
 	<div class="subject">{{message.date}}{% if message.nation %} | <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a>{% endif %} |
-	{% if message.type == 200 %}Rapport de bataille.
+	{% if message.type == 100 %}Invitation d'alliance.
+	{% elif message.type == 120 %}Invitation d'un nouveau membre.
+	{% elif message.type == 122 %}Invitation déclinée.
+	{% elif message.type == 130 %}Invitation acceptée.
+	{% elif message.type == 132 %}Exclusion de membre.
+	{% elif message.type == 200 %}Rapport de bataille.
 	{% elif message.type == 201 %}Rapport de bataille (vainqueur).
 	{% elif message.type == 300 %}Eurêka !
 	{% elif message.type == 310 %}Production et coût d'entretien.
 	{% elif message.type == 320 %}Un commandant a récemment eu une augmentation
 	{% elif message.type == 400 %}Flotte arrivée à destination.
 	{% elif message.type == 401 %}Récolteurs pleins.
+	{% elif message.type == 402 %}Plus de matériau à recycler.
 	{% elif message.type == 403 %}Détection d'une flotte.
 	{% elif message.type == 501 %}Cargaison reçue.
 	{% elif message.type == 503 %}Vente effectuée.
+	{% elif message.type == 504 %}Vente effectuée sur planète alliée.
+	{% elif message.type == 505 %}Achat effectué sur une de nos planètes.
 	{% elif message.type == 600 %}Nouvelle planète.
 	{% elif message.type == 752 %}Découverte de riches filons de minerai !
+	{% elif message.type == 753 %}Épuisement des filons de minerai.
 	{% elif message.type == 754 %}Découverte de riches gisements d'hydrocarbure !
+	{% elif message.type == 755 %}Épuisement des gisements d'hydrocarbure.
+	{% elif message.type == 800 %}Contre-espionnage : tentative d'espionnage.
+	{% elif message.type == 801 %}Contre-espionnage : notre Nation est espionnée !
+	{% elif message.type == 803 %}Contre-espionnage : une de nos planètes est espionnée !
+	{% elif message.type == 810 %}Rapport d'espionnage : nation.
+	{% elif message.type == 830 %}Rapport d'espionnage : planète.
 	{% else %}{{message.type}}
 	{% endif %}
 	</div>
 	
 	<div class="body">
-    {% if message.type == 200 %}Une bataille a eu lieu près de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
+	{% if message.type == 100 %}L'alliance <a href="/game/alliance/?tag={{message.alliancetag}}">[{{message.alliancetag}}] {{message.alliancename}}</a> nous propose de les rejoindre.<br/>
+	Vous devriez réfléchir à cette offre et répondre en accédant à <a href="/game/alliance-invitations/">cette page</a>.
+	{% elif message.type == 120 %}Le recruteur <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a> a invité la nation <a href="/game/nation/?name={{message.invitedusername}}">{{message.invitedusername}}</a> à rejoindre notre alliance.
+	{% elif message.type == 122 %}La nation <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a> a décliné notre invitation.
+	{% elif message.type == 130 %}La nation <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a> a rejoint notre alliance.
+	{% elif message.type == 132 %}La nation <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a> va être exclue de l'alliance<script>if('{{message.username}}'!='') document.write(' (action décidée par <a href="/game/nation/?name={{message.username}}">{{message.username}}</a>)');</script>.
+    {% elif message.type == 200 %}Une bataille a eu lieu près de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Vous pouvez accéder au <a href="/game/battle/?id={{message.battleid}}&v={{message.ownerid}}">rapport du combat</a>.
 	{% elif message.type == 201 %}Une bataille a eu lieu près de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Vous pouvez accéder au <a href="/game/battle/?id={{message.battleid}}&v={{message.ownerid}}">rapport du combat</a>.
@@ -66,6 +87,7 @@
 	{% elif message.type == 320 %}Le commandant {{message.commandername}} s'est récemment distingué et a obtenu une promotion. Vous devriez vous rendre sur la page de gestion des commandants afin de lui attribuer son nouveau point de compétence.
 	{% elif message.type == 400 %}La flotte <script>LinkFleet('{{message.fleetid}}','{{message.fleetname}}')</script> est arrivée aux alentours de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.
 	{% elif message.type == 401 %}Les récolteurs de la flotte <script>LinkFleet('{{message.fleetid}}','{{message.fleetname}}')</script> ne peuvent plus recycler car leurs soutes sont pleines. Videz leurs soutes avant de recycler à nouveau.
+	{% elif message.type == 402 %}La flotte <script>LinkFleet('{{message.fleetid}}','{{message.fleetname}}')</script>  a terminé le recyclage aux coordonnées suivantes <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, il n'y a plus de ressources dans les parages.
 	{% elif message.type == 403 %}Une flotte de la nation <a href="/game/nation/?name={{message.username}}">{{message.username}}</a> vient d'être détectée à proximité de notre planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.
 	{% elif message.type == 501 %}Une flotte de <a href="/game/nation/?name={{message.username}}">{{message.username}}</a> vient de décharger des ressources sur notre planète <a href="/game/buildings/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	<script>if({{message.ore}} > 0 || {{message.hydrocarbon}} > 0) {
@@ -92,10 +114,42 @@
 	</script> 
 	
 	sur une de leurs planètes, les marchands nous ont payé la somme de <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{message.credits|intcomma}} crédits.
-	{% elif message.type == 600 %}Nous occupons désormais la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
+	{% elif message.type == 504 %}Suite au dépôt de 
+	<script>
+		var s = "";
+
+		if({{message.ore}} > 0) s += '{{message.ore|intcomma}} unités de minerai';
+		if({{message.hydrocarbon}} > 0) s += (s!=''?', ':'')+'{{message.hydrocarbon|intcomma}} unités d\'hydrocarbure'; 
+		
+		if({{message.scientists}} > 0) s += (s!=''?', ':'')+'{{message.scientists|intcomma}} scientifiques';
+		if({{message.soldiers}} > 0) s += (s!=''?', ':'')+'{{message.soldiers|intcomma}} soldats';
+		if({{message.workers}} > 0) s += (s!=''?', ':'')+'{{message.workers|intcomma}} travailleurs';
+		document.write(s);
+	</script> 
+	sur la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, nous avons été payé la somme de <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{message.credits|intcomma}} crédits.
+	{% elif message.type == 505 %}Une flotte de <a href="/game/nation/?name={{message.username}}">{{message.username}}</a> vient de décharger des ressources sur notre planète <a href="/game/buildings/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
+	<script>if({{message.ore}} > 0 || {{message.hydrocarbon}} > 0) {
+	document.write('Nos stocks ont augmenté de '); if({{message.ore}} > 0){ document.write('{{message.ore|intcomma}} unités de minerai'); if({{message.hydrocarbon}} > 0) document.write(" et de {{message.hydrocarbon|intcomma}} unités d'hydrocarbure");} else document.write("{{message.hydrocarbon|intcomma}} unités d'hydrocarbure"); document.write('.<br/>'); }
+	if({{message.scientists}}>0 || {{message.soldiers}}>0 || {{message.workers}} > 0) {
+		document.write('Nous notons'+(({{message.ore}}>0 || {{message.hydrocarbon}}>0)?' aussi':'') +' l\'arrivée de personnel : ');
+		if({{message.scientists}}>0) document.write('{{message.scientists|intcomma}} scientifiques, ');
+		if({{message.soldiers}}>0) document.write('{{message.soldiers|intcomma}} soldats, ');
+		if({{message.workers}}>0) document.write('{{message.workers|intcomma}} travailleurs, ');
+		document.write('ils se sont parfaitement intégrés et travaillent désormais sous nos ordres.');
+		}
+	</script>
+	Nous avons payé la somme de <img src="{PATH_IMAGES}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {credits:n} crédits.
+    {% elif message.type == 600 %}Nous occupons désormais la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Nous devrions vérifier les installations et <a href="/game/buildings/?planet={{message.planetid}}">construire les bâtiments</a> dont nous avons besoin.
 	{% elif message.type == 752 %}De riches filons de minerai ont été découverts sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production de minerai est augmentée.
+	{% elif message.type == 753 %}Nous avons épuisé les filons de minerai que nous avions localisés sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production de minerai est redescendue au niveau normal.
 	{% elif message.type == 754 %}De riches gisements d'hydrocarbure ont été découverts sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production en hydrocarbure est augmentée.
+	{% elif message.type == 755 %}Nous avons épuisé les riches gisements d'hydrocarbure que nous avions localisés sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production en hydrocarbure est redescendue au niveau normal.
+	{% elif message.type == 800 %}Nos services de contre-espionnage ont repéré un espion et l'ont maîtrisé. Malheureusement, celui-ci s'est suicidé en cellule avant de pouvoir nous révéler le nom de son employeur.
+	{% elif message.type == 801 %}Nos services de contre-espionnage ont capté un message codé provenant certainement d'un espion, destiné à <a href="/game/nation/?name={{message.description}}">{{message.description}}</a>, contenant des informations sur l'ensemble de notre nation.
+	{% elif message.type == 803 %}Nos services de contre-espionnage ont capté un message codé provenant certainement d'un espion, destiné à <a href="/game/nation/?name={{message.description}}">{{message.description}}</a>, contenant des informations capitales sur la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>. Il est possible que l'ennemi connaisse nos forces de défenses.
+	{% elif message.type == 810 %}L'espion de la Compagnie des Pirates de la Fosse est revenu avec <a href="/game/spy-report/?id={{message.spyid}}&key={{message.spykey}}" title="Rapport">son rapport</a> sur la nation <a href="/game/nation/?name={{message.description}}">{{message.description}}</a>.
+	{% elif message.type == 830 %}L'espion de la Compagnie des Pirates de la Fosse est revenu avec <a href="/game/spy-report/?id={{message.spyid}}&key={{message.spykey}}" title="Rapport">son rapport</a> sur la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.
 	{% else %}{{message.type}}
 	{% endif %}
 	</div>

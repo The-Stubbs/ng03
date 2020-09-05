@@ -28,3 +28,10 @@ def ToInt(s, defaultValue):
     if i == None:
         return defaultValue
     return i
+
+def ToBool(s, defaultValue):
+    if(s == "" or s == None): return defaultValue
+    i = int(float(s))
+    if i == 0:
+        return defaultValue
+    return True

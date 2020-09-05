@@ -11,13 +11,13 @@ class View(GlobalView):
 
         self.selected_menu = "intelligence"
 
-        id = request.GET.get("id")
-        if id = "" or not isNumeric(id):
+        self.id = request.GET.get("id", "")
+        if self.id == "":
             return HttpResponseRedirect("/game/reports/")
 
-        id = int(id)
+        self.id = int(self.id)
 
-        key = request.GET.get("key")
+        key = request.GET.get("key", "")
         if key == "":
             return HttpResponseRedirect("/game/reports/")
 
@@ -27,7 +27,7 @@ class View(GlobalView):
 
         query = "SELECT id, key, userid, type, level, date, credits, spotted, target_name" + \
                 " FROM spy" + \
-                " WHERE id="+id+" AND key="+dosql(key)
+                " WHERE id="+str(self.id)+" AND key="+dosql(key)
 
         oRs = oConnExecute(query)
 
@@ -38,17 +38,15 @@ class View(GlobalView):
         else:
             #user = oRs[2]
             typ = oRs[3]
-            level = oRs[4]
-            spydate = oRs[5]
+            self.level = oRs[4]
+            self.spydate = oRs[5]
 
-            if oRs[6]: credits = oRs[6]
-            spotted = oRs[7]
-            if oRs[8]: target = oRs[8]
+            if oRs[6]: self.credits = oRs[6]
+            self.spotted = oRs[7]
+            if oRs[8]: self.target = oRs[8]
 
         if typ == 1:
             return self.DisplayNation()
-        elif typ == 2:
-            return self.DisplayFleets()
         elif typ == 3:
             return self.DisplayPlanet()
         else:
@@ -69,36 +67,35 @@ class View(GlobalView):
                 " FROM spy_planet " + \
                 " LEFT JOIN nav_planet " + \
                     " ON ( spy_planet.planet_id=nav_planet.id) " + \
-                " WHERE spy_id=" + id
+                " WHERE spy_id=" + str(self.id)
 
         oRss = oConnExecuteAll(query)
 
         nbplanet = 0
 
         list = []
+        content.AssignValue("planets", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
             if oRs[2]:
-                item["planet", oRs[2]
+                item["planet"] = oRs[2]
             else:
-                item["planet", target
+                item["planet"] = target
 
-            item["g", oRs[6]
-            item["s", oRs[7]
-            item["p", oRs[8]
+            item["g"] = oRs[6]
+            item["s"] = oRs[7]
+            item["p"] = oRs[8]
 
-            item["floor", oRs[3]
-            item["space", oRs[4]
-            item["ground", oRs[5]
+            item["floor"] = oRs[3]
+            item["space"] = oRs[4]
+            item["ground"] = oRs[5]
 
-            item["pct_ore", oRs[9]
-            item["pct_hydrocarbon", oRs[10]
+            item["pct_ore"] = oRs[9]
+            item["pct_hydrocarbon"] = oRs[10]
 
             nbplanet = nbplanet + 1
-
-            content.Parse("nation.planet"
 
         #
         # list spied technologies
@@ -107,124 +104,55 @@ class View(GlobalView):
                 " FROM spy_research " + \
                 " LEFT JOIN db_research " + \
                     " ON ( spy_research.research_id=db_research.id) " + \
-                " WHERE spy_id=" + id  + \
+                " WHERE spy_id=" + str(self.id)  + \
                 " ORDER BY category, db_research.id "
 
         oRss = oConnExecuteAll(query)
 
         nbresearch = 0
 
-        if oRs:
-            category = oRs[0]
-            lastCategory = category
+        lastCategory = -1
 
-        list = []
+        cats = []
         for oRs in oRss:
-            item = {}
-            list.append(item)
-            
+
             category = oRs[0]
 
             if category != lastCategory:
-                content.Parse("nation.researches.category.category" + lastcategory
-                content.Parse("nation.researches.category"
+                cat = { "list":[] }
+                cat["id"] = category
                 lastCategory = category
                 itemCount = 0
 
             itemCount = itemCount + 1
 
-            item["research", getResearchLabel(oRs[1])
-            item["level", oRs[2]
-            item["levels", oRs[3]
+            item = {}
+            item["research"] = getResearchLabel(oRs[1])
+            item["level"] = oRs[2]
+            item["levels"] = oRs[3]
 
             nbresearch = nbresearch + 1
 
-            content.Parse("nation.researches.category.research"
-
-        if itemCount > 0:
-            content.Parse("nation.researches.category.category" + category
-            content.Parse("nation.researches.category"
+            cat["list"].append(item)
 
         # display spied nation credits if possible
-        if not isEmpty(credits):
-            content.AssignValue("credits", credits
-            content.Parse("nation.credits"
+        if credits:
+            content.AssignValue("credits", credits)
+            content.Parse("credits")
 
         if nbresearch != 0:
-            content.AssignValue("nb_research", nbresearch
-            content.Parse("nation.researches"
+            content.AssignValue("nb_research", nbresearch)
+            content.Parse("researches")
 
-        content.AssignValue("date", spydate
-        content.AssignValue("nation", target
-        content.AssignValue("nb_planet", nbplanet
-        content.Parse("nation.spy_" + level
-
-        # spotted is True if our spy has been spotted while he was doing his job
-        if spotted: content.Parse("nation.spotted"
-
-        content.Parse("nation"
-
-        return self.Display(content)
-
-    def DisplayFleets(self):
-        Set content = GetTemplate(self.request, "spy-report")
-
-        if level > 1:
-            query = " SELECT fleet_name, galaxy, sector, planet, signature, size, dest_galaxy, dest_sector, dest_planet " + \
-                    " FROM spy_fleet " + \
-                    " WHERE spy_id=" + id + \
-                    " ORDER BY galaxy, sector, planet, fleet_name"
-        else:
-            query = " SELECT fleet_name, galaxy, sector, planet, signature " + \
-                    " FROM spy_fleet " + \
-                    " WHERE spy_id=" + id + \
-                    " ORDER BY galaxy, sector, planet, fleet_name"
-
-        oRss = oConnExecuteAll(query)
-
-        nbfleet = 0
-
-        list = []
-        for oRs in oRss:
-            item = {}
-            list.append(item)
-            
-            item["fleet", oRs[0]
-            item["location", oRs[1] + "." + oRs[2] + "." + oRs[3]
-            item["signature", oRs[4]
-
-            if level > 1:
-                if oRs[5]:
-                    item["size", oRs[5]
-                    content.Parse("fleets.fleet.size"
-                else:
-                    content.Parse("fleets.fleet.nosize"
-
-                if oRs[6]:
-                    item["destination", oRs[6] + "." + oRs[7] + "." + oRs[8]
-                    content.Parse("fleets.fleet.dest"
-                else:
-                    content.Parse("fleets.fleet.nodest"
-
-            else:
-                content.Parse("fleets.fleet.nosize"
-                content.Parse("fleets.fleet.nodest"
-
-            content.Parse("fleets.fleet"
-
-            nbfleet = nbfleet + 1
-
-        content.AssignValue("date", spydate
-        content.AssignValue("nation", target
-
-        content.AssignValue("nb_fleet", nbfleet
-
-        content.Parse("fleets.spy_" + level
+        content.AssignValue("date", self.spydate)
+        content.AssignValue("nation", self.target)
+        content.AssignValue("nb_planet", nbplanet)
+        content.AssignValue("level", self.level)
 
         # spotted is True if our spy has been spotted while he was doing his job
-        if spotted: content.Parse("fleets.spotted"
+        if self.spotted: content.Parse("spotted")
 
-        content.Parse("fleets"
+        content.Parse("spynation")
 
         return self.Display(content)
 
@@ -238,7 +166,7 @@ class View(GlobalView):
                 " FROM spy_planet AS s" + \
                 " LEFT JOIN nav_planet " + \
                     " ON ( s.planet_id=nav_planet.id) " + \
-                " WHERE spy_id=" + id
+                " WHERE spy_id=" + str(self.id)
 
         oRs = oConnExecute(query)
 
@@ -248,102 +176,96 @@ class View(GlobalView):
         planet = oRs[1]
 
         # display basic info
-        content.AssignValue("name", oRs[2]
-        content.AssignValue("location", oRs[25] + ":" + oRs[26] + ":" + oRs[27]
-        content.AssignValue("floor", oRs[4]
-        content.AssignValue("space", oRs[5]
-        content.AssignValue("ground", oRs[6]
+        content.AssignValue("name", oRs[2])
+        content.AssignValue("location", str(oRs[25]) + ":" + str(oRs[26]) + ":" + str(oRs[27]))
+        content.AssignValue("floor", oRs[4])
+        content.AssignValue("space", oRs[5])
+        content.AssignValue("ground", oRs[6])
 
-        content.AssignValue("pct_ore", oRs[28]
-        content.AssignValue("pct_hydrocarbon", oRs[29]
+        content.AssignValue("pct_ore", oRs[28])
+        content.AssignValue("pct_hydrocarbon", oRs[29])
 
         if oRs[3]:
-            content.AssignValue("owner", oRs[3]
-            content.Parse("planet.owner"
+            content.AssignValue("owner", oRs[3])
         else:
-            content.Parse("planet.no_owner"
+            content.Parse("no_owner")
 
         if oRs[7]: # display common info
-            content.AssignValue("ore", oRs[7]
-            content.AssignValue("hydrocarbon", oRs[8]
-            content.AssignValue("ore_capacity", oRs[9]
-            content.AssignValue("hydrocarbon_capacity", oRs[10]
-            content.AssignValue("ore_prod", oRs[11]
-            content.AssignValue("hydrocarbon_prod", oRs[12]
-            content.AssignValue("energy_consumption", oRs[13]
-            content.AssignValue("energy_prod", oRs[14]
-            content.Parse("planet.common"
+            content.AssignValue("ore", oRs[7])
+            content.AssignValue("hydrocarbon", oRs[8])
+            content.AssignValue("ore_capacity", oRs[9])
+            content.AssignValue("hydrocarbon_capacity", oRs[10])
+            content.AssignValue("ore_prod", oRs[11])
+            content.AssignValue("hydrocarbon_prod", oRs[12])
+            content.AssignValue("energy_consumption", oRs[13])
+            content.AssignValue("energy_prod", oRs[14])
+            content.Parse("common")
 
         if oRs[15]: # display rare info
-            content.AssignValue("workers", oRs[15]
-            content.AssignValue("workers_cap", oRs[16]
-            content.AssignValue("scientists", oRs[17]
-            content.AssignValue("scientists_cap", oRs[18]
-            content.AssignValue("soldiers", oRs[19]
-            content.AssignValue("soldiers_cap", oRs[20]
-            content.Parse("planet.rare"
+            content.AssignValue("workers", oRs[15])
+            content.AssignValue("workers_cap", oRs[16])
+            content.AssignValue("scientists", oRs[17])
+            content.AssignValue("scientists_cap", oRs[18])
+            content.AssignValue("soldiers", oRs[19])
+            content.AssignValue("soldiers_cap", oRs[20])
+            content.Parse("rare")
 
         if oRs[21]: # display uncommon info
-            content.AssignValue("radar_strength", oRs[21]
-            content.AssignValue("radar_jamming", oRs[22]
-            content.AssignValue("orbit_ore", oRs[23]
-            content.AssignValue("orbit_hydrocarbon", oRs[24]
-            content.Parse("planet.uncommon"
+            content.AssignValue("radar_strength", oRs[21])
+            content.AssignValue("radar_jamming", oRs[22])
+            content.AssignValue("orbit_ore", oRs[23])
+            content.AssignValue("orbit_hydrocarbon", oRs[24])
+            content.Parse("uncommon")
 
         # display pending buildings
         query = " SELECT s.building_id, s.quantity, label, s.endtime, category " + \
                 " FROM spy_building AS s " + \
                 " LEFT JOIN db_buildings " + \
                     " ON (s.building_id=id) " + \
-                " WHERE spy_id=" + id + " AND planet_id=" + planet + " AND s.endtime IS NOT None " + \
+                " WHERE spy_id=" + str(self.id) + " AND planet_id=" + str(planet) + " AND s.endtime IS NOT NULL " + \
                 " ORDER BY category, label "
 
         oRss = oConnExecuteAll(query)
 
         if oRss:
             list = []
+            content.AssignValue("buildings_pendings", list)
             for oRs in oRss:
                 item = {}
                 list.append(item)
                 
-                item["building", oRs[2]
-                item["qty", oRs[1]
-                item["endtime", oRs[3]
-                content.Parse("planet.buildings_pending.building"
-
-            content.Parse("planet.buildings_pending"
+                item["building"] = oRs[2]
+                item["qty"] = oRs[1]
+                item["endtime"] = oRs[3]
 
         # display built buildings
         query = " SELECT s.building_id, s.quantity, label, s.endtime, category " + \
                 " FROM spy_building AS s " + \
                 " LEFT JOIN db_buildings " + \
                     " ON (s.building_id=id) " + \
-                " WHERE spy_id=" + id + " AND planet_id=" + planet + " AND s.endtime IS None " + \
+                " WHERE spy_id=" + str(self.id) + " AND planet_id=" + str(planet) + " AND s.endtime IS NULL " + \
                 " ORDER BY category, label "
 
         oRss = oConnExecuteAll(query)
 
         if oRss:
             list = []
+            content.AssignValue("buildings", list)
             for oRs in oRss:
                 item = {}
                 list.append(item)
                 
-                item["building", oRs[2]
-                item["qty", oRs[1]
-                content.Parse("planet.buildings.building"
+                item["building"] = oRs[2]
+                item["qty"] = oRs[1]
 
-            content.Parse("planet.buildings"
+        content.AssignValue("date", self.spydate)
+        content.AssignValue("nation", self.target)
 
-        content.AssignValue("date", spydate
-        content.AssignValue("nation", target
-
-        content.Parse("planet.spy_" + level
+        content.AssignValue("level", self.level)
 
         # spotted is True if our spy has been spotted while he was doing his job
-        if spotted: content.Parse("planet.spotted"
+        if self.spotted: content.Parse("spotted")
 
-        content.Parse("planet"
+        content.Parse("spyplanet")
 
         return self.Display(content)
-

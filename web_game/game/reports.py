@@ -54,7 +54,7 @@ class View(GlobalView):
 
                 reportType = oRs[0]*100+oRs[1]
 
-                if reportType != 140 and reportType != 141 and reportType != 133:
+                if reportType != 140 and reportType != 141 and reportType != 142 and reportType != 133:
                     report = {}
 
                     report["type"] = reportType

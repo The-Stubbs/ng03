@@ -11,7 +11,7 @@ class View(GlobalView):
 
         self.selected_menu = "fleets.orbiting"
 
-        listFleetsOrbiting
+        return self.listFleetsOrbiting()
 
     # list fleets not belonging to the player that are near his planets
     def listFleetsOrbiting(self):
@@ -28,43 +28,44 @@ class View(GlobalView):
                 " ORDER BY nav_planet.id, upper(alliances.tag), upper(fleets.name)"
         oRss = oConnExecuteAll(query)
 
-        if oRs == None:
-            content.Parse("nofleets"
+        if oRss == None:
+            content.Parse("nofleets")
         else:
-            lastplanetid=oRs[0]
+            lastplanetid=-1
 
-            list = []
+            planets = []
+            content.AssignValue("planets", planets)
+            
             for oRs in oRss:
-                item = {}
-                list.append(item)
                 
                 if oRs[0] != lastplanetid:
-                    content.Parse("planet"
+                    planet = { "fleets":[] }
+                    planets.append(planet)
+                    
+                    planet["planetid"] = oRs[0]
+                    planet["planetname"] = oRs[1]
+                    planet["g"] = oRs[2]
+                    planet["s"] = oRs[3]
+                    planet["p"] = oRs[4]
+                    
                     lastplanetid = oRs[0]
 
-                item["planetid", oRs[0]
-                item["planetname", oRs[1]
-                item["g", oRs[2]
-                item["s", oRs[3]
-                item["p", oRs[4]
+                item = {}
+                planet["fleets"].append(item)
 
                 if (oRs[8]):
-                    item["tag", oRs[8]
-                    content.Parse("planet.fleet.alliance"
+                    item["tag"] = oRs[8]
+                    item["alliance"] = True
 
                 if oRs[9] == -1:
-                    content.Parse("planet.fleet.enemy"
+                    item["enemy"] = True
                 elif oRs[9] == 0:
-                    content.Parse("planet.fleet.friend"
+                    item["friend"] = True
                 elif oRs[9] == 1:
-                    content.Parse("planet.fleet.ally"
+                    item["ally"] = True
 
-                item["fleetname", oRs[6]
-                item["fleetowner", oRs[7]
-                item["fleetsignature", oRs[10]
-                content.Parse("planet.fleet"
-
-            content.Parse("planet"
+                item["fleetname"] = oRs[6]
+                item["fleetowner"] = oRs[7]
+                item["fleetsignature"] = oRs[10]
 
         return self.Display(content)
-

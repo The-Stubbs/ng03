@@ -21,26 +21,26 @@ class View(GlobalView):
 
         query = "SELECT login" + \
                 " FROM users" + \
-                " WHERE upper(login) ILIKE upper(" + dosql( "%" + nation + "%") + ")" + \
+                " WHERE upper(login) ILIKE upper(" + str( "\'%" + nation + "%\'") + ")" + \
                 " ORDER BY upper(login)"
         oRss = oConnExecuteAll(query)
 
         list = []
+        content.AssignValue("nations", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            item["nation", oRs[0]
-            content.Parse("nation"
+            item["nation"] = oRs[0]
 
         return self.Display(content)
 
     def display_nation(self):
 
-        nation = request.GET.get("name", "").strip()
+        nation = self.request.GET.get("name", "").strip()
 
         # if no nation is given: display info on the current player
-        if nation == "": nation = self.oPlayerInfo["login")
+        if nation == "": nation = self.oPlayerInfo["login"]
 
         content = GetTemplate(self.request, "nation")
 
@@ -60,60 +60,60 @@ class View(GlobalView):
             else:
                 return HttpResponseRedirect("/game/nation/")
 
-        nationId = oRs["id")
+        nationId = oRs[7]
 
-        content.AssignValue("name", oRs[0]
-        content.AssignValue("regdate", oRs[8]
+        content.AssignValue("name", oRs[0])
+        content.AssignValue("regdate", oRs[8])
 
-        content.AssignValue("alliance_joined", oRs[10]
+        content.AssignValue("alliance_joined", oRs[10])
 
         if oRs[1] == None or oRs[1] == "":
-            content.Parse("noavatar"
+            content.Parse("noavatar")
         else:
-            content.AssignValue("avatar_url", oRs[1]
-            content.Parse("avatar"
+            content.AssignValue("avatar_url", oRs[1])
+            content.Parse("avatar")
 
-        if oRs[7] != self.UserId: content.Parse("sendmail"
+        if oRs[7] != self.UserId: content.Parse("sendmail")
 
         if oRs[2] and oRs[2] != "":
-            content.AssignValue("description", oRs[2]
-            content.Parse("description"
+            content.AssignValue("description", oRs[2])
 
         if oRs[3] < rFriend:
-            content.Parse("enemy"
-        elif oRs[3] = rFriend:
-            content.Parse("friend"
+            content.Parse("enemy")
+        elif oRs[3] == rFriend:
+            content.Parse("friend")
         elif oRs[3] > rFriend:  # display planets + fleets of alliance members if has the rights for it
 
-            if oRs[3] = rAlliance:
-                content.Parse("ally"
+            if oRs[3] == rAlliance:
+                content.Parse("ally")
                 show_details = self.oAllianceRights["leader"] or self.oAllianceRights["can_see_members_info"]
             else:
-                content.Parse("self"
+                content.Parse("self")
                 show_details = True
 
             if show_details:
-                if oRs[3] = rAlliance:
+                if oRs[3] == rAlliance:
                     if not self.oAllianceRights["leader"]:
                         show_details = False
 
-                if show_details:'oRs[3] = rSelf or self.oAllianceRights["leader"] ):
+                if show_details:
                     # view current nation planets
-                    query = "SELECT name, galaxy, sector, planet FROM vw_planets WHERE ownerid=" + oRs[7]
-
+                    query = "SELECT name, galaxy, sector, planet FROM vw_planets WHERE ownerid=" + str(oRs[7])
                     query = query + " ORDER BY id"
-                oPlanetsRs = oConnExecute(query)
+                    oPlanetsRs = oConnExecuteAll(query)
 
-                    if oPlanetsRs.EOF:
-                        content.Parse("allied.noplanets"
+                    if oPlanetsRs == None:
+                        content.Parse("noplanets")
 
-                    while not oPlanetsRs.EOF
-                        content.AssignValue("planetname", oPlanetsRs(0)
-                        content.AssignValue("g", oPlanetsRs(1)
-                        content.AssignValue("s", oPlanetsRs(2)
-                        content.AssignValue("p", oPlanetsRs(3)
-                        content.Parse("allied.planet"
-                        oPlanetsRs.MoveNext
+                    planets = []
+                    content.AssignValue("planets", planets)
+                    for rs in oPlanetsRs:
+                        i = {}
+                        planets.append(i)
+                        i["planetname"] = rs[0]
+                        i["g"] = rs[1]
+                        i["s"] = rs[2]
+                        i["p"] = rs[3]
 
                 # view current nation fleets
 
@@ -121,97 +121,95 @@ class View(GlobalView):
                     " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, sp_relation(planet_ownerid, ownerid)," + \
                     " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, sp_relation(destplanet_ownerid, ownerid)," + \
                     " action, signature, sp_get_user_rs(ownerid, planet_galaxy, planet_sector), sp_get_user_rs(ownerid, destplanet_galaxy, destplanet_sector)" + \
-                    " FROM vw_fleets WHERE ownerid=" + oRs[7]
+                    " FROM vw_fleets WHERE ownerid=" + str(oRs[7])
 
-                if oRs[3] = rAlliance:
+                if oRs[3] == rAlliance:
                     if not self.oAllianceRights["leader"]:
                         query = query + " AND action != 0"
 
                 query = query + " ORDER BY planetid, upper(name)"
 
-                oFleetsRs = oConnExecute(query)
+                oFleetsRs = oConnExecuteAll(query)
 
-                if oFleetsRs.EOF: content.Parse("allied.nofleets"
+                if oFleetsRs == None: content.Parse("nofleets")
 
-                while not oFleetsRs.EOF
-                    content.AssignValue("fleetid", oFleetsRs(0)
-                    content.AssignValue("fleetname", oFleetsRs(1)
-                    content.AssignValue("planetid", oFleetsRs(5)
-                    content.AssignValue("signature", oFleetsRs(22)
-                    content.AssignValue("g", oFleetsRs(7)
-                    content.AssignValue("s", oFleetsRs(8)
-                    content.AssignValue("p", oFleetsRs(9)
-                    if oFleetsRs(4):
-                        content.AssignValue("time", oFleetsRs(4)
+                fleets = []
+                content.AssignValue("fleets", fleets)
+                for rs in oFleetsRs:
+                    i = {}
+                    fleets.append(i)
+                    i["fleetid"] = rs[0]
+                    i["fleetname"] = rs[1]
+                    i["planetid"] = rs[5]
+                    i["signature"] = rs[22]
+                    i["g"] = rs[7]
+                    i["s"] = rs[8]
+                    i["p"] = rs[9]
+                    if rs[4]:
+                        i["time"] = rs[4]
                     else:
-                        content.AssignValue("time", 0
+                        i["time"] = 0
 
-                    content.AssignValue("relation", oFleetsRs(12)
-                    content.AssignValue("planetname", self.getPlanetName(oFleetsRs(12), oFleetsRs(23), oFleetsRs(11), oFleetsRs(6))
+                    i["relation"] = rs[12]
+                    i["planetname"] = self.getPlanetName(rs[12], rs[23], rs[11], rs[6])
 
-                    if oRs[3] = rAlliance:
-                        content.Parse("allied.fleet.ally"
+                    if oRs[3] == rAlliance:
+                        i["ally"] = True
                     else:
-                        content.Parse("allied.fleet.owned"
+                        i["owned"] = True
 
-                    if oFleetsRs(3):
-                        content.Parse("allied.fleet.fighting"
-                    elif oFleetsRs(21)=2:
-                        content.Parse("allied.fleet.recycling"
-                    elif oFleetsRs(13):
+                    if rs[3]:
+                        i["fighting"] = True
+                    elif rs[21]==2:
+                        i["recycling"] = True
+                    elif rs[13]:
                         # Assign destination planet
-                        content.AssignValue("t_planetid", oFleetsRs(13)
-                        content.AssignValue("t_g", oFleetsRs(15)
-                        content.AssignValue("t_s", oFleetsRs(16)
-                        content.AssignValue("t_p", oFleetsRs(17)
-                        content.AssignValue("t_relation", oFleetsRs(20)
-                        content.AssignValue("t_planetname", self.getPlanetName(oFleetsRs(20), oFleetsRs(24), oFleetsRs(19), oFleetsRs(14))
+                        i["t_planetid"] = rs[13]
+                        i["t_g"] = rs[15]
+                        i["t_s"] = rs[16]
+                        i["t_p"] = rs[17]
+                        i["t_relation"] = rs[20]
+                        i["t_planetname"] = self.getPlanetName(rs[20], rs[24], rs[19], rs[14])
 
-                        content.Parse("allied.fleet.moving"
+                        i["moving"] = True
                     else:
-                        content.Parse("allied.fleet.patrolling"
+                        i["patrolling"] = True
 
-                    content.Parse("allied.fleet"
-                    oFleetsRs.MoveNext
-
-                content.Parse("allied"
+                content.Parse("allied")
 
         if oRs[4] == None:
-            content.AssignValue("alliancename", oRs[6]
-            content.AssignValue("alliancetag", oRs[5]
-            content.AssignValue("rank_label", oRs[9]
+            content.AssignValue("alliancename", oRs[6])
+            content.AssignValue("alliancetag", oRs[5])
+            content.AssignValue("rank_label", oRs[9])
 
             if oRs[3] == rSelf:
-                content.Parse("alliance.self"
+                content.Parse("self")
             elif oRs[3] == rAlliance:
-                content.Parse("alliance.ally"
+                content.Parse("ally")
             elif oRs[3] == rFriend:
-                content.Parse("alliance.friend"
+                content.Parse("friend")
             else:
-                content.Parse("alliance.enemy"
+                content.Parse("enemy")
 
-            content.Parse("alliance"
+            content.Parse("alliance")
         else:
-            content.Parse("noalliance"
+            content.Parse("noalliance")
 
-        query = "SELECT alliance_tag, alliance_name, joined, ""left""" + \
+        query = "SELECT alliance_tag, alliance_name, joined, \"left\"" + \
                 " FROM users_alliance_history" + \
-                " WHERE userid = " + dosql(nationId) + " AND joined > (SELECT GREATEST(regdate, game_started) FROM users WHERE privilege < 100 AND id=" + dosql(nationId) + ")" + \
+                " WHERE userid = " + str(nationId) + " AND joined > (SELECT GREATEST(regdate, game_started) FROM users WHERE privilege < 100 AND id=" + str(nationId) + ")" + \
                 " ORDER BY joined DESC"
         oRss = oConnExecuteAll(query)
 
         list = []
+        content.AssignValue("alliances", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
-            item["history_tag", oRs[0].value
-            item["history_name", oRs[1].value
-            item["joined", oRs[2].value
-            item["left", oRs[3].value
-            content.Parse("alliances.item"
-
-        content.Parse("alliances"
+            item["history_tag"] = oRs[0]
+            item["history_name"] = oRs[1]
+            item["joined"] = oRs[2]
+            item["left"] = oRs[3]
 
         return self.Display(content)
-

@@ -15,20 +15,20 @@ function putlevel(level,levels){
 
 <!-- display nation report -->
 
-{% if nation %}
+{% if spynation %}
 
 <table class="default" width="800">
 <tr class="title"><td>Rapport d'espionnage</td></tr>
 {% if spotted %}
 <tr><td><br/><p class="error">Attention, nos transmissions ont été repérées et la nation {{nation}} sait que nous avons opéré pour votre compte.</p><br/></td></tr>
-{% endspotted %}
+{% endif %}
 
-<tr class="category"><td>Informations au {{date:d}} concernant la nation {{nation}}.</td></tr>
+<tr class="category"><td>Informations au {{date}} concernant la nation {{nation}}.</td></tr>
 <tr class="item">
-	<td>Agent : {% if spy_0 %}Novice{% endspy_0 %}{% if spy_1 %}Initié{% endspy_1 %}{% if spy_2 %}Agent{% endspy_2 %}{% if spy_3 %}Taupe{% endspy_3 %}<br/>
+	<td>Agent : {% if level == 0 %}Novice{% endif %}{% if level == 1 %}Initié{% endif %}{% if level == 2 %}Agent{% endif %}{% if level == 3 %}Taupe{% endif %}<br/>
 	Planètes repérées : {{nb_planet}}<br/>
-	{% if credits %}Portefeuille : {{credits|intcomma}} crédits<br/>{% endcredits %}
-	{% if researches %}Recherches connues : {{nb_research}}{% endresearches %}
+	{% if credits %}Portefeuille : {{credits|intcomma}} crédits<br/>{% endif %}
+	{% if researches %}Recherches connues : {{nb_research}}{% endif %}
 	</td>
 </tr>
 </table>
@@ -36,86 +36,50 @@ function putlevel(level,levels){
 {% if researches %}
 	<table class="default" width="800">
 	<tr class="header"><td align="center">Recherche</td><td align="center">Niveau</td></tr>
-	{% if category %}
+	{% for category in categories %}
 	<tr class="category"><td colspan=2>
-	{% if category10 %}Technologies{% endif %}
-	{% if category20 %}Industrie{% endcategory20 %}
-	{% if category30 %}Empire{% endcategory30 %}
-	{% if category40 %}Recherche{% endcategory40 %}
-	{% if category50 %}Technologies militaires{% endcategory50 %}
-	{% if category90 %}Vaisseaux spatiaux{% endcategory90 %}&nbsp;</td></tr>
-	{% if research %}<tr class="item"><td>{{research}}</td><td align="center"><script>putlevel({{level}},{{levels}});</script></td></tr>{% endfor %}
+	{% if category.id == 10 %}Technologies{% endif %}
+	{% if category.id == 20 %}Industrie{% endif %}
+	{% if category.id == 30 %}Empire{% endif %}
+	{% if category.id == 40 %}Recherche{% endif %}
+	{% if category.id == 50 %}Technologies militaires{% endif %}
+	{% if category.id == 90 %}Vaisseaux spatiaux{% endif %}&nbsp;</td></tr>
+	{% for research in category.list %}<tr class="item"><td>{{research.research}}</td><td align="center"><script>putlevel({{research.level}},{{research.levels}});</script></td></tr>{% endfor %}
 	<tr class="clear"><td colspan=2>&nbsp;</td></tr>
 	{% endfor %}
 	</table>
-{% endresearches %}
+{% endif %}
 
 	<table width="800" class="default">
 	<tr class="header"><td align="center">Planète</td><td align="center" colspan=2>Superficie</td><td align="center" colspan=2>Abondance</td><td align="center">Vaisseaux au sol</td></tr>
-{% if planet %}
+{% for planet in planets %}
 	<tr>
-	<td align="center">{{planet}}&nbsp;<a href="/game/map/?g={{g}}&s={{s}}&p={{p}}" title="Localiser la planète">({{g}}.{{s}}.{{p}})</a></td>
-	<td align="right" width="1%"><img src="{{PATH_IMAGES}}/interface/floor.gif" class="icon" title="Terrain" width=16 height=16>{{floor|intcomma}}</td>
-	<td align="right" width="1%"><img src="{{PATH_IMAGES}}/interface/space.gif" class="icon" title="Espace" width=16 height=16>{{space|intcomma}}</td>
-	<td align="right" width="1%"><img src="{{PATH_IMAGES}}/interface/ore.gif" class="icon" title="Minerai" width=16 height=16>{{pct_ore|intcomma}}%</td>
-	<td align="right" width="1%"><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" class="icon" title="Hydrocarbure" width=16 height=16>{{pct_hydrocarbon|intcomma}}%</td>
-	<td align="center"><img src="{{PATH_IMAGES}}/interface/fleets.gif" class="icon" title="Espace" width=16 height=16>{{ground|intcomma}}</td>
+	<td align="center">{{planet.planet}}&nbsp;<a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planet.p}}" title="Localiser la planète">({{planet.g}}.{{planet.s}}.{{planet.p}})</a></td>
+	<td align="right" width="1%"><img src="{{PATH_IMAGES}}/interface/floor.gif" class="icon" title="Terrain" width=16 height=16>{{planet.floor|intcomma}}</td>
+	<td align="right" width="1%"><img src="{{PATH_IMAGES}}/interface/space.gif" class="icon" title="Espace" width=16 height=16>{{planet.space|intcomma}}</td>
+	<td align="right" width="1%"><img src="{{PATH_IMAGES}}/interface/ore.gif" class="icon" title="Minerai" width=16 height=16>{{planet.pct_ore|intcomma}}%</td>
+	<td align="right" width="1%"><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" class="icon" title="Hydrocarbure" width=16 height=16>{{planet.pct_hydrocarbon|intcomma}}%</td>
+	<td align="center"><img src="{{PATH_IMAGES}}/interface/fleets.gif" class="icon" title="Espace" width=16 height=16>{{planet.ground|intcomma}}</td>
 	</tr>
 {% endfor %}
 	</table>
-{% endnation %}
+{% endif %}
 
-<!-- display fleets report -->
-
-{% if fleets %}
-
-<table class="default" width="800">
-<tr class="title"><td>Rapport d'espionnage</td></tr>
-{% if spotted %}
-<tr><td><br/><p class="error">Attention, nos transmissions ont été repérées et la nation {{nation}} sait que nous avons opéré pour votre compte.</p><br/></td></tr>
-{% endspotted %}
-
-<tr class="category"><td>Informations au {{date:d}} concernant les flottes de {{nation}}.</td></tr>
-<tr class="item">
-	<td><div id="stats">
-	<div><span class="label">Agent: </span><span class="value">{% if spy_0 %}Novice{% endspy_0 %}{% if spy_1 %}Initié{% endspy_1 %}{% if spy_2 %}Agent{% endspy_2 %}{% if spy_3 %}Espion militaire{% endspy_3 %}</span></div>
-	<div><span class="label">Flottes repérées: </span><span class="value">{{nb_fleet}}</span></div>
-	</div></td>
-</tr>
-</table>
-
-<table width="800" class="default">
-<tr class="header">
-<td align="center">Flotte</td><td align="center">Taille</td><td align="center">Signature</td><td align="center">Localisation</td><td align="center">Destination</td>
-</tr>
-{% if fleet %}
-
-<tr>
-<td>{{fleet}}</td>
-<td>{% if size %}{{size|intcomma}}{% endsize %}{% if nosize %}Inconnue{% endnosize %}</td>
-<td>{{signature|intcomma}}</td>
-<td>{{location}}</td>
-<td>{% if dest %}{{destination}}{% enddest %}{% if nodest %}-{% endnodest %}</td>
-</tr>
-
-{% endfor %}
-</table>
-{% endfleets %}
 
 <!-- display planet report -->
 
 
-{% if planet %}
+{% if spyplanet %}
 
 <table class="default" width="800">
 <tr class="title"><td>Rapport d'espionnage</td></tr>
 {% if spotted %}
 <tr><td><br/><p class="error">Attention, nos transmissions ont été repérées et la nation {{nation}} sait que nous avons opéré pour votre compte.</p><br/></td></tr>
-{% endspotted %}
+{% endif %}
 
-<tr class="category"><td>Informations au {{date:d}} concernant la planète {{location}}.</td></tr>
+<tr class="category"><td>Informations au {{date}} concernant la planète {{location}}.</td></tr>
 <tr class="item">
-	<td><div id="stats"><span class="label">Agent: </span><span class="value">{% if spy_0 %}Novice{% endspy_0 %}{% if spy_1 %}Initié{% endspy_1 %}{% if spy_2 %}Agent{% endspy_2 %}{% if spy_3 %}Infiltrateur{% endspy_3 %}</span></div></td>
+	<td><div id="stats"><span class="label">Agent: </span><span class="value">{% if level == 0 %}Novice{% endif %}{% if level == 1 %}Initié{% endif %}{% if level == 2 %}Agent{% endif %}{% if level == 3 %}Infiltrateur{% endif %}</span></div></td>
 </tr>
 </table>
 
@@ -126,14 +90,14 @@ function putlevel(level,levels){
 	<td><div id="stats">
 	<div><span class="label">Nom: </span><span class="value">{{name}}</span></div>
 	<div><span class="label">Localisation: </span><span class="value">{{location}}</span></div>
-	<div><span class="label">Nation: </span><span class="value">{% if owner %}{{owner}}{% endowner %}{% if no_owner %}aucune{% endno_owner %}</span></div>
+	<div><span class="label">Nation: </span><span class="value">{% if owner %}{{owner}}{% endif %}{% if no_owner %}aucune{% endif %}</span></div>
 	<div><span class="label">Terrains: </span><span class="value">{{floor}}</span></div>
 	<div><span class="label">Espace: </span><span class="value">{{space}}</span></div>
 {% if uncommon %}
 	<div><span class="label">Abondance minerai: </span><span class="value">{{pct_ore}}%</span></div>
 	<div><span class="label">Abondance hydrocarbure: </span><span class="value">{{pct_hydrocarbon}}%</span></div>
-{% enduncommon %}
-	<div><span class="label">Vaisseaux au sol (signature): </span><span class="value">{% if owner %}{{ground|intcomma}}{% endowner %}{% if no_owner %}-{% endno_owner %}</span></div>
+{% endif %}
+	<div><span class="label">Vaisseaux au sol (signature): </span><span class="value">{% if owner %}{{ground|intcomma}}{% endif %}{% if no_owner %}-{% endif %}</span></div>
 	</div></td>
 </tr>
 
@@ -149,7 +113,7 @@ function putlevel(level,levels){
 	<div><span class="label">Consommation / Production énergie: </span><span class="value">{{energy_consumption|intcomma}} / {{energy_prod|intcomma}}</span></div>
 	</div></td>
 </tr>
-{% endcommon %}
+{% endif %}
 
 {% if uncommon %}
 <tr class="category"><td>Radar & Orbite</td></tr>
@@ -162,7 +126,7 @@ function putlevel(level,levels){
 	<div><span class="label">Hydrocarbure en orbite: </span><span class="value">{{orbit_hydrocarbon|intcomma}}</span></div>
 	</div></td>
 </tr>
-{% enduncommon %}
+{% endif %}
 
 {% if rare %}
 <tr class="category"><td>Population</td></tr>
@@ -174,7 +138,7 @@ function putlevel(level,levels){
 	</div>
 	</td>
 </tr>
-{% endrare %}		
+{% endif %}		
 
 </table>
 
@@ -190,16 +154,16 @@ function putlevel(level,levels){
 	</td>
 </tr>
 
-{% if building %}
+{% for building in buildings %}
 
 <tr class="item">
-	<td>{{building}}</td>
-	<td align="center">{{qty}}</td>
+	<td>{{building.building}}</td>
+	<td align="center">{{building.qty}}</td>
 </tr>
 {% endfor %}
 </table>
 
-{% endbuildings %}
+{% endif %}
 
 {% if buildings_pending %}
 <br/>
@@ -212,15 +176,15 @@ function putlevel(level,levels){
 	</td>
 </tr>
 
-{% if building %}
+{% for building in buildings_pending %}
 
 <tr class="item">
-	<td>{{building}}</td>
-	<td align="center">{{endtime:d}}</td>
+	<td>{{building.building}}</td>
+	<td align="center">{{building.endtime}}</td>
 </tr>
 {% endfor %}
 </table>
-{% endbuildings_pending %}
+{% endif %}
 
-{% endplanet %}
+{% endif %}
 {% endblock %}

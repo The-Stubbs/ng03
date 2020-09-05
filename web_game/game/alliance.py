@@ -50,9 +50,6 @@ class View(GlobalView):
             content.AssignValue("members", oRs[5])
             content.AssignValue("max_members", oRs[8])
 
-            if oRs[3] and oRs[3] != "":
-                content.Parse("description")
-
             if oRs[6] and oRs[6] != "":
                 content.AssignValue("logo_url", oRs[6])
                 content.Parse("logo")

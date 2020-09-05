@@ -52,15 +52,13 @@ def getAllianceTag(allianceid):
     if allianceid == None:
         return ""
 
-    allianceTag = cache.get("AllianceTag_" + allianceid)
+    allianceTag = cache.get("AllianceTag_" + str(allianceid))
 
     if allianceTag == None:
-        oRs = oConnExecute("SELECT tag FROM alliances WHERE id=" & allianceid)
+        oRs = oConnExecute("SELECT tag FROM alliances WHERE id=" + str(allianceid))
         if oRs:
-            cache.add("AllianceTag_" + allianceid, oRs[0], "")
             return oRs[0]
         else:
-            cache.add("AllianceTag_" + allianceid, "", "")
             return ""
     
     return allianceTag

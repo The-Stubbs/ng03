@@ -2,6 +2,8 @@
 
 from web_game.game._global import *
 
+from web_game.lib.accounts import *
+
 class View(GlobalView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,29 +11,29 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        from web_game.lib.accounts import *
-
         self.selected_menu = "alliance.manage"
 
         if self.AllianceId == None: return HttpResponseRedirect("/game/alliance/")
         if not (self.oAllianceRights["leader"] or self.oAllianceRights["can_manage_description"] or self.oAllianceRights["can_manage_announce"]): return HttpResponseRedirect("/game/alliance/")
 
-        cat = ToInt(request.GET.get("cat"), 1)
+        cat = ToInt(request.GET.get("cat", ""), 1)
         if cat < 1 or cat > 3: cat = 1
 
         if cat == 3 and not self.oAllianceRights["leader"]: cat=1
         if cat == 1 and not (self.oAllianceRights["leader"] or self.oAllianceRights["can_manage_description"]): cat=2
         if cat == 2 and not (self.oAllianceRights["leader"] or self.oAllianceRights["can_manage_announce"]): cat=1
+        
+        self.changes_status = ""
 
-        if request.POST.get("submit") != "":
+        if request.POST.get("submit", "") != "":
             if cat == 1:
-                return self.SaveGeneral()
+                self.SaveGeneral()
             elif cat == 2:
-                return self.SaveMotD()
+                self.SaveMotD()
             elif cat == 3:
-                return self.SaveRanks()
+                self.SaveRanks()
 
-        if not pageTerminated: return self.DisplayOptions(cat)
+        if not self.pageTerminated: return self.displayOptions(cat)
 
     #
     # Display alliance description page
@@ -70,8 +72,8 @@ class View(GlobalView):
         oRs = oConnExecute(query)
 
         if oRs:
-            content.AssignValue("motd", oRs[0])
-            content.Parse("defcon_" + sr(oRs[1]))
+            content.AssignValue("announce", oRs[0])
+            content.Parse("defcon_" + str(oRs[1]))
 
         content.Parse("motd")
 
@@ -87,8 +89,8 @@ class View(GlobalView):
         list = []
         for oRs in oRss:
             item = {}
-            item["rank_id"] = oRs[0]
-            item["rank_label"] = oRs[1]
+            item["rank_id"] = oRs["rankid"]
+            item["rank_label"] = oRs["label"]
 
             if oRs["leader"]: item["disabled"] = True
 
@@ -131,7 +133,7 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "alliance-manage")
         content.AssignValue("cat", cat)
-
+        
         if cat == 1:
             self.displayGeneral(content)
         elif cat == 2:
@@ -139,8 +141,8 @@ class View(GlobalView):
         elif cat == 3:
             self.displayRanks(content)
 
-        if changes_status != "":
-            content.Parse(changes_status)
+        if self.changes_status != "":
+            content.Parse(self.changes_status)
             content.Parse("error")
 
         content.Parse("cat"+str(cat)+"_selected")
@@ -153,25 +155,25 @@ class View(GlobalView):
 
     def SaveGeneral(self):
 
-        logo = self.request.POST.get("logo").strip()
-        description = self.request.POST.get("description").strip()
+        logo = self.request.POST.get("logo", "").strip()
+        description = self.request.POST.get("description", "").strip()
 
-        if logo != "" and not self.isValidURL(logo):
+        if logo != "" and not isValidURL(logo):
             #logo is invalid
-            changes_status = "check_logo"
+            self.changes_status = "check_logo"
         else:
             # save updated information
             oConnDoQuery("UPDATE alliances SET logo_url=" + dosql(logo) + ", description=" + dosql(description) + " WHERE id = " + str(self.AllianceId))
 
-            changes_status = "done"
+            self.changes_status = "done"
 
     def SaveMotD(self):
         MotD = self.request.POST.get("motd").strip()
         defcon = ToInt(self.request.POST.get("defcon"), 5)
 
         # save updated information
-        oConnDoQuery("UPDATE alliances SET defcon=" + dosql(defcon) + ", announce=" + dosql(MotD) + " WHERE id = " + str(self.AllianceId))
-        changes_status = "done"
+        oConnDoQuery("UPDATE alliances SET defcon=" + str(defcon) + ", announce=" + dosql(MotD) + " WHERE id = " + str(self.AllianceId))
+        self.changes_status = "done"
 
     def SaveRanks(self):
 
@@ -180,29 +182,29 @@ class View(GlobalView):
                 " FROM alliances_ranks" + \
                 " WHERE allianceid=" + str(self.AllianceId) + \
                 " ORDER BY rankid"
-        oRss = oConnExecute(query)
+        oRss = oConnExecuteAll(query)
         for oRs in oRss:
-            name = request.POST.get("n" + str(oRs[0])).strip()
+            name = self.request.POST.get("n" + str(oRs[0]), "").strip()
             if len(name) > 2:
                 query = "UPDATE alliances_ranks SET" + \
                         " label=" + dosql(name) + \
-                        ", is_default=NOT leader AND " + str(request.POST.get("c" + str(oRs[0]) + "_0")) + \
-                        ", can_invite_player=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_1")) + \
-                        ", can_kick_player=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_2")) + \
-                        ", can_create_nap=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_3")) + \
-                        ", can_break_nap=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_4")) + \
-                        ", can_ask_money=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_5")) + \
-                        ", can_see_reports=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_6")) + \
-                        ", can_accept_money_requests=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_7")) + \
-                        ", can_change_tax_rate=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_8")) + \
-                        ", can_mail_alliance=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_9")) + \
-                        ", can_manage_description=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_10")) + \
-                        ", can_manage_announce=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_11")) + \
-                        ", can_see_members_info=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_12")) + \
-                        ", members_displayed=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_13")) + \
-                        ", can_order_other_fleets=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_14")) + \
-                        ", can_use_alliance_radars=leader OR " + str(request.POST.get("c" + str(oRs[0]) + "_15")) + \
-                        ", enabled=leader OR EXISTS(SELECT 1 FROM users WHERE alliance_id=" + str(self.AllianceId) + " AND alliance_rank=" + str(oRs[0])+ " LIMIT 1) OR " + str(request.POST.get("c" + str(oRs[0]) + "_enabled")) + " OR " + str(request.POST.get("c" + str(oRs[0]) + "_0")) + \
+                        ", is_default=NOT leader AND " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_0"), False)) + \
+                        ", can_invite_player=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_1"), False)) + \
+                        ", can_kick_player=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_2"), False)) + \
+                        ", can_create_nap=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_3"), False)) + \
+                        ", can_break_nap=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_4"), False)) + \
+                        ", can_ask_money=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_5"), False)) + \
+                        ", can_see_reports=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_6"), False)) + \
+                        ", can_accept_money_requests=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_7"), False)) + \
+                        ", can_change_tax_rate=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_8"), False)) + \
+                        ", can_mail_alliance=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_9"), False)) + \
+                        ", can_manage_description=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_10"), False)) + \
+                        ", can_manage_announce=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_11"), False)) + \
+                        ", can_see_members_info=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_12"), False)) + \
+                        ", members_displayed=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_13"), False)) + \
+                        ", can_order_other_fleets=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_14"), False)) + \
+                        ", can_use_alliance_radars=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_15"), False)) + \
+                        ", enabled=leader OR EXISTS(SELECT 1 FROM users WHERE alliance_id=" + str(self.AllianceId) + " AND alliance_rank=" + str(oRs[0])+ " LIMIT 1) OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_enabled"), False)) + " OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_0"), False)) + \
                         " WHERE allianceid=" + str(self.AllianceId) + " AND rankid=" + str(oRs[0])
 
                 oConnDoQuery(query)

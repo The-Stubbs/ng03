@@ -7,22 +7,11 @@
 	<td>Planète</td><td>Vaisseaux</td>
 </tr>
 
-{% if planet %}
+{% for planet in planets %}
 <tr class="smallitem">
-	<td><b><a href="/game/orbit/?planet={{planetid}}">{{planetname}}</a>&nbsp;<a href="/game/map/?g={{g}}&s={{s}}&p={{p}}">({{g}}.{{s}}.{{p}})</a></b></td>
-	<td align=left>{% if ship %}<div>{{ship}} x{{quantity|intcomma}}{% if t %}
-	{% if category10 %}Vaisseaux utilitaires{% endif %}
-	{% if category11 %}Vaisseaux de déploiement{% endcategory11 %}
-	{% if category15 %}Vaisseaux tactiques{% endcategory15 %}
-	{% if category20 %}Vaisseaux légers{% endcategory20 %}
-	{% if category30 %}Corvettes{% endcategory30 %}
-	{% if category40 %}Frégates{% endcategory40 %}
-	{% if category50 %}Croiseurs{% endcategory50 %}
-	{% if category60 %}Dreadnought{% endcategory60 %}
-	{% if category80 %}Titan{% endcategory80 %}
-	{% if category90 %}Plateforme de défense{% endcategory90 %}{% endt %}
-	</div>
-	{% endfor %}
+	<td><b><a href="/game/orbit/?planet={{planet.planetid}}">{{planet.planetname}}</a>&nbsp;<a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planetp}}">({{planet.g}}.{{planet.s}}.{{planet.p}})</a></b></td>
+	<td align=left>{% for ship in planet.ships %}<div>{{ship.ship}} x{{ship.quantity|intcomma}}
+	</div>{% endfor %}
 	</td>
 </tr>
 {% endfor %}
@@ -30,7 +19,7 @@
 <tr class="smallitem">
 	<td colspan="3" align="center">Aucun vaisseau en attente</td>
 </tr>
-{% endnoships %}
+{% endif %}
 </table>
 </div>
 {% endblock %}

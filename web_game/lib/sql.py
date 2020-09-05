@@ -70,7 +70,7 @@ def sqlValue(val):
     if val == None or val == "":
         return "Null"
     else:
-        return val
+        return str(val)
 
 # tries to execute a query up to 3 times if it fails the first times
 def connExecuteRetry(query):

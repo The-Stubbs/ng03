@@ -49,7 +49,7 @@ class View(GlobalView):
         content = GetTemplate(self.request, "alliance-invitations")
 
         oRs = oConnExecute("SELECT date_part('epoch', const_interval_before_join_new_alliance()) / 3600")
-        content.AssignValue("hours_before_rejoin", oRs[0])
+        content.AssignValue("hours_before_rejoin", int(oRs[0]))
 
         query = "SELECT alliances.tag, alliances.name, alliances_invitations.created, users.login" + \
                 " FROM alliances_invitations" + \
