@@ -26,14 +26,14 @@
 	<tr valign="top"><td>
 		<table width="300">
 		<tr class="title"><td>Pacte(s) de non-aggression</td></tr>
-		{% for nap in naps %}<tr class="smallitem"><td><a href="/game/alliance/?tag={{naptag}}">[{{naptag}}] {{napname}}</a></td></tr>{% endfor %}
+		{% for nap in naps %}<tr class="smallitem"><td><a href="/game/alliance/?tag={{nap.naptag}}">[{{nap.naptag}}] {{nap.napname}}</a></td></tr>{% endfor %}
 		{% if nonaps %}<tr><td align=center>Aucun</td></tr>{% endif %}
 		</table>
 	</td>
 	<td>
 		<table>
 		<tr class="title"><td>Guerres en cours</td></tr>
-		{% for war in wars %}<tr class="smallitem"><td><a href="/game/alliance/?tag={{wartag}}">[{{wartag}}] {{warname}}</a></td></tr>{% endfor %}
+		{% for war in wars %}<tr class="smallitem"><td><a href="/game/alliance/?tag={{war.wartag}}">[{{war.wartag}}] {{war.warname}}</a></td></tr>{% endfor %}
 		{% if nowars %}<tr><td align=center>Aucune</td></tr>{% endif %}
 		</table>
 	</td></tr>

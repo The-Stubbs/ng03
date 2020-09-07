@@ -7,42 +7,42 @@
 	{% if nav %}
 	<div>
 	<ul class="htabs">
-		{% if cat1 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=1">Tributs perçus</a></li>{% endcat1 %}
-		{% if cat2 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=2">Tributs envoyés</a></li>{% endcat2 %}
-		{% if cat3 %}<li{% if selected %} class="active"{% endif %}><a href="?cat=3">Nouveau tribut</a></li>{% endcat3 %}
+		{% if cat1 %}<li{% if cat1_selected %} class="active"{% endif %}><a href="?cat=1">Tributs perçus</a></li>{% endif %}
+		{% if cat2 %}<li{% if cat2_selected %} class="active"{% endif %}><a href="?cat=2">Tributs envoyés</a></li>{% endif %}
+		{% if cat3 %}<li{% if cat3_selected %} class="active"{% endif %}><a href="?cat=3">Nouveau tribut</a></li>{% endif %}
 	</ul>
 	</div>
 	{% endif %}
 	<div>
 
-{% if tributes_sent %}
+{% if cat1_selected %}
 <table class="default" width="100%">
 <tr class="title"><td colspan="4">Nos tributs</td></tr>
 <tr class="header">
 <td><a href="?cat={{cat}}&col=1{% if r1 %}&r=1{% endif %}">Alliance</a></td>
 <td><a href="?cat={{cat}}&col=2{% if r2 %}&r=1{% endif %}">Créé le</a></td>
 <td><a href="?cat={{cat}}&col=3{% if r3 %}&r=1{% endif %}">Somme</a></td>
-{% if cancel %}<td>Annuler</td>{% endcancel %}
+{% if cancel %}<td>Annuler</td>{% endif %}
 </tr>
-{% if item %}
-<tr><td>{{place}}. <a href="/game/alliance/?tag={{tag}}">[{{tag}}] {{name}}</a></td>
-<td>{{created}}</td>
-<td align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{credits|intcomma}}</td>
-{% if cancel %}<td><a href="?cat={{cat}}&a=cancel&tag={{tag}}">Annuler</a></td>{% endcancel %}
+{% for item in items %}
+<tr><td>{{item.place}}. <a href="/game/alliance/?tag={{item.tag}}">[{{item.tag}}] {{item.name}}</a></td>
+<td>{{item.created}}</td>
+<td align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{item.credits|intcomma}}</td>
+{% if cancel %}<td><a href="?cat={{cat}}&a=cancel&tag={{item.tag}}">Annuler</a></td>{% endif %}
 </tr>
 {% endfor %}
 {% if none %}
 <tr><td colspan=4 align=center>Aucun</td></tr>
-{% endnone %}
+{% endif %}
 {% if message %}<tr><td colspan=5 class="error">
-{% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endnorights %}
-{% if unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endunknown %}
+{% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
+{% if unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
 </td></tr>
 {% endif %}
 </table>
-{% endtributes_sent %}
+{% endif %}
 
-{% if tributes_received %}
+{% if cat2_selected %}
 <table class="default" width="100%">
 <tr class="title"><td colspan="4">Nos tributs perçus</td></tr>
 <tr class="header">
@@ -51,18 +51,18 @@
 <td><a href="?cat={{cat}}&col=3{% if r3 %}&r=1{% endif %}">Somme</a></td>
 <td>Prochain versement</td>
 </tr>
-{% if item %}
-<tr><td>{{place}}. <a href="/game/alliance/?tag={{tag}}">[{{tag}}] {{name}}</a></td>
-<td>{{created}}</td>
-<td align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{credits|intcomma}}</td>
-<td>{{next_transfer}}</td>
+{% for item in items %}
+<tr><td>{{item.place}}. <a href="/game/alliance/?tag={{item.tag}}">[{{item.tag}}] {{item.name}}</a></td>
+<td>{{item.created}}</td>
+<td align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{item.credits|intcomma}}</td>
+<td>{{item.next_transfer}}</td>
 </tr>
 {% endfor %}
 {% if none %}
 <tr><td colspan=4 align=center>Aucun</td></tr>
-{% endnone %}
+{% endif %}
 </table>
-{% endtributes_received %}
+{% endif %}
 
 {% if new %}
 <form action="?cat={{cat}}&a=new" method="post">{% csrf_token %}
@@ -73,10 +73,10 @@
 <tr><td>Crédits</td><td><input type="text" name="credits" value="{{credits}}" maxlength=10> crédits</td></tr>
 <tr><td colspan=2 align=center><input type="submit" name="submit" value="Envoyer"></td></tr>
 {% if message %}<tr><td colspan=2 class="error">
-{% if ok %}Tribut automatique créé{% endok %}
-{% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endnorights %}
-{% if unknown %}Aucune alliance avec un tel tag n'a été trouvée{% endunknown %}
-{% if already_exists %}Nous avons déjà un versement automatique avec cette alliance, annuler celui existant et recommencez.{% endalready_exists %}
+{% if ok %}Tribut automatique créé{% endif %}
+{% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
+{% if unknown %}Aucune alliance avec un tel tag n'a été trouvée{% endif %}
+{% if already_exists %}Nous avons déjà un versement automatique avec cette alliance, annuler celui existant et recommencez.{% endif %}
 </td></tr>
 {% endif %}
 </table>
@@ -84,7 +84,7 @@
 
 </td>
 </table>
-{% endnew %}
+{% endif %}
 
 </div>
 

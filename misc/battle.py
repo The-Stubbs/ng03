@@ -219,10 +219,6 @@ def GetChanceToHit(WeaponTracking, TargetHandling, Tech, TargetTech):
 
     if Result > 1: Result = 1
     if Result == 0: Result = 0.0000001
-
-    Result = (WeaponTracking - TargetHandling) / 1000
-    if Result > 1: Result = 1
-    if Result <= 0: Result = 0.0000001
     
     return Result
 

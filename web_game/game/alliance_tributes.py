@@ -11,10 +11,10 @@ class View(GlobalView):
 
         self.selected_menu = "alliance.tributes"
 
-        invitation_success = ""
-        cease_success = ""
+        self.invitation_success = ""
+        self.cease_success = ""
 
-        cat = request.GET.get("cat")
+        cat = ToInt(request.GET.get("cat"), 0)
         if cat < 1 or cat > 3: cat = 1
 
         if not (self.oAllianceRights["can_create_nap"] or self.oAllianceRights["can_break_nap"]) and cat == 3: cat = 1
@@ -27,50 +27,53 @@ class View(GlobalView):
         if self.AllianceId == None:
             return HttpResponseRedirect("/game/alliance/")
 
-        action = request.GET.get("a")
+        action = request.GET.get("a", "")
 
-        tag = ""
+        self.tag = ""
+        self.credits = 0
 
-        if action == "cancel"
-            tag = request.GET.get("tag").strip()
-            oRs = oConnExecute("SELECT sp_alliance_tribute_cancel(" + str(self.UserId) + "," + dosql(tag) + ")")
+        if action == "cancel":
+            self.tag = request.GET.get("tag").strip()
+            oRs = oConnExecute("SELECT sp_alliance_tribute_cancel(" + str(self.UserId) + "," + dosql(self.tag) + ")")
 
             if oRs[0] == 0:
-                cease_success = "ok"
+                self.cease_success = "ok"
             elif oRs[0] == 1:
-                cease_success = "norights"
+                self.cease_success = "norights"
             elif oRs[0] == 2:
-                cease_success = "unknown"
+                self.cease_success = "unknown"
 
-        elif action == == "new"
+        elif action == "new":
 
-            tag = request.POST.get("tag").strip()
-            credits = ToInt(request.POST.get("credits"), 0)
+            self.tag = request.POST.get("tag", "").strip()
+            self.credits = ToInt(request.POST.get("credits"), 0)
 
-            oRs = oConnExecute("SELECT sp_alliance_tribute_new(" + str(self.UserId) + "," + dosql(tag) + "," + str(credits) + ")")
-            if oRs[0] == 0:
-                invitation_success = "ok"
-                tag = ""
-            elif oRs[0] == 1:
-                invitation_success = "norights"
-            elif oRs[0] == 2:
-                invitation_success = "unknown"
-            elif oRs[0] == 3:
-                invitation_success = "already_exists"
+            if self.tag != "" and self.credits > 0:
+                oRs = oConnExecute("SELECT sp_alliance_tribute_new(" + str(self.UserId) + "," + dosql(self.tag) + "," + str(self.credits) + ")")
+                if oRs[0] == 0:
+                    self.invitation_success = "ok"
+                    self.tag = ""
+                elif oRs[0] == 1:
+                    self.invitation_success = "norights"
+                elif oRs[0] == 2:
+                    self.invitation_success = "unknown"
+                elif oRs[0] == 3:
+                    self.invitation_success = "already_exists"
 
         return self.displayPage(cat)
 
-    def DisplayTributesReceived(self, content):
-        col = request.GET.get("col")
+    def displayTributesReceived(self, content):
+        col = ToInt(self.request.GET.get("col"), 0)
         if col < 1 or col > 2: col = 1
 
+        reversed = False
         if col == 1:
             orderby = "tag"
         elif col == 2:
             orderby = "created"
             reversed = True
 
-        if request.GET.get("r", "") != "":
+        if self.request.GET.get("r", "") != "":
             reversed = not reversed
         else:
             content.Parse("tributes_received_r" + str(col))
@@ -88,7 +91,7 @@ class View(GlobalView):
 
         i = 0
         list = []
-        content.AssignValue("tributes_received", list)
+        content.AssignValue("items", list)
         for oRs in oRss:
             item = {}
             list.append(item)
@@ -102,19 +105,20 @@ class View(GlobalView):
 
             i = i + 1
 
-        if i == 0: content.Parse("tributes_received_none")
+        if i == 0: content.Parse("none")
 
-    def DisplayTributesSent(self, content):
-        col = request.GET.get("col")
+    def displayTributesSent(self, content):
+        col = ToInt(self.request.GET.get("col"), 0)
         if col < 1 or col > 2: col = 1
 
-        if col == 1
+        reversed = False
+        if col == 1:
             orderby = "tag"
-        elif col == 2
+        elif col == 2:
             orderby = "created"
             reversed = True
 
-        if request.GET.get("r", "") != "":
+        if self.request.GET.get("r", "") != "":
             reversed = not reversed
         else:
             content.Parse("tributes_sent_r" + str(col))
@@ -132,7 +136,7 @@ class View(GlobalView):
 
         i = 0
         list = []
-        content.AssignValue("tributes_sent", list)
+        content.AssignValue("items", list)
         for oRs in oRss:
             item = {}
             list.append(item)
@@ -149,20 +153,20 @@ class View(GlobalView):
 
         if self.oAllianceRights["can_break_nap"] and (i > 0): content.Parse("tributes_sent_cancel")
 
-        if i == 0: content.Parse("tributes_sent_none")
+        if i == 0: content.Parse("none")
 
-        if cease_success != "":
-            content.Parse(cease_success)
+        if self.cease_success != "":
+            content.Parse(self.cease_success)
             content.Parse("tributes_sent_message")
 
     def displayNew(self, content):
 
-        if invitation_success != "":
-            content.Parse(invitation_success)
+        if self.invitation_success != "":
+            content.Parse(self.invitation_success)
             content.Parse("new_message")
 
-        content.AssignValue("tag", tag)
-        content.AssignValue("credits", credits)
+        content.AssignValue("tag", self.tag)
+        content.AssignValue("credits", self.credits)
 
         content.Parse("new")
 
@@ -177,7 +181,7 @@ class View(GlobalView):
         elif cat  == 3:
             self.displayNew(content)
 
-        content.Parse("cat" + cat + "_selected")
+        content.Parse("cat" + str(cat) + "_selected")
 
         content.Parse("cat1")
         content.Parse("cat2")

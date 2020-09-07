@@ -13,8 +13,11 @@ from web_game.game import alliance_create
 from web_game.game import alliance_invitations
 from web_game.game import alliance_manage
 from web_game.game import alliance_members
+from web_game.game import alliance_naps
 from web_game.game import alliance_reports
+from web_game.game import alliance_tributes
 from web_game.game import alliance_wallet
+from web_game.game import alliance_wars
 from web_game.game import battle
 from web_game.game import battle_view
 from web_game.game import buildings
@@ -30,6 +33,7 @@ from web_game.game import fleets_orbiting
 from web_game.game import fleets_ships_stats
 from web_game.game import fleets_standby
 from web_game.game import help
+from web_game.game import invasion
 from web_game.game import mails
 from web_game.game import map
 from web_game.game import market_buy
@@ -54,8 +58,6 @@ from web_game.game import upkeep
 from web_game.game import start
 from web_game.game import wait
 
-from web_game.game import not_implemented
-
 
 
 ################################################################################
@@ -70,11 +72,11 @@ urlpatterns = [
     path('alliance-invitations/', alliance_invitations.View.as_view()),
     path('alliance-manage/', alliance_manage.View.as_view()),
     path('alliance-members/', alliance_members.View.as_view()),
-    path('alliance-naps/', not_implemented.View.as_view()),
+    path('alliance-naps/', alliance_naps.View.as_view()),
     path('alliance-reports/', alliance_reports.View.as_view()),
-    path('alliance-tributes/', not_implemented.View.as_view()),
+    path('alliance-tributes/', alliance_tributes.View.as_view()),
     path('alliance-wallet/', alliance_wallet.View.as_view()),
-    path('alliance-wars/', not_implemented.View.as_view()),
+    path('alliance-wars/', alliance_wars.View.as_view()),
     path('alliance/', alliance.View.as_view()),
     path('battle-view/', battle_view.View.as_view()),
     path('battle/', battle.View.as_view()),
@@ -91,6 +93,7 @@ urlpatterns = [
     path('fleets-standby/', fleets_standby.View.as_view()),
     path('fleets/', fleets.View.as_view()),
     path('help/', help.View.as_view()),
+    path('invasion/', invasion.View.as_view()),
     path('mails/', mails.View.as_view()),
     path('map/', map.View.as_view()),
     path('market-buy/', market_buy.View.as_view()),

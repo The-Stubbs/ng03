@@ -11,10 +11,10 @@ class View(GlobalView):
 
         self.selected_menu = "alliance.wars"
 
-        result = ""
+        self.result = ""
         self.cease_success = ""
 
-        cat = request.GET.get("cat")
+        cat = ToInt(request.GET.get("cat"), 0)
         if cat < 1 or cat > 2: cat = 1
 
         if not (self.oAllianceRights["can_create_nap"] or self.oAllianceRights["can_break_nap"]) and cat != 1: cat = 1
@@ -27,12 +27,12 @@ class View(GlobalView):
         if self.AllianceId == None:
             return HttpResponseRedirect("/game/alliance/")
 
-        action = request.GET.get("a")
-        tag = ""
+        action = request.GET.get("a", "")
+        self.tag = ""
 
         if action == "pay":
-            tag = request.GET.get("tag").strip()
-            oRs = oConnExecute("SELECT sp_alliance_war_pay_bill(" + str(self.UserId) + "," + dosql(tag) + ")")
+            tag = request.GET.get("tag", "").strip()
+            oRs = oConnExecute("SELECT sp_alliance_war_pay_bill(" + str(self.UserId) + "," + dosql(self.tag) + ")")
 
             if oRs[0] == 0:
                 self.cease_success = "ok"
@@ -44,8 +44,8 @@ class View(GlobalView):
                 self.cease_success = "war_not_found"
 
         elif action == "stop":
-            tag = request.GET.get("tag").strip()
-            oRs = oConnExecute("SELECT sp_alliance_war_stop(" + str(self.UserId) + "," + dosql(tag) + ")")
+            self.tag = request.GET.get("tag", "").strip()
+            oRs = oConnExecute("SELECT sp_alliance_war_stop(" + str(self.UserId) + "," + dosql(self.tag) + ")")
 
             if oRs[0] == 0:
                 self.cease_success = "ok"
@@ -56,35 +56,36 @@ class View(GlobalView):
             elif oRs[0] == 3:
                 self.cease_success = "war_not_found"
 
-         elif action == "new2":
-            tag = request.POST.get("tag").strip()
+        elif action == "new2":
+            self.tag = request.POST.get("tag", "").strip()
 
-            oRs = oConnExecute("SELECT sp_alliance_war_declare(" + str(self.UserId) + "," + dosql(tag) + ")")
+            oRs = oConnExecute("SELECT sp_alliance_war_declare(" + str(self.UserId) + "," + dosql(self.tag) + ")")
             if oRs[0] == 0:
-                result = "ok"
-                tag = ""
+                self.result = "ok"
+                self.tag = ""
             elif oRs[0] == 1:
-                result = "norights"
+                self.result = "norights"
             elif oRs[0] == 2:
-                result = "unknown"
+                self.result = "unknown"
             elif oRs[0] == 3:
-                result = "already_at_war"
+                self.result = "already_at_war"
             elif oRs[0] == 9:
-                result = "not_enough_credits"
+                self.result = "not_enough_credits"
 
         return self.displayPage(cat)
 
-    def DisplayWars(self, content):
-        col = request.GET.get("col")
+    def displayWars(self, content):
+        col = ToInt(self.request.GET.get("col"), 0)
         if col < 1 or col > 2: col = 1
 
+        reversed = False
         if col == 1:
             orderby = "tag"
         elif col == 2:
             orderby = "created"
             reversed = True
 
-        if request.GET.get("r", "") != "":
+        if self.request.GET.get("r", "") != "":
             reversed = not reversed
         else:
             content.Parse("r" + str(col))
@@ -152,13 +153,13 @@ class View(GlobalView):
             content.Parse("message")
 
     def displayDeclaration(self, content):
-        if request.GET.get("a") == "new":
+        if self.request.GET.get("a", "") == "new":
 
-            tag = request.POST.get("tag").strip()
+            self.tag = self.request.POST.get("tag").strip()
 
-            oRs = oConnExecute("SELECT id, tag, name, sp_alliance_war_cost(id) + (const_coef_score_to_war()*sp_alliance_value(" + str(self.AllianceId) + "))::integer FROM alliances WHERE lower(tag)=lower(" + dosql(tag) + ")")
+            oRs = oConnExecute("SELECT id, tag, name, sp_alliance_war_cost(id) + (const_coef_score_to_war()*sp_alliance_value(" + str(self.AllianceId) + "))::integer FROM alliances WHERE lower(tag)=lower(" + dosql(self.tag) + ")")
             if oRs == None:
-                content.AssignValue("tag", tag)
+                content.AssignValue("tag", self.tag)
 
                 content.Parse("unknown")
                 content.Parse("message")
@@ -171,11 +172,11 @@ class View(GlobalView):
                 content.Parse("newwar_confirm")
 
         else:
-            if result != "":
-                content.Parse(result)
+            if self.result != "":
+                content.Parse(self.result)
                 content.Parse("message")
 
-            content.AssignValue("tag", tag)
+            content.AssignValue("tag", self.tag)
 
             content.Parse("newwar")
 

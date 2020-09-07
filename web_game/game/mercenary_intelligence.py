@@ -49,7 +49,7 @@ class View(GlobalView):
         spotted = False
 
         action = request.POST.get("spy")
-        self.level = ToInt(request.POST.get("self.level"), 0)
+        self.level = ToInt(request.POST.get("level"), -1)
 
         if action == "nation":
             self.SpyNation()
@@ -203,9 +203,9 @@ class View(GlobalView):
         # For veteran spy, collect additionnal research infos
         #
         if self.level >= 2:
-            query = " SELECT researchid, self.level " + \
+            query = " SELECT researchid, level " + \
                     " FROM sp_list_researches(" + str(id) + ") " + \
-                    " WHERE self.level > 0" + \
+                    " WHERE level > 0" + \
                     " ORDER BY researchid "
             oRss = oConnExecuteAll(query)
 
@@ -214,8 +214,6 @@ class View(GlobalView):
                 query = " INSERT INTO spy_research(spy_id,  research_id,  research_level) " + \
                         " VALUES("+ str(reportid) +", " + str(oRs[0]) +", " + str(oRs[1]) +") "
                 oConnDoQuery(query)
-
-                i = i + 1
 
         #
         # Add spy reports in report list

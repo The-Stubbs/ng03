@@ -11,11 +11,11 @@ class View(GlobalView):
 
         self.selected_menu = "alliance.naps"
 
-        invitation_success = ""
-        break_success = ""
-        nap_success = ""
+        self.invitation_success = ""
+        self.break_success = ""
+        self.nap_success = ""
 
-        cat = request.GET.get("cat")
+        cat = ToInt(request.GET.get("cat"), 0)
         if cat < 1 or cat > 3: cat = 1
 
         if not self.oAllianceRights["can_create_nap"] and cat == 3: cat = 1
@@ -27,20 +27,20 @@ class View(GlobalView):
 
         # redirect the player to the alliance page if he is not part of an alliance
         if self.AllianceId == None:
-            return HttpResponseRedirect("/game/alliance.asp"
+            return HttpResponseRedirect("/game/alliance/")
 
-        action = request.GET.get("a")
-        targetalliancetag = Trim(request.GET.get("tag"))
+        action = request.GET.get("a", "")
+        targetalliancetag = request.GET.get("tag", "").strip()
 
-        tag = ""
-        hours = 24
+        self.tag = ""
+        self.hours = 24
 
         if action == "accept":
             oRs = oConnExecute("SELECT sp_alliance_nap_accept(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
             if oRs[0] == 0:
-                nap_success = "ok"
+                self.nap_success = "ok"
             elif oRs[0] == 5:
-                nap_success = "too_many"
+                self.nap_success = "too_many"
 
         elif action == "decline":
             oConnExecute("SELECT sp_alliance_nap_decline(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
@@ -54,44 +54,45 @@ class View(GlobalView):
             oRs = oConnExecute("SELECT sp_alliance_nap_break(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
 
             if oRs[0] == 0:
-                break_success = "ok"
+                self.break_success = "ok"
             elif oRs[0] == 1:
-                break_success = "norights"
+                self.break_success = "norights"
             elif oRs[0] == 2:
-                break_success = "unknown"
+                self.break_success = "unknown"
             elif oRs[0] == 3:
-                break_success = "nap_not_found"
+                self.break_success = "nap_not_found"
             elif oRs[0] == 4:
-                break_success = "not_enough_credits"
+                self.break_success = "not_enough_credits"
 
         elif action == "new":
-            self.tag = request.POST.get("tag").strip()
+            self.tag = request.POST.get("tag", "").strip()
 
             self.hours = ToInt(request.POST.get("hours"), 0)
 
-            oRs = oConnExecute("SELECT sp_alliance_nap_request(" + str(self.UserId) + "," + dosql(tag) + "," + str(hours) + ")")
+            oRs = oConnExecute("SELECT sp_alliance_nap_request(" + str(self.UserId) + "," + dosql(self.tag) + "," + str(self.hours) + ")")
             if oRs[0] == 0:
-                invitation_success = "ok"
-                tag = ""
-                hours = 24
+                self.invitation_success = "ok"
+                self.tag = ""
+                self.hours = 24
             elif oRs[0] == 1:
-                invitation_success = "norights"
+                self.invitation_success = "norights"
             elif oRs[0] == 2:
-                invitation_success = "unknown"
+                self.invitation_success = "unknown"
             elif oRs[0] == 3:
-                invitation_success = "already_naped"
+                self.invitation_success = "already_naped"
             elif oRs[0] == 4:
-                invitation_success = "request_waiting"
+                self.invitation_success = "request_waiting"
             elif oRs[0] == 6:
-                invitation_success = "already_requested"
+                self.invitation_success = "already_requested"
 
         return self.displayPage(cat)
 
-    def DisplayNAPs(self, content):
-        col = request.GET.get("col")
+    def displayNAPs(self, content):
+        col = ToInt(self.request.GET.get("col"), 0)
         if col < 1 or col > 4: col = 1
-        if col = 2: col = 1
+        if col == 2: col = 1
 
+        reversed = False
         if col == 1:
             orderby = "tag"
         elif col == 3:
@@ -104,7 +105,7 @@ class View(GlobalView):
         elif col == 6:
             orderby = "share_radars"
 
-        if request.GET.get("r", "") != "":
+        if self.request.GET.get("r", "") != "":
             reversed = not reversed
         else:
             content.Parse("r" + str(col))
@@ -158,7 +159,7 @@ class View(GlobalView):
             if self.oAllianceRights["can_create_nap"]:
                 item["toggle_share_radars"] = True
 
-            if self.oAllianceRights["can_break_nap"):
+            if self.oAllianceRights["can_break_nap"]:
                 if oRs[6] == None:
                     item["break"] = True
                 else:
@@ -170,9 +171,9 @@ class View(GlobalView):
 
         if i == 0: content.Parse("nonaps")
 
-        if break_success != "":
-            content.Parse(break_success)
-            content.Parse("naps.message")
+        if self.break_success != "":
+            content.Parse(self.break_success)
+            content.Parse("message")
 
     def displayPropositions(self, content):
 
@@ -206,8 +207,8 @@ class View(GlobalView):
 
         if i == 0: content.Parse("nopropositions")
 
-        if nap_success != "":
-            content.Parse(nap_success)
+        if self.nap_success != "":
+            content.Parse(self.nap_success)
             content.Parse("message")
 
     def displayRequests(self, content):
@@ -243,8 +244,8 @@ class View(GlobalView):
 
         if i == 0: content.Parse("norequests")
 
-        if invitation_success != "":
-            content.Parse(invitation_success)
+        if self.invitation_success != "":
+            content.Parse(self.invitation_success)
             content.Parse("message")
 
         content.AssignValue("tag", self.tag)
@@ -266,16 +267,14 @@ class View(GlobalView):
             query = "SELECT int4(count(*)) FROM alliances_naps_offers" + \
                     " WHERE targetallianceid=" + str(self.AllianceId) + " AND NOT declined"
             oRs = oConnExecute(query)
-            content.AssignValue("propositions", oRs[0])
-            if oRs[0] > 0: content.Parse("propositions")
+            content.AssignValue("proposition_count", oRs[0])
 
             query = "SELECT int4(count(*)) FROM alliances_naps_offers" + \
                     " WHERE allianceid=" + str(self.AllianceId) + " AND NOT declined"
             oRs = oConnExecute(query)
-            content.AssignValue("requests", oRs[0])
-            if oRs[0] > 0: content.Parse("requests")
+            content.AssignValue("request_count", oRs[0])
 
-            content.Parse("cat" + cat + ".selected")
+            content.Parse("cat" + str(cat) + "_selected")
             content.Parse("cat1")
             content.Parse("cat2")
             if self.oAllianceRights["can_create_nap"]: content.Parse("cat3")

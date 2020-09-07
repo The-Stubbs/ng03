@@ -138,7 +138,7 @@
 		document.write('ils se sont parfaitement intégrés et travaillent désormais sous nos ordres.');
 		}
 	</script>
-	Nous avons payé la somme de <img src="{PATH_IMAGES}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {credits:n} crédits.
+	Nous avons payé la somme de <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{credits|intcomma}} crédits.
     {% elif message.type == 600 %}Nous occupons désormais la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Nous devrions vérifier les installations et <a href="/game/buildings/?planet={{message.planetid}}">construire les bâtiments</a> dont nous avons besoin.
 	{% elif message.type == 752 %}De riches filons de minerai ont été découverts sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production de minerai est augmentée.

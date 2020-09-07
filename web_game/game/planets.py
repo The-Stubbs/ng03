@@ -125,13 +125,13 @@ class View(GlobalView):
 
             credits = oRs[37] + (oRs[38] / 2)
 
-            item["credits"] = credits
+            item["credits"] = int(credits)
             if credits < 0:
                 item["credits_minus"] = True
             else:
                 item["credits_plus"] = True
 
-            item["prestige"] = oRs[35]
+            item["prestige"] = oRs[39]
 
             if oRs[13] < 0:
                 item["negative_energy_production"] = True
