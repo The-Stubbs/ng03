@@ -457,12 +457,12 @@ class View(GlobalView):
         oRss = oConnExecuteAll("SELECT * FROM sp_get_addressee_list(" + str(self.UserId) + ")")
 
         list = []
+        content.AssignValue("tos", list)
         for oRs in oRss:
             item = {}
             list.append(item)
             
             item["to_user"] = oRs[0]
-            item["to"] = True 
 
         if self.mailto == ":admins":
             content.Parse("sendadmins_selected")

@@ -59,7 +59,7 @@ function showAddressee(obj)
 	</tr>
 	<tr class="item" id="nation"{% if hidenation %} style="display:none; visibility:hidden"{% endif %}>
 		<td width="1%">Nation</td>
-		<td><input type="text" id=to name=to value="{{mailto}}" size=36 maxlength=128>&nbsp;&nbsp;<select onchange="return setaddressee(this,to)"><option>Derniers contacts</option>{% if to %}<option>{{to_user}}</option>{% endif %}</select></td>
+		<td><input type="text" id=to name=to value="{{mailto}}" size=36 maxlength=128>&nbsp;&nbsp;<select onchange="return setaddressee(this,to)"><option>Derniers contacts</option>{% for to in tos %}<option>{{to.to_user}}</option>{% endfor %}</select></td>
 	</tr>
 
 	<tr class="item">

@@ -220,7 +220,7 @@ class View(GlobalView):
                 item["outcome"] = -oRs[2]
 
             item["description"] = oRs[3] if oRs[3] else ""
-            item["source"] = oRs[4]
+            item["source"] = oRs[4] if oRs[4] else ""
             item["destination"] = oRs[5] if oRs[5] else ""
 
             if oRs[6] == 0: # gift

@@ -151,7 +151,7 @@ tiptext = $("hinttext");
 	<tr class="smallitem"><td class="error" colspan="3">Impossible de recevoir quand de l'énergie est envoyée.</td></tr>
 	{% endif %}
 	{% for received in receiveds %}
-	<tr class="smallitem"><td align="center" nowrap><script>putplanet({{planetid}},'{{name}}',{{g}},{{s}},{{p}},{{rel}});</script></td><td align="center">{{energy|intcomma}}</td><td align="center">{{effective_energy|intcomma}} (perte: {{loss}}%) <a href="?cat={{cat}}&a=cancel&from={{planetid}}">rompre</a></td></tr>
+	<tr class="smallitem"><td align="center" nowrap><script>putplanet({{received.planetid}},'{{received.name}}',{{received.g}},{{received.s}},{{received.p}},{{received.rel}});</script></td><td align="center">{{received.energy|intcomma}}</td><td align="center">{{received.effective_energy|intcomma}} (perte: {{received.loss}}%) <a href="?cat={{cat}}&a=cancel&from={{received.planetid}}">rompre</a></td></tr>
 	{% endfor %}
 	<tr class="clear"><td colspan="3">&nbsp;</td></tr>
 	<tr class="title"><td colspan="3">Energie envoyée ({{antennas_send_used}}/{{antennas_send_total}})</td></tr>
@@ -164,16 +164,16 @@ tiptext = $("hinttext");
 	{% endif %}
 	{% for sent in sents %}
 	<tr class="smallitem">
-		<td align="center" nowrap><input type="checkbox" class="checkbox" name="enabled_{{planetid}}" value="1"{% if enabled %} checked{% endif %}><script>putplanet({{planetid}},'{{name}}',{{g}},{{s}},{{p}},{{rel}});</script></td>
-		<td align="center"><input type="text" name="energy_{{planetid}}" value="{{energy}}" maxlength="6" size="6"></td>
-		<td align="center">{{effective_energy|intcomma}} (perte: {{loss}}%) <a href="?cat={{cat}}&a=cancel&to={{planetid}}">retirer</a></td>
+		<td align="center" nowrap><input type="checkbox" class="checkbox" name="enabled_{{sent.planetid}}" value="1"{% if sent.enabled %} checked{% endif %}><script>putplanet({{sent.planetid}},'{{sent.name}}',{{sent.g}},{{sent.s}},{{sent.p}},{{sent.rel}});</script></td>
+		<td align="center"><input type="text" name="energy_{{sent.planetid}}" value="{{sent.energy}}" maxlength="6" size="6"></td>
+		<td align="center">{{sent.effective_energy|intcomma}} (perte: {{sent.loss}}%) <a href="?cat={{cat}}&a=cancel&to={{sent.planetid}}">retirer</a></td>
 	</tr>
 	{% endfor %}
 	{% if send %}
 	<tr class="smallitem">
-		<td align="center" nowrap><input type="text" name="to_g" maxlength="2" size="2" value="{{g}}">.<input type="text" maxlength="2" size="2" name="to_s" value="{{s}}">.<input type="text" maxlength="2" size="2" name="to_p" value="{{p}}"></td>
+		<td align="center" nowrap><input type="text" name="to_g" maxlength="2" size="2" value="{{send_g}}">.<input type="text" maxlength="2" size="2" name="to_s" value="{{send_s}}">.<input type="text" maxlength="2" size="2" name="to_p" value="{{send_p}}"></td>
 		<td align="center"><input type="text" name="energy" maxlength="6" size="6" value="0"></td>
-		<td align="center">{{effective_energy|intcomma}} (perte: {{loss}}%)</td>
+		<td align="center">{{send_effective_energy|intcomma}} (perte: {{send_loss}}%)</td>
 	</tr>
 	{% endif %}
 	{% if submit %}

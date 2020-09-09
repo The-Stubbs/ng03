@@ -2,6 +2,13 @@
 
 <html>
 <head>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-134044291-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-134044291-1');
+	</script>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 	<meta http-equiv="cache-control" content="no-cache">
 	<meta http-equiv="expires" content="0">
@@ -13,7 +20,7 @@
 
 	<script type="text/javascript">
 	var timers_enabled=true;
-	function alertAbort(){{return window.confirm("Êtes-vous sûr de vouloir arrêter le mode vacances ?\r\nVous ne pourrez le réactiver qu'après une semaine de jeu.");}}
+	function alertAbort(){return window.confirm("ÃŠtes-vous sÃ»r de vouloir arrÃªter le mode vacances ?\r\nVous ne pourrez le rÃ©activer qu'aprÃ¨s une semaine de jeu.");}
 	</script>
 
 	<script type="text/javascript" src='/scripts/lang.js'></script>
@@ -27,9 +34,9 @@
 <div id=holidays>MODE VACANCES</div>
 <div id=playername>{{login}}</div>
 <br/>
-Votre compte est actuellement en mode vacances, vos planètes sont protégées de toutes attaques et invasion mais toutes vos productions, constructions et recherches sont suspendues.<br />
+Votre compte est actuellement en mode vacances, vos planÃ¨tes sont protÃ©gÃ©es de toutes attaques et invasion mais toutes vos productions, constructions et recherches sont suspendues.<br />
 <br/>
-En cliquant sur Débloquer, le mode vacances sera arrêté, vos productions, constructions et recherches reprendront et vos planètes ne seront plus protégées.
+En cliquant sur DÃ©bloquer, le mode vacances sera arrÃªtÃ©, vos productions, constructions et recherches reprendront et vos planÃ¨tes ne seront plus protÃ©gÃ©es.
 <br/>
 <br/>
 <div align=center>
@@ -37,17 +44,16 @@ Temps restant: <script type="text/javascript">putcountdown1({{remaining_time}},"
 <br/>
 {% if unlock %}
 <form method="post" action="?">{% csrf_token %}
-<input onclick="return alertAbort()" type="submit" name="unlock" value="Débloquer">
+<input onclick="return alertAbort()" type="submit" name="unlock" value="DÃ©bloquer">
 </form>
-{% endunlock %}
+{% endif %}
 {% if cant_unlock %}
-Temps restant avant déblocage: <script type="text/javascript">putcountdown1({{remaining_time_before_unlock}},"", "");</script><br/>
-<script type="text/javascript">putcountdown2({{remaining_time_before_unlock}},"", "<br/><form method='post' action='?'>{% csrf_token %}<input onclick='return alertAbort()' type='submit' name='unlock' value='Débloquer'></form>");</script>
-{% endcant_unlock %}
+Temps restant avant dÃ©blocage: <script type="text/javascript">putcountdown1({{remaining_time_before_unlock}},"", "");</script><br/>
+<script type="text/javascript">putcountdown2({{remaining_time_before_unlock}},"", "<br/><form method='post' action='?'>{% csrf_token %}<input onclick='return alertAbort()' type='submit' name='unlock' value='DÃ©bloquer'></form>");</script>
+{% endif %}
 </div>
 
 </div>
 </div>
 </body>
 </html>
-{% endblock %}

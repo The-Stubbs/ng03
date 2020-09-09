@@ -265,8 +265,8 @@ class View(GlobalView):
         update_planet = False
 
         if self.action == "cancel":
-            energy_from = ToInt(request.GET.get("from"), 0)
-            energy_to = ToInt(request.GET.get("to"), 0)
+            energy_from = ToInt(self.request.GET.get("from"), 0)
+            energy_to = ToInt(self.request.GET.get("to"), 0)
 
             if energy_from != 0:
                 query = "DELETE FROM planet_energy_transfer WHERE planetid=" + str(energy_from) + " AND target_planetid=" + str(self.CurrentPlanet)
@@ -292,11 +292,11 @@ class View(GlobalView):
                 
                 query = ""
 
-                I = ToInt(request.POST.get("energy_" + oRs[0]), 0)
+                I = ToInt(self.request.POST.get("energy_" + str(oRs[0])), 0)
                 if I != oRs[1]:
-                    query = query + "energy = " + I
+                    query = query + "energy = " + str(I)
 
-                I = request.POST.get("enabled_" + oRs[0])
+                I = self.request.POST.get("enabled_" + str(oRs[0]))
                 if I == "1":
                     I = True
                 else:
@@ -304,25 +304,24 @@ class View(GlobalView):
 
                 if I != oRs[2]:
                     if query != "": query = query + ","
-                    query = query + "enabled=" + dosql(I)
+                    query = query + "enabled=" + str(I)
 
                 if query != "":
-                    query = "UPDATE planet_energy_transfer SET " + query + " WHERE planetid=" + str(self.CurrentPlanet) + " AND target_planetid=" + oRs[0]
+                    query = "UPDATE planet_energy_transfer SET " + query + " WHERE planetid=" + str(self.CurrentPlanet) + " AND target_planetid=" + str(oRs[0])
                     oConnDoQuery(query)
 
                     update_planet = True
 
-            for I in range(1, request.POST.get("to_g").count):
-                g = ToInt(request.POST.get("to_g").item(I), 0)
-                s = ToInt(request.POST.get("to_s").item(I), 0)
-                p = ToInt(request.POST.get("to_p").item(I), 0)
-                energy = ToInt(request.POST.get("energy").item(I), 0)
+            g = ToInt(self.request.POST.get("to_g"), 0)
+            s = ToInt(self.request.POST.get("to_s"), 0)
+            p = ToInt(self.request.POST.get("to_p"), 0)
+            energy = ToInt(self.request.POST.get("energy"), 0)
 
-                if g != 0 and s != 0 and p != 0 and energy > 0:
-                    query = "INSERT INTO planet_energy_transfer(planetid, target_planetid, energy) VALUES(" + str(self.CurrentPlanet) + ", sp_planet(" + g + "," + s + "," + p + ")," + energy + ")"
-                    oConnDoQuery(query)
+            if g != 0 and s != 0 and p != 0 and energy > 0:
+                query = "INSERT INTO planet_energy_transfer(planetid, target_planetid, energy) VALUES(" + str(self.CurrentPlanet) + ", sp_planet(" + str(g) + "," + str(s) + "," + str(p) + ")," + str(energy) + ")"
+                oConnDoQuery(query)
 
-                    update_planet = True
+                update_planet = True
 
             if update_planet:
                 query = "SELECT sp_update_planet(" + str(self.CurrentPlanet) + ")"
@@ -353,9 +352,9 @@ class View(GlobalView):
             
             item["energy"] = oRs[12]
             item["effective_energy"] = oRs[13]
-            item["loss"] = getpercent(oRs[12]-oRs[13], oRs[12], 1)
+            item["loss"] = self.getpercent(oRs[12]-oRs[13], oRs[12], 1)
 
-            if oRs[0] == str(self.CurrentPlanet):
+            if oRs[0] == self.CurrentPlanet:
                 sending = sending + 1
                 if oRs[14]: sending_enabled = sending_enabled + 1
                 item["planetid"] = oRs[6]
@@ -402,13 +401,11 @@ class View(GlobalView):
         if sending_enabled > 0:
             self.content.Parse("cant_receive_when_sending")
             max_receive = 0
-            self.content.Parse("send")
         elif receiving == 0 and max_receive > 0:
             self.content.Parse("receiving_none")
 
-        self.content.Parse("receive")
-        
-
+        if max_receive > 0: self.content.Parse("receive")
+        if max_send - len(sents) > 0: self.content.Parse("send")
         if max_send > 0: self.content.Parse("submit")
 
         self.content.Parse("sendreceive")

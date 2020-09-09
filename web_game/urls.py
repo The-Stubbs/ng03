@@ -34,6 +34,7 @@ from web_game.game import fleets_ships_stats
 from web_game.game import fleets_standby
 from web_game.game import game_over
 from web_game.game import help
+from web_game.game import holidays
 from web_game.game import invasion
 from web_game.game import mails
 from web_game.game import map
@@ -95,6 +96,7 @@ urlpatterns = [
     path('fleets/', fleets.View.as_view()),
     path('game-over/', game_over.View.as_view()),
     path('help/', help.View.as_view()),
+    path('holidays/', holidays.View.as_view()),
     path('invasion/', invasion.View.as_view()),
     path('mails/', mails.View.as_view()),
     path('map/', map.View.as_view()),

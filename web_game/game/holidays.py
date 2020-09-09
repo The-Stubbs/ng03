@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 
-from web_game.game._global import *
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views import View
 
-class View(GlobalView):
+from web_game.lib.exile import *
+from web_game.lib.template import *
+
+class View(ExileMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        <!--#include virtual="/lib/exile.asp"-->
-        <!--#include virtual="/lib/template.asp"-->
-
-        UserId = ToInt(Session("user"), "")
+        self.UserId = ToInt(self.request.session.get("user"), "")
 
         if self.UserId == "":
             return HttpResponseRedirect("/")
 
-        set content = GetTemplate(self.request, "holidays")
+        content = GetTemplate(self.request, "holidays")
 
         # retrieve remaining time
         query = "SELECT login," + \
@@ -31,25 +33,24 @@ class View(GlobalView):
             return HttpResponseRedirect("/")
 
         # check to unlock holidays mode
-        action = request.POST.get("unlock")
+        action = request.POST.get("unlock", "")
 
         if action != "" and oRs[1] < 0:
-            oConnExecute("SELECT sp_stop_holidays("+str(self.UserId)+")", , 128
+            oConnExecute("SELECT sp_stop_holidays("+str(self.UserId)+")")
             return HttpResponseRedirect("/game/overview/")
 
         # if remaining time is negative, return to overview page
         if oRs[2] <= 0:
-            response.redirect "/game/overview.asp"
+            return HttpResponseRedirect("/game/overview/")
 
-        content.AssignValue("login", oRs[0]
-        content.AssignValue("remaining_time", oRs[2]
+        content.AssignValue("login", oRs[0])
+        content.AssignValue("remaining_time", oRs[2])
 
         # only allow to unlock the account after 2 days of holidays
         if oRs[1] < 0:
-            content.Parse("unlock"
+            content.Parse("unlock")
         else:
-            content.AssignValue("remaining_time_before_unlock", oRs[1]
-            content.Parse("cant_unlock"
+            content.AssignValue("remaining_time_before_unlock", oRs[1])
+            content.Parse("cant_unlock")
 
-        Response.write content.Output
-
+        return render(self.request, content.template, content.data)
