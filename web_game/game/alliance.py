@@ -96,6 +96,7 @@ class View(GlobalView):
             if oRss:
                 list = []
                 for oRs in oRss:
+                    item = {}
                     item["wartag"] = oRs[2]
                     item["warname"] = oRs[3]
                     list.append(item)

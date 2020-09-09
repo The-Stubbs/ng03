@@ -32,6 +32,7 @@ from web_game.game import fleets_handler
 from web_game.game import fleets_orbiting
 from web_game.game import fleets_ships_stats
 from web_game.game import fleets_standby
+from web_game.game import game_over
 from web_game.game import help
 from web_game.game import invasion
 from web_game.game import mails
@@ -92,6 +93,7 @@ urlpatterns = [
     path('fleets-ships-stats/', fleets_ships_stats.View.as_view()),
     path('fleets-standby/', fleets_standby.View.as_view()),
     path('fleets/', fleets.View.as_view()),
+    path('game-over/', game_over.View.as_view()),
     path('help/', help.View.as_view()),
     path('invasion/', invasion.View.as_view()),
     path('mails/', mails.View.as_view()),

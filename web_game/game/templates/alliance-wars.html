@@ -27,14 +27,14 @@ function confirmStopWar(tag) {
 <td>status</td>
 </tr>
 {% for war in wars %}
-<tr><td>{{place}}. <a href="/game/alliance/?tag={{tag}}">[{{tag}}] {{name}}</a></td>
-<td>{{created}}<br/>{% if cant_fight %}Préparation en cours{% endif %}{% if can_fight %}{{next_bill}}{% endif %}</td>
+<tr><td>{{war.place}}. <a href="/game/alliance/?tag={{war.tag}}">[{{war.tag}}] {{war.name}}</a></td>
+<td>{{war.created}}<br/>{% if war.cant_fight %}Préparation en cours{% endif %}{% if war.can_fight %}{{war.next_bill}}{% endif %}</td>
 <td>
-{% if extend %}<a href="?cat={{cat}}&a=pay&tag={{tag}}">Étendre la guerre d'une semaine</a> <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16">{{cost|intcomma}}<br/>{% endif %}
-{% if ceasing %}Fin de guerre demandée (<script>putcountdown1({{time}}, "Terminé", "?")</script>){% endif %}
-{% if cease_requested %}<a href="?cat={{cat}}&a=cease&tag={{tag}}">Accepter la fin de la guerre (<script>putcountdown1({{time}}, "Terminé", "?")</script>)</a>{% endif %}
-{% if stop %}<a href="?cat={{cat}}&a=stop&tag={{tag}}" onclick="return confirmStopWar('{{tag}}')">Arrêter la guerre</a>{% endif %}
-{% if surrender %}&nbsp;{% endif %}
+{% if war.extend %}<a href="?cat={{cat}}&a=pay&tag={{war.tag}}">Étendre la guerre d'une semaine</a> <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16">{{war.cost|intcomma}}<br/>{% endif %}
+{% if war.ceasing %}Fin de guerre demandée (<script>putcountdown1({{war.time}}, "Terminé", "?")</script>){% endif %}
+{% if war.cease_requested %}<a href="?cat={{cat}}&a=cease&tag={{war.tag}}">Accepter la fin de la guerre (<script>putcountdown1({{war.time}}, "Terminé", "?")</script>)</a>{% endif %}
+{% if war.stop %}<a href="?cat={{cat}}&a=stop&tag={{war.tag}}" onclick="return confirmStopWar('{{war.tag}}')">Arrêter la guerre</a>{% endif %}
+{% if war.surrender %}&nbsp;{% endif %}
 </td>
 </tr>
 {% endfor %}

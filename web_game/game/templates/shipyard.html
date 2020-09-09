@@ -102,7 +102,7 @@ tiptext = $("hinttext");
 	<table class="clear" width="100%">
 	<tr><td><a href="/game/help/?cat=ships#{{ship.id}}" onmouseover="ddrivetip(descShip({{ship.id}}))" onmouseout="hideddrivetip()"><b>{{ship.name}}</b></a></td><td align="right">x{{ship.quantity}}</td></tr>
 	{% if ship.required_ship %}<tr><td colspan=2 nowrap><p class="shiprequirement">Requiert {{ship.required_ship_name}} ({% if none_available %}<span class=low>{% endif %}{{ship.required_ship_available}}{% if ship.none_available %}</span>{% endif %})</p></td></tr>{% endif %}
-	{% if ship.required_pp %}<tr><td colspan=2 nowrap><p class="shiprequirement">Requiert {{ship.required_pp}} points de prestige ({% if not_enough %}<span class=low>{% endif %}{{ship.pp}}{% if ship.not_enough %}</span>{% endif %})</p></td></tr>{% endif %}
+	{% if ship.required_pp %}<tr><td colspan=2 nowrap><p class="shiprequirement">Requiert {{ship.required_pp}} points de prestige ({% if ship.required_pp_not_enough %}<span class=low>{% endif %}{{ship.pp}}{% if ship.ship.required_pp_not_enough %}</span>{% endif %})</p></td></tr>{% endif %}
 	</table>
 </td>
 <td nowrap{% if ship.not_enough_ore %} class="notenough"{% endif %}><img src="{{PATH_IMAGES}}/interface/ore.gif" class="icon" title="Minerai" width=16 height=16> {{ship.ore|intcomma}}</td>

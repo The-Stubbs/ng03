@@ -33,8 +33,14 @@
 	{% elif message.type == 122 %}Invitation déclinée.
 	{% elif message.type == 130 %}Invitation acceptée.
 	{% elif message.type == 132 %}Exclusion de membre.
+	{% elif message.type == 160 %}Nous entrons en guerre !
+	{% elif message.type == 171 %}PNA rompu.
 	{% elif message.type == 200 %}Rapport de bataille.
 	{% elif message.type == 201 %}Rapport de bataille (vainqueur).
+	{% elif message.type == 210 %}Invasion ennemie : perte d'une planète.
+	{% elif message.type == 211 %}Invasion ennemie repoussée !
+	{% elif message.type == 212 %}Invasion repoussée.
+	{% elif message.type == 214 %}Invasion réussie !
 	{% elif message.type == 300 %}Eurêka !
 	{% elif message.type == 310 %}Production et coût d'entretien.
 	{% elif message.type == 320 %}Un commandant a récemment eu une augmentation
@@ -43,10 +49,14 @@
 	{% elif message.type == 402 %}Plus de matériau à recycler.
 	{% elif message.type == 403 %}Détection d'une flotte.
 	{% elif message.type == 501 %}Cargaison reçue.
+	{% elif message.type == 502 %}Versement reçu.
 	{% elif message.type == 503 %}Vente effectuée.
 	{% elif message.type == 504 %}Vente effectuée sur planète alliée.
 	{% elif message.type == 505 %}Achat effectué sur une de nos planètes.
 	{% elif message.type == 600 %}Nouvelle planète.
+	{% elif message.type == 602 %}Soulèvement.
+	{% elif message.type == 720 %}Vol de ressources.
+	{% elif message.type == 721 %}Des émeutes éclatent.
 	{% elif message.type == 752 %}Découverte de riches filons de minerai !
 	{% elif message.type == 753 %}Épuisement des filons de minerai.
 	{% elif message.type == 754 %}Découverte de riches gisements d'hydrocarbure !
@@ -67,10 +77,20 @@
 	{% elif message.type == 122 %}La nation <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a> a décliné notre invitation.
 	{% elif message.type == 130 %}La nation <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a> a rejoint notre alliance.
 	{% elif message.type == 132 %}La nation <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a> va être exclue de l'alliance<script>if('{{message.username}}'!='') document.write(' (action décidée par <a href="/game/nation/?name={{message.username}}">{{message.username}}</a>)');</script>.
+    {% elif message.type == 160 %}L'alliance <a href="/game/alliance/?tag={{message.alliancetag}}">[{{message.alliancetag}}] {{message.alliancename}}</a> vient de nous déclarer la guerre.
+    {% elif message.type == 171 %}L'alliance <a href="/game/alliance/?tag={{message.alliancetag}}">[{{message.alliancetag}}] {{message.alliancename}}</a> a décidé de rompre le pacte de non-aggression que nous avions.
     {% elif message.type == 200 %}Une bataille a eu lieu près de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Vous pouvez accéder au <a href="/game/battle/?id={{message.battleid}}&v={{message.ownerid}}">rapport du combat</a>.
 	{% elif message.type == 201 %}Une bataille a eu lieu près de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Vous pouvez accéder au <a href="/game/battle/?id={{message.battleid}}&v={{message.ownerid}}">rapport du combat</a>.
+	{% elif message.type == 210 %}Une flotte ennemie de <a href="/game/nation/?name={{message.username}}">{{message.username}}</a> s'est emparée d'une de nos planètes. Elle est désormais connue sous le nom de <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
+	Vous pouvez accéder au <a href="/game/invasion/?id={{message.invasionid}}">rapport d'invasion</a>.
+	{% elif message.type == 211 %}Une flotte ennemie de <a href="/game/nation/?name={{message.username}}">{{message.username}}</a> a tenté d'envahir notre planète <a href="/game/training/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}}</a>, mais nos vaillantes troupes l'ont repoussée !<br/>
+	Vous pouvez accéder au <a href="/game/invasion/?id={{message.invasionid}}">rapport d'invasion</a>.
+	{% elif message.type == 212 %}Notre tentative pour prendre la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a> a lamentablement échoué.<br/>
+	Vous pouvez accéder au <a href="/game/invasion/?id={{message.invasionid}}">rapport d'invasion</a> que nous avons pu établir suite aux indications de nos soldats tombés vaillament au combat.
+	{% elif message.type == 214 %}Nous avons pris la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a> !<br/>
+	Vous pouvez accéder au <a href="/game/invasion/?id={{message.invasionid}}">rapport d'invasion</a>.
 	{% elif message.type == 300 %}Nos scientifiques ont terminé la recherche sur "{{message.researchname}}".<br/>
 	Ils sont prêts pour de <a href="/game/research/">nouvelles recherches</a>.
 	{% elif message.type == 310 %}Les coûts d'entretien et de fonctionnement concernant la dernière période s'élèvent à <img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" width="16" height="16"> {{message.credits|intcomma}}.<br/><br/>
@@ -100,6 +120,7 @@
 		document.write('ils se sont parfaitement intégrés et travaillent désormais sous nos ordres.');
 		}
 	</script>
+	{% elif message.type == 502 %}Vous avez reçu la somme de <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{message.credits|intcomma}} crédits par messagerie de la part de <a href="/game/nation/?name={{message.username}}">{{message.username}}</a>.
 	{% elif message.type == 503 %}Suite au dépôt de 
 	<script>
 		var s = "";
@@ -141,6 +162,49 @@
 	Nous avons payé la somme de <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{credits|intcomma}} crédits.
     {% elif message.type == 600 %}Nous occupons désormais la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.<br/>
 	Nous devrions vérifier les installations et <a href="/game/buildings/?planet={{message.planetid}}">construire les bâtiments</a> dont nous avons besoin.
+	{% elif message.type == 602 %}Suite à votre ordre, nous avons essayé d'abandonner la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">({{message.g}}.{{message.s}}.{{message.p}})</a>, malheureusement, d'importantes manifestations se sont déclarées dans toute la colonie pour montrer leur indignation face à cette décision.<br/>
+	Les travailleurs qui étaient censés détruire les bâtiments de la colonie ont été arrêtés avant même de commencer. Il s'en est suivi un coup d'état et une déclaration d'indépendance émanant des dirigeants temporaires de la planète.<br/>
+	Nous ne contrôlons plus la planète et les bâtiments sont restés fonctionnels ! Une autre nation pourrait s'en emparer et s'en servir contre nous.<br/>
+	Nous perdons 20 points de contrôle sur toutes nos planètes.
+	{% elif message.type == 720 %}Une intrusion a eu lieu dans nos entrepôts de <a href="/game/training/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>. Après inventaire des stocks, il semblerait <script>
+	if({{message.ore}} > 0 || {{message.hydrocarbon}} > 0) {
+		if({{message.ore}} > 0){
+			document.write('que {{message.ore|intcomma}} unités de minerai'); 
+			if({{message.hydrocarbon}} > 0) document.write(" et {{message.hydrocarbon|intcomma}} unités d'hydrocarbure");
+		}
+		else
+			document.write("que {{message.hydrocarbon|intcomma}} unités d'hydrocarbure");
+
+		document.write(" aient été volées.<br/>Nous ");
+	}
+	else
+		document.write("que rien n'ait été volé.<br/>Cependant, nous "); </script>
+	devrions augmenter nos effectifs de <a href="/game/training/?planet={{message.planetid}}">soldats</a> afin de prévenir ce genre d'agissement dans le futur.<br/>Nous perdons 3 points de contrôle sur cette planète.
+	{% elif message.type == 721 %}Des rassemblements se sont formés sur <a href="/game/training/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a> pour manifester contre le manque de sécurité et ont dégénéré en émeutes générales. Les gens sont devenus incontrôlables et s'en sont pris aux bâtiments administratifs.
+	<script>
+	if({{message.scientists}} > 0 || {{message.soldiers}} > 0 || {{message.workers}} > 0) {
+		document.write("Il y a eu beaucoup de blessés dont plusieurs morts. Il y a à déplorer la mort de ");
+
+		if({{message.scientists}} > 0){
+			document.write("{{message.scientists|intcomma}} scientifiques"); 
+			if({soldiers} > 0) document.write(", {{message.soldiers|intcomma}} soldats");
+			if({workers} > 0) document.write(" et {{message.workers|intcomma}} travailleurs");
+		}
+		else
+		if({{message.soldiers}} > 0){
+			document.write("{{message.soldier|intcomma}} soldats");
+			if({{message.workers}} > 0) document.write(" et {{message.workers|intcomma}} travailleurs");
+		}
+		else
+		if({{message.workers}} > 0) document.write("{{message.workers|intcomma}} travailleurs");
+
+		document.write(".<br/>La population est encore sous le choc.");
+	}
+	else
+	{
+		document.write("Il y a eu beaucoup de blessés mais heureusement aucun mort n'est à déplorer.");
+	}
+	</script><br/>Nous perdons 17 points de contrôle sur cette planète et 2 points sur toutes les autres planètes.
 	{% elif message.type == 752 %}De riches filons de minerai ont été découverts sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production de minerai est augmentée.
 	{% elif message.type == 753 %}Nous avons épuisé les filons de minerai que nous avions localisés sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production de minerai est redescendue au niveau normal.
 	{% elif message.type == 754 %}De riches gisements d'hydrocarbure ont été découverts sur <a href="/game/planet/?planet={{message.planetid}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>, la production en hydrocarbure est augmentée.

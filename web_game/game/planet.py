@@ -52,7 +52,7 @@ class View(GlobalView):
 
         elif request.POST.get("action") == "abandon":
             oConnExecute("SELECT sp_abandon_planet(" + str(self.UserId) + "," + str(self.CurrentPlanet) + ")")
-            InvalidatePlanetList()
+            self.InvalidatePlanetList()
             return HttpResponseRedirect("/game/overview/")
 
         elif request.POST.get("action") == "resources_price":

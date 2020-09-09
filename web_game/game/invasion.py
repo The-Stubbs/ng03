@@ -16,7 +16,7 @@ class View(GlobalView):
         if invasionid == 0:
             return HttpResponseRedirect("/game/overview/")
 
-        fleetid = ToInt(request.GET.get("fleetid"), 0)
+        self.fleetid = ToInt(request.GET.get("fleetid"), 0)
 
         return self.DisplayReport(invasionid, self.UserId)
 
@@ -123,9 +123,9 @@ class View(GlobalView):
             content.Parse("enemy")
             content.Parse("attacker")
 
-        if fleetid != 0:
+        if self.fleetid != 0:
             # if a fleetid is specified, parse a link to redirect the user to the fleet
-            content.AssignValue("fleetid", fleetid)
+            content.AssignValue("fleetid", self.fleetid)
             content.Parse("justdone")
 
         if oRs[6]:

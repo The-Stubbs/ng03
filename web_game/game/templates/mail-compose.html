@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
+{% include 'header-credits.html' %}
 <script>
 function setaddressee(obj,input){if(obj.selectedIndex > 0) input.value = obj.options[obj.selectedIndex].text; else input.value = '';}
 

@@ -397,7 +397,7 @@ class View(GlobalView):
                     # oRs[37] is the value returned by const_seconds_before_invasion() from DB
                     if oRs[36] < oRs[37]: t = oRs[37] - oRs[36]
                     else: t = 0 
-                    content.AssignValue("invade_time", t)
+                    content.AssignValue("invade_time", int(t))
 
                     if oRs[39] == 0:
                         content.Parse("cant_invade")
@@ -678,7 +678,7 @@ class View(GlobalView):
             self.move_fleet_result = "error_jump_to_same_point_limit_reached"
 
     def Invade(self, fleetid, droppods, take):
-        oRs = oConnExecute("SELECT sp_invade_planet(" + str(self.fleet_owner_id) + "," + str(fleetid) + ","+ str(droppods) +")")
+        oRs = oConnExecute("SELECT sp_invade_planet(" + str(self.fleet_owner_id) + "," + str(fleetid) + ","+ str(droppods) +"," + str(ToBool(take, False)) +")")
 
         res = oRs[0]
         

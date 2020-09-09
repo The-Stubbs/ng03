@@ -68,7 +68,7 @@ class View(GlobalView):
             self.mailsubject = request.POST.get("subject", "").strip()
             self.mailbody = request.POST.get("message", "").strip()
 
-            if request.POST.get("sendcredits") == 1:
+            if ToInt(request.POST.get("sendcredits"), 0) == 1:
                 self.moneyamount = ToInt(request.POST.get("amount"), 0)
             else:
                 self.moneyamount = 0
@@ -359,14 +359,14 @@ class View(GlobalView):
             if oRs[1] == ":admins":
                 item["admins"] = True
             elif oRs[1] == ":alliance":
-                item["alliance"] = True
+                item["to_alliance"] = True
             else:
                 item["nation"] = True
 
             item["date"] = oRs[3]
             item["subject"] = oRs[4]
 
-            if oRs[5]:
+            if oRs[8]:
                 item["bodybb"] = oRs[5]
                 item["bbcode"] = True
             else:
@@ -374,7 +374,7 @@ class View(GlobalView):
                 item["html"] = True
 
             item["mailid"] = oRs[0]
-            item["self.moneyamount"] = oRs[6]
+            item["moneyamount"] = oRs[6]
 
             if oRs[6] > 0: # sender has given money
                 item["money"] = True

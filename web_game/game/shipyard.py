@@ -186,8 +186,7 @@ class View(GlobalView):
                 if oRs["cost_prestige"] > 0:
                     ship["required_pp"] = oRs["cost_prestige"]
                     ship["pp"] = self.oPlayerInfo["prestige_points"]
-                    if oRs["cost_prestige"] > self.oPlayerInfo["prestige_points"]: ship["required_pp.not_enough"] = True
-                    ship["required_pp"] = True
+                    if oRs["cost_prestige"] > self.oPlayerInfo["prestige_points"]: ship["required_pp_not_enough"] = True
 
                 ship["ore"] = oRs["cost_ore"]
                 ship["hydrocarbon"] = oRs["cost_hydrocarbon"]
