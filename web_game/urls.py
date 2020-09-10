@@ -37,6 +37,7 @@ from web_game.game import help
 from web_game.game import holidays
 from web_game.game import invasion
 from web_game.game import mails
+from web_game.game import maintenance
 from web_game.game import map
 from web_game.game import market_buy
 from web_game.game import market_sell
@@ -99,6 +100,7 @@ urlpatterns = [
     path('holidays/', holidays.View.as_view()),
     path('invasion/', invasion.View.as_view()),
     path('mails/', mails.View.as_view()),
+    path('maintenance/', maintenance.View.as_view()),
     path('map/', map.View.as_view()),
     path('market-buy/', market_buy.View.as_view()),
     path('market-sell/', market_sell.View.as_view()),

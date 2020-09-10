@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load tz %}
 {% load humanize %}
 {% load bbcode_tags %}
 {% block content %}
@@ -22,7 +23,7 @@
 	</td>
 	<td width="90%" valign=top>
 	<div class="subject">
-	{{mail.date}} | {{mail.subject}}{% if mail.money %} | Somme envoyée : <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width=16 height=16> {{mail.moneyamount|intcomma}}{% endif %}</div>
+	{{mail.date|timezone:"Europe/Paris"}} | {{mail.subject}}{% if mail.money %} | Somme envoyée : <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width=16 height=16> {{mail.moneyamount|intcomma}}{% endif %}</div>
 	<div class="body">{% if mail.html %}{{mail.body|safe}}{% endif %}{% if mail.bbcode %}{{mail.bodybb|bbcode}}{% endif %}</div>
 	</td>
 </tr>

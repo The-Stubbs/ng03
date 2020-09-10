@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from web_game.game._global import *
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views import View
 
-class View(GlobalView):
+from web_game.lib.exile import *
+from web_game.lib.template import *
+
+class View(View):
 
     def dispatch(self, request, *args, **kwargs):
-
-        response = super().pre_dispatch(request, *args, **kwargs)
-        if response: return response
-
-        <!--#include virtual="/lib/config.asp"-->
-        <!--#include virtual="/lib/template.asp"-->
 
         #
         # process page
         #
 
-        DisplayPage
+        return self.DisplayPage()
 
     def sqlValue(self, value):
         if value == None:
@@ -30,7 +29,6 @@ class View(GlobalView):
     def DisplayPage(self):
 
         content = GetTemplate(self.request, "maintenance")
-        content.AssignValue("skin", "s_transparent"
+        content.AssignValue("skin", "s_transparent")
 
-        Response.write content.Output
-
+        return render(self.request, content.template, content.data)
