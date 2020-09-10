@@ -2346,11 +2346,11 @@ BEGIN
 
 		VALUES(fleet_id, 401, 30+int4(random()*30));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_workers=5000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2380,11 +2380,11 @@ BEGIN
 
 		VALUES(fleet_id, 501, 200+int4(random()*100));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_workers=20000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2438,13 +2438,13 @@ BEGIN
 
 		VALUES(fleet_id, 106, int4(random()*300));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_soldiers=50000,
 
 			cargo_workers=50000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2498,13 +2498,13 @@ BEGIN
 
 		VALUES(fleet_id, 106, int4(random()*300));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_soldiers=50000,
 
 			cargo_workers=50000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2552,13 +2552,13 @@ BEGIN
 
 		VALUES(fleet_id, 504, 500+int4(random()*300));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_soldiers=50000,
 
 			cargo_workers=50000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2604,13 +2604,13 @@ BEGIN
 
 		VALUES(fleet_id, 504, 1000+int4(random()*300));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_soldiers=50000,
 
 			cargo_workers=50000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2656,13 +2656,13 @@ BEGIN
 
 		VALUES(fleet_id, 504, 2000+int4(random()*1000));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_soldiers=50000,
 
 			cargo_workers=50000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2690,13 +2690,13 @@ BEGIN
 
 		VALUES(fleet_id, 121, 5+int4(random()*10));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_ore=100000,
 
 			cargo_hydrocarbon=100000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2722,13 +2722,13 @@ BEGIN
 
 		VALUES(fleet_id, 121, 5+int4(random()*10));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_ore=200000,
 
 			cargo_hydrocarbon=200000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -2754,13 +2754,13 @@ BEGIN
 
 		VALUES(fleet_id, 121, 10+int4(random()*20));
 
-		UPDATE fleets SET
+		/* UPDATE fleets SET
 
 			cargo_ore=300000,
 
 			cargo_hydrocarbon=300000
 
-		WHERE id=fleet_id;
+		WHERE id=fleet_id; */
 
 	END IF;
 
@@ -3423,7 +3423,7 @@ ALTER FUNCTION static.const_galaxy_y(_galaxyid integer) OWNER TO exileng;
 
 CREATE FUNCTION static.const_game_speed() RETURNS double precision
     LANGUAGE sql IMMUTABLE
-    AS $$SELECT float8(1);$$;
+    AS $$SELECT float8(0.1);$$;
 
 
 ALTER FUNCTION static.const_game_speed() OWNER TO exileng;
@@ -6510,7 +6510,7 @@ CREATE FUNCTION static.sp_alliance_nap_cancel(_userid integer, _alliance_tag cha
 
 DECLARE
 
-	user record;
+	r_user record;
 
 	invitedallianceid int4;
 
@@ -6518,7 +6518,7 @@ BEGIN
 
 	-- check that the player $1 can request a NAP
 
-	SELECT INTO user id, alliance_id
+	SELECT INTO r_user id, alliance_id
 
 	FROM users
 
@@ -6544,13 +6544,13 @@ BEGIN
 
 	END IF;
 
-	IF user.alliance_id = invitedallianceid THEN
+	IF r_user.alliance_id = invitedallianceid THEN
 
 		RETURN 2;
 
 	END IF;
 
-	DELETE FROM alliances_naps_offers WHERE allianceid=user.alliance_id AND targetallianceid=invitedallianceid;
+	DELETE FROM alliances_naps_offers WHERE allianceid=r_user.alliance_id AND targetallianceid=invitedallianceid;
 
 	RETURN 0;
 
@@ -6675,7 +6675,7 @@ CREATE FUNCTION static.sp_alliance_nap_request(_userid integer, _alliance_tag ch
 
 DECLARE
 
-	user record;
+	r_user record;
 
 	invitedallianceid int4;
 
@@ -6683,7 +6683,7 @@ BEGIN
 
 	-- check that the player $1 can request a NAP
 
-	SELECT INTO user id, alliance_id
+	SELECT INTO r_user id, alliance_id
 
 	FROM users
 
@@ -6709,7 +6709,7 @@ BEGIN
 
 	END IF;
 
-	IF user.alliance_id = invitedallianceid THEN
+	IF r_user.alliance_id = invitedallianceid THEN
 
 		RETURN 2;
 
@@ -6721,7 +6721,7 @@ BEGIN
 
 	FROM alliances_naps
 
-	WHERE allianceid1=invitedallianceid AND allianceid2 = user.alliance_id;
+	WHERE allianceid1=invitedallianceid AND allianceid2 = r_user.alliance_id;
 
 	IF FOUND THEN
 
@@ -6735,7 +6735,7 @@ BEGIN
 
 	FROM alliances_naps_offers
 
-	WHERE allianceid=invitedallianceid AND targetallianceid = user.alliance_id AND NOT declined;
+	WHERE allianceid=invitedallianceid AND targetallianceid = r_user.alliance_id AND NOT declined;
 
 	IF FOUND THEN
 
@@ -6747,7 +6747,7 @@ BEGIN
 
 		INSERT INTO alliances_naps_offers(allianceid, targetallianceid, recruiterid, break_interval)
 
-		VALUES(user.alliance_id, invitedallianceid, user.id, GREATEST(0, LEAST(72, _hours))*INTERVAL '1 hour');
+		VALUES(r_user.alliance_id, invitedallianceid, r_user.id, GREATEST(0, LEAST(72, _hours))*INTERVAL '1 hour');
 
 		RETURN 0;
 
@@ -15898,7 +15898,7 @@ BEGIN
 
 		IF $4 THEN
 
-			PERFORM 1 FROM users WHERE prestige >= sp_get_prestige_cost_for_new_planet(planets) AND id=$1;
+			PERFORM 1 FROM users WHERE prestige_points >= sp_get_prestige_cost_for_new_planet(planets) AND id=$1;
 
 			IF NOT FOUND THEN
 
@@ -16474,7 +16474,7 @@ BEGIN
 
 		requests=requests+1*/
 
-	WHERE id=$1 AND (lastactivity < now()-INTERVAL '5 minutes');-- OR lastaddress <> addr OR lastbrowserid <> $3);
+	WHERE id=$1 AND (lastactivity IS NULL OR lastactivity < now()-INTERVAL '5 minutes');-- OR lastaddress <> addr OR lastbrowserid <> $3);
 
 /*
 
@@ -27851,14 +27851,17 @@ INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\.]*woodwar[\.]fr[[:a
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\.]*miniville[\.]fr[[:alnum:]_\./:\?=]*', ':)');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\.]*wood-war[\.]net[[:alnum:]_\./:\?=]*', ':)');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\.]*myminicity[\.]fr[[:alnum:]_\./:\?=]*
+
 ', ':)');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\.]*ville-virtuelle[\.]com[[:alnum:]_\./:\?=]*', ':)');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\.]*floodinator[\.]keuf[\.]net[[:alnum:]_\./:\?=]*', ':)');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\-.]*labrute[\.]fr[[:alnum:]_\./:\?=]*', 'http://exile.labrute.fr');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\-.]*labrute[\.]com[[:alnum:]_\./:\?=]*', 'http://exile.labrute.com');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\-.]*gladiatus[\.][[:alnum:]_\./:\?=]*
+
 ', ':)');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\.]*clodogame[\.]fr[[:alnum:]_\./:\?=]*
+
 ', ':(');
 INSERT INTO static.chat_banned_words VALUES ('[[:alnum:]_/:\.]*armygames[\.]fr[[:alnum:]_\./:\?=]*', ':)');
 
@@ -27874,23 +27877,30 @@ INSERT INTO static.db_buildings VALUES (91, 100, 'electromagnetic_storm', 'Temp�
 INSERT INTO static.db_buildings VALUES (125, 32, 'ship_hangar1', 'Hangar à vaisseaux', 'Ce hangar augmente la capacité de stockage des vaisseaux de 25 000 signature.', 40000, 35000, 0, 25000, 250, 0, 2, 0, 0, 0, 0, 0, 0, 200, 28000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, false, 100, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 25000);
 INSERT INTO static.db_buildings VALUES (93, 100, 'oil_rich', 'Riche en hydrocarbure', 'Nous avons découvert un gros gisement de pétrôle, nos puits d''hydrocarbures carburent à fond.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, true, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, true, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (94, 100, 'extraordinary_planet', 'Planète extraordinaire', 'Cette planète se trouve proche d''une déformation gravitationnelle dans l''espace temps, le temps passe plus vite par rapport aux autres colonies.<br/>
+
 La construction, la production et la formation des nouveaux travailleurs est plus rapide sur cette planète.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0.3, 0.3, 0, 0.8, 2, 2, 0, 0, 0, 0, true, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, true, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (217, 23, 'nuclear_power_plant', 'Centrale nucléaire', 'Cette centrale à énergie accueille plusieurs réacteurs nucléaires dont le principe repose sur la fission nucléaire.<br/>
+
 L''énergie produite est importante.', 28000, 14000, 0, 7500, 200, 2000, 2, 0, 0, 0, 0, 0, 0, 200, 43200, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 150, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (115, 20, 'ore_mine1', 'Mine de minerai', 'Un système automatisé extrait le minerai de la planète continuellement.<br/>
+
 Chaque bâtiment augmente la production de minerai de 1% mais réduit la demande en minerai de la planète.', 500, 1000, 0, 2000, 25, 0, 2, 0, 400, 0, 0, 0, 0, 200, 7200, true, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, true, 0, 0, 50, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 20, 0, true, NULL, NULL, 0, 0, 0, -0.015, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (901, 90, 'TEST BUILDING', 'TEST BUILDING', 'description here
+
 ì‹œí—˜é à ^ $ Â£ Â¤', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 5, true, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 60, true, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (1001, 10, 'merchant_colony', 'Colonie marchande', 'Colonie marchande.', 900000, 600000, 0, 100000, 0, 20000, 20, 0, 0, 0, 400000, 400000, 600000, 1, 900000, false, 0, 0, 0, 0, 0, 0, 100000, 100000, 4, 0, false, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1000000, false, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (310, 80, 'send_energy_satellite', 'Satellite émetteur d''énergie', 'Ce satellite permet de créer un lien avec un satellite de réception d''une autre planète située dans la même galaxie et de lui envoyer de l''énergie.<br/>
+
 Un satellite émetteur ne peut envoyer qu''un seul flux à la fois.', 120000, 80000, 0, 25000, 200, 0, 0, 1, 0, 0, 0, 0, 0, 100, 100000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, true, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, true, 0, false, 50, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (117, 23, 'solar_power_plant', 'Capteurs solaires', 'Des capteurs solaires tapissent des champs entiers et convertissent les rayons du soleil en énergie.', 200, 300, 0, 1000, 0, 200, 1, 0, 0, 0, 0, 0, 0, 200, 1200, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 20, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (401, 31, 'ore_storage_complex', 'Complexe de stockage de minerai', 'Ce complexe de stockage augmente la capacité de stockage du minerai de 2 000 000.', 500000, 400000, 0, 25000, 1000, 0, 2, 0, 0, 0, 2000000, 0, 0, 200, 128000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 200, 0, true, NULL, NULL, 0, 0, 10000, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (403, 23, 'star_belt', 'Ceinture d''étoile', 'Il s''agit certainement du projet le plus fou mais aussi le plus ambitieux à entreprendre : créer une ceinture tout autour de l''étoile du système afin de capter le plus possible d''énergie.<br/>
+
 Une production d''au moins 50 000 énergie/heure est prévue. De plus, il sera possible d''augmenter cette production en ajoutant jusqu''à 5 capteurs supplémentaires fournissant chacun 10 000 énergie/heure.', 2000000, 1600000, 0, 50000, 0, 50000, 0, 2, 0, 0, 0, 0, 0, 1, 512000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 10000, 0, true, NULL, NULL, 0, 0, 200000, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (602, 23, 'energy_cell', 'Caisse d''énergie', 'Ce bâtiment apporte un flux minimum de 10000 unités d''énergie pour une durée d''environ 5 heures.', 0, 0, 0, 0, 0, 10000, 1, 0, 0, 0, 0, 0, 0, 1, 3600, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 18000, true, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (402, 32, 'hydrocarbon_storage_complex', 'Complexe de stockage d''hydrocarbure', 'Ce complexe de stockage augmente la capacité de stockage en hydrocarbure de 2 000 000.', 500000, 400000, 0, 25000, 1000, 0, 2, 0, 0, 0, 0, 2000000, 0, 200, 128000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 200, 0, true, NULL, NULL, 0, 0, 10000, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (231, 20, 'manufactured_products_factory', 'Usine de produits manufacturés', 'De ces usines sortent des produits manufacturés vendus à la population.<br/>
+
 Chaque usine génère entre 8 000 et 10 000 crédits par jour.', 30000, 25000, 0, 10000, 3000, 0, 4, 0, 0, 0, 0, 0, 0, 100, 54000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, true, 0, 0, 50, 1, 0, 0, 8000, 2000, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (1, 100, 'boost_x_server', 'Boost serveur X', 'description here', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, false, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, true, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, false, 0, 0);
 INSERT INTO static.db_buildings VALUES (96, 100, 'sandworm_activity', 'Présence de vers de sable', 'De gigantesques vers de sable sont présents sur la planète et attaquent tout ce qui émet des vibrations régulières.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3600, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, false, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, true, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
@@ -27903,6 +27913,7 @@ INSERT INTO static.db_buildings VALUES (51, 110, 'ore_bonus', 'Filon de minerai'
 INSERT INTO static.db_buildings VALUES (903, 90, 'large_energy_shield', 'Bouclier énergétique II', 'description here', 100000, 50000, 0, 20000, 1000, 0, 1, 0, 0, 0, 0, 0, 0, 5, 72000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (904, 90, 'missile_launcher', 'Batterie de missiles', 'description here', 3000, 500, 0, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1000, 300, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (102, 11, 'construction_plant1', 'Usine de préfabriqués', 'Cette usine est spécialisée dans la préfabrication, des ouvriers préfabriquent certains éléments qui sont ensuite assemblés sur place ce qui donne une augmentation globale de la vitesse de construction des bâtiments.<br/>
+
 Ce bâtiment est requis avant de pouvoir construire des structures plus avancées.', 2000, 1250, 0, 5000, 50, 0, 1, 0, 0, 0, 0, 0, 0, 1, 43200, true, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 50, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (303, 40, 'heavyweapon_factory', 'Usine d''armement lourd', 'Cette usine permet de construire les différentes armes dont vous aurez besoin pour construire vos défenses plus évoluées et équiper vos vaisseaux de combat.', 180000, 160000, 0, 32000, 600, 0, 12, 0, 0, 0, 0, 0, 0, 1, 172800, true, 0, 0, 0, 0, 0, 0.02, 0, 0, 0, 0, false, false, 0, 0, 20, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 1000, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (1021, 32, 'merchant_hydrocarbon_storage', 'Entrepôt marchand d''hydrocarbure', 'Les entrepôts marchand sont immenses et peuvent contenir des millions d''unités de ressources.', 3000000, 2000000, 0, 120000, 0, 0, 5, 0, 0, 0, 0, 900000000, 0, 100, 1000000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
@@ -27911,17 +27922,24 @@ INSERT INTO static.db_buildings VALUES (203, 40, 'light_weapon_factory', 'Usine 
 INSERT INTO static.db_buildings VALUES (120, 31, 'ore_hangar1', 'Réserve à minerai', 'Ce petit entrepôt augmente la capacité de stockage du minerai de 50 000.', 1000, 500, 0, 5000, 0, 0, 1, 0, 0, 0, 50000, 0, 0, 200, 9000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, false, 10, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (218, 23, 'solar_power_satellite', 'Satellite solaire', 'Un satelite solaire est envoyé en orbite géostationnaire, transforme l''énergie solaire en électricité puis redirige celle-ci vers la rectenna de la colonie sous forme de micro-ondes.', 4000, 7000, 0, 2500, 0, 600, 0, 1, 0, 0, 0, 0, 0, 200, 32000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 125, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (317, 23, 'energy_plant3', 'Tokamak', 'Cet énorme bâtiment accueille plusieurs machines qui reproduisent la fusion nucléaire semblable à celle qui se produit en permanence au coeur des étoiles.<br/>
+
 L''énergie produite est très importante.<br/>
+
 De plus, cet édifice vous rapportera 100 points de prestige par jour.', 140000, 90000, 0, 40000, 500, 10000, 4, 0, 0, 0, 0, 0, 0, 1, 172800, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 600, 0, true, NULL, NULL, 0, 100, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (302, 11, 'synthesis_plant', 'Usine de synthèse', 'Une technique avancée permet de créer de nouveaux matériaux uniquement à partir d''énergie.<br/>
+
 La qualité de ces matériaux exempts de tout défaut, les rend beaucoup plus résistants.', 100000, 80000, 0, 35000, 800, 0, 1, 0, 0, 0, 0, 0, 0, 1, 172800, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 150, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (391, 10, 'artificial_moon', 'Lune artificielle', 'La création d''une lune artificielle ajoute 10 unités d''espace exploitable.<br/>
+
 Ce bâtiment ne peut être détruit après construction. Il n''est possible d''en construire qu''une seule.', 700000, 150000, 0, 55000, 0, 0, 0, -10, 0, 0, 0, 0, 0, 1, 432000, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (390, 10, 'steel_caves', 'Cavernes d''acier', 'La transformation d''une partie des sous-sols en espace utilisable permet d''étendre le terrain de la planète de 4 unités.<br/>
+
 Ce bâtiment ne peut être détruit après construction. Il n''est possible d''en construire que 5 par planète.', 400000, 300000, 0, 45000, 0, 0, -4, 0, 0, 0, 0, 0, 0, 5, 345600, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (370, 40, 'sandworm_proctection', 'Barrières électromagnétiques', 'Des barrières sont disposées tout autour de la colonie repoussant les attaques des vers de sable. La probabilité qu''un vers s''attaque à un bâtiment de la colonie est grandement réduite.', 100000, 80000, 0, 30000, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 1, 172800, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, true, 0, 0, 10, 1, -19, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 500, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (309, 80, 'jammer', 'Brouilleur radar', 'Ce satellite est capable de brouiller les radars ennemis.<br/>
+
 Lancez plusieurs satellites afin de brouiller efficacement les radars ennemis pour cacher vos flottes en orbite et les caractéristiques de votre planète.<br/>
+
 Chaque satellite augmente le brouillage de la planète de 2 points.', 90000, 65000, 0, 25000, 1000, 0, 0, 1, 0, 0, 0, 0, 0, 200, 100000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, false, true, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 100, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (1020, 31, 'merchant_ore_storage', 'Entrepôt marchand de minerai', 'Les entrepôts marchand sont immenses et peuvent contenir des millions d''unités de ressources.', 3000000, 2000000, 0, 120000, 0, 0, 5, 0, 0, 0, 900000000, 0, 0, 100, 1000000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (381, 40, 'seism_protection', 'Déflecteur', 'Des capteurs sont disséminés sur toute la surface de la planète afin de prévenir les séismes et amoindrir les secousses à la surface.', 420000, 31000, 0, 10000, 3000, 0, 4, 0, 0, 0, 0, 0, 0, 1, 18000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, true, 0, 0, 1, 0, 0, -19, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 500, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
@@ -27933,10 +27951,12 @@ INSERT INTO static.db_buildings VALUES (221, 32, 'hydrocarbon_hangar2', 'Hangar 
 INSERT INTO static.db_buildings VALUES (320, 31, 'ore_hangar3', 'Entrepôt à minerai', 'Un entrepôt souterrain sur plusieurs niveaux qui augmente considérablement la capacité de stockage du minerai de 1 000 000.', 80000, 55000, 0, 15000, 500, 0, 3, 0, 0, 0, 1000000, 0, 0, 200, 56000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 100, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (321, 32, 'hydrocarbon_hangar3', 'Entrepôt à hydrocarbure', 'Un entrepôt souterrain sur plusieurs niveaux qui augmente considérablement la capacité de stockage en hydrocarbure de 1 000 000.', 80000, 55000, 0, 15000, 500, 0, 3, 0, 0, 0, 0, 1000000, 0, 200, 61600, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 100, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (116, 20, 'hydrocarbon_mine1', 'Puits d''hydrocarbures', 'Un système automatisé extrait les hydrocarbures de la planète continuellement.<br/>
+
 Chaque bâtiment augmente la production d''hydrocarbure de 1% mais réduit la demande en hydrocarbure de la planète.', 1000, 500, 0, 2000, 25, 0, 2, 0, 0, 400, 0, 0, 0, 200, 7200, true, 0, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, false, true, 0, 0, 50, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 20, 0, true, NULL, NULL, 0, 0, 0, 0, -0.015, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (308, 30, 'military_base', 'Base militaire', 'La base militaire permet d''accueillir 10 000 soldats supplémentaires dans votre colonie et l''entraînement de 100 soldats à la fois.', 110000, 90000, 0, 30000, 600, 0, 3, 0, 0, 0, 0, 0, 0, 200, 172800, true, 0, 0, 0, 0, 0, 0, 0, 10000, 0, 0, false, false, 0, 100, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 250, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (510, 90, 'titan_engine_research_center', 'Centre d''étude de l''épave de moteurs', 'Afin d''étudier l''épave des gigantesques moteurs qui se trouve sur cette planète, nous avons besoin d''un centre d''étude dédié. Ce centre accueillera une équipe dirigée par nos scientifiques afin d''étudier, analyser et rapporter toute information nécessaire à la compréhension de leur fonctionnement.', 300000, 190000, 0, 40000, 1400, 0, 6, 0, 0, 0, 0, 0, 0, 1, 320000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (207, 23, 'rectenna', 'Rectenna', 'La rectenna est une antenne qui convertit les micro-ondes envoyées par les satellites solaires en énergie utilisable par la colonie.<br/>
+
 Vous ne pouvez construire ces satellites qu''une fois la rectenna construite.', 16000, 5000, 0, 6000, 50, 0, 2, 0, 0, 0, 0, 0, 0, 1, 42000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 25, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (902, 90, 'small_energy_shield', 'Bouclier énergétique I', '', 20000, 10000, 0, 3000, 200, 0, 1, 0, 0, 0, 0, 0, 0, 5, 14400, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (89, 100, 'vortex', 'Vortex', 'Présence d''un vortex stable à proximité', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, true, 0, 0, true, NULL, NULL, 10, 0, 0, 0, 0, 0, 0, true, 0, 0);
@@ -27945,44 +27965,64 @@ INSERT INTO static.db_buildings VALUES (604, 80, 'deployed_vortex_medium', 'Vort
 INSERT INTO static.db_buildings VALUES (605, 80, 'deployed_vortex_strong', 'Vortex artificiel', 'Vortex artificiel déployé par un groupe ayant connaissance de la science des vortex', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, false, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 1800, true, 0, 0, true, NULL, NULL, 4, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (606, 80, 'deployed_vortex_inhibitor', 'Inhibiteur de vortex', 'Déstabilisateur de vortex rendant son utilisation plus compliquée.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, false, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 172800, true, 0, 0, true, NULL, NULL, -8, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (204, 30, 'workshop1', 'Ateliers', 'Les ateliers fournissent des infrastructures de travail à votre population.<br/>
+
 Votre colonie peut accueillir 3 000 nouveaux travailleurs.<br/>
+
 L''atelier génère 200 crédits par jour et augmente légèrement la demande en minerai et hydrocarbure de la planète.', 8000, 4000, 0, 5000, 150, 0, 1, 0, 0, 0, 0, 0, 3000, 200, 21600, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 200, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 800, 800, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (206, 30, 'research_center', 'Centre de recherche', 'Le centre de recherche est équipé de tout ce qui est nécessaire afin d''entreprendre des recherches avancée.<br/>
+
 Votre planète peut accueillir 5 000 scientifiques de plus et permet la formation de 100 scientifiques par heure.', 28000, 21000, 0, 15000, 150, 0, 2, 0, 0, 0, 0, 0, 0, 1, 108000, true, 0, 0, 0, 0, 0, 0, 5000, 0, 0, 0, false, false, 100, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 50, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (101, 10, 'colony1', 'Colonie', 'Ce bâtiment est le centre administratif de votre colonie, il est essentiel pour la gestion de votre colonie.<br/>
+
 Il dispose de petits extracteurs de minerai et d''hydrocarbures, d''une centrale géothermique pour produire de l''énergie à l''ensemble de la colonie et d''ateliers pour construire de nouveaux bâtiments.<br/>
+
 La colonie offre une capacité de stockage de 100 000 unités de minerai, 100 000 unités d''hydrocarbure, 30 000 unités d''énergie et génère 2 500 crédits par jour.', 20000, 10000, 0, 2500, 0, 300, 2, 0, 100, 50, 100000, 100000, 20000, 1, 44800, false, 0, 0, 0, 0, 0, 0, 1000, 1000, 0, 0, false, false, 50, 50, 20, 1, 0, 0, 2500, 0, 0, 0, 0, 1, 30000, true, 0, false, 0, 0, true, NULL, NULL, 0, 10, 0, 0, 0, 8000, 8000, true, 0, 10000);
 INSERT INTO static.db_buildings VALUES (400, 10, 'wonder', '12ème merveille', 'Cette reproduction de la douzième merveille de l''univers vous rapportera 100 points de prestige par jour.<br/>
+
 Le tourisme associé à ce bâtiment rapporte entre 1000 et 2000 crédits par jour.', 600000, 150000, 0, 28000, 200, 0, 2, 0, 0, 0, 0, 0, 0, 1, 320000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 1, 1, 0, 0, 1000, 2000, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 100, 1000, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (208, 30, 'military_barracks', 'Caserne militaire', 'La caserne militaire permet d''accueillir 2 000 nouveaux soldats dans la colonie et l''entraînement de 100 soldats à la fois.', 22000, 10000, 0, 6000, 200, 0, 1, 0, 0, 0, 0, 0, 0, 200, 108000, true, 0, 0, 0, 0, 0, 0, 0, 2000, 0, 0, false, true, 0, 100, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 100, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (121, 32, 'hydrocarbon_hangar1', 'Réserve à hydrocarbure', 'Ce petit entrepôt augmente la capacité de stockage en hydrocarbure de 50 000.', 1000, 500, 0, 5000, 0, 0, 1, 0, 0, 0, 0, 50000, 0, 200, 9900, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, false, 10, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (404, 23, 'star_belt_panel', 'Ceinture d''étoile : capteur', 'Ajoute un capteur solaire à la ceinture d''étoile augmentant la production de 10 000 énergie/heure.', 400000, 300000, 0, 25000, 0, 10000, 0, 0, 0, 0, 0, 0, 0, 5, 128000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 1000, 0, true, NULL, NULL, 0, 0, 10000, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (230, 30, 'housing', 'Habitations', 'Les habitations permettent d''augmenter la population civile au sein de la colonie et ainsi augmenter les besoins en minerai et hydrocarbure.<br/>
+
 Les habitations génèrent 1 000 crédits par jour, la vitesse de formation des travailleurs augmente de 10% et les besoins en minerai et hydrocarbure augmentent sensiblement.', 30000, 18000, 0, 10000, 500, 0, 4, 0, 0, 0, 0, 0, 0, 10, 28000, true, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 10, 1, 0, 0, 1000, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0.1, 0.1, 18750, 18750, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (210, 80, 'receive_energy_satellite', 'Satellite de réception d''énergie', 'Ce satellite permet de recevoir un flux d''énergie provenant d''une autre planète située dans la même galaxie envoyé par un satellite émetteur.<br/>
+
 L''énergie reçue est redirigée vers la rectenna et est ensuite utilisable par la colonie.', 9000, 6000, 0, 5000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 200, 28000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, true, 0, false, 20, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (371, 40, 'sandworm_field', 'Champ de moissonneuses', 'Des moissonneuses récoltent une substance étrange à partir du sable de la planète où la présence de vers a été signalé récemment. Cette substance est ensuite exclusivement vendue à la guilde marchande qui y porte un très grand intérêt.<br/>
+
 Suivant les récoltes, l''argent généré par jour varie entre 40 000 et 50 000 crédits.<br/>
+
 De plus, chaque champ vous fait gagner 20 points de prestige par jour.', 30000, 17000, 0, 10000, 2000, 0, 7, 0, 0, 0, 0, 0, 0, 100, 78000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, true, 0, 0, 50, 1, 0, 0, 40000, 10000, 0, 0, 0, 1, 0, true, 0, false, 50, 0, true, NULL, NULL, 0, 20, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (106, 30, 'laboratory', 'Laboratoire', 'Le laboratoire permet d''accueillir 1 000 scientifiques supplémentaire et la formation de 150 scientifiques par heure.', 2500, 2000, 0, 4000, 100, 0, 1, 0, 0, 0, 0, 0, 0, 200, 9600, true, 0, 0, 0, 0, 0, 0, 1000, 0, 0, 0, false, false, 150, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 50, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (92, 100, 'ore_rich', 'Riche en minerai', 'De riches filons de minerai ont été découverts, nos mines de minerai minent plus vite.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 0, true, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (201, 10, 'colony2', 'Cité', 'De nouveaux bâtiment et ateliers sont construits à proximité de votre colonie ce qui vous permet d''emmagasiner 70 000 unités d''énergie supplémentaire et d''accueillir 10 000 nouveaux travailleurs.<br/>
+
 La formation de vos travailleurs et l''efficacité de vos mines et puits sont légèrement augmentées.<br/>
+
 La cité génère 1 500 crédits par jour.', 35000, 35000, 0, 6000, 100, 0, 2, 0, 0, 0, 0, 0, 10000, 1, 64800, true, 0.02, 0.02, 0.02, 0.1, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 1500, 0, 0, 0, 0, 1, 70000, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 15000);
 INSERT INTO static.db_buildings VALUES (301, 10, 'colony3', 'Métropole', 'Votre colonie s''aggrandit encore et doit être, en partie, réorganisée.<br/>
+
 Le contrôle de la production en minerai, hydrocarbures et énergie est désormais effectué par un centre dédié, la production s''en voit légérement augmentée.<br/>
+
 Les anciens ateliers sont réaménagés et de nouveaux sont construits augmentant le nombre de travailleurs de 10 000.<br/>
+
 La métropole génère 2 500 crédits par jour.', 200000, 200000, 0, 30000, 500, 0, 3, 1, 0, 0, 0, 0, 10000, 1, 259200, true, 0.02, 0.02, 0.02, 0.1, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 2500, 0, 0, 0, 0, 1, 0, true, 0, false, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 25000);
 INSERT INTO static.db_buildings VALUES (202, 11, 'construction_plant2', 'Usine d''automates', 'Les ouvriers ne peuvent pas tout construire par eux-même, ils ont besoin d''aide méchanisée pour mener à bien les constructions, cette usine permet de construire de nouveaux bâtiments et augmente la vitesse de construction.', 22500, 15000, 0, 15000, 250, 0, 1, 0, 0, 0, 0, 0, 0, 1, 64800, true, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 100, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (118, 23, 'geothermal_power_plant', 'Centrale géothermique', 'Cette centrale transforme l''énergie thermique en provenance de l''intérieur de la planète en énergie.', 1500, 1250, 0, 1000, 0, 300, 1, 0, 0, 0, 0, 0, 0, 200, 3600, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 50, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (205, 80, 'shipyard', 'Chantier spatial', 'Le chantier spatial construit les vaisseaux de grande taille qu''il n''est pas possible d''assembler dans les usines de la colonie.', 40000, 30000, 0, 22000, 150, 0, 2, 6, 0, 0, 0, 0, 0, 1, 108000, true, 0, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 1500, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (105, 80, 'spaceport', 'Spatioport', 'Le spatioport permet la construction et le lancement en orbite de la plupart des vaisseaux utilitaires et des vaisseaux légers.<br/>
+
 Pour les vaisseaux plus lourds, un chantier spatial est nécessaire, ceux-ci seront construits directement en orbite.', 2500, 2000, 0, 5000, 50, 0, 4, 0, 0, 0, 0, 0, 0, 1, 36000, true, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 200, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (103, 80, 'radar', 'Radar', 'Les radars vous permettent de scanner les planètes du secteur où se trouve votre planète.<br/>
+
 Cela vous permet, par exemple, de connaître l''espace utilisable sur les planètes ou de visualiser les flottes proche d''une planète.<br/>
+
 Construire plusieurs radars sur la même planète vous permettra de venir à bout des tentatives de brouillage radar ennemies.<br/>
+
 Chaque radar augmente la puissance radar de la planète de 1.', 1000, 500, 0, 2000, 100, 0, 1, 0, 0, 0, 0, 0, 0, 200, 28800, true, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, true, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 150, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (209, 80, 'radar_satellite', 'Satellite radar', 'Les radars vous permettent de scanner les planètes du secteur où se trouve votre planète.<br/>
+
 Chaque satellite augmente la puissance radar de la planète de 2.', 15000, 8500, 0, 7000, 300, 0, 0, 2, 0, 0, 0, 0, 0, 200, 39600, true, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, false, true, 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, true, 0, false, 200, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, true, 0, 0);
 INSERT INTO static.db_buildings VALUES (801, 110, 'prestige_ships_const_speed', 'Construction accélérée', 'Vous doublez la vitesse de construction de vos vaisseaux pour une durée de 24 heures.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 28800, true, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, false, false, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, false, 86400, true, 0, 0, true, NULL, NULL, 0, 0, 5000, 0, 0, 0, 0, true, 0, 0);
 
@@ -28184,14 +28224,17 @@ INSERT INTO static.db_items VALUES (5, 0, 'soldier', 'Soldat', '', false, true, 
 --
 
 INSERT INTO static.db_messages VALUES (1, 1036, 'Rapport de colonisation', 'Notre nouvelle colonie est prête à accueillir nos colons !
+
 Nous devrions commencer à produire de l''énergie, à extraire du minerai et des hydrocarbures dès que possible afin d''assurer le développement de la colonie.
 
 Vous pouvez lancer la construction de nouveaux bâtiments à partir de la page Planète / Infrastructures.
 
 Gagnez des crédits en vendant des ressources dans la page Planète / Marché, un marchand de la Guilde Marchande (géré par ordinateur) viendra au bout de 3 à 4 heures sur la planète pour prendre les ressources vendues. Les marchands payent la moitié de l''argent à la vente puis la seconde moitié est payée une fois que leurs vaisseaux sont revenus sur leur planète.
+
 Cet argent vous servira à l''entretien de vos infrastructures et vaisseaux, à faire des recherches afin de débloquer de nouveaux bâtiments et d''autres recherches, à construire de nouveaux vaisseaux et pour les salaires de vos commandants (notez que votre premier commandant ne vous coûte rien).
 
 En tant que nouvelle nation, vos planètes ne peuvent être attaquées pendant deux semaines. Profitez-en pour faire connaissance avec les nations autour de vous.
+
 Pendant cette période de protection, vous ne pourrez ni recevoir ni envoyer d''argent par la messagerie du jeu ou par la demande de financement de l''alliance.
 
 Développez-vous, augmentez votre production en construisant des mines de minerai et des puits d''hydrocarbure.
@@ -28202,24 +28245,30 @@ INSERT INTO static.db_messages VALUES (4, 1036, 'Fin de contrat', 'Cher client,
 J''ai le regret de vous annoncer la fin du contrat vous procurant un bonus sur les ventes de ressources que vous effectuez avec nous.
 
 Cordialement,
+
 Votre représentant de la Guilde Marchande', 'Guilde Marchande');
 INSERT INTO static.db_messages VALUES (3, 1036, 'Reconduction tacite de notre contrat', 'Cher client,
 
 Je suis heureux de vous apprendre que notre contrat se prolonge pour une durée de 7 nouveaux jours.
 
 Cordialement,
+
 Votre représentant de la Guilde Marchande', 'Guilde Marchande');
 INSERT INTO static.db_messages VALUES (2, 1036, 'Contrat spécial de vente', 'Cher client,
 
 Votre nation fait parti de nos vingt plus importants fournisseurs de ressources aussi nous avons le plaisir de vous annoncer qu''à partir de maintenant et ceci pour une durée d''une semaine, vous bénéficierez d''un bonus de 5% sur le prix de vente de votre minerai et hydrocarbure.
+
 Continuez ainsi et je ne doute pas que ce contrat sera reconduit.
 
 Cordialement,
+
 Votre représentant de la Guilde Marchande', 'Guilde Marchande');
 INSERT INTO static.db_messages VALUES (5, 1036, 'Recherches', 'Votre équipe de scientifiques attend vos ordres. Vous pouvez choisir une recherche en allant sur la page "Recherche" du menu Empire.
 
 Nous ne connaissons pas bien les environs de notre colonie, nous pouvons construire un radar mais nous n''aurons que les informations relatives aux planètes de notre secteur.
+
 Il serait bien de débloquer les sondes qui sont de petits appareils très rapides idéaux pour découvrir les planètes d''autres secteurs.
+
 Pour cela, nous avons besoin de faire des recherches en mécanique et nous aurons aussi besoin d''un spatioport pour construire les vaisseaux.
 
 Afin de construire le vaisseau de colonisation, nous avons besoin de "Mécanique" niveau 1 et de "Vaisseau Utilitaire" niveau 3.
@@ -28228,7 +28277,9 @@ Fin de transmission.', '');
 INSERT INTO static.db_messages VALUES (7, 1036, 'Premier vaisseau de colonisation', 'Il est désormais temps d''agrandir notre empire en colonisant de nouvelles planètes.
 
 Pour coloniser, vous allez avoir besoin de former une flotte avec votre vaisseau de colonisation et trouver une planète non occupée pour établir votre colonie dans un secteur autre que votre secteur de départ (notez les coordonnées de cette planète).
+
 Lorsque votre future planète est choisie, déplacez votre flotte contenant votre vaisseau de colonisation vers cette planète. Les vaisseaux de colonisation sont très lent et cela prendra plusieurs heures (ou jours suivant la distance à parcourir).
+
 Une fois arrivée à destination, allez dans la page de votre flotte et déployer votre vaisseau de colonisation : bouton "déployer" tout à droite de la page.
 
 Bravo, vous avez désormais une colonie supplémentaire à faire évoluer.
@@ -28239,15 +28290,23 @@ Fin de transmission.', '');
 INSERT INTO static.db_messages VALUES (6, 1036, 'Premier vaisseau', 'Félicitation, vous venez de construire votre premier vaisseau !
 
 Afin de pouvoir le déplacer, vous devez former une flotte à partir de la page "Orbite" de la planète où votre vaisseau a été construit.
+
 Une fois formée, vous pouvez obtenir la liste de vos flottes à partir de la page "Flottes" du menu Empire.
 
 Cliquez sur votre flotte pour observer sa composition et lui donner des ordres :
+
  - déplacer
+
  - charger/décharger des ressources
+
  - changer le mode d''engagement
+
  - regrouper/scinder
+
  - déployer un bâtiment
+
  - envahir une planète si votre flotte possède des barges et des soldats
+
  - récolter si votre flotte possède des récolteurs
 
 Fin de transmission', '');
@@ -28255,15 +28314,18 @@ INSERT INTO static.db_messages VALUES (10, 1036, 'Résultat de la loterie', 'Vou
 INSERT INTO static.db_messages VALUES (12, 1036, 'Début de la loterie ', 'Bonjour,
 
 Nous avons le plaisir de vous annoncer le début de la prochaine loterie intergalactique dont le tirage a lieu chaque vendredi à minuit.
+
 Le gagnant recevra un Dreadnought d''élite directement sorti de nos industries et envoyé à destination d''une de ses planètes.
 
 Afin de piloter ce vaisseau d''exception, vous devrez posséder les connaissances nécessaire au pilotage des croiseurs d''élite.
 
 Pour participer, envoyez-nous simplement un message en joignant la somme de crédit que vous voulez.
+
 Plus la somme est élevée, plus vos chances de gagner augmentent et celles des autres diminuent.
 
 Bon jeu !', 'Guilde Marchande');
 INSERT INTO static.db_messages VALUES (11, 1036, 'Résultat de la loterie', 'Vous avez misé un total de $1 crédits dans notre loterie intergalactique et vous avez gagné !
+
 Votre lot a déjà quitté nos hangars et nous vous en souhaitons une bonne réception.', 'Guilde Marchande');
 
 
@@ -28342,105 +28404,150 @@ INSERT INTO static.db_names VALUES ('Riker');
 --
 
 INSERT INTO static.db_research VALUES (110, 10, 'advanced_deployement', 'Déploiement avancé de bâtiment', 'En améliorant la technologie des vaisseaux de colonisation, il sera possible de créer des vaisseaux spécialement prévus pour déployer un bâtiment très rapidement sur les bases d''une colonie déjà existante.<br/>
+
 Malheureusement, tous les bâtiments ne peuvent pas être adaptés à cette technologie.', 2, 1, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (501, 50, 'weaponry', 'Armement', 'Recherchez de nouvelles armes afin d''équiper vos vaisseaux. Sans armes, vous serez limités à vous déplacer en vaisseau cargo.<br/>
+
 L''arme de base est le canon laser, facile à produire avec une bonne cadence de tir, il équipera vos premiers vaisseaux légers.', 3, 5, 1, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (203, 20, 'mining', 'Extraction de minerai', 'Des améliorations au niveau du rendement sont effectuées ce qui augmente légèrement la production de minerai.<br/>
+
 Chaque niveau augmente la production de minerai de 1%.', 2, 5, 0, 90, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (206, 20, 'improved_refining', 'Extraction d''hydrocarbure améliorée', 'L''amélioration de vos raffineries réduit les pertes liées au traitement des hydrocarbures.<br/>
+
 Chaque niveau augmente la production d''hydrocarbure de 1%.', 7, 5, 0, 2000, 0, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (402, 40, 'nuclear_physics', 'Physique nucléaire', 'La physique nucléaire est l''étude du comportement du noyau atomique.<br/>
+
 Effectuez des recherches dans ce domaine pour trouver des applications pratiques tel que des centrales d''énergie ou des armes.', 2, 3, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (502, 50, 'rockets', 'Roquettes', 'Les roquettes sont des projectiles autopropulsés non guidés principalement utilisés par les vaisseaux de tailles moyennes pour endommager et détruire des cibles plus importantes.<br/>
+
 Une usine d''armement léger est nécessaire pour construire les lance-roquettes.', 2, 1, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (503, 50, 'missiles', 'Missiles', 'Les missiles constituent une très grande amélioration des roquettes, une fois qu''une cible est acquise, le missile se dirige tout seul vers celle-ci ce qui le rend utilisable par n''importe quel vaisseau.<br/>
+
 Les missiles se dirigent aussi facilement que le meilleur des chasseurs cependant ils peuvent être esquivés par ceux-ci. Lorsque le missile n''a plus de combustible, sa charge est automatiquement désactivée afin d''éviter de se faire endommager par ses propres missiles en les percutant ce qui arrive très rarement.<br/>
+
 Une usine d''armement léger est nécessaire pour construire les lance-missiles.', 4, 1, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (504, 50, 'laser_turrets', 'Tourelles à canon laser', 'Les tourelles à canon laser donnent à vos vaisseaux moins maniables une chance de cibler les vaisseaux plus légers et plus maniables. Elles deviennent de plus en plus essentielles à mesure que vos vaisseaux s''allourdissent et perdent en maniabilité.<br/>
+
 Une usine d''armement léger est nécessaire pour construire ces tourelles.', 2, 3, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (505, 50, 'railgun', 'Railgun', 'Le railgun est un nouveau type de tourelle reposant sur l''envoi de projectiles à très grande vitesse pour un effet dévastateur. Bien que le railgun soit aidé par un ordinateur qui anticipe la direction du vaisseau ciblé, il est assez facile d''éviter ses projectiles.<br/>
+
 Les premiers types de railgun peuvent être construits dans une usine d''armement léger, cependant les railguns plus avancés demanderont une usine d''armement lourd.', 5, 3, 0, 210, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (506, 50, 'ion_cannon', 'Canon à ion', 'Le canon à ion tire des jets de particules ionisées traversant les boucliers. Sa spécificité repose sur le fait qu''il n''inflige pas directement de dégats physique mais surcharge les circuits électriques de la cible pouvant provoquer d''importantes explosions.<br/>
+
 Une usine d''armement lourd est nécessaire pour construire les canons à ion.', 6, 1, 0, 290, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (510, 50, 'enhanced_shield', 'Déflecteurs améliorés', 'L''amélioration des déflecteurs permet de mieux régler la force des boucliers sur les différentes parties de sa surface suivant l''origine de la menace.<br/>
+
 Chaque niveau augmente l''efficacité des boucliers de 5%.', 6, 5, 0, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (902, 90, 'utility_ship_construction', 'Construction de vaisseaux utilitaires', 'Les vaisseaux utilitaires regroupent :<br/>
+
 - Les vaisseaux de transport qui sont de grandes coques vides servant à transporter vos ressources ou du personnel vers une autre planète. Un grand équipage est nécessaire pour l''entretien de ces vaisseaux.<br/>
+
 - Les vaisseaux de colonisation qui sont des vaisseaux construit pour se déployer automatiquement en un bâtiment fonctionnel.<br/>
+
 - Les vaisseaux de recyclage qui vous serviront à récupérer des ressources parmi les débris laissés après des batailles.<br/>
+
 Un chantier spatial est nécessaire pour construire la plupart de ces vaisseaux.', 1, 5, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (401, 40, 'science', 'Science', 'Cette branche vous permet de découvrir de nouvelles sources d''énergies pour un usage pacifique ou militaire.', 3, 5, 2, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (204, 20, 'improved_mining', 'Extraction de minerai améliorée', 'L''amélioration des machines d''extraction permet une légère augmentation de la production de minerai.<br/>
+
 Chaque niveau augmente la production de minerai de 1%.', 7, 5, 0, 2000, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (22, 2, 'bonus_soldiers', 'Bonus d''entretient des soldats', '-', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (301, 30, 'planet_control', 'Gestion d''empire', 'Permet d''augmenter le nombre maximum de planètes que vous pouvez gérer de 1 par niveau.', 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (101, 10, 'propulsion', 'Propulsion', 'L''élément primordial de tout vaisseau est la propulsion car un vaisseau immobile est une cible facile.<br/>
+
 Avant de pouvoir élaborer de nouveaux chassis pour vos vaisseaux, vous devez rechercher des moteurs capables de propulser ceux-ci. Plus la propulsion sera puissante, plus les chassis seront importants.<br/>
+
 Chaque niveau augmente la vitesse des vaisseaux de 1%.', 1, 5, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (32, 3, 'unlock_r_advanced_deployement', 'Déblocage du déploiement avancé de bâtiment', '-', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (102, 10, 'energy_conservation', 'Conservation de l''énergie', 'La propulsion est le système qui consomme le plus de puissance sur un vaisseau.<br/>
+
 Effectuez des recherches dans ce domaine pour pouvoir équiper vos plus gros vaisseaux de moteurs sans pour autant être un gouffre en énergie.<br/>
+
 Ces recherches sont applicables à la gestion d''énergie de vos colonies et permet d''augmenter la production d''énergie de vos centrales.<br/>
+
 Chaque niveau augmente la production d''énergie des centrales de 2%.', 3, 5, 0, 220, 0, 0, 0.02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (907, 90, 'cruiser_construction', 'Construction de croiseurs', 'Les croiseurs ont été pensés pour être robustes et avoir une bonne puissance de feu aussi la coque n''a pas été prévue pour accueillir un autre type d''arme que des railguns.<br/>
+
 Un chantier spatial est nécessaire pour construire les croiseurs.', 6, 3, 0, 600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (1, 0, 'evil_science', 'Technologie des fossoyeurs', 'La science spécifique aux technologies des fossoyeurs', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.25, 0.3, 0.5, 0.45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (420, 40, 'energy_transfer', 'Transfert d''énergie', 'Cette technologie permet de transférer la  production d''énergie d''une planète vers une autre grâce à des satellites émetteurs et récepteurs placés en orbite.<br/>
+
 Le système n''est pas parfait et une perte d''énergie est à prévoir suivant la distance séparant les planètes.<br/>
+
 Une rectenna est requise pour faire le lien entre la colonie et les satellites.', 1, 1, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (421, 40, 'enhanced_energy_transfer', 'Transfert d''énergie amélioré', 'Chaque niveau améliore l''efficacité de vos satellites émetteurs d''énergie de 5% pour une distance de 100 unités.', 6, 5, 0, 1500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (5, 0, 'special_merchant_contract', 'Special contrat marchand', '-', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (12, 1, 'unlock_s_merchant_ship', 'Déblocage de la caravelle marchande', '-', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (403, 40, 'plasma_physics', 'Physique des plasmas', 'La physique des plasmas est l''étude des propriétés des gaz ionisés à haute température, tels qu''on les trouve au coeur des étoiles.<br/>
+
 Maîtriser cette énergie vous permettra de trouver des applications pratiques tel que des centrales d''énergie ou des armes.', 4, 3, 0, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (404, 40, 'quantum_physics', 'Physique quantique', 'La physique quantique étudie les lois fondamentales de la physique au niveau subatomique. Faire des recherches dans ce domaine vous permettra sûrement de développer de nouvelles sources d''énergie.', 6, 3, 0, 700, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (31, 3, 'bonus_cheaper_research', 'Bonus recherche moins couteuse', '-', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.2, 0, 0, -0.2, -0.05, 0, 0, 0, 0, 0, 0.03, 0, 0.03, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (406, 40, 'scalar_waves', 'Ondes scalaires', 'L''étude des ondes scalaires pourrait bien être l''étape majeure suivant la physique quantique. Nos scientifiques sont partagés quant à la réalité de ces ondes mais celles-ci pourraient être responsables de la gravité et de l''écoulement du temps.', 10, 5, 0, 4000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (901, 90, 'mechanic', 'Mécanique', 'La recherche en mécanique permet de trouver de nouveaux designs dans la construction de vaisseaux et l''amélioration de la vitesse de construction de ceux-ci en optimisant les étapes de construction.<br/>
+
 Chaque niveau augmente la vitesse de construction des vaisseaux de 1%.', 3, 5, 1, 50, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (405, 40, 'planetology', 'Planétologie', 'La planétologie est la science de l''étude des planètes. Faites des recherches dans ce domaine afin que vos scientifiques cherchent des solutions pour augmenter la place disponible sur vos planètes.<br/>
+
 Vous avez besoin de 5 centres de recherche pour développer cette recherche.<br/>
+
 Une fois débloqué, vous pourrez construire 2 nouveaux types de bâtiment sur vos colonies permettant d''augmenter la place sur celles-ci.', 8, 1, 0, 6000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (3, 0, 'merchant_science', 'Technologie marchande', 'La science spécifique aux technologies marchandes.', 0, 1, 0, 0, 0.6, 0.6, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (410, 40, 'sandworm_study', 'Etude des vers de sable', 'Les vers de sable peuvent être trouvés sur quelques rares planètes. Ils sont gigantesques et sont attirés par tout ce qui émet des vibrations régulières.<br/>
+
 Nos scientifiques devraient être capables de concevoir une barrière capable de les tenir à l''écart de la colonie.<br/>
+
 Nous avons besoin d''une planète ayant cette particularité afin que nos scientifiques puissent travailler dessus.', 5, 1, 0, 786, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (205, 20, 'refining', 'Extraction d''hydrocarbure', 'Des améliorations au niveau de l''extraction permet d''augmenter la production d''hydrocarbure.<br/>
+
 Chaque niveau augmente la production d''hydrocarbure de 1%.', 2, 5, 0, 90, 0, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (202, 20, 'mass_production', 'Production à la chaîne', 'La standardisation des produits et matériaux utilisés dans la plupart des constructions permet une diminution du temps de construction global des bâtiments et des vaisseaux spaciaux.<br/>
+
 Chaque niveau augmente la vitesse de construction des bâtiments de 4% et de vos vaisseaux de 5%.', 3, 5, 0, 600, 0, 0, 0, 0, 0.04, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (20, 2, 'bonus_faster_ship_construction', 'Bonus vitesse de construction de vaisseaux', '-', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (908, 90, 'dreadnought_construction', 'Construction de dreadnought', 'La classe de vaisseau dreadnought est le grand frère du croiseur. Nos scientifiques ont pensé l''architecture pour que toutes les armes puissent être adaptées à la coque. Pour se faire, le vaisseau a une forme allongée et ses moteurs délivrent une énorme puissance.<br/>
+
 Un chantier spatial est nécessaire pour construire les dreadnoughts.', 10, 3, 0, 3500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (906, 90, 'frigate_construction', 'Construction de frégates', 'Les frégates sont des vaisseaux de taille moyenne dotés d''une coque très modulable qui permet d''accueillir des railguns, des missiles ou même un canon à ion.<br/>
+
 Un chantier spatial est nécessaire pour construire les frégates.', 4, 3, 0, 350, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (30, 3, 'bonus_faster_fleets_build', 'Bonus production d''énergie', 'Votre orientation de scientifique vous procure une production augmentée d''énergie.', 0, 1, 0, 0, 0, 0, 0.2, 0, 0.1, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (21, 2, 'bonus_combat', 'Bonus de combat', '-', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, -0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (40, 4, 'warlord_bonus', 'Seigneur de guerre', 'Votre orientation vous procure une production augmentée de minerai, d''hydrocarbure et d''énergie.', 0, 1, 0, 0, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.75, 0, 0, 0, 0, 0, 1, 1, 3, 3, 3, 0, NULL);
 INSERT INTO static.db_research VALUES (903, 90, 'tactical_ship_construction', 'Construction de vaisseaux tactiques', 'Les vaisseaux tactiques regroupent :<br/>
+
  - Les vaisseaux mère qui donnent des bonus aux flottes auxquelles ils appartiennent<br/>
+
  - Les vaisseaux radar qui peuvent être déployés sur une de vos planètes, une planète alliée ou un emplacement vide afin d''obtenir une vision d''un secteur complet pour une durée limitée<br/>
+
  - Les vaisseaux de brouillage qui peuvent être déployés sur une de vos planètes, une planète alliée ou un emplacement vide pour une durée limitée', 8, 3, 0, 800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (303, 30, 'warlord_research', 'Gestion d''empire galactique', 'Permet d''augmenter le nombre maximum de planètes que vous pouvez gérer de 10 par niveau.', -4, 98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (905, 90, 'corvette_construction', 'Construction de corvettes', 'Les corvettes sont des vaisseaux un peu plus gros que les vaisseaux légers mais gardant néanmoins une bonne manoeuvrabilité.<br/>
+
  Ils bénéficient d''une plus grande puissance ce qui permet de les équiper avec des armes plus grosses ou en plus grand nombre ce qui offre une bonne base pour contrer les vaisseaux légers et attaquer les vaisseaux lourds.<br/>
+
 Les corvettes devraient être équipées de tourelles laser ou de roquettes.<br/>
+
 Vous aurez besoin d''un spatioport pour construire les corvettes.', 2, 3, 0, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (201, 20, 'industry', 'Industrie', 'Vos scientifiques peuvent effectuer des recherches dans le domaine de l''industrie pour améliorer certains bâtiments et machines afin d''augmenter le rendement ou diminuer le temps de construction.<br/>
+
 Chaque niveau augmente la vitesse de construction des bâtiments de 1%.', 3, 5, 0, 40, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (10, 1, 'bonus_buy_sell', 'Bonus achat/vente', '-', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (11, 1, 'bonus_better_production', 'Orientation de marchand', 'Votre orientation de marchand vous procure une production augmentée de minerai et d''hydrocarbure.', 0, 1, 0, 0, 0.05, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.05, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.1, 0, NULL);
 INSERT INTO static.db_research VALUES (105, 10, 'jumpdrive', 'Saut hyperspatial', 'Les sauts dans l''hyper-espace permettent de traverser de grandes distances en utilisant les vortex.<br/>
+
 Cette technologie est requise pour les voyages intergalactiques.<br/>
+
 Vous avez besoin de 3 centres de recherche pour développer le saut hyperspatial.', 7, 1, 0, 4000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (904, 90, 'light_ship_construction', 'Construction de vaisseaux légers', 'La coque réduite ne permet pas une grande variété de modifications aussi les vaisseaux de ce type sont limités à deux canons lasers.<br/>
+
 Il ne vous faudra qu''un simple spatioport pour pouvoir construire vos vaisseaux légers.', 1, 3, 1, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (109, 10, 'temp_bonus_speed', 'Surcharge de la propulsion', 'Cette recherche permet d''augmenter la vitesse de tous les vaisseaux de 10% pendant 48 heures.', 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '48:00:00');
 INSERT INTO static.db_research VALUES (509, 50, 'temp_bonus_weapon', 'Surcharge de l''armement', 'Cette recherche permet d''augmenter la puissance de feu de tous les vaisseaux de 10% pendant 48 heures.', 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '48:00:00');
 INSERT INTO static.db_research VALUES (519, 50, 'temp_bonus_shield', 'Surcharge des boucliers', 'Cette recherche permet d''augmenter l''efficacité des boucliers de 10% pendant 48 heures.', 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '48:00:00');
-INSERT INTO static.db_research VALUES (0, 0, 'human_science', 'Technologie humaine', 'La science spécifique aux humains', 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (302, 30, 'commanders_control', 'Hiérarchie de commandement', 'Permet d''augmenter le nombre maximum de commandants dont vous pouvez disposer de 1 par niveau.', 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 INSERT INTO static.db_research VALUES (50, 5, 'exile_bonus', 'Exilé', 'Stats de base des exilés', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 80, 0, 0, 0, 1, 0, 0, 0, 0, NULL);
+INSERT INTO static.db_research VALUES (0, 0, 'human_science', 'Technologie humaine', 'La science spécifique aux humains', 0, 1, 1, 0, 10, 10, 10, 10, 10, 10, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, -0.9, 0, 5, 20, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 
 
 --
@@ -28554,19 +28661,24 @@ INSERT INTO static.db_ships VALUES (193, 10, 'upg_cargo_V_to_X', 'Upgrade du car
 INSERT INTO static.db_ships VALUES (199, 15, 'upg_mothership', 'Upgrade Vaisseau mère avec saut', 'Upgrade', 60000, 30000, 0, 0, 1000, 0, 18600, 0, 0, 0, 0, 0, 0, 0, 0, 1000, 10, NULL, 0, 0, 0, true, 120, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, true, 1);
 INSERT INTO static.db_ships VALUES (102, 10, 'cargo_V', 'Cargo V', 'Avec une capacité de 100 000 unités et une bonne hyper propulsion, le cargo V est parfait pour le déplacement de ressources entre secteurs.', 21000, 18000, 0, 0, 350, 100000, 7200, 0, 9000, 4000, 0, 0, 0, 0, 78, 1100, 100, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 40, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (110, 10, 'recycler', 'Recolteur', 'Le récolteur est un vaisseau spécialisé dans le recyclage des carcasses de vaisseaux et l''exploitation d''astéroides.<br/>
+
 Il peut récupérer et recycler jusqu''a 3000 ressources par heure. Equipé de systèmes de transfert de ressources, le récolteur peut ainsi stocker minerais et hydrocarbures dans les autres vaisseaux de sa flotte.', 10000, 7000, 0, 0, 100, 5000, 5760, 0, 6000, 5000, 0, 0, 0, 0, 34, 1000, 100, NULL, 3000, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 5, 500, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (101, 10, 'cargo_I', 'Cargo I', 'Le cargo I est un vaisseau robuste qui peut transporter jusqu''à 30 000 unités de ressources ou de personnel.', 8000, 8000, 0, 0, 200, 30000, 3600, 0, 3000, 1000, 0, 0, 0, 0, 32, 1200, 200, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 20, 500, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (103, 10, 'cargo_X', 'Cargo X', 'Le cargo X peut transporter jusqu''à 225 000 unités.', 48000, 27000, 0, 0, 600, 225000, 10800, 0, 25000, 20000, 0, 0, 0, 0, 150, 1000, 50, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 75, 2000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (191, 10, 'upg_cargo_I_to_V', 'Upgrade du cargo I', 'Upgrade', 17000, 10000, 0, 0, 150, 0, 3600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, NULL, 0, 0, 0, true, 101, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, true, 1);
 INSERT INTO static.db_ships VALUES (106, 10, 'jumper', 'Jumper', 'Le jumper permet à un groupe de vaisseaux d''effectuer des sauts permettant de relier les galaxies.<br/>
+
 Ce vaisseau offre une capacité de saut intergalactique de 2000.', 45000, 35000, 0, 0, 16, 0, 20400, 0, 5000, 3000, 0, 0, 0, 0, 40, 800, 10, NULL, 0, 0, 2000, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 10, 8000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, true, 1);
 INSERT INTO static.db_ships VALUES (140, 15, 'sector_probe', 'Vaisseau radar', 'Ce vaisseau permet de déployer un satellite qui augmente la puissance radar de 1 pour une durée de 8 heures.<br/>
+
 Le vaisseau est détruit une fois déployé.', 30000, 20000, 0, 0, 0, 0, 19000, 0, 1, 0, 0, 0, 0, 0, 100, 22500, 1, 600, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 50, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (601, 60, 'redempteur', 'Rédempteur', '', 2000000, 1800000, 0, 0, 6000, 10000, 280000, 0, 1000000, 3200000, 1, 28, 900, 28, 7600, 450, 350, NULL, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 8000, 500000, 1500, 0, 0, 0, 40, 75, 30, 91, 5, 1000, 0, 100000, 1, 0, 0, 0, false, 1);
 INSERT INTO static.db_ships VALUES (950, 50, 'imperial_cruiser', 'Croiseur impérial', '', 900000, 800000, 100000, 0, 25000, 25000, 240000, 0, 15000, 25000, 90, 7, 720, 7, 3400, 750, 470, NULL, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 200, 5000, 250, 0, 250, 0, 35, 60, 25, 90, 1, 10, 0, 0, 1, 0, 0, 0, false, 1);
 INSERT INTO static.db_ships VALUES (901, 90, 'mine_field', 'Mine', 'Mine explosive', 20000, 10000, 0, 0, 0, 0, 700, 0, 1, 0, 0, 100, 200, 100, 100, 0, 1, NULL, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, true, 1);
 INSERT INTO static.db_ships VALUES (910, 10, 'caravel', 'Caravelle marchande', 'La caravelle marchande est un petit vaisseau comparé au cargo X, cependant sa taille, sa forme, son aménagement de l''équipage et sa modularité pour accueillir les différents types de ressource lui confèrent une très nette supériorité aux autres vaisseaux de transport.<br/>
+
 La caravelle peut transporter jusqu''à 100 000 unités de ressource.<br/>
+
 Comparée au cargo X, la caravelle dispose de plusieurs atouts dont un blindage digne d''un vaisseau de guerre et une vitesse supérieure. De plus, à capacité égale, les caravelles marchandes demandent bien moins d''entretien.', 12000, 8000, 0, 0, 300, 100000, 3600, 0, 8000, 10000, 0, 0, 0, 0, 40, 1300, 200, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (952, 20, 'mower', 'Faucheur', '', 1100, 900, 15, 0, 3, 5, 500, 0, 300, 50, 10, 1, 2300, 2, 8, 1650, 1500, NULL, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 8, 100, 10, 0, 0, 10, -30, 50, 0, 5, 1, 1, 0, 0, 1, 250, 0, 0, false, 1);
 INSERT INTO static.db_ships VALUES (953, 80, 'fortress', 'Forteresse', '', 10000000, 20000000, 0, 0, 30000, 10000000, 500000, 0, 63568, 53392, 15, 400, 100, 400, 20000, 150, 600, NULL, 20000, 10000, 32500, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 20000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1000, 0, 0, 1, 0, 0, 0, false, 1);
@@ -28575,117 +28687,188 @@ INSERT INTO static.db_ships VALUES (955, 30, 'rogue_ctm', 'Foudroyeur', '', 4500
 INSERT INTO static.db_ships VALUES (960, 10, 'rogue_recycler', 'Collecteur', '', 25000, 15000, 1000, 0, 100, 15000, 18000, 0, 6000, 1200, 0, 0, 0, 0, 80, 1000, 400, NULL, 15000, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0, 0, false, 1);
 INSERT INTO static.db_ships VALUES (100, 10, 'probe', 'Sonde', 'Petit vaisseau de reconnaissance extrémement rapide équipé d''un petit dispositif permettant d''analyser la planète qu''il orbite.', 500, 500, 0, 0, 0, 0, 180, 0, 1, 0, 0, 0, 0, 0, 1, 25000, 1, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 1, 50, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, false, 1);
 INSERT INTO static.db_ships VALUES (104, 10, 'cargo_Z', 'Convoyeur', 'Le convoyeur est spécialisé dans le transport de ressources intergalactique. Ne possédant pas la vitesse d''une caravelle, il est cependant équipé d''un système de saut intégré qui le rend très utile dès lors qu''il s''agit de déplacer des ressources d''une galaxie à une autre.<br/>
+
 Ce cargo peut transporter jusqu''à 1 000 000 d''unités.', 120000, 80000, 0, 0, 1000, 1000000, 36000, 0, 75000, 60000, 0, 0, 0, 0, 300, 1000, 25, NULL, 0, 0, 300, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 175, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, true, 1);
 INSERT INTO static.db_ships VALUES (105, 10, 'droppods', 'Barge d''invasion', 'Les barges d''invasion sont utilisées lors de l''invasion de planètes, plus vous disposez de barges dans votre flotte, plus vous pouvez envoyer de soldats en même temps.<br/>
+
 Cette barge augmente la capacité d''invasion de la flotte de 1 000 soldats.', 15000, 12000, 0, 0, 4, 1000, 4720, 0, 10000, 2000, 0, 0, 0, 0, 54, 1000, 10, NULL, 0, 1000, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 40, 200, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0, true, 1);
 INSERT INTO static.db_ships VALUES (141, 15, 'jammer_probe', 'Vaisseau de brouillage', 'Ce vaisseau, une fois déployé, génère une onde qui augmente le brouillage radar de 10 pour une durée de 8 heures.<br/>
+
 Le vaisseau est détruit à son utilisation.', 100000, 70000, 0, 0, 0, 0, 19000, 0, 1, 0, 0, 0, 0, 0, 340, 20000, 1, 601, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 200, 5000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (142, 15, 'd_vortex_medium', 'Harmoniseur quantique', 'Ce vaisseau, une fois déployé, crée un vortex de stabilité 2 pour une durée de 12 heures.<br/>
+
 Le vaisseau est détruit à son utilisation.', 100000, 70000, 0, 0, 0, 0, 19000, 0, 500, 0, 0, 0, 0, 0, 340, 2000, 1, 604, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 200, 100000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 100, 1, 0, 1, 0, false, 1);
 INSERT INTO static.db_ships VALUES (143, 15, 'd_vortex_strong', 'Stabilisateur quantique', 'Ce vaisseau, une fois déployé, déchire l''espace temps et crée un vortex permettant de faire passer les plus gros vaisseaux pour une durée de 30 minutes.<br/>
+
 Le vaisseau est détruit à son utilisation.', 160000, 100000, 0, 0, 0, 0, 24000, 0, 500, 0, 0, 0, 0, 0, 520, 1200, 1, 605, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 260, 100000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1000, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (144, 15, 'd_vortex_inhibitor', 'Inhibiteur quantique', 'Ce vaisseau, une fois déployé, déstabilise le vortex à proximité et réduit sa stabilité de 8 points pour une durée de 2 jours.<br/>
+
 Le vaisseau est détruit à son utilisation.', 80000, 50000, 0, 0, 0, 0, 16000, 0, 500, 0, 0, 0, 0, 0, 260, 1200, 1, 606, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 130, 100000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2000, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (162, 11, 'd_workshop1', 'D: Atelier', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "atelier".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 13000, 6600, 0, 0, 2, 0, 37600, 0, 300, 0, 0, 0, 0, 0, 40, 450, 1, 204, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 25, 12500, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (120, 15, 'mothership_combat', 'Vaisseau mère de combat', 'Ce vaisseau mère de combat n''est pas un vaisseau de combat classique, en ce qu''il ne possède aucune arme. Cependant, il est capable d''augmenter significativement l''efficacité de la flotte à laquelle il appartient.<br/>
+
 Les données de ses nombreux senseurs et relais géotactiques sont transmises à toute la flotte, ce qui permet aux pilotes et artilleurs des vaisseaux des manoeuvres plus précises et des tirs plus mortels.<br/>
+
 Bonus conférés à la flotte contenant un vaisseau mère:<br/>
+
 Boucliers augmentés de 10%<br/>
+
 Manoeuvrabilité augmentée de 10%<br/>
+
 Ciblage augmenté de 20%<br/>
+
 Dégats augmentés de 10%', 300000, 250000, 0, 0, 30000, 100000, 76800, 0, 150000, 75000, 0, 0, 0, 0, 1100, 1000, 10, NULL, 0, 0, 1000, true, NULL, NULL, 0, 0.1, 0.1, 0.2, 0.1, 0, 0, 0, 2000, 80000, 0, 0, 0, 0, 0, 0, 0, 0, 5, 100, 0, 0, 1, 0, 4, 5000, false, 1);
 INSERT INTO static.db_ships VALUES (401, 40, 'assault_frigate', 'Frégate d''assaut', 'La frégate d''assaut est un vaisseau lourd équipé de 3 railguns R-1. Moins maniable mais plus résistant que les corvettes, la frégate d''assaut offre un tir de soutien efficace.<br/><br/>
+
 Arme: Railgun R-1', 9000, 5000, 0, 0, 50, 50, 2080, 0, 7500, 2500, 1, 3, 1000, 3, 28, 900, 680, NULL, 0, 0, 16, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 16, 1000, 0, 0, 130, 0, 55, 45, 25, 60, 3, 5, 0, 0, 1, 0, 3, 10, false, 1);
 INSERT INTO static.db_ships VALUES (501, 50, 'cruiser', 'Croiseur', 'Conçu pour constituer le fer de lance de vos flottes de combat, le croiseur est un vaisseau puissament armé dont le blindage lui permet de résister à un feu nourri.<br/>
+
 Bien que ses railguns améliorés le rendent dévastateur face aux vaisseaux lourds, il n''est pas équipé pour combattre efficacement les vaisseaux légers, contre lesquels son blindage le rend extrêmement résistant.<br/><br/>
+
 Arme: Railgun R-2', 20000, 14000, 0, 0, 250, 200, 4400, 0, 10000, 20000, 1, 4, 720, 4, 68, 800, 400, NULL, 0, 0, 50, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 50, 3000, 0, 0, 400, 0, 30, 65, 45, 85, 4, 10, 0, 0, 1, 0, 4, 50, false, 1);
 INSERT INTO static.db_ships VALUES (504, 50, 'battle_cruiser', 'Croiseur de combat', 'Le croiseur de combat est une version du croiseur optimisée pour la destruction de vaisseaux lourds.<br/>
+
 Bénéficiant d''un bouclier amélioré, la structure du chassis a été repensée pour accueillir 6 railguns à canon long et de grandes quantités de munitions perforantes lourdes.<br/>
+
 Comme son petit frère, il reste inefficace contre les flottes de petits vaisseaux, bien que son blindage en alliage thermo-renforçé le rende très résistant.<br/><br/>
+
 Arme: Railgun R-3', 35000, 25000, 0, 0, 500, 300, 7900, 0, 10000, 25000, 1, 6, 720, 6, 120, 800, 400, NULL, 0, 0, 100, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 90, 5000, 0, 0, 750, 0, 35, 70, 50, 85, 4, 10, 0, 0, 1, 0, 4, 50, false, 1);
 INSERT INTO static.db_ships VALUES (302, 30, 'heavy_corvette', 'Corvette lourde', 'La corvette lourde se voit dotée d''un lance roquettes afin de cibler et endommager les vaisseaux les plus lourds en priorité.<br/>
+
 La taille des lance roquettes n''étant pas vraiment adaptée au chassis des corvettes, une partie de la structure a du être allégée réduisant l''armure cependant la manoeuvrabilité du vaisseau reste correcte.<br/><br/>
+
 Arme: Roquette', 2000, 2500, 0, 0, 8, 25, 800, 0, 1500, 0, 1, 1, 1100, 1, 9, 1200, 960, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 6, 500, 0, 225, 0, 0, 10, 35, 20, 35, 2, 2, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (163, 11, 'd_research_center', 'D: Centre de recherche', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "centre de recherche".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 33000, 23600, 0, 0, 2, 0, 117600, 0, 300, 0, 0, 0, 0, 0, 113, 450, 1, 206, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 50, 25000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (164, 11, 'd_military_barracks', 'D: Caserne militaire', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "caserne militaire".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 27000, 12600, 0, 0, 2, 0, 117600, 0, 300, 0, 0, 0, 0, 0, 79, 450, 1, 208, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 50, 25000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (304, 30, 'multi_gun_corvette', 'Corvette à tir multiple', 'Dotée de 5 tourelles T-1, cette corvette peut prendre pour cible plusieurs chasseurs à la fois et les abattre avec une précision redoutable.<br/><br/>
+
 Arme: Laser C-1 sur tourelle', 2500, 2500, 0, 0, 10, 25, 950, 0, 1500, 0, 1, 5, 2300, 5, 10, 1200, 970, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 7, 750, 0, 0, 0, 15, 11, 36, 21, 36, 2, 2, 0, 0, 1, 0, 2, 4, true, 1);
 INSERT INTO static.db_ships VALUES (205, 20, 'defense_drone', 'Drone de protection', 'Les drones sont des vaisseaux automatisés ne demandant pas de pilote.<br/>
+
 Bien qu''ils soient armés d''un petit laser, leur principal atout est d''intercepter les tirs ennemis.<br/>
+
 Ces drones sont construits par 10.', 2500, 250, 0, 0, 0, 0, 700, 0, 30, 0, 1, 1, 1, 1, 1, 3000, 1, NULL, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 1, 100, 0, 0, 0, 1, -10000, -10000, -10000, -10000, 1, 0, 0, 0, 10, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (150, 10, 'colonizer_I', 'Vaisseau de colonisation', 'Le vaisseau de colonisation est prévu pour atterrir en toute sécurité sur la surface d''une planète vierge et déployer un bâtiment de type "colonie".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 <br/>
+
 Note: le vaisseau de colonisation ne peut pas coloniser une planète déjà occupée.
+
 ', 25000, 11600, 0, 0, 2500, 0, 54400, 0, 10000, 2000, 0, 0, 0, 0, 72, 450, 1, 101, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 100, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (151, 11, 'd_construction_plant', 'D: Usine de préfabriqués', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "usine de préfabriqué".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 7000, 3800, 0, 0, 2, 0, 52800, 0, 300, 0, 0, 0, 0, 0, 21, 450, 1, 102, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 25, 5000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (152, 11, 'd_geothermal_power', 'D: Centrale géothermique', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "centrale géothermique".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 6000, 3000, 0, 0, 2, 0, 20400, 0, 300, 0, 0, 0, 0, 0, 18, 450, 1, 118, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 25, 5000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (153, 11, 'd_ore_hangar1', 'D: Réserve à minerai', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "réserve de minerai".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 6000, 3100, 0, 0, 2, 0, 18600, 0, 300, 0, 0, 0, 0, 0, 18, 450, 1, 120, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 25, 5000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (404, 40, 'missile_frigate', 'Frégate à missiles', 'La frégate à missiles est équipée de lance-missiles de type M-1 capables de poursuivre efficacement les vaisseaux de taille moyenne tels que les corvettes.<br/><br/>
+
 Arme: Missile M-1', 13000, 12000, 0, 0, 120, 50, 4000, 0, 6000, 2500, 1, 8, 2000, 8, 50, 950, 685, NULL, 0, 0, 16, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 35, 2000, 0, 50, 0, 0, 60, 45, 30, 65, 3, 5, 0, 0, 1, 0, 3, 5, false, 1);
 INSERT INTO static.db_ships VALUES (166, 11, 'd_hydrocarbon_hangar2', 'D: Hangar à hydrocarbure', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "hangar à hydrocarbure".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 30000, 16600, 0, 0, 2, 0, 40400, 0, 300, 0, 0, 0, 0, 0, 93, 450, 1, 221, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 50, 12500, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (595, 50, 'upg_elite_cruiser', 'Upgrade Croiseur d''Elite', 'Upgrade', 15000, 10000, 0, 0, 0, 0, 3600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, NULL, 0, 0, 0, true, 504, 505, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 100, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (154, 11, 'd_hydrocarbon_hangar1', 'D: Réserve à hydrocarbure', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "réserve d''hydrocarbure".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 6000, 3100, 0, 0, 2, 0, 19500, 0, 300, 0, 0, 0, 0, 0, 18, 450, 1, 121, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 25, 5000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (155, 11, 'd_laboratory', 'D: Laboratoire', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "laboratoire".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 7500, 4600, 0, 0, 2, 0, 32200, 0, 300, 0, 0, 0, 0, 0, 24, 450, 1, 106, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 25, 5000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (161, 11, 'd_construction_plant2', 'D: Usine d''automates', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "usine d''automates".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 27500, 17600, 0, 0, 2, 0, 103200, 0, 300, 0, 0, 0, 0, 0, 90, 450, 1, 202, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 25, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (165, 11, 'd_ore_hangar2', 'D: Hangar à minerai', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "hangar à minerai".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 30000, 16600, 0, 0, 2, 0, 37600, 0, 300, 0, 0, 0, 0, 0, 93, 450, 1, 220, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 50, 12500, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, false, 1);
 INSERT INTO static.db_ships VALUES (203, 20, 'predator', 'Prédateur', 'Le prédateur est basé sur l''intercepteur offrant ainsi une bonne maniabilité et vitesse, il est équipé d''un canon laser C-3 version améliorée du canon C-2 avec un temps de recharge plus court offrant encore plus de précision.<br/>
+
 Offrant une puissance de feu légèrement supérieure à l''intercepteur, il est aussi prévu pour faciliter la formation d''escadrons composés de 5 vaisseaux.<br/>
+
 <i>Élu modèle de l''année dans sa catégorie.</i><br/><br/>
+
 Arme: Laser C-3', 1000, 1500, 0, 0, 2, 0, 590, 0, 275, 0, 1, 1, 2450, 1, 5, 1550, 1505, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 2, 75, 0, 0, 0, 35, 1, 91, 1, -24, 1, 1, 0, 5, 1, 0, 2, 5, true, 1);
 INSERT INTO static.db_ships VALUES (505, 50, 'elite_cruiser', 'Croiseur d''élite', 'Le croiseur d''élite est un croiseur de combat bénéficiant d''améliorations au niveau de la vitesse de déplacement, de la manoeuvrabilité, de la précision de tir et de la puissance de feu.<br/>
+
 <i>A reçu 5 étoiles au crash-test uni NCAP</i><br/><br/>
+
 Arme: Railgun R-3', 35000, 25000, 0, 0, 500, 300, 8400, 0, 10000, 25000, 1, 6, 725, 6, 120, 900, 405, NULL, 0, 0, 100, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 80, 5000, 0, 0, 800, 0, 36, 71, 51, 90, 4, 10, 0, 100, 1, 0, 4, 100, false, 1);
 INSERT INTO static.db_ships VALUES (171, 11, 'd_synthesis_plant', 'D: Usine de synthèse', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "usine de synthèse".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 105000, 82600, 0, 0, 2, 0, 182400, 0, 300, 0, 0, 0, 0, 0, 375, 450, 1, 302, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 100, 50000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0, false, 1);
 INSERT INTO static.db_ships VALUES (180, 11, 'd_energy_cell', 'D: Caisse d''énergie', 'Ce vaisseau est prévu pour atterrir en toute sécurité sur la surface d''une planète colonisée et déployer un bâtiment de type "caisse d''énergie".<br/>
+
 Ce "bâtiment volant" est extrêmement fragile et ne devrait être engagé dans aucun combat.<br/>
+
 Les prérequis à la construction du bâtiment déployé doivent se trouver déjà construit sur la planète.', 45000, 25000, 0, 0, 2, 0, 76000, 0, 300, 0, 0, 0, 0, 0, 140, 450, 1, 602, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 75, 75000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 200, 1, 0, 3, 0, false, 1);
 INSERT INTO static.db_ships VALUES (402, 40, 'ion_frigate', 'Frégate à canon ionique', 'La frégate à canon ionique est un vaisseau atypique, celui-ci ne possède qu''une seule et unique arme : un canon ionique qui peut infliger d''énormes dégats. Cependant, ce canon est lent, non directionnel et la puissance demandée pour tirer est telle qu''il ne possède aucune autre arme pour se défendre le rendant complètement sans défense face à des vaisseaux rapides.<br/><br/>
+
 Arme: Canon ionique', 9000, 7000, 0, 0, 80, 75, 2500, 0, 3500, 2500, 1, 1, 450, 1, 32, 900, 680, NULL, 0, 0, 16, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 20, 1500, 4000, 0, 0, 0, 60, 45, 30, 65, 3, 5, 0, 0, 1, 0, 3, 5, false, 1);
 INSERT INTO static.db_ships VALUES (202, 20, 'interceptor', 'Intercepteur', 'Moins lourdement blindé que le chasseur, l''intercepteur est sans aucun doute le vaisseau le plus maniable de sa catégorie ce qui le rend très difficile à cibler. Il est équipé d''un canon laser fixe de type C-2 monté sous le cockpit de l''appareil, ce canon est plus puissant et permet un tir plus précis.<br/><br/>
+
 Arme: Laser C-2', 1000, 1500, 0, 0, 2, 0, 550, 0, 275, 0, 1, 1, 2400, 1, 5, 1500, 1500, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 3, 75, 0, 0, 0, 30, 0, 90, 0, -25, 1, 1, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (201, 20, 'fighter', 'Chasseur', 'Le chasseur est un appareil de combat agile et rapide. Il est équipé d''un canon laser fixe C-1 monté sous le cockpit. Sa manoeuvrabilité le rend difficile à toucher et lui procure une grande précision de frappe. Utilisé en nombre, les chasseurs peuvent être fatals contre les flottes composées de vaisseaux moins maniables.<br/><br/>
+
 Arme: Laser C-1', 800, 1200, 0, 0, 2, 15, 420, 0, 350, 0, 1, 1, 2200, 1, 4, 1450, 1400, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 2, 50, 0, 0, 0, 20, 0, 85, 0, -30, 1, 1, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (121, 15, 'mothership_logistic', 'Vaisseau mère de logistique', 'Ce vaisseau mère est capable d''améliorer significativement la coordination de la flotte à laquelle il appartient lors des opérations de recyclage.<br/>
+
 De plus, son générateur de saut lui permet d''assister de nombreux vaisseaux pour des vols hyperspatiaux et d''augmenter la vitesse globale de la flotte.<br/>
+
 Bonus conférés à la flotte contenant ce vaisseau mère:<br/>
+
 Vitesse augmentée de 15%<br/>
+
 Vitesse du recyclage augmentée de 20%
+
 ', 350000, 270000, 0, 0, 31000, 100000, 93600, 0, 100000, 50000, 0, 0, 0, 0, 1240, 1000, 10, NULL, 0, 0, 10000, true, NULL, NULL, 0.15, 0, 0, 0, 0, 0, 0.2, 0, 2000, 100000, 0, 0, 0, 0, 0, 0, 0, 0, 5, 100, 0, 0, 1, 0, 4, 2000, false, 1);
 INSERT INTO static.db_ships VALUES (292, 20, 'upg_interceptor', 'Upgrade Intercepteur', 'Upgrade', 250, 350, 0, 0, 0, 0, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, NULL, 0, 0, 0, true, 201, 202, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (293, 20, 'upg_predator', 'Upgrade Prédateur', 'Upgrade', 100, 100, 0, 0, 0, 0, 160, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, NULL, 0, 0, 0, true, 202, 203, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 5, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (301, 30, 'light_corvette', 'Corvette légère', 'Dessinée pour remplacer le chasseur, la corvette légère possède 3 tourelles mobiles T-1 qui lui permettent de compenser sa mobilité plus réduite que celle des chasseurs.<br/><br/>
+
 Arme: Laser C-1 sur tourelle', 1500, 2000, 0, 0, 4, 50, 600, 0, 1600, 0, 1, 3, 1500, 3, 7, 1200, 965, NULL, 0, 0, 0, true, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 4, 100, 0, 0, 0, 15, 5, 30, 15, 30, 2, 2, 0, 0, 1, 0, 2, 0, true, 1);
 INSERT INTO static.db_ships VALUES (305, 30, 'elite_corvette', 'Corvette d''elite', 'Possédant 4 tourelle mobiles T-2, la corvette d''élite est une valeur sûre dans les affrontements contre les vaisseaux légers.<br/><br/>
+
 Arme: Laser C-2 sur tourelle', 3000, 3000, 0, 0, 8, 50, 1300, 0, 1800, 0, 1, 4, 1700, 4, 12, 1350, 965, NULL, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 9, 600, 0, 0, 0, 20, 10, 35, 20, 35, 2, 5, 0, 10, 1, 0, 2, 7, true, 1);
 INSERT INTO static.db_ships VALUES (959, 60, 'annihilator', 'Annihilateur', '', 2000000, 1500000, 0, 0, 30000, 30000, 300000, 0, 500000000, 500000000, 1, 200, 1500, 200, 1, 400, 200, NULL, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 1000, 20000, 5000, 5000, 5000, 5000, 20, 95, 95, 95, 5, 1000000, 0, 0, 1, 2000000, 0, 0, false, 1);
 INSERT INTO static.db_ships VALUES (951, 60, 'obliterator', 'Oblitérateur', '', 200000, 200000, 0, 0, 30000, 30000, 300000, 0, 200000, 200000, 1, 20, 650, 20, 800, 600, 450, NULL, 0, 0, 0, false, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 1000, 20000, 500, 500, 500, 500, 20, 50, 50, 50, 5, 100, 0, 0, 1, 2000, 0, 0, false, 1);
 INSERT INTO static.db_ships VALUES (605, 60, 'elite_dreadnought', 'Dreadnought d''élite', 'Véritable mastodonte, le dreadnought d''élite bénéficie des dernières découvertes en armement lourd permettant d''annihiler ses cibles avec une précision redoutable.<br/>
+
 En plus d''un armement inégalé, il possède un blindage révolutionnaire offrant jusqu''à 99% de réduction de tout type de dégat et offre un bonus de 10% au bouclier à la flotte.<br/><br/>
+
 Boucliers augmentés de 10%', 1300000, 1000000, 0, 0, 6000, 10000, 300000, 0, 1000000, 2000000, 1, 20, 1000, 20, 4600, 600, 300, NULL, 0, 0, 0, false, NULL, NULL, 0, 0.1, 0, 0, 0, 0, 0, 0, 2000, 300000, 10000, 0, 0, 0, 80, 99, 99, 99, 5, 1000, 0, 5000, 1, 0, 4, 1000, false, 1);
 
 
@@ -28934,52 +29117,52 @@ INSERT INTO static.sys_daily_updates VALUES ('sp_daily_cleaning()', true, '2008-
 -- Data for Name: sys_events; Type: TABLE DATA; Schema: static; Owner: exileng
 --
 
-INSERT INTO static.sys_events VALUES ('sp_event_merchants_contract()', true, '2008-10-08 18:04:54.25', '24:00:00', NULL, '{00:00:00.016,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_rogue_fleets_patrol()', true, '2008-10-08 18:04:54.25', '01:30:00', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_commanders_promotions()', true, '2008-10-08 18:04:54.25', '00:30:00', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_rogue_fleets_rush_resources()', true, '2008-10-08 18:04:53.234', '01:15:00', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_sandworm()', true, '2008-10-08 18:04:53.234', '00:11:10', 'relation "nav_planet" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00.015,00:00:00,00:00:00.016,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_lost_nations_abandon()', true, '2008-10-08 18:04:53.234', '00:11:00', 'relation "nav_planet" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_robberies()', true, '2008-07-23 06:25:14.613', '00:10:10', 'relation "vw_planets" does not exist', '{00:00:00,00:00:00.015,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_fleet_delayed()', true, '2008-10-08 18:04:54.25', '00:10:30', 'relation "fleets" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_laboratory_accident()', true, '2008-07-23 06:30:57.207', '00:10:20', 'relation "vw_planets" does not exist', '{00:00:00,00:00:00,00:00:00.015,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_long()', true, '2008-10-08 18:04:53.234', '00:10:40', 'relation "nav_planet" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_spawn_orbit_resources()', true, '2008-10-08 18:04:53.234', '00:01:00', 'relation "nav_planet" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_riots()', true, '2008-07-23 06:31:17.551', '00:10:50', 'relation "vw_planets" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00.016}');
-INSERT INTO static.sys_events VALUES ('sp_event_spawn_new_resource_points()', true, '2008-07-23 06:19:03.238', '00:19:10', 'relation "events_spawned_resources" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00.016,00:00:00,00:00:00}');
-INSERT INTO static.sys_events VALUES ('sp_event_planet_bonus()', true, '2008-07-23 06:23:52.019', '00:10:00', 'relation "vw_planets" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
+INSERT INTO static.sys_events VALUES ('sp_event_merchants_contract()', true, '2008-10-08 18:04:54.25', '24:00:00', 'relation "market_history" does not exist', '{00:00:00.00026,00:00:00.000104,00:00:00.00015,00:00:00.000114,00:00:00.000101,00:00:00.000108,00:00:00.000105,00:00:00.000098,00:00:00.000105,00:00:00.000115}');
+INSERT INTO static.sys_events VALUES ('sp_event_rogue_fleets_patrol()', true, '2008-10-08 18:04:54.25', '01:30:00', 'relation "nav_planet" does not exist', '{00:00:00.000102,00:00:00.00009,00:00:00.000124,00:00:00.000065,00:00:00.000086,00:00:00.000066,00:00:00.000066,00:00:00.00007,00:00:00.000067,00:00:00.000136}');
+INSERT INTO static.sys_events VALUES ('sp_event_commanders_promotions()', true, '2008-10-08 18:04:54.25', '00:30:00', 'relation "commanders" does not exist', '{00:00:00.000084,00:00:00.000055,00:00:00.000087,00:00:00.000059,00:00:00.000046,00:00:00.000051,00:00:00.000051,00:00:00.000083,00:00:00.000053,00:00:00.000102}');
+INSERT INTO static.sys_events VALUES ('sp_event_rogue_fleets_rush_resources()', true, '2008-10-08 18:04:53.234', '01:15:00', 'relation "nav_planet" does not exist', '{00:00:00.000071,00:00:00.000053,00:00:00.000076,00:00:00.00005,00:00:00.000046,00:00:00.000051,00:00:00.000052,00:00:00.0001,00:00:00.000052,00:00:00.000059}');
+INSERT INTO static.sys_events VALUES ('sp_event_sandworm()', true, '2008-10-08 18:04:53.234', '00:11:10', 'relation "nav_planet" does not exist', '{00:00:00.000076,00:00:00.000058,00:00:00.000086,00:00:00.000062,00:00:00.000053,00:00:00.000057,00:00:00.000057,00:00:00.000054,00:00:00.000058,00:00:00.000059}');
+INSERT INTO static.sys_events VALUES ('sp_event_lost_nations_abandon()', true, '2008-10-08 18:04:53.234', '00:11:00', 'relation "nav_planet" does not exist', '{00:00:00.000063,00:00:00.000049,00:00:00.000087,00:00:00.000045,00:00:00.000066,00:00:00.000049,00:00:00.000049,00:00:00.000044,00:00:00.00005,00:00:00.000054}');
+INSERT INTO static.sys_events VALUES ('sp_event_robberies()', true, '2008-07-23 06:25:14.613', '00:10:10', 'relation "vw_planets" does not exist', '{00:00:00.000224,00:00:00.000092,00:00:00.000129,00:00:00.000077,00:00:00.000081,00:00:00.000084,00:00:00.000086,00:00:00.000077,00:00:00.000124,00:00:00.000099}');
+INSERT INTO static.sys_events VALUES ('sp_event_fleet_delayed()', true, '2008-10-08 18:04:54.25', '00:10:30', 'relation "fleets" does not exist', '{00:00:00.000083,00:00:00.000057,00:00:00.000077,00:00:00.00005,00:00:00.000055,00:00:00.000054,00:00:00.000053,00:00:00.00005,00:00:00.000087,00:00:00.000055}');
+INSERT INTO static.sys_events VALUES ('sp_event_laboratory_accident()', true, '2008-07-23 06:30:57.207', '00:10:20', 'relation "vw_planets" does not exist', '{00:00:00.000117,00:00:00.000075,00:00:00.000098,00:00:00.000062,00:00:00.000061,00:00:00.000067,00:00:00.000065,00:00:00.000061,00:00:00.000074,00:00:00.000118}');
+INSERT INTO static.sys_events VALUES ('sp_event_long()', true, '2008-10-08 18:04:53.234', '00:10:40', 'relation "nav_planet" does not exist', '{00:00:00.000078,00:00:00.000057,00:00:00.000083,00:00:00.000078,00:00:00.000051,00:00:00.000056,00:00:00.000054,00:00:00.000052,00:00:00.000066,00:00:00.000112}');
+INSERT INTO static.sys_events VALUES ('sp_event_spawn_orbit_resources()', true, '2008-10-08 18:04:53.234', '00:01:00', 'relation "nav_planet" does not exist', '{00:00:00.000069,00:00:00.000055,00:00:00.000078,00:00:00.00005,00:00:00.00005,00:00:00.000055,00:00:00.000051,00:00:00.000049,00:00:00.000049,00:00:00.000056}');
+INSERT INTO static.sys_events VALUES ('sp_event_riots()', true, '2008-07-23 06:31:17.551', '00:10:50', 'relation "vw_planets" does not exist', '{00:00:00.000121,00:00:00.000065,00:00:00.0001,00:00:00.000078,00:00:00.00006,00:00:00.000107,00:00:00.000064,00:00:00.000059,00:00:00.000061,00:00:00.000066}');
+INSERT INTO static.sys_events VALUES ('sp_event_spawn_new_resource_points()', true, '2008-07-23 06:19:03.238', '00:19:10', 'relation "events_spawned_resources" does not exist', '{00:00:00.000058,00:00:00.000064,00:00:00.000072,00:00:00.000055,00:00:00.000061,00:00:00.000068,00:00:00.000062,00:00:00.000061,00:00:00.000063,00:00:00.000111}');
+INSERT INTO static.sys_events VALUES ('sp_event_planet_bonus()', true, '2008-07-23 06:23:52.019', '00:10:00', 'relation "vw_planets" does not exist', '{00:00:00.000076,00:00:00.000062,00:00:00.000065,00:00:00.000058,00:00:00.000054,00:00:00.000055,00:00:00.000057,00:00:00.000053,00:00:00.000055,00:00:00.000058}');
 
 
 --
 -- Data for Name: sys_processes; Type: TABLE DATA; Schema: static; Owner: exileng
 --
 
-INSERT INTO static.sys_processes VALUES ('sp_process_fleets_recycling(''0:00:01'', 25)', true, '2008-10-08 18:04:53.937', '00:00:00.5', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_credits_production(''0:00:00'', 25)', true, '2008-10-08 18:04:53.937', '00:00:00.5', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_training(''0:00:01'', 10)', true, '2008-07-23 06:32:35.285', '00:00:01', 'relation "planet_training_pending" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_destroy_buildings(''0:00:01'', 10)', true, '2008-07-23 06:32:35.285', '00:00:01', 'relation "planet_buildings" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_fleets_waiting()', true, '2008-10-08 18:04:53.937', '00:00:01', NULL, '{00:00:00.016,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_tributes(25)', true, '2008-10-08 18:04:53.937', '00:00:01', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_researches()', true, '2008-07-23 06:32:35.285', '00:00:01', 'relation "researches_pending" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_score(''0:00:00'', 50)', true, '2008-10-08 18:04:53.937', '00:00:01', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_wars(10)', true, '2008-10-08 18:04:53.937', '00:00:01', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00.016,00:00:00,00:00:00,00:00:00,00:00:00.016}');
-INSERT INTO static.sys_processes VALUES ('sp_process_update_planets(''0:00:00'', 25)', true, '2008-10-08 18:04:53.406', '00:00:01', NULL, '{00:00:00.015,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_buildings()', true, '2008-10-08 18:04:53.406', '00:00:01', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00.016,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_ships(''0:00:01'', 20)', true, '2008-10-08 18:04:53.937', '00:00:00.5', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00.015,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_continue_shipyard(''0:00:01'', 20)', true, '2008-10-08 18:04:53.937', '00:00:00.5', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_fleets_movements(''0:00:01'', 25)', true, '2008-10-08 18:04:53.937', '00:00:00.5', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_market(''0:00:05'', 50)', true, '2008-07-23 06:32:34.723', '00:00:05', 'relation "market_sales" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_sessions_timeout()', true, '2008-07-23 06:32:35.285', '00:00:01', 'relation "sessions" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_merchant_planets()', true, '2008-10-08 18:04:53.937', '00:00:05', NULL, '{00:00:00.016,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_bounties(10)', true, '2008-07-23 06:32:34.723', '00:00:05', 'relation "users_bounty" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_market_purchases()', true, '2008-07-23 06:32:34.723', '00:00:05', 'relation "market_purchases" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_naps(10)', true, '2008-10-08 18:04:53.937', '00:00:01', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_accounts_deletion()', true, '2008-10-08 18:04:52.89', '00:01:00', NULL, '{00:00:00.016,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00.015,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_leave_alliance(10)', true, '2008-10-08 18:04:53.937', '00:00:01', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_clean_waiting_fleets()', true, '2008-10-08 18:04:53.937', '00:10:00', NULL, '{00:00:00.015,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_holidays()', true, '2008-07-23 06:32:34.723', '00:00:05', 'relation "users_holidays" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_clean_routes()', true, '2008-07-23 06:32:09.801', '00:05:00', 'relation "routes" does not exist', '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
-INSERT INTO static.sys_processes VALUES ('sp_process_clean_alliances()', true, '2008-10-08 18:04:53.937', '00:01:00', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
+INSERT INTO static.sys_processes VALUES ('sp_process_fleets_recycling(''0:00:01'', 25)', true, '2020-08-31 15:02:41.554751', '00:00:00.5', NULL, '{00:00:00.000164,00:00:00.000166,00:00:00.000239,00:00:00.000143,00:00:00.000229,00:00:00.000166,00:00:00.000261,00:00:00.000245,00:00:00.00018,00:00:00.000151}');
+INSERT INTO static.sys_processes VALUES ('sp_process_credits_production(''0:00:00'', 25)', true, '2020-08-31 15:02:41.554751', '00:00:00.5', NULL, '{00:00:00.00007,00:00:00.000082,00:00:00.000132,00:00:00.000069,00:00:00.000164,00:00:00.000099,00:00:00.000135,00:00:00.000078,00:00:00.000095,00:00:00.000072}');
+INSERT INTO static.sys_processes VALUES ('sp_process_accounts_deletion()', true, '2020-08-31 15:02:25.924088', '00:01:00', NULL, '{00:00:00.000917,00:00:00.000069,00:00:00.000122,00:00:00.000056,00:00:00.000065,00:00:00.000054,00:00:00.000052,00:00:00.000076,00:00:00.000065,00:00:00.000056}');
+INSERT INTO static.sys_processes VALUES ('sp_process_training(''0:00:01'', 10)', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000337,00:00:00.000292,00:00:00.000384,00:00:00.000288,00:00:00.000365,00:00:00.0003,00:00:00.000372,00:00:00.000346,00:00:00.000398,00:00:00.000301}');
+INSERT INTO static.sys_processes VALUES ('sp_process_fleets_waiting()', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000071,00:00:00.000061,00:00:00.000069,00:00:00.000069,00:00:00.000063,00:00:00.000056,00:00:00.00006,00:00:00.000057,00:00:00.000063,00:00:00.00007}');
+INSERT INTO static.sys_processes VALUES ('sp_process_tributes(25)', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000104,00:00:00.000082,00:00:00.000078,00:00:00.000078,00:00:00.000085,00:00:00.00008,00:00:00.000084,00:00:00.000129,00:00:00.000083,00:00:00.000072}');
+INSERT INTO static.sys_processes VALUES ('sp_process_researches()', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.00009,00:00:00.000078,00:00:00.000091,00:00:00.000129,00:00:00.000088,00:00:00.000116,00:00:00.000086,00:00:00.000107,00:00:00.000099,00:00:00.000127}');
+INSERT INTO static.sys_processes VALUES ('sp_process_destroy_buildings(''0:00:01'', 10)', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000217,00:00:00.00017,00:00:00.000182,00:00:00.000201,00:00:00.000237,00:00:00.000268,00:00:00.000193,00:00:00.000205,00:00:00.000202,00:00:00.000174}');
+INSERT INTO static.sys_processes VALUES ('sp_process_clean_alliances()', true, '2020-08-31 15:02:25.924088', '00:01:00', NULL, '{00:00:00.000632,00:00:00.000104,00:00:00.000146,00:00:00.000075,00:00:00.000122,00:00:00.000076,00:00:00.000091,00:00:00.000071,00:00:00.000095,00:00:00.00012}');
+INSERT INTO static.sys_processes VALUES ('sp_process_clean_routes()', true, '2020-08-31 15:02:25.924088', '00:05:00', NULL, '{00:00:00.000608,00:00:00.000054,00:00:00.000082,00:00:00.00006,00:00:00.000064,00:00:00.000056,00:00:00.000075,00:00:00.000044,00:00:00.000101,00:00:00.000057}');
+INSERT INTO static.sys_processes VALUES ('sp_process_market(''0:00:05'', 50)', true, '2020-08-31 15:02:41.050236', '00:00:05', NULL, '{00:00:00.000114,00:00:00.000071,00:00:00.000763,00:00:00.000548,00:00:00.000079,00:00:00.000102,00:00:00.000055,00:00:00.000076,00:00:00.000053,00:00:00.000098}');
+INSERT INTO static.sys_processes VALUES ('sp_process_merchant_planets()', true, '2020-08-31 15:02:41.050236', '00:00:05', NULL, '{00:00:00.000078,00:00:00.000068,00:00:00.000766,00:00:00.000756,00:00:00.000085,00:00:00.000094,00:00:00.000054,00:00:00.000054,00:00:00.000052,00:00:00.000079}');
+INSERT INTO static.sys_processes VALUES ('sp_process_sessions_timeout()', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.00005,00:00:00.000047,00:00:00.000061,00:00:00.00005,00:00:00.000067,00:00:00.000046,00:00:00.00005,00:00:00.000046,00:00:00.000071,00:00:00.000044}');
+INSERT INTO static.sys_processes VALUES ('sp_process_bounties(10)', true, '2020-08-31 15:02:41.554751', '00:00:05', NULL, '{00:00:00.000053,00:00:00.000059,00:00:00.000177,00:00:00.000279,00:00:00.000209,00:00:00.000053,00:00:00.000077,00:00:00.000045,00:00:00.000064,00:00:00.000045}');
+INSERT INTO static.sys_processes VALUES ('sp_process_clean_waiting_fleets()', true, '2020-08-31 15:02:25.924088', '00:10:00', NULL, '{00:00:00.000328,00:00:00.000062,00:00:00.000131,00:00:00.000048,00:00:00.000053,00:00:00.000048,00:00:00.000054,00:00:00.000047,00:00:00.000071,00:00:00.000049}');
+INSERT INTO static.sys_processes VALUES ('sp_process_market_purchases()', true, '2020-08-31 15:02:41.050236', '00:00:05', NULL, '{00:00:00.000096,00:00:00.000095,00:00:00.000481,00:00:00.000515,00:00:00.00008,00:00:00.000078,00:00:00.000048,00:00:00.000051,00:00:00.000052,00:00:00.000049}');
+INSERT INTO static.sys_processes VALUES ('sp_process_holidays()', true, '2020-08-31 15:02:41.554751', '00:00:05', NULL, '{00:00:00.000058,00:00:00.000098,00:00:00.000215,00:00:00.000373,00:00:00.000104,00:00:00.000052,00:00:00.000096,00:00:00.000044,00:00:00.000046,00:00:00.000044}');
+INSERT INTO static.sys_processes VALUES ('sp_process_leave_alliance(10)', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000158,00:00:00.000141,00:00:00.000206,00:00:00.000211,00:00:00.000157,00:00:00.000192,00:00:00.000182,00:00:00.000713,00:00:00.000182,00:00:00.000161}');
+INSERT INTO static.sys_processes VALUES ('sp_process_fleets_movements(''0:00:01'', 25)', true, '2020-08-31 15:02:41.554751', '00:00:00.5', NULL, '{00:00:00.000088,00:00:00.000101,00:00:00.000156,00:00:00.000073,00:00:00.000199,00:00:00.000111,00:00:00.000171,00:00:00.000094,00:00:00.000086,00:00:00.000132}');
+INSERT INTO static.sys_processes VALUES ('sp_process_buildings()', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000082,00:00:00.000065,00:00:00.000083,00:00:00.000067,00:00:00.000062,00:00:00.000071,00:00:00.000126,00:00:00.000088,00:00:00.000071,00:00:00.000069}');
+INSERT INTO static.sys_processes VALUES ('sp_process_naps(10)', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000083,00:00:00.000083,00:00:00.000116,00:00:00.00009,00:00:00.000088,00:00:00.000082,00:00:00.000127,00:00:00.000107,00:00:00.000119,00:00:00.000134}');
+INSERT INTO static.sys_processes VALUES ('sp_process_wars(10)', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000103,00:00:00.000103,00:00:00.00013,00:00:00.000109,00:00:00.000106,00:00:00.000136,00:00:00.00013,00:00:00.000207,00:00:00.000249,00:00:00.000134}');
+INSERT INTO static.sys_processes VALUES ('sp_process_ships(''0:00:01'', 20)', true, '2020-08-31 15:02:41.554751', '00:00:00.5', NULL, '{00:00:00.000432,00:00:00.000328,00:00:00.000678,00:00:00.000342,00:00:00.000702,00:00:00.000375,00:00:00.000734,00:00:00.000418,00:00:00.000451,00:00:00.000402}');
+INSERT INTO static.sys_processes VALUES ('sp_process_continue_shipyard(''0:00:01'', 20)', true, '2020-08-31 15:02:41.554751', '00:00:00.5', NULL, '{00:00:00.00014,00:00:00.000149,00:00:00.000288,00:00:00.000138,00:00:00.000323,00:00:00.000179,00:00:00.000292,00:00:00.000157,00:00:00.000143,00:00:00.000146}');
+INSERT INTO static.sys_processes VALUES ('sp_process_score(''0:00:00'', 50)', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000056,00:00:00.000055,00:00:00.000064,00:00:00.00006,00:00:00.000058,00:00:00.00006,00:00:00.000057,00:00:00.000162,00:00:00.000082,00:00:00.000079}');
+INSERT INTO static.sys_processes VALUES ('sp_process_update_planets(''0:00:00'', 25)', true, '2020-08-31 15:02:41.050236', '00:00:01', NULL, '{00:00:00.000193,00:00:00.000151,00:00:00.000172,00:00:00.000137,00:00:00.00014,00:00:00.000162,00:00:00.000188,00:00:00.000295,00:00:00.000195,00:00:00.000152}');
 
 
 --
@@ -29091,7 +29274,7 @@ SELECT pg_catalog.setval('static.log_referers_id_seq', 1968, true);
 -- Name: log_sys_errors_id_seq; Type: SEQUENCE SET; Schema: static; Owner: exileng
 --
 
-SELECT pg_catalog.setval('static.log_sys_errors_id_seq', 623951, true);
+SELECT pg_catalog.setval('static.log_sys_errors_id_seq', 628115, true);
 
 
 --
@@ -29596,3 +29779,4 @@ ALTER TABLE ONLY static.log_referers_users
 --
 -- PostgreSQL database dump complete
 --
+

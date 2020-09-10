@@ -6785,7 +6785,7 @@ CREATE TABLE exile_s03.battles_ships (
     battleid integer NOT NULL,
     owner_id integer NOT NULL,
     owner_name character varying(16) NOT NULL,
-    fleet_name character varying(18) NOT NULL,
+    fleet_name character varying(18),
     shipid integer NOT NULL,
     before integer DEFAULT 0 NOT NULL,
     after integer DEFAULT 0 NOT NULL,
@@ -6793,7 +6793,12 @@ CREATE TABLE exile_s03.battles_ships (
     won boolean DEFAULT false NOT NULL,
     damages integer DEFAULT 0 NOT NULL,
     fleet_id integer DEFAULT 0 NOT NULL,
-    attacked boolean DEFAULT true NOT NULL
+    attacked boolean,
+    hull integer DEFAULT 0 NOT NULL,
+    shield integer DEFAULT 0 NOT NULL,
+    handling integer DEFAULT 0 NOT NULL,
+    damage integer DEFAULT 0 NOT NULL,
+    tracking integer DEFAULT 0 NOT NULL
 );
 
 
@@ -8069,7 +8074,7 @@ CREATE TABLE exile_s03.battles_fleets (
     owner_id integer,
     owner_name character varying(16) NOT NULL,
     fleet_id integer,
-    fleet_name character varying(18),
+    fleet_name character varying(18) NOT NULL,
     attackonsight boolean DEFAULT true NOT NULL,
     won boolean DEFAULT false NOT NULL,
     mod_shield smallint DEFAULT 0 NOT NULL,
@@ -8422,7 +8427,6 @@ CREATE TABLE exile_s03.fleets (
     required_vortex_strength integer DEFAULT 0 NOT NULL,
     leadership bigint DEFAULT 0 NOT NULL,
     shared boolean DEFAULT false NOT NULL,
-    CONSTRAINT fleets_capacity CHECK ((cargo_capacity >= ((((cargo_ore + cargo_hydrocarbon) + cargo_workers) + cargo_scientists) + cargo_soldiers))),
     CONSTRAINT fleets_resources CHECK (((cargo_ore >= 0) AND (cargo_hydrocarbon >= 0) AND (cargo_scientists >= 0) AND (cargo_soldiers >= 0) AND (cargo_workers >= 0) AND (cargo_capacity >= 0)))
 );
 
@@ -8514,6 +8518,44 @@ CREATE TABLE exile_s03.fleets_items (
 
 
 ALTER TABLE exile_s03.fleets_items OWNER TO exileng;
+
+--
+-- Name: impersonate_impersonationlog; Type: TABLE; Schema: exile_s03; Owner: exileng
+--
+
+CREATE TABLE exile_s03.impersonate_impersonationlog (
+    id integer NOT NULL,
+    session_key character varying(40) NOT NULL,
+    session_started_at timestamp with time zone,
+    session_ended_at timestamp with time zone,
+    impersonating_id integer NOT NULL,
+    impersonator_id integer NOT NULL
+);
+
+
+ALTER TABLE exile_s03.impersonate_impersonationlog OWNER TO exileng;
+
+--
+-- Name: impersonate_impersonationlog_id_seq; Type: SEQUENCE; Schema: exile_s03; Owner: exileng
+--
+
+CREATE SEQUENCE exile_s03.impersonate_impersonationlog_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE exile_s03.impersonate_impersonationlog_id_seq OWNER TO exileng;
+
+--
+-- Name: impersonate_impersonationlog_id_seq; Type: SEQUENCE OWNED BY; Schema: exile_s03; Owner: exileng
+--
+
+ALTER SEQUENCE exile_s03.impersonate_impersonationlog_id_seq OWNED BY exile_s03.impersonate_impersonationlog.id;
+
 
 --
 -- Name: last_colonisation_planet_seq; Type: SEQUENCE; Schema: exile_s03; Owner: exileng
@@ -9987,7 +10029,7 @@ CREATE VIEW exile_s03.vw_fleets AS
     n1.planet AS planet_planet,
     n1.ownerid AS planet_ownerid,
     n1.radar_strength,
-    COALESCE(n1.radar_jamming::integer, 0)::smallint AS radar_jamming,
+    (COALESCE((n1.radar_jamming)::integer, 0))::smallint AS radar_jamming,
     static.sp_get_user(n1.ownerid) AS planet_owner_name,
     static.sp_relation(fleets.ownerid, n1.ownerid) AS planet_owner_relation,
     fleets.dest_planetid AS destplanetid,
@@ -9997,7 +10039,7 @@ CREATE VIEW exile_s03.vw_fleets AS
     n2.planet AS destplanet_planet,
     n2.ownerid AS destplanet_ownerid,
     n2.radar_strength AS destplanet_radar_strength,
-    COALESCE(n2.radar_jamming::integer, 0)::smallint AS destplanet_radar_jamming,
+    (COALESCE((n2.radar_jamming)::integer, 0))::smallint AS destplanet_radar_jamming,
     static.sp_get_user(n2.ownerid) AS destplanet_owner_name,
     static.sp_relation(fleets.ownerid, n2.ownerid) AS destplanet_owner_relation,
     fleets.cargo_capacity,
@@ -10636,6 +10678,13 @@ ALTER TABLE ONLY exile_s03.chat_channels ALTER COLUMN id SET DEFAULT nextval('ex
 
 
 --
+-- Name: impersonate_impersonationlog id; Type: DEFAULT; Schema: exile_s03; Owner: exileng
+--
+
+ALTER TABLE ONLY exile_s03.impersonate_impersonationlog ALTER COLUMN id SET DEFAULT nextval('exile_s03.impersonate_impersonationlog_id_seq'::regclass);
+
+
+--
 -- Name: precise_bbcode_bbcodetag id; Type: DEFAULT; Schema: exile_s03; Owner: exileng
 --
 
@@ -10722,7 +10771,6 @@ ALTER TABLE ONLY exile_s03.users_options_history ALTER COLUMN id SET DEFAULT nex
 --
 
 
-
 --
 -- Data for Name: alliances_tributes; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
 --
@@ -10793,8 +10841,8 @@ ALTER TABLE ONLY exile_s03.users_options_history ALTER COLUMN id SET DEFAULT nex
 -- Data for Name: chat; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
 --
 
-INSERT INTO exile_s03.chat VALUES (1, 'Nouveaux joueurs', '', '', true);
 INSERT INTO exile_s03.chat VALUES (2, 'Exile', '', '', true);
+INSERT INTO exile_s03.chat VALUES (1, 'Nouveaux joueurs', '', '', true);
 
 
 --
@@ -10841,6 +10889,12 @@ INSERT INTO exile_s03.chat VALUES (2, 'Exile', '', '', true);
 
 --
 -- Data for Name: fleets_ships; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
+--
+
+
+
+--
+-- Data for Name: impersonate_impersonationlog; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
 --
 
 
@@ -10941,7 +10995,6 @@ INSERT INTO exile_s03.log_jobs VALUES ('exile-battles.vbs', '2019-03-30 13:46:57
 --
 -- Data for Name: messages_addressee_history; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
 --
-
 
 
 --
@@ -11075,7 +11128,6 @@ INSERT INTO exile_s03.log_jobs VALUES ('exile-battles.vbs', '2019-03-30 13:46:57
 --
 
 
-
 --
 -- Data for Name: spy_fleet; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
 --
@@ -11087,11 +11139,9 @@ INSERT INTO exile_s03.log_jobs VALUES ('exile-battles.vbs', '2019-03-30 13:46:57
 --
 
 
-
 --
 -- Data for Name: spy_research; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
 --
-
 
 
 --
@@ -11111,63 +11161,63 @@ INSERT INTO exile_s03.sys_events VALUES ('sp_event_fleet_delayed()', false, '200
 INSERT INTO exile_s03.sys_events VALUES ('sp_event_spawn_new_resource_points()', false, '2008-07-24 15:24:11.004', '00:19:10', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00}');
 INSERT INTO exile_s03.sys_events VALUES ('sp_event_spawn_orbit_resources()', false, '2008-11-03 13:43:38.781', '00:01:00', NULL, '{00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00.016,00:00:00,00:00:00.016,00:00:00.016,00:00:00.016}');
 INSERT INTO exile_s03.sys_events VALUES ('sp_event_annihilation_fleets()', false, '2019-03-28 22:23:15.281233', '00:30:00', NULL, '{00:00:02.363637,00:00:02.49736,00:00:00.049482,00:00:00.049954,00:00:00.049901,00:00:08.135784,00:00:02.225658,00:00:00.935741,00:00:01.75,00:00:02.125}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_long()', true, '2020-08-31 13:09:48.081528', '00:10:40', NULL, '{00:00:00.004628,00:00:00.003003,00:00:00.002414,00:00:00.005003,00:00:00.000844,00:00:00.00286,00:00:00.006044,00:00:00.00093,00:00:00.003405,00:00:00.000856}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_lottery()', true, '2020-08-30 18:34:47.823186', '168:00:00', NULL, '{00:00:00.004089,00:00:00.089142,00:00:00.003773,00:00:00.101392,00:00:03.625,00:00:00.938,00:00:00.781,00:00:01.031,00:00:04.203,00:00:00.625}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_daily_cleaning()', true, '2020-08-30 18:36:48.642243', '24:00:00', NULL, '{00:00:00.023779,00:00:00.042752,00:00:00.048971,00:00:00.039493,00:00:00.044538,00:00:00.038905,00:00:00.037025,00:00:00.03893,00:00:00.032691,00:00:00.02872}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_merchants_contract()', true, '2020-08-30 18:36:48.642243', '24:00:00', NULL, '{00:00:00.0075,00:00:00.001504,00:00:00.00234,00:00:00.00194,00:00:00.001568,00:00:00.001427,00:00:00.001273,00:00:00.002975,00:00:00.00246,00:00:00.00306}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_commanders_promotions()', true, '2020-08-31 13:17:47.873894', '00:30:00', NULL, '{00:00:00.001537,00:00:00.001553,00:00:00.001981,00:00:00.000677,00:00:00.001557,00:00:00.001203,00:00:00.001456,00:00:00.001688,00:00:00.001381,00:00:00.000797}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_lost_nations_abandon()', true, '2020-08-31 13:17:47.873894', '00:11:00', NULL, '{00:00:00.001455,00:00:00.004329,00:00:00.003195,00:00:00.002324,00:00:00.003649,00:00:00.002208,00:00:00.002239,00:00:00.002415,00:00:00.000543,00:00:00.00049}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_rogue_fleets_patrol()', true, '2020-08-31 12:10:47.151912', '01:30:00', NULL, '{00:00:00.008099,00:00:00.01131,00:00:00.00973,00:00:00.007862,00:00:00.008238,00:00:00.006687,00:00:00.007592,00:00:00.022961,00:00:00.007569,00:00:00.007883}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_laboratory_accident()', true, '2020-08-31 13:11:47.361297', '00:10:20', NULL, '{00:00:00.00295,00:00:00.001559,00:00:00.00543,00:00:00.003829,00:00:00.004304,00:00:00.002015,00:00:00.003118,00:00:00.00313,00:00:00.003342,00:00:00.006605}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_planet_bonus()', true, '2020-08-31 13:13:48.450699', '00:10:00', NULL, '{00:00:00.004222,00:00:00.004571,00:00:00.00194,00:00:00.004212,00:00:00.004562,00:00:00.004849,00:00:00.003789,00:00:00.004714,00:00:00.00477,00:00:00.00453}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_robberies()', true, '2020-08-31 13:16:17.875698', '00:10:10', NULL, '{00:00:00.005051,00:00:00.002438,00:00:00.00501,00:00:00.00455,00:00:00.004887,00:00:00.005646,00:00:00.002137,00:00:00.002886,00:00:00.004751,00:00:00.00461}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_riots()', true, '2020-08-31 13:11:47.361297', '00:10:50', NULL, '{00:00:00.0012,00:00:00.005275,00:00:00.004149,00:00:00.003905,00:00:00.007148,00:00:00.004404,00:00:00.004089,00:00:00.001537,00:00:00.001079,00:00:00.001006}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_sandworm()', true, '2020-08-31 13:17:47.873894', '00:11:10', NULL, '{00:00:00.001995,00:00:00.002302,00:00:00.002874,00:00:00.00251,00:00:00.00288,00:00:00.001839,00:00:00.002249,00:00:00.001946,00:00:00.00148,00:00:00.00173}');
-INSERT INTO exile_s03.sys_events VALUES ('sp_event_rogue_fleets_rush_resources()', true, '2020-08-31 12:38:47.666681', '01:15:00', NULL, '{00:00:00.001352,00:00:00.003989,00:00:00.002622,00:00:00.005118,00:00:00.023789,00:00:00.024549,00:00:00.026993,00:00:00.049038,00:00:00.049984,00:00:00.004548}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_merchants_contract()', true, '2020-09-09 18:37:48.554622', '24:00:00', NULL, '{00:00:00.013764,00:00:00.002839,00:00:00.002246,00:00:00.001681,00:00:00.001819,00:00:00.00186,00:00:00.010767,00:00:00.007715,00:00:00.001035,00:00:00.000896}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_lottery()', true, '2020-09-06 18:34:47.887603', '168:00:00', NULL, '{00:00:00.010829,00:00:00.004089,00:00:00.089142,00:00:00.003773,00:00:00.101392,00:00:03.625,00:00:00.938,00:00:00.781,00:00:01.031,00:00:04.203}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_rogue_fleets_rush_resources()', true, '2020-09-10 07:54:13.999933', '01:15:00', NULL, '{00:00:00.001325,00:00:00.000765,00:00:00.033123,00:00:00.00155,00:00:00.002498,00:00:00.001128,00:00:00.004483,00:00:00.001258,00:00:00.002918,00:00:00.002732}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_rogue_fleets_patrol()', true, '2020-09-10 08:09:11.449584', '01:30:00', NULL, '{00:00:00.007417,00:00:00.009682,00:00:00.007987,00:00:00.009318,00:00:00.00837,00:00:00.008106,00:00:00.007294,00:00:00.03403,00:00:00.006827,00:00:00.009471}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_daily_cleaning()', true, '2020-09-09 18:37:48.554622', '24:00:00', NULL, '{00:00:00.034056,00:00:00.040125,00:00:00.032311,00:00:00.034862,00:00:00.033231,00:00:00.026335,00:00:00.023199,00:00:00.019599,00:00:00.025142,00:00:00.022588}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_commanders_promotions()', true, '2020-09-10 08:15:47.034513', '00:30:00', NULL, '{00:00:00.00147,00:00:00.001721,00:00:00.001647,00:00:00.001341,00:00:00.001246,00:00:00.001248,00:00:00.001645,00:00:00.001611,00:00:00.00233,00:00:00.001672}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_long()', true, '2020-09-10 08:30:26.649858', '00:10:40', NULL, '{00:00:00.000989,00:00:00.003432,00:00:00.003864,00:00:00.003104,00:00:00.003833,00:00:00.003117,00:00:00.003097,00:00:00.003352,00:00:00.003291,00:00:00.003682}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_laboratory_accident()', true, '2020-09-10 08:34:06.966149', '00:10:20', NULL, '{00:00:00.004072,00:00:00.004552,00:00:00.003795,00:00:00.004042,00:00:00.004057,00:00:00.004432,00:00:00.003667,00:00:00.001266,00:00:00.00393,00:00:00.003881}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_robberies()', true, '2020-09-10 08:34:17.997529', '00:10:10', NULL, '{00:00:00.002864,00:00:00.002615,00:00:00.004622,00:00:00.009328,00:00:00.002732,00:00:00.001858,00:00:00.005129,00:00:00.005074,00:00:00.006631,00:00:00.009077}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_riots()', true, '2020-09-10 08:37:03.00961', '00:10:50', NULL, '{00:00:00.006364,00:00:00.005597,00:00:00.010352,00:00:00.003533,00:00:00.004085,00:00:00.00463,00:00:00.004528,00:00:00.005105,00:00:00.005828,00:00:00.004334}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_lost_nations_abandon()', true, '2020-09-10 08:37:52.450203', '00:11:00', NULL, '{00:00:00.003662,00:00:00.002457,00:00:00.001833,00:00:00.002663,00:00:00.002484,00:00:00.002806,00:00:00.002681,00:00:00.002474,00:00:00.000619,00:00:00.002436}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_sandworm()', true, '2020-09-10 08:39:09.562054', '00:11:10', NULL, '{00:00:00.004023,00:00:00.004078,00:00:00.004364,00:00:00.002844,00:00:00.002454,00:00:00.002211,00:00:00.002366,00:00:00.002693,00:00:00.004324,00:00:00.002044}');
+INSERT INTO exile_s03.sys_events VALUES ('sp_event_planet_bonus()', true, '2020-09-10 08:39:46.847862', '00:10:00', NULL, '{00:00:00.004265,00:00:00.004304,00:00:00.00239,00:00:00.004527,00:00:00.00435,00:00:00.008041,00:00:00.004748,00:00:00.005094,00:00:00.008425,00:00:00.00554}');
 
 
 --
 -- Data for Name: sys_processes; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
 --
 
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_clean_waiting_fleets()', true, '2020-08-31 13:18:42.939238', '00:10:00', NULL, '{00:00:00.000332,00:00:00.000949,00:00:00.000405,00:00:00.000367,00:00:00.000389,00:00:00.000387,00:00:00.000661,00:00:00.000385,00:00:00.000423,00:00:00.000438}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_clean_routes()', true, '2020-08-31 13:18:42.939238', '00:05:00', NULL, '{00:00:00.000704,00:00:00.000859,00:00:00.000871,00:00:00.000856,00:00:00.000761,00:00:00.000846,00:00:00.000823,00:00:00.001357,00:00:00.000815,00:00:00.001032}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_market_price()', true, '2020-08-31 12:37:44.250353', '01:00:00', NULL, '{00:00:00.002772,00:00:00.003373,00:00:00.003516,00:00:00.003498,00:00:00.002813,00:00:00.002437,00:00:00.002781,00:00:00.002883,00:00:00.004077,00:00:00.002654}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_clean_alliances()', true, '2020-08-31 13:18:42.939238', '00:01:00', NULL, '{00:00:00.002761,00:00:00.002616,00:00:00.003968,00:00:00.003766,00:00:00.002458,00:00:00.002588,00:00:00.00307,00:00:00.003408,00:00:00.002902,00:00:00.003025}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_holidays()', true, '2020-08-31 13:19:29.696682', '00:00:05', NULL, '{00:00:00.000139,00:00:00.00026,00:00:00.000145,00:00:00.000118,00:00:00.000181,00:00:00.000201,00:00:00.000128,00:00:00.000138,00:00:00.000139,00:00:00.000605}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_market(''0:00:05'', 50)', true, '2020-08-31 13:19:29.696682', '00:00:05', NULL, '{00:00:00.000116,00:00:00.000224,00:00:00.00015,00:00:00.000118,00:00:00.000439,00:00:00.000787,00:00:00.000664,00:00:00.000515,00:00:00.000527,00:00:00.002077}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_bounties(10)', true, '2020-08-31 13:19:29.696682', '00:00:05', NULL, '{00:00:00.000057,00:00:00.000108,00:00:00.000112,00:00:00.000089,00:00:00.000131,00:00:00.000146,00:00:00.000092,00:00:00.000132,00:00:00.000182,00:00:00.000258}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_merchant_planets()', true, '2020-08-31 13:19:29.696682', '00:00:05', NULL, '{00:00:00.000077,00:00:00.000137,00:00:00.000134,00:00:00.000083,00:00:00.000102,00:00:00.000144,00:00:00.000103,00:00:00.0001,00:00:00.000111,00:00:00.001405}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_market_purchases()', true, '2020-08-31 13:19:29.696682', '00:00:05', NULL, '{00:00:00.000106,00:00:00.00015,00:00:00.000085,00:00:00.00008,00:00:00.000127,00:00:00.000201,00:00:00.000146,00:00:00.000107,00:00:00.000104,00:00:00.000807}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_researches()', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000259,00:00:00.000231,00:00:00.000225,00:00:00.00016,00:00:00.000223,00:00:00.000242,00:00:00.000324,00:00:00.000246,00:00:00.000409,00:00:00.000211}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_credits_production(''0:00:00'', 50)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000426,00:00:00.0004,00:00:00.000502,00:00:00.000361,00:00:00.000413,00:00:00.000365,00:00:00.000588,00:00:00.000612,00:00:00.000659,00:00:00.000404}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_update_planets(''0:00:00'', 25)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000268,00:00:00.000308,00:00:00.000373,00:00:00.00025,00:00:00.000292,00:00:00.000274,00:00:00.000446,00:00:00.000449,00:00:00.000507,00:00:00.000399}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_destroy_buildings(''0:00:01'', 10)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000389,00:00:00.000345,00:00:00.000486,00:00:00.000378,00:00:00.000323,00:00:00.000351,00:00:00.000517,00:00:00.000528,00:00:00.000511,00:00:00.000406}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_buildings()', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000225,00:00:00.000153,00:00:00.000187,00:00:00.000163,00:00:00.00022,00:00:00.000141,00:00:00.000211,00:00:00.000219,00:00:00.000186,00:00:00.000134}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_leave_alliance(10)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000168,00:00:00.000153,00:00:00.000227,00:00:00.00022,00:00:00.000147,00:00:00.000146,00:00:00.000256,00:00:00.000371,00:00:00.0002,00:00:00.000171}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_continue_shipyard(''0:00:01'', 20)', true, '2020-08-31 13:19:33.654112', '00:00:00.5', NULL, '{00:00:00.000349,00:00:00.000432,00:00:00.000271,00:00:00.000528,00:00:00.000407,00:00:00.000453,00:00:00.000292,00:00:00.000277,00:00:00.000367,00:00:00.000338}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_fleets_recycling(''0:00:01'', 25)', true, '2020-08-31 13:19:33.654112', '00:00:00.5', NULL, '{00:00:00.000199,00:00:00.000224,00:00:00.000209,00:00:00.000341,00:00:00.000225,00:00:00.000379,00:00:00.00026,00:00:00.000233,00:00:00.000265,00:00:00.000297}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_fleets_movements(''0:00:01'', 25)', true, '2020-08-31 13:19:33.654112', '00:00:00.5', NULL, '{00:00:00.000222,00:00:00.000197,00:00:00.000207,00:00:00.000294,00:00:00.000288,00:00:00.000298,00:00:00.000213,00:00:00.000295,00:00:00.000235,00:00:00.000342}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_accounts_deletion()', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000269,00:00:00.000173,00:00:00.000253,00:00:00.000192,00:00:00.000184,00:00:00.000248,00:00:00.000237,00:00:00.000303,00:00:00.000291,00:00:00.000194}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_score(''0:00:00'', 50)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000149,00:00:00.000169,00:00:00.000211,00:00:00.000153,00:00:00.00022,00:00:00.000137,00:00:00.000216,00:00:00.000252,00:00:00.000259,00:00:00.000159}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_fleets_waiting()', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000156,00:00:00.000153,00:00:00.000218,00:00:00.000156,00:00:00.000214,00:00:00.000159,00:00:00.000226,00:00:00.000303,00:00:00.000258,00:00:00.000173}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_wars(10)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000174,00:00:00.000206,00:00:00.000362,00:00:00.000207,00:00:00.000214,00:00:00.000212,00:00:00.000317,00:00:00.000383,00:00:00.000239,00:00:00.000207}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_tributes(25)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000213,00:00:00.000277,00:00:00.00025,00:00:00.000169,00:00:00.000163,00:00:00.000154,00:00:00.000223,00:00:00.000263,00:00:00.000222,00:00:00.000185}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_sessions_timeout()', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000166,00:00:00.000222,00:00:00.000191,00:00:00.000135,00:00:00.000176,00:00:00.000203,00:00:00.000184,00:00:00.000244,00:00:00.000192,00:00:00.000169}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_training(''0:00:01'', 10)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000432,00:00:00.000377,00:00:00.000494,00:00:00.000352,00:00:00.000405,00:00:00.000391,00:00:00.000432,00:00:00.000605,00:00:00.000648,00:00:00.00039}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_naps(10)', true, '2020-08-31 13:19:33.654112', '00:00:01', NULL, '{00:00:00.000193,00:00:00.000165,00:00:00.000226,00:00:00.000156,00:00:00.000205,00:00:00.000253,00:00:00.000239,00:00:00.000279,00:00:00.000392,00:00:00.000192}');
-INSERT INTO exile_s03.sys_processes VALUES ('sp_process_ships(''0:00:01'', 20)', true, '2020-08-31 13:19:33.654112', '00:00:00.5', NULL, '{00:00:00.000404,00:00:00.000419,00:00:00.000417,00:00:00.000614,00:00:00.000637,00:00:00.000739,00:00:00.000515,00:00:00.000462,00:00:00.000403,00:00:00.000532}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_market_price()', true, '2020-09-10 08:34:44.300009', '01:00:00', NULL, '{00:00:00.004638,00:00:00.003627,00:00:00.003688,00:00:00.003939,00:00:00.006734,00:00:00.003795,00:00:00.003886,00:00:00.005855,00:00:00.011807,00:00:00.012746}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_clean_waiting_fleets()', true, '2020-09-10 08:37:42.363947', '00:10:00', NULL, '{00:00:00.003096,00:00:00.001882,00:00:00.002355,00:00:00.000761,00:00:00.002188,00:00:00.000984,00:00:00.000606,00:00:00.00071,00:00:00.00207,00:00:00.001924}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_clean_routes()', true, '2020-09-10 08:37:43.013722', '00:05:00', NULL, '{00:00:00.001099,00:00:00.003072,00:00:00.000912,00:00:00.000934,00:00:00.000874,00:00:00.000879,00:00:00.000928,00:00:00.002565,00:00:00.001135,00:00:00.001208}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_clean_alliances()', true, '2020-09-10 08:39:42.939604', '00:01:00', NULL, '{00:00:00.001001,00:00:00.003425,00:00:00.002044,00:00:00.000916,00:00:00.001209,00:00:00.001134,00:00:00.000953,00:00:00.001153,00:00:00.003359,00:00:00.00291}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_market(''0:00:05'', 50)', true, '2020-09-10 08:40:17.381115', '00:00:05', NULL, '{00:00:00.000202,00:00:00.000535,00:00:00.000779,00:00:00.000459,00:00:00.000401,00:00:00.000761,00:00:00.000892,00:00:00.000115,00:00:00.000115,00:00:00.000107}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_merchant_planets()', true, '2020-09-10 08:40:17.381115', '00:00:05', NULL, '{00:00:00.00009,00:00:00.000116,00:00:00.000188,00:00:00.000096,00:00:00.000094,00:00:00.000152,00:00:00.001188,00:00:00.000091,00:00:00.00009,00:00:00.00009}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_bounties(10)', true, '2020-09-10 08:40:17.381115', '00:00:05', NULL, '{00:00:00.000063,00:00:00.000092,00:00:00.000373,00:00:00.000206,00:00:00.000206,00:00:00.000312,00:00:00.000249,00:00:00.000064,00:00:00.000064,00:00:00.000064}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_holidays()', true, '2020-09-10 08:40:17.381115', '00:00:05', NULL, '{00:00:00.000065,00:00:00.00007,00:00:00.000178,00:00:00.00009,00:00:00.000086,00:00:00.000142,00:00:00.000424,00:00:00.000067,00:00:00.000065,00:00:00.000064}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_market_purchases()', true, '2020-09-10 08:40:17.381115', '00:00:05', NULL, '{00:00:00.000077,00:00:00.00008,00:00:00.000203,00:00:00.000092,00:00:00.00009,00:00:00.000173,00:00:00.000963,00:00:00.000196,00:00:00.000193,00:00:00.000158}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_buildings()', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000235,00:00:00.000234,00:00:00.00018,00:00:00.000338,00:00:00.000257,00:00:00.000239,00:00:00.000248,00:00:00.000228,00:00:00.000233,00:00:00.000245}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_tributes(25)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.00017,00:00:00.000169,00:00:00.000158,00:00:00.000305,00:00:00.00023,00:00:00.000171,00:00:00.000184,00:00:00.000179,00:00:00.00016,00:00:00.000178}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_training(''0:00:01'', 10)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000368,00:00:00.000374,00:00:00.000411,00:00:00.000652,00:00:00.000451,00:00:00.000457,00:00:00.000436,00:00:00.000476,00:00:00.000388,00:00:00.000358}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_update_planets(''0:00:00'', 25)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.00026,00:00:00.000261,00:00:00.000259,00:00:00.000504,00:00:00.000336,00:00:00.000379,00:00:00.000333,00:00:00.000328,00:00:00.000262,00:00:00.000344}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_leave_alliance(10)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000219,00:00:00.00022,00:00:00.000216,00:00:00.000375,00:00:00.000279,00:00:00.000273,00:00:00.000275,00:00:00.000267,00:00:00.000223,00:00:00.000244}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_naps(10)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000158,00:00:00.000159,00:00:00.000272,00:00:00.000301,00:00:00.000224,00:00:00.000173,00:00:00.000175,00:00:00.000176,00:00:00.000156,00:00:00.000169}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_sessions_timeout()', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.00013,00:00:00.000131,00:00:00.000153,00:00:00.000259,00:00:00.000185,00:00:00.000155,00:00:00.000136,00:00:00.000145,00:00:00.000128,00:00:00.000132}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_continue_shipyard(''0:00:01'', 20)', true, '2020-09-10 08:40:19.70904', '00:00:00.5', NULL, '{00:00:00.000249,00:00:00.000444,00:00:00.000248,00:00:00.000405,00:00:00.00039,00:00:00.000422,00:00:00.000484,00:00:00.000406,00:00:00.000394,00:00:00.000436}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_fleets_movements(''0:00:01'', 25)', true, '2020-09-10 08:40:19.70904', '00:00:00.5', NULL, '{00:00:00.000195,00:00:00.000211,00:00:00.000195,00:00:00.000246,00:00:00.000202,00:00:00.000213,00:00:00.000319,00:00:00.000248,00:00:00.000271,00:00:00.000286}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_credits_production(''0:00:00'', 50)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000744,00:00:00.000638,00:00:00.000972,00:00:00.001171,00:00:00.000803,00:00:00.00071,00:00:00.000666,00:00:00.000674,00:00:00.000636,00:00:00.00065}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_wars(10)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000327,00:00:00.000426,00:00:00.000225,00:00:00.000302,00:00:00.000255,00:00:00.000354,00:00:00.000332,00:00:00.000325,00:00:00.000343,00:00:00.000369}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_score(''0:00:00'', 50)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000211,00:00:00.000254,00:00:00.000321,00:00:00.000278,00:00:00.000229,00:00:00.000264,00:00:00.000241,00:00:00.000258,00:00:00.000332,00:00:00.000243}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_researches()', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.00016,00:00:00.000243,00:00:00.000223,00:00:00.000197,00:00:00.00016,00:00:00.000162,00:00:00.000157,00:00:00.000174,00:00:00.000162,00:00:00.000162}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_fleets_waiting()', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000169,00:00:00.000215,00:00:00.000191,00:00:00.00019,00:00:00.000166,00:00:00.000179,00:00:00.000174,00:00:00.000177,00:00:00.000194,00:00:00.000159}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_destroy_buildings(''0:00:01'', 10)', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000306,00:00:00.000386,00:00:00.000371,00:00:00.000391,00:00:00.000311,00:00:00.000325,00:00:00.000323,00:00:00.000378,00:00:00.000347,00:00:00.000326}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_accounts_deletion()', true, '2020-09-10 08:40:19.70904', '00:00:01', NULL, '{00:00:00.000203,00:00:00.000264,00:00:00.000208,00:00:00.000298,00:00:00.000211,00:00:00.000243,00:00:00.000211,00:00:00.00024,00:00:00.000249,00:00:00.000217}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_ships(''0:00:01'', 20)', true, '2020-09-10 08:40:19.70904', '00:00:00.5', NULL, '{00:00:00.000442,00:00:00.000435,00:00:00.000446,00:00:00.000481,00:00:00.000383,00:00:00.000483,00:00:00.000465,00:00:00.00046,00:00:00.000431,00:00:00.000457}');
+INSERT INTO exile_s03.sys_processes VALUES ('sp_process_fleets_recycling(''0:00:01'', 25)', true, '2020-09-10 08:40:19.70904', '00:00:00.5', NULL, '{00:00:00.000197,00:00:00.000223,00:00:00.000212,00:00:00.000229,00:00:00.000192,00:00:00.000238,00:00:00.000223,00:00:00.000233,00:00:00.000202,00:00:00.000205}');
 
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: exile_s03; Owner: exileng
 --
 
-INSERT INTO exile_s03.users VALUES (2, -100, 'Nation oubliée', 'A', '2006-09-01 00:00:00', '2006-09-01 00:00:00', 'no@exile', 1000000, 168, 1036, '', NULL, '', NULL, NULL, 0, 4469810, 140617750, 0, 36455650, NULL, 100, '2019-03-29 18:16:08.73905', '2019-03-30 02:16:08.73905', 0, 0, 0, 0, NULL, NULL, 0, NULL, '2006-09-05 11:54:34.148706', NULL, 0, true, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, NULL, NULL, false, 5, '2006-09-19 11:54:34.148706', 50000, 100000, 7095, 0, 375, 3255, 1693, 0, 0, 0, NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 100, 2, '', NULL, NULL, '2006-09-01 00:00:00', 1, 1, 0, '2007-02-23 10:53:36.184266', false, 0, 4471262, 1, 0, 0, NULL, '0.0.0.0', NULL, 1, NULL, true, true, NULL, 62100, '2008-07-27 14:38:06.042', 2908182609, 1, 1, 1, 400, 3, 3);
-INSERT INTO exile_s03.users VALUES (1, -100, 'Les fossoyeurs', 'A', '2006-09-01 00:00:00', '2006-09-01 00:00:00', 'fos@exile', 1000000, 168, 1036, '', NULL, '', NULL, NULL, 0, 14857556, 0, 0, 0, NULL, 100, '2019-03-30 13:49:00.351465', '2019-03-30 21:49:00.351465', 0, 0, 0, 0, NULL, NULL, 0, NULL, '2006-09-05 11:56:46.664541', NULL, 0, false, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, NULL, NULL, false, 5, '2006-09-19 11:56:46.664541', 50000, 99999, 0, 0, 0, 0, 0, 535430.8, 0, 0, NULL, 1, 1.8522, 1.8522, 1.21, 1, 1.9845, 2.3625, 1.2, 1.575, 1.625, 1.5, 1.45, 1, 1, 1, 0.9, 1.1, 1.25, 1, 0.95, 0.8, 0.9, 1, 0.8, 0.95, 1, 5, 20, 85, 2, '', NULL, NULL, '2006-09-01 00:00:00', 1, 1, 0, '2007-02-23 10:53:36.184266', false, 0, 14894248, 1.1, 0, 0, NULL, '0.0.0.0', NULL, 1, NULL, true, true, NULL, 0, '2008-07-27 14:38:06.042', 0, 1, 1, 1, 400, 3, 0);
 INSERT INTO exile_s03.users VALUES (4, -100, 'Nation rebelle', 'A', '2006-09-01 00:00:00', '2006-09-01 00:00:00', 'nr@exile', 1000000, 168, 1036, '', NULL, '', NULL, NULL, 0, 103843, 0, 0, 0, NULL, 0, NULL, NULL, 0, 0, 0, 0, NULL, NULL, 0, NULL, '2006-09-05 11:57:09.571683', NULL, 0, true, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, NULL, NULL, false, 5, '2006-09-19 11:57:09.571683', 50000, 100000, 0, 0, 0, 0, 0, 0, 0, 0, NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 100, 2, '', NULL, NULL, '2006-09-01 00:00:00', 1, 1, 0, '2007-02-23 10:53:36.184266', false, 0, 103843, 1, 0, 0, NULL, '0.0.0.0', NULL, 1, NULL, true, true, NULL, 0, '2008-07-27 14:38:06.042', 0, 1, 1, 1, 400, 3, 0);
-INSERT INTO exile_s03.users VALUES (3, -50, 'Guilde marchande', 'A', '2006-09-01 00:00:00', '2006-09-01 00:00:00', 'gm@exile', 1000000, 168, 1036, '', NULL, '', NULL, NULL, 0, 0, 0, 0, 0, NULL, 100, '2019-03-30 13:49:00.351465', '2019-03-30 21:49:00.351465', 0, 0, 0, 0, NULL, NULL, 1017, NULL, '2106-09-05 11:54:00.464825', NULL, 0, false, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, NULL, NULL, false, 5, '2005-09-19 11:54:00.464825', 50000, 100000, 46389, 0, 375, 0, 0, 1026.6666, 0, 0, NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 85, 1, '', NULL, NULL, '2006-09-01 00:00:00', 1, 1, 0, '2007-02-23 10:53:36.184266', true, 0, 0, 1, 0, 0, NULL, '0.0.0.0', NULL, 1, NULL, true, true, NULL, 0, '2008-07-27 14:38:06.042', 0, 1, 1, 1, 400, 3, 0);
-INSERT INTO exile_s03.users VALUES (5, 500, 'Duke', 'nocheat', '2019-03-29 16:14:24.626639', '2009-01-01 21:22:34.04', NULL, 1000000, 168, 1036, '', NULL, '', NULL, NULL, 283, 0, 0, 0, 0, NULL, 0, NULL, NULL, 0, 0, 0, 0, NULL, '2019-03-29 16:14:24.626639', 0, NULL, '2009-01-01 21:22:34.04', NULL, 0, true, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, 637, 99880, false, 5, '2009-01-15 21:22:34.04', 50000, 100000, 0, 0, 0, 0, 0, 0, 0, 0, NULL, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 85, 0, '', NULL, '', '2009-01-01 21:22:34.04', 1, 1, 0, '2020-09-01 00:00:00', false, 0, 0, 1, 0, 0, NULL, '82.246.212.174', NULL, 1, 's_default', false, false, NULL, 0, '2008-12-31 21:22:34.04', 0, 1, 1, 1, 400, 3, 0);
+INSERT INTO exile_s03.users VALUES (2, -100, 'Nation oubliée', 'A', '2006-09-01 00:00:00', '2006-09-01 00:00:00', 'no@exile', 1000000, 168, 1036, '', NULL, '', NULL, NULL, 0, 4469810, 140617750, 0, 36455650, NULL, 100, '2019-03-29 18:16:08.73905', '2019-03-30 02:16:08.73905', 0, 0, 0, 0, NULL, NULL, 3, NULL, '2006-09-05 11:54:34.148706', NULL, 0, true, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, NULL, NULL, false, 5, '2006-09-19 11:54:34.148706', 50000, 100000, 7095, 0, 375, 3255, 1693, 0, 0, 0, NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 100, 2, '', NULL, NULL, '2006-09-01 00:00:00', 1, 1, 0, '2007-02-23 10:53:36.184266', false, 0, 4471262, 1, 0, 0, NULL, '0.0.0.0', NULL, 1, NULL, true, true, NULL, 62100, '2008-07-27 14:38:06.042', 2908212204, 1, 1, 1, 400, 3, 3);
+INSERT INTO exile_s03.users VALUES (5, 500, 'Duke', 'nocheat', '2019-03-29 16:14:24.626639', '2009-01-01 21:22:34.04', NULL, 1000000, 168, 1036, '', NULL, '', NULL, NULL, 283, 0, 0, 0, 0, NULL, 0, NULL, NULL, 0, 0, 0, 0, NULL, '2019-03-29 16:14:24.626639', 0, NULL, '2009-01-01 21:22:34.04', NULL, 283, true, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, 637, 99880, false, 5, '2009-01-15 21:22:34.04', 50000, 100000, 0, 0, 0, 0, 0, 0, 0, 0, NULL, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 85, 0, '', NULL, '', '2009-01-01 21:22:34.04', 1, 1, 0, '2020-09-11 00:00:00', false, 0, 0, 1, 0, 0, NULL, '82.246.212.174', NULL, 1, 's_default', false, false, NULL, 0, '2008-12-31 21:22:34.04', 0, 1, 1, 1, 400, 3, 0);
+INSERT INTO exile_s03.users VALUES (1, -100, 'Les fossoyeurs', 'A', '2006-09-01 00:00:00', '2006-09-01 00:00:00', 'fos@exile', 1000000, 168, 1036, '', NULL, '', NULL, NULL, 0, 14868700, 0, 0, 0, NULL, 100, '2019-03-30 13:49:00.351465', '2019-03-30 21:49:00.351465', 0, 0, 0, 0, NULL, NULL, 0, NULL, '2006-09-05 11:56:46.664541', NULL, 0, false, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, NULL, NULL, false, 5, '2006-09-19 11:56:46.664541', 50000, 99999, 0, 0, 0, 0, 0, 535430.8, 0, 0, NULL, 1, 1.8522, 1.8522, 1.21, 1, 1.9845, 2.3625, 1.2, 1.575, 1.625, 1.5, 1.45, 1, 1, 1, 0.9, 1.1, 1.25, 1, 0.95, 0.8, 0.9, 1, 0.8, 0.95, 1, 5, 20, 85, 2, '', NULL, NULL, '2006-09-01 00:00:00', 1, 1, 0, '2007-02-23 10:53:36.184266', false, 0, 14905392, 1.1, 0, 0, NULL, '0.0.0.0', NULL, 1, NULL, true, true, NULL, 0, '2008-07-27 14:38:06.042', 0, 1, 1, 1, 400, 3, 0);
+INSERT INTO exile_s03.users VALUES (3, -50, 'Guilde marchande', 'A', '2006-09-01 00:00:00', '2006-09-01 00:00:00', 'gm@exile', 1000000, 168, 1036, '', NULL, '', NULL, NULL, 0, 0, 0, 0, 0, NULL, 100, '2019-03-30 13:49:00.351465', '2019-03-30 21:49:00.351465', 0, 0, 0, 0, NULL, NULL, 1021, NULL, '2106-09-05 11:54:00.464825', NULL, 0, false, NULL, '2009-01-01 17:00:00', NULL, NULL, NULL, 0, 0, NULL, NULL, false, 5, '2005-09-19 11:54:00.464825', 50000, 100000, 46389, 0, 375, 0, 0, 1026.6666, 0, 0, NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 85, 1, '', NULL, NULL, '2006-09-01 00:00:00', 1, 1, 0, '2007-02-23 10:53:36.184266', true, 0, 0, 1, 0, 0, NULL, '0.0.0.0', NULL, 1, NULL, true, true, NULL, 0, '2008-07-27 14:38:06.042', 0, 1, 1, 1, 400, 3, 0);
 
 
 --
@@ -11258,21 +11308,21 @@ INSERT INTO exile_s03.users VALUES (5, 500, 'Duke', 'nocheat', '2019-03-29 16:14
 -- Name: alliances_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.alliances_id_seq', 437, true);
+SELECT pg_catalog.setval('exile_s03.alliances_id_seq', 440, true);
 
 
 --
 -- Name: alliances_reports_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.alliances_reports_id_seq', 310108, true);
+SELECT pg_catalog.setval('exile_s03.alliances_reports_id_seq', 310249, true);
 
 
 --
 -- Name: alliances_wallet_journal_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.alliances_wallet_journal_id_seq', 497218, true);
+SELECT pg_catalog.setval('exile_s03.alliances_wallet_journal_id_seq', 497256, true);
 
 
 --
@@ -11286,14 +11336,14 @@ SELECT pg_catalog.setval('exile_s03.alliances_wallet_requests_id_seq', 5128, tru
 -- Name: battles_fleets_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.battles_fleets_id_seq', 477861, true);
+SELECT pg_catalog.setval('exile_s03.battles_fleets_id_seq', 479634, true);
 
 
 --
 -- Name: battles_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.battles_id_seq', 110314, true);
+SELECT pg_catalog.setval('exile_s03.battles_id_seq', 110642, true);
 
 
 --
@@ -11307,35 +11357,42 @@ SELECT pg_catalog.setval('exile_s03.chat_channels_id_seq', 1, false);
 -- Name: chat_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.chat_id_seq', 12533, true);
+SELECT pg_catalog.setval('exile_s03.chat_id_seq', 12541, true);
 
 
 --
 -- Name: chat_lines_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.chat_lines_id_seq', 2266496, true);
+SELECT pg_catalog.setval('exile_s03.chat_lines_id_seq', 2266734, true);
 
 
 --
 -- Name: commanders_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.commanders_id_seq', 50897, true);
+SELECT pg_catalog.setval('exile_s03.commanders_id_seq', 50938, true);
 
 
 --
 -- Name: fleets_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.fleets_id_seq', 723167, true);
+SELECT pg_catalog.setval('exile_s03.fleets_id_seq', 724266, true);
+
+
+--
+-- Name: impersonate_impersonationlog_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
+--
+
+SELECT pg_catalog.setval('exile_s03.impersonate_impersonationlog_id_seq', 24, true);
 
 
 --
 -- Name: invasions_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.invasions_id_seq', 21949, true);
+SELECT pg_catalog.setval('exile_s03.invasions_id_seq', 21963, true);
 
 
 --
@@ -11363,7 +11420,7 @@ SELECT pg_catalog.setval('exile_s03.log_http_errors_id_seq', 637, true);
 -- Name: log_notices_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.log_notices_id_seq', 99975, true);
+SELECT pg_catalog.setval('exile_s03.log_notices_id_seq', 144809, true);
 
 
 --
@@ -11384,28 +11441,28 @@ SELECT pg_catalog.setval('exile_s03.log_referers_id_seq', 358, true);
 -- Name: log_sys_errors_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.log_sys_errors_id_seq', 697540, true);
+SELECT pg_catalog.setval('exile_s03.log_sys_errors_id_seq', 697543, true);
 
 
 --
 -- Name: market_history_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.market_history_id_seq', 316508, true);
+SELECT pg_catalog.setval('exile_s03.market_history_id_seq', 316590, true);
 
 
 --
 -- Name: messages_addressee_history_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.messages_addressee_history_id_seq', 214517, true);
+SELECT pg_catalog.setval('exile_s03.messages_addressee_history_id_seq', 214540, true);
 
 
 --
 -- Name: messages_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.messages_id_seq', 467832, true);
+SELECT pg_catalog.setval('exile_s03.messages_id_seq', 467894, true);
 
 
 --
@@ -11426,35 +11483,35 @@ SELECT pg_catalog.setval('exile_s03.nav_planet_location', 1, false);
 -- Name: npc_fleet_uid_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.npc_fleet_uid_seq', 217481, true);
+SELECT pg_catalog.setval('exile_s03.npc_fleet_uid_seq', 217505, true);
 
 
 --
 -- Name: planet_buildings_pending_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.planet_buildings_pending_id_seq', 1352447, true);
+SELECT pg_catalog.setval('exile_s03.planet_buildings_pending_id_seq', 1354293, true);
 
 
 --
 -- Name: planet_owners_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.planet_owners_id_seq', 157053, true);
+SELECT pg_catalog.setval('exile_s03.planet_owners_id_seq', 157116, true);
 
 
 --
 -- Name: planet_ships_pending_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.planet_ships_pending_id_seq', 45390451, true);
+SELECT pg_catalog.setval('exile_s03.planet_ships_pending_id_seq', 45390804, true);
 
 
 --
 -- Name: planet_training_pending_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.planet_training_pending_id_seq', 1994258, true);
+SELECT pg_catalog.setval('exile_s03.planet_training_pending_id_seq', 1996304, true);
 
 
 --
@@ -11475,28 +11532,28 @@ SELECT pg_catalog.setval('exile_s03.precise_bbcode_smileytag_id_seq', 1, false);
 -- Name: reports_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.reports_id_seq', 5701299, true);
+SELECT pg_catalog.setval('exile_s03.reports_id_seq', 5705589, true);
 
 
 --
 -- Name: researches_pending_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.researches_pending_id_seq', 165123, true);
+SELECT pg_catalog.setval('exile_s03.researches_pending_id_seq', 165397, true);
 
 
 --
 -- Name: routes_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.routes_id_seq', 559875, true);
+SELECT pg_catalog.setval('exile_s03.routes_id_seq', 560137, true);
 
 
 --
 -- Name: routes_waypoints_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.routes_waypoints_id_seq', 1132497, true);
+SELECT pg_catalog.setval('exile_s03.routes_waypoints_id_seq', 1133077, true);
 
 
 --
@@ -11510,21 +11567,21 @@ SELECT pg_catalog.setval('exile_s03.sessions_notifications_id_seq', 1, false);
 -- Name: spy_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.spy_id_seq', 7844, true);
+SELECT pg_catalog.setval('exile_s03.spy_id_seq', 7880, true);
 
 
 --
 -- Name: stats_requests; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.stats_requests', 5288394, true);
+SELECT pg_catalog.setval('exile_s03.stats_requests', 5334196, true);
 
 
 --
 -- Name: users_connections_id_seq; Type: SEQUENCE SET; Schema: exile_s03; Owner: exileng
 --
 
-SELECT pg_catalog.setval('exile_s03.users_connections_id_seq', 905390, true);
+SELECT pg_catalog.setval('exile_s03.users_connections_id_seq', 905474, true);
 
 
 --
@@ -11748,6 +11805,14 @@ ALTER TABLE ONLY exile_s03.fleets
 
 ALTER TABLE ONLY exile_s03.fleets_ships
     ADD CONSTRAINT fleets_ships_pkey PRIMARY KEY (fleetid, shipid);
+
+
+--
+-- Name: impersonate_impersonationlog impersonate_impersonationlog_pkey; Type: CONSTRAINT; Schema: exile_s03; Owner: exileng
+--
+
+ALTER TABLE ONLY exile_s03.impersonate_impersonationlog
+    ADD CONSTRAINT impersonate_impersonationlog_pkey PRIMARY KEY (id);
 
 
 --
@@ -12634,6 +12699,20 @@ CREATE INDEX fleets_ownerid_idx ON exile_s03.fleets USING btree (ownerid);
 --
 
 CREATE INDEX fleets_planetid_idx ON exile_s03.fleets USING btree (planetid) WHERE (planetid IS NOT NULL);
+
+
+--
+-- Name: impersonate_impersonationlog_impersonating_id_afd114fc; Type: INDEX; Schema: exile_s03; Owner: exileng
+--
+
+CREATE INDEX impersonate_impersonationlog_impersonating_id_afd114fc ON exile_s03.impersonate_impersonationlog USING btree (impersonating_id);
+
+
+--
+-- Name: impersonate_impersonationlog_impersonator_id_1ecfe8ce; Type: INDEX; Schema: exile_s03; Owner: exileng
+--
+
+CREATE INDEX impersonate_impersonationlog_impersonator_id_1ecfe8ce ON exile_s03.impersonate_impersonationlog USING btree (impersonator_id);
 
 
 --
@@ -13610,6 +13689,22 @@ ALTER TABLE ONLY exile_s03.fleets_ships
 
 
 --
+-- Name: impersonate_impersonationlog impersonate_imperson_impersonating_id_afd114fc_fk_auth_user; Type: FK CONSTRAINT; Schema: exile_s03; Owner: exileng
+--
+
+ALTER TABLE ONLY exile_s03.impersonate_impersonationlog
+    ADD CONSTRAINT impersonate_imperson_impersonating_id_afd114fc_fk_auth_user FOREIGN KEY (impersonating_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: impersonate_impersonationlog impersonate_imperson_impersonator_id_1ecfe8ce_fk_auth_user; Type: FK CONSTRAINT; Schema: exile_s03; Owner: exileng
+--
+
+ALTER TABLE ONLY exile_s03.impersonate_impersonationlog
+    ADD CONSTRAINT impersonate_imperson_impersonator_id_1ecfe8ce_fk_auth_user FOREIGN KEY (impersonator_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: log_multi_simultaneous_warnings log_multi_simultaneous_warnings_userid1_fkey; Type: FK CONSTRAINT; Schema: exile_s03; Owner: exileng
 --
 
@@ -14108,3 +14203,4 @@ ALTER TABLE ONLY exile_s03.users_ships_kills
 --
 -- PostgreSQL database dump complete
 --
+
