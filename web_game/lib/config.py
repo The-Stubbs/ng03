@@ -19,7 +19,7 @@ allowedOrientations = [1,2,3]
 allowedRetry = True
 allowedHolidays = True
 
-hasAdmins = False    # allow to send messages to administrators or not
+hasAdmins = False    # allow to send gm_mails to administrators or not
 
 maintenance = True            # enable/disable maintenance
 maintenance_msg = "Maintenance serveur ..." #"Mise à jour logiciel ...";#"Maintenance serveur" #Migration de la base de donnée";

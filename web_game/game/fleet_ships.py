@@ -9,7 +9,7 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "fleets"
+        self.selected_menu = "gm_fleets"
 
         self.e_no_error = 0
         self.e_bad_destination = 1
@@ -20,7 +20,7 @@ class View(GlobalView):
         fleetid = request.GET.get("id", "")
 
         if fleetid == None or fleetid == "":
-            return HttpResponseRedirect("/game/fleets/")
+            return HttpResponseRedirect("/game/gm_fleets/")
 
         fleetid = int(fleetid)
 
@@ -38,15 +38,15 @@ class View(GlobalView):
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
-                " FROM vw_fleets WHERE ownerid="+str(self.UserId)+" AND id="+str(fleetid)
+                " FROM vw_gm_fleets WHERE ownerid="+str(self.UserId)+" AND id="+str(fleetid)
 
         oRs = oConnExecute(query)
 
-        # if fleet doesn't exist, redirect to the list of fleets
+        # if fleet doesn't exist, redirect to the list of gm_fleets
         if oRs == None:
-            return HttpResponseRedirect("/game/fleets/")
+            return HttpResponseRedirect("/game/gm_fleets/")
 
-        # if fleet is moving or engaged, go back to the fleets
+        # if fleet is moving or engaged, go back to the gm_fleets
         if oRs[7] or oRs[3]:
             return HttpResponseRedirect("/game/fleet/?id=" + str(fleetid))
 
@@ -62,11 +62,11 @@ class View(GlobalView):
 
         if oRs[17] == rSelf:
             # retrieve the list of ships in the fleet
-            query = "SELECT db_ships.id, db_ships.capacity," + \
-                    "COALESCE((SELECT quantity FROM fleets_ships WHERE fleetid=" + str(fleetid) + " AND shipid = db_ships.id), 0)," + \
-                    "COALESCE((SELECT quantity FROM planet_ships WHERE planetid=(SELECT planetid FROM fleets WHERE id=" + str(fleetid) + ") AND shipid = db_ships.id), 0)" + \
-                    " FROM db_ships" + \
-                    " ORDER BY db_ships.category, db_ships.label"
+            query = "SELECT dt_ships.id, dt_ships.capacity," + \
+                    "COALESCE((SELECT quantity FROM gm_fleet_ships WHERE fleetid=" + str(fleetid) + " AND shipid = dt_ships.id), 0)," + \
+                    "COALESCE((SELECT quantity FROM gm_planet_ships WHERE planetid=(SELECT planetid FROM gm_fleets WHERE id=" + str(fleetid) + ") AND shipid = dt_ships.id), 0)" + \
+                    " FROM dt_ships" + \
+                    " ORDER BY dt_ships.category, dt_ships.label"
 
             oRss = oConnExecuteAll(query)
 
@@ -96,7 +96,7 @@ class View(GlobalView):
 
         # if units are removed, the fleet may be destroyed so retrieve the planetid where the fleet is
         if self.fleet_planet == 0:
-            oRs = oConnExecute("SELECT planetid FROM fleets WHERE id=" + str(fleetid))
+            oRs = oConnExecute("SELECT planetid FROM gm_fleets WHERE id=" + str(fleetid))
 
             if oRs == None:
                 self.fleet_planet = -1
@@ -104,7 +104,7 @@ class View(GlobalView):
                 self.fleet_planet = oRs[0]
 
         # retrieve the list of all existing ships
-        shipsArray = oConnExecute("SELECT id FROM db_ships")
+        shipsArray = oConnExecute("SELECT id FROM dt_ships")
 
         # for each ship id, check if the player wants to add ships of this kind
         for i in shipsArray:
@@ -113,7 +113,7 @@ class View(GlobalView):
             quantity = ToInt(self.request.POST.get("addship" + str(shipid)), 0)
 
             if quantity > 0:
-                oConnExecute("SELECT sp_transfer_ships_to_fleet(" + str(self.UserId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
+                oConnExecute("SELECT user_planet_transfer_ships(" + str(self.UserId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
 
         # for each ship id, check if the player wants to remove ships of this kind
         for i in shipsArray:
@@ -122,16 +122,16 @@ class View(GlobalView):
             quantity = ToInt(self.request.POST.get("removeship" + str(shipid)), 0)
             if quantity > 0:
                 ShipsRemoved = ShipsRemoved + quantity
-                oConnExecute("SELECT sp_transfer_ships_to_planet(" + str(self.UserId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
+                oConnExecute("SELECT user_fleet_transfer_ships(" + str(self.UserId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
 
         if ShipsRemoved > 0:
-            oRs = oConnExecute("SELECT id FROM fleets WHERE id=" + str(fleetid))
+            oRs = oConnExecute("SELECT id FROM gm_fleets WHERE id=" + str(fleetid))
 
             if oRs == None:
                 if self.fleet_planet > 0:
                     return HttpResponseRedirect("/game/orbit/?planet=" + str(self.fleet_planet))
                 else:
-                    return HttpResponseRedirect("/game/fleets/")
+                    return HttpResponseRedirect("/game/gm_fleets/")
 
     def ExecuteOrder(self, fleetid):
         if ToInt(self.request.POST.get("transfer_ships"), 0) == 1:

@@ -31,12 +31,12 @@ class View(GlobalView):
             if self.oAllianceRights["can_kick_player"]:
                 if action == "kick":
                     self.username = request.GET.get("name").strip()
-                    oConnExecute("SELECT sp_alliance_kick_member("+str(self.UserId)+","+dosql(self.username)+")")
+                    oConnExecute("SELECT user_alliance_kick_member("+str(self.UserId)+","+dosql(self.username)+")")
         
         if cat == 2 and self.username != "":
             if self.oAllianceRights["can_invite_player"]:
 
-                oRs = oConnExecute("SELECT sp_alliance_invite(" + str(self.UserId) + "," + dosql(self.username) + ")")
+                oRs = oConnExecute("SELECT user_alliance_invitation_create(" + str(self.UserId) + "," + dosql(self.username) + ")")
                 if oRs[0] == 0:
                     self.invitation_success = "ok"
                     self.username = ""
@@ -90,7 +90,7 @@ class View(GlobalView):
 
         # list ranks
         query = "SELECT rankid, label" + \
-                " FROM alliances_ranks" + \
+                " FROM gm_alliance_ranks" + \
                 " WHERE enabled AND allianceid=" + str(self.AllianceId) + \
                 " ORDER BY rankid"
         oRss = oConnExecuteAll(query)
@@ -107,10 +107,10 @@ class View(GlobalView):
             item["rank_label"] = oRs[1]
 
         # list members
-        query = "SELECT login, CASE WHEN id="+str(self.UserId)+" OR score_visibility >=1 THEN score ELSE 0 END AS score, int4((SELECT count(1) FROM nav_planet WHERE ownerid=users.id)) AS colonies," + \
+        query = "SELECT login, CASE WHEN id="+str(self.UserId)+" OR score_visibility >=1 THEN score ELSE 0 END AS score, int4((SELECT count(1) FROM gm_planets WHERE ownerid=gm_profiles.id)) AS colonies," + \
                 " date_part('epoch', now()-lastactivity) / 3600, alliance_joined, alliance_rank, privilege, score-previous_score AS score_delta, id," + \
-                " sp_alliance_get_leave_cost(id), credits, score_visibility, orientation, COALESCE(date_part('epoch', leave_alliance_datetime-now()), 0)" + \
-                " FROM users" + \
+                " internal_profile_get_alliance_leaving_cost(id), credits, score_visibility, orientation, COALESCE(date_part('epoch', leave_alliance_datetime-now()), 0)" + \
+                " FROM gm_profiles" + \
                 " WHERE alliance_id=" + str(self.AllianceId) + \
                 " ORDER BY " + orderby
         oRss = oConnExecuteAll(query)
@@ -222,9 +222,9 @@ class View(GlobalView):
 
         if self.oAllianceRights["can_invite_player"]:
             query = "SELECT recruit.login, created, recruiters.login, declined" + \
-                    " FROM alliances_invitations" + \
-                    "        INNER JOIN users AS recruit ON recruit.id = alliances_invitations.userid" + \
-                    "        LEFT JOIN users AS recruiters ON recruiters.id = alliances_invitations.recruiterid" + \
+                    " FROM gm_alliance_invitations" + \
+                    "        INNER JOIN gm_profiles AS recruit ON recruit.id = gm_alliance_invitations.userid" + \
+                    "        LEFT JOIN gm_profiles AS recruiters ON recruiters.id = gm_alliance_invitations.recruiterid" + \
                     " WHERE allianceid=" + str(self.AllianceId) + \
                     " ORDER BY created DESC"
 
@@ -281,12 +281,12 @@ class View(GlobalView):
     def SaveRanks(self):
         # retrieve alliance members# id and assign new rank
         query = "SELECT id" + \
-                " FROM users" + \
+                " FROM gm_profiles" + \
                 " WHERE alliance_id=" + str(self.AllianceId)
         oRss = oConnExecuteAll(query)
 
         for oRs in oRss:
-            query = " UPDATE users SET" + \
+            query = " UPDATE gm_profiles SET" + \
                     " alliance_rank=" + str(ToInt(self.request.POST.get("player" + str(oRs[0])), 100)) + \
                     " WHERE id=" + str(oRs[0]) + " AND alliance_id=" + str(self.AllianceId) + " AND (alliance_rank > 0 OR id=" + str(self.UserId) + ")"
             oConnDoQuery(query)

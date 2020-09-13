@@ -11,7 +11,7 @@ from web_game.lib.sql import *
 def retrieveBuildingsCache():
     
     # retrieve general buildings info
-    query = "SELECT id, storage_workers, energy_production, storage_ore, storage_hydrocarbon, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep FROM db_buildings"
+    query = "SELECT id, storage_workers, energy_production, storage_ore, storage_hydrocarbon, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep FROM dt_buildings"
     return oConnExecute(query)
 
 def retrieveBuildingsReqCache():
@@ -19,33 +19,33 @@ def retrieveBuildingsReqCache():
     # retrieve buildings requirements
     # planet elements can't restrict the destruction of a building that made their construction possible
     query = "SELECT buildingid, required_buildingid" +\
-            " FROM db_buildings_req_building" +\
-            "    INNER JOIN db_buildings ON (db_buildings.id=db_buildings_req_building.buildingid)" +\
-            " WHERE db_buildings.destroyable"
+            " FROM dt_building_building_reqs" +\
+            "    INNER JOIN dt_buildings ON (dt_buildings.id=dt_building_building_reqs.buildingid)" +\
+            " WHERE dt_buildings.destroyable"
     return oConnExecute(query)
 
 def retrieveShipsCache():
 
     # retrieve general Ships info
-    query = "SELECT id, label, description FROM db_Ships ORDER BY category, id"
+    query = "SELECT id, label, description FROM dt_ships ORDER BY category, id"
     return oConnExecute(query)
 
 def retrieveShipsReqCache():
     
     # retrieve buildings requirements for ships
-    query = "SELECT shipid, required_buildingid FROM db_ships_req_building"
+    query = "SELECT shipid, required_buildingid FROM dt_ship_building_reqs"
     return oConnExecute(query)
 
 def retrieveResearchCache():
 
     # retrieve Research info
-    query = "SELECT id, label, description FROM db_Research"
+    query = "SELECT id, label, description FROM dt_researches"
     return oConnExecute(query)
 
 def checkPlanetListCache(Session):
     
     # retrieve Research info
-    query = "SELECT id, name, galaxy, sector, planet FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(Session.get("user")) + " ORDER BY id"
+    query = "SELECT id, name, galaxy, sector, planet FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(Session.get("user")) + " ORDER BY id"
     return oConnExecuteAll(query)
 
 def getAllianceTag(allianceid):
@@ -55,7 +55,7 @@ def getAllianceTag(allianceid):
     allianceTag = cache.get("AllianceTag_" + str(allianceid))
 
     if allianceTag == None:
-        oRs = oConnExecute("SELECT tag FROM alliances WHERE id=" + str(allianceid))
+        oRs = oConnExecute("SELECT tag FROM gm_alliances WHERE id=" + str(allianceid))
         if oRs:
             return oRs[0]
         else:

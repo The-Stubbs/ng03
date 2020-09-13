@@ -27,9 +27,9 @@ class View(GlobalView):
 
         self.selected_menu = "alliance.overview"
 
-        query = "SELECT id, name, tag, description, created, (SELECT count(*) FROM users WHERE alliance_id=alliances.id)," + \
+        query = "SELECT id, name, tag, description, created, (SELECT count(*) FROM gm_profiles WHERE alliance_id=gm_alliances.id)," + \
                 " logo_url, website_url, max_members" + \
-                " FROM alliances"
+                " FROM gm_alliances"
 
         if alliance_tag == None:
             query = query + " WHERE id=" + str(self.AllianceId) + " LIMIT 1"
@@ -60,7 +60,7 @@ class View(GlobalView):
             NAPcount = 0
 
             query = "SELECT allianceid1, tag, name" + \
-                    " FROM alliances_naps INNER JOIN alliances ON (alliances_naps.allianceid1=alliances.id)" + \
+                    " FROM gm_alliance_naps INNER JOIN gm_alliances ON (gm_alliance_naps.allianceid1=gm_alliances.id)" + \
                     " WHERE allianceid2=" + str(alliance_id)
             oRss = oConnExecuteAll(query)
 
@@ -82,14 +82,14 @@ class View(GlobalView):
             #
             WARcount = 0
 
-            query = "SELECT w.created, alliances.id, alliances.tag, alliances.name"+ \
-                " FROM alliances_wars w" + \
-                "    INNER JOIN alliances ON (allianceid2 = alliances.id)" + \
+            query = "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name"+ \
+                " FROM gm_alliance_wars w" + \
+                "    INNER JOIN gm_alliances ON (allianceid2 = gm_alliances.id)" + \
                 " WHERE allianceid1=" + str(alliance_id) + \
                 " UNION " + \
-                "SELECT w.created, alliances.id, alliances.tag, alliances.name"+ \
-                " FROM alliances_wars w" + \
-                "    INNER JOIN alliances ON (allianceid1 = alliances.id)" + \
+                "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name"+ \
+                " FROM gm_alliance_wars w" + \
+                "    INNER JOIN gm_alliances ON (allianceid1 = gm_alliances.id)" + \
                 " WHERE allianceid2=" + str(alliance_id)
             oRss = oConnExecuteAll(query)
 
@@ -111,7 +111,7 @@ class View(GlobalView):
             #
 
             query = "SELECT rankid, label" + \
-                    " FROM alliances_ranks" + \
+                    " FROM gm_alliance_ranks" + \
                     " WHERE members_displayed AND allianceid=" + str(alliance_id) + \
                     " ORDER BY rankid"
             oRss = oConnExecuteAll(query)
@@ -123,7 +123,7 @@ class View(GlobalView):
                     item["rank_label"] = oRs[1]
 
                     query = "SELECT login" + \
-                            " FROM users" + \
+                            " FROM gm_profiles" + \
                             " WHERE alliance_id=" + str(alliance_id) + " AND alliance_rank = " + str(oRs[0]) + \
                             " ORDER BY upper(login)"
                     oMembersRss = oConnExecuteAll(query)

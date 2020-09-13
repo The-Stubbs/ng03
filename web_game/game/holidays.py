@@ -23,9 +23,9 @@ class View(ExileMixin, View):
 
         # retrieve remaining time
         query = "SELECT login," + \
-                " (SELECT int4(date_part('epoch', min_end_time-now())) FROM users_holidays WHERE userid=id)," + \
-                " (SELECT int4(date_part('epoch', end_time-now())) FROM users_holidays WHERE userid=id)" + \
-                " FROM users WHERE privilege=-2 AND id=" + str(self.UserId)
+                " (SELECT int4(date_part('epoch', min_end_time-now())) FROM gm_profile_holidays WHERE userid=id)," + \
+                " (SELECT int4(date_part('epoch', end_time-now())) FROM gm_profile_holidays WHERE userid=id)" + \
+                " FROM gm_profiles WHERE privilege=-2 AND id=" + str(self.UserId)
 
         oRs = oConnExecute(query)
 
@@ -36,7 +36,7 @@ class View(ExileMixin, View):
         action = request.POST.get("unlock", "")
 
         if action != "" and oRs[1] < 0:
-            oConnExecute("SELECT sp_stop_holidays("+str(self.UserId)+")")
+            oConnExecute("SELECT user_profile_stop_holidays("+str(self.UserId)+")")
             return HttpResponseRedirect("/game/overview/")
 
         # if remaining time is negative, return to overview page

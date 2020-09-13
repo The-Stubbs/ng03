@@ -53,14 +53,14 @@ class View(GlobalView):
                 "energy_production - energy_consumption, energy_capacity," + \
                 "floor, floor_occupied," + \
                 "space, space_occupied," + \
-                "commanderid, (SELECT name FROM commanders WHERE id = t.commanderid) AS commandername," + \
+                "commanderid, (SELECT name FROM gm_commanders WHERE id = t.commanderid) AS commandername," + \
                 "mod_production_ore, mod_production_hydrocarbon, workers, t.soldiers, soldiers_capacity," + \
                 "t.scientists, scientists_capacity, workers_for_maintenance, planet_floor, mood," + \
                 "energy, mod_production_energy, upkeep, energy_consumption," + \
-                " (SELECT int4(COALESCE(sum(scientists), 0)) FROM planet_training_pending WHERE planetid=t.id) AS scientists_training," + \
-                " (SELECT int4(COALESCE(sum(soldiers), 0)) FROM planet_training_pending WHERE planetid=t.id) AS soldiers_training," + \
+                " (SELECT int4(COALESCE(sum(scientists), 0)) FROM gm_planet_trainings WHERE planetid=t.id) AS scientists_training," + \
+                " (SELECT int4(COALESCE(sum(soldiers), 0)) FROM gm_planet_trainings WHERE planetid=t.id) AS soldiers_training," + \
                 " credits_production, credits_random_production, production_prestige" + \
-                " FROM vw_planets AS t" + \
+                " FROM vw_gm_planets AS t" + \
                 " WHERE planet_floor > 0 AND planet_space > 0 AND ownerid="+str(self.UserId)+ \
                 " ORDER BY "+orderby
 

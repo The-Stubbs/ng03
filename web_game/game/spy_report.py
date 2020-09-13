@@ -13,27 +13,27 @@ class View(GlobalView):
 
         self.id = request.GET.get("id", "")
         if self.id == "":
-            return HttpResponseRedirect("/game/reports/")
+            return HttpResponseRedirect("/game/gm_profile_reports/")
 
         self.id = int(self.id)
 
         key = request.GET.get("key", "")
         if key == "":
-            return HttpResponseRedirect("/game/reports/")
+            return HttpResponseRedirect("/game/gm_profile_reports/")
 
         #
         # retrieve report id and info
         #
 
         query = "SELECT id, key, userid, type, level, date, credits, spotted, target_name" + \
-                " FROM spy" + \
+                " FROM gm_spyings" + \
                 " WHERE id="+str(self.id)+" AND key="+dosql(key)
 
         oRs = oConnExecute(query)
 
-        # check if report exists and if given key is correct otherwise redirect to the reports
+        # check if report exists and if given key is correct otherwise redirect to the gm_profile_reports
         if oRs == None:
-            return HttpResponseRedirect("/game/reports/")
+            return HttpResponseRedirect("/game/gm_profile_reports/")
 
         else:
             #user = oRs[2]
@@ -50,23 +50,23 @@ class View(GlobalView):
         elif typ == 3:
             return self.DisplayPlanet()
         else:
-            return HttpResponseRedirect("/game/reports/")
+            return HttpResponseRedirect("/game/gm_profile_reports/")
 
     #
-    # display the spy report of a nation
+    # display the gm_spyings report of a nation
     #
     def DisplayNation(self):
 
         # load template
-        content = GetTemplate(self.request, "spy-report")
+        content = GetTemplate(self.request, "gm_spyings-report")
 
         #
         # list spied planets
         #
-        query = " SELECT spy_id, planet_id, planet_name, spy_planet.floor, spy_planet.space, ground, galaxy, sector, planet, spy_planet.pct_ore, spy_planet.pct_hydrocarbon " + \
-                " FROM spy_planet " + \
-                " LEFT JOIN nav_planet " + \
-                    " ON ( spy_planet.planet_id=nav_planet.id) " + \
+        query = " SELECT spy_id, planet_id, planet_name, gm_spying_planets.floor, gm_spying_planets.space, ground, galaxy, sector, planet, gm_spying_planets.pct_ore, gm_spying_planets.pct_hydrocarbon " + \
+                " FROM gm_spying_planets " + \
+                " LEFT JOIN gm_planets " + \
+                    " ON ( gm_spying_planets.planet_id=gm_planets.id) " + \
                 " WHERE spy_id=" + str(self.id)
 
         oRss = oConnExecuteAll(query)
@@ -100,12 +100,12 @@ class View(GlobalView):
         #
         # list spied technologies
         #
-        query = " SELECT category, db_research.id, research_level, levels " + \
-                " FROM spy_research " + \
-                " LEFT JOIN db_research " + \
-                    " ON ( spy_research.research_id=db_research.id) " + \
+        query = " SELECT category, dt_researches.id, research_level, levels " + \
+                " FROM gm_spying_researches " + \
+                " LEFT JOIN dt_researches " + \
+                    " ON ( gm_spying_researches.research_id=dt_researches.id) " + \
                 " WHERE spy_id=" + str(self.id)  + \
-                " ORDER BY category, db_research.id "
+                " ORDER BY category, dt_researches.id "
 
         oRss = oConnExecuteAll(query)
 
@@ -142,14 +142,14 @@ class View(GlobalView):
 
         if nbresearch != 0:
             content.AssignValue("nb_research", nbresearch)
-            content.Parse("researches")
+            content.Parse("gm_profile_researches")
 
         content.AssignValue("date", self.spydate)
         content.AssignValue("nation", self.target)
         content.AssignValue("nb_planet", nbplanet)
         content.AssignValue("level", self.level)
 
-        # spotted is True if our spy has been spotted while he was doing his job
+        # spotted is True if our gm_spyings has been spotted while he was doing his job
         if self.spotted: content.Parse("spotted")
 
         content.Parse("spynation")
@@ -157,21 +157,21 @@ class View(GlobalView):
         return self.Display(content)
 
     def DisplayPlanet(self):
-        content = GetTemplate(self.request, "spy-report")
+        content = GetTemplate(self.request, "gm_spyings-report")
 
         query = " SELECT spy_id,  planet_id,  planet_name,  s.owner_name,  s.floor,  s.space,  s.ground,  s.ore,  s.hydrocarbon,  s.ore_capacity, " + \
                 " s.hydrocarbon_capacity,  s.ore_production,  s.hydrocarbon_production,  s.energy_consumption,  s.energy_production,  s.workers,  s.workers_capacity,  s.scientists, " + \
                 " s.scientists_capacity,  s.soldiers,  s.soldiers_capacity,  s.radar_strength,  s.radar_jamming,  s.orbit_ore,  " + \
                 " s.orbit_hydrocarbon, galaxy, sector, planet, s.pct_ore, s.pct_hydrocarbon " + \
-                " FROM spy_planet AS s" + \
-                " LEFT JOIN nav_planet " + \
-                    " ON ( s.planet_id=nav_planet.id) " + \
+                " FROM gm_spying_planets AS s" + \
+                " LEFT JOIN gm_planets " + \
+                    " ON ( s.planet_id=gm_planets.id) " + \
                 " WHERE spy_id=" + str(self.id)
 
         oRs = oConnExecute(query)
 
         if oRs == None:
-            return HttpResponseRedirect("/game/reports/")
+            return HttpResponseRedirect("/game/gm_profile_reports/")
 
         planet = oRs[1]
 
@@ -219,8 +219,8 @@ class View(GlobalView):
 
         # display pending buildings
         query = " SELECT s.building_id, s.quantity, label, s.endtime, category " + \
-                " FROM spy_building AS s " + \
-                " LEFT JOIN db_buildings " + \
+                " FROM gm_spying_buildings AS s " + \
+                " LEFT JOIN dt_buildings " + \
                     " ON (s.building_id=id) " + \
                 " WHERE spy_id=" + str(self.id) + " AND planet_id=" + str(planet) + " AND s.endtime IS NOT NULL " + \
                 " ORDER BY category, label "
@@ -240,8 +240,8 @@ class View(GlobalView):
 
         # display built buildings
         query = " SELECT s.building_id, s.quantity, label, s.endtime, category " + \
-                " FROM spy_building AS s " + \
-                " LEFT JOIN db_buildings " + \
+                " FROM gm_spying_buildings AS s " + \
+                " LEFT JOIN dt_buildings " + \
                     " ON (s.building_id=id) " + \
                 " WHERE spy_id=" + str(self.id) + " AND planet_id=" + str(planet) + " AND s.endtime IS NULL " + \
                 " ORDER BY category, label "
@@ -263,7 +263,7 @@ class View(GlobalView):
 
         content.AssignValue("level", self.level)
 
-        # spotted is True if our spy has been spotted while he was doing his job
+        # spotted is True if our gm_spyings has been spotted while he was doing his job
         if self.spotted: content.Parse("spotted")
 
         content.Parse("spyplanet")

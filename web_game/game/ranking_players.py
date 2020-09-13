@@ -37,7 +37,7 @@ class View(GlobalView):
         if col == 1:
             orderby = "CASE WHEN score_visibility=2 OR v.id="+str(self.UserId)+"THEN upper(login) ELSE '' END, upper(login)"
         elif col == 2:
-            orderby = "upper(alliances.name)"
+            orderby = "upper(gm_alliances.name)"
         elif col == 3:
             orderby = "v.score"
             reversed = True
@@ -59,7 +59,7 @@ class View(GlobalView):
         # get the score of the tenth user to only show the avatars of the first 10 players
         #
         query = "SELECT score" + \
-                " FROM vw_players" + \
+                " FROM vw_gm_profiles" + \
                 " WHERE True "+searchby + \
                 " ORDER BY score DESC OFFSET 9 LIMIT 1"
         oRs = oConnExecute(query)
@@ -78,7 +78,7 @@ class View(GlobalView):
 
         if offset < 0:
             query = "SELECT v.id" + \
-                    " FROM vw_players v LEFT JOIN alliances ON alliances.id=v.alliance_id" + \
+                    " FROM vw_gm_profiles v LEFT JOIN gm_alliances ON gm_alliances.id=v.alliance_id" + \
                     " WHERE True "+searchby + \
                     " ORDER BY "+orderby
             oRss = oConnExecuteAll(query)
@@ -97,7 +97,7 @@ class View(GlobalView):
             offset = myOffset
 
         # get total number of players that could be displayed
-        query = "SELECT count(1) FROM vw_players WHERE True "+searchby
+        query = "SELECT count(1) FROM vw_gm_profiles WHERE True "+searchby
         oRs = oConnExecute(query)
         size = int(oRs[0])
         nb_pages = int(size/displayed)
@@ -138,10 +138,10 @@ class View(GlobalView):
 
         # Retrieve players to display
         query = "SELECT login, v.score, v.score_prestige," + \
-                "COALESCE(date_part('day', now()-lastactivity), 15), alliances.name, alliances.tag, v.id, avatar_url, v.alliance_id, v.score-v.previous_score AS score_delta," + \
+                "COALESCE(date_part('day', now()-lastactivity), 15), gm_alliances.name, gm_alliances.tag, v.id, avatar_url, v.alliance_id, v.score-v.previous_score AS score_delta," + \
                 "v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.AllianceId))+") OR v.id="+str(self.UserId) + \
-                " FROM vw_players v" + \
-                "    LEFT JOIN alliances ON ((v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR v.id="+str(self.UserId)+" OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.AllianceId))+")) AND alliances.id=v.alliance_id)" + \
+                " FROM vw_gm_profiles v" + \
+                "    LEFT JOIN gm_alliances ON ((v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR v.id="+str(self.UserId)+" OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.AllianceId))+")) AND gm_alliances.id=v.alliance_id)" + \
                 " WHERE True "+searchby + \
                 " ORDER BY "+orderby+" OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
         oRss = oConnExecuteAll(query)

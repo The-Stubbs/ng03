@@ -9,16 +9,16 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "fleets.fleets"
+        self.selected_menu = "gm_fleets.gm_fleets"
 
         return self.DisplayFleetsPage()
 
     def DisplayFleetsPage(self):
 
-        content = GetTemplate(self.request, "fleets")
+        content = GetTemplate(self.request, "gm_fleets")
 
         query = "SELECT category, label" + \
-                " FROM users_fleets_categories" + \
+                " FROM gm_profile_fleet_categories" + \
                 " WHERE userid=" + str(self.UserId) + \
                 " ORDER BY upper(label)"
         oRss = oConnExecuteAll(query)

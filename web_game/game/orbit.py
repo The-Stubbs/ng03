@@ -32,12 +32,12 @@ class View(GlobalView):
 
         content.AssignValue("planetid", str(self.CurrentPlanet))
 
-        # list the fleets near the planet
+        # list the gm_fleets near the planet
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," + \
                 " action, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
-                " FROM vw_fleets " + \
+                " FROM vw_gm_fleets " + \
                 " WHERE planetid="+ str(self.CurrentPlanet) +" AND action != 1 AND action != -1" + \
                 " ORDER BY upper(name)"
         oRss = oConnExecuteAll(query)
@@ -45,8 +45,8 @@ class View(GlobalView):
         if not oRss:
             content.Parse("nofleets")
         else:
-            fleets = []
-            content.AssignValue("fleets", fleets)
+            gm_fleets = []
+            content.AssignValue("gm_fleets", gm_fleets)
             
             for oRs in oRss:
                 manage = False
@@ -103,12 +103,12 @@ class View(GlobalView):
                 else:
                     fleet["cant_trade"] = True
                 
-                fleets.append(fleet)
+                gm_fleets.append(fleet)
 
         # list the ships on the planet to create a new fleet
         query = "SELECT shipid, quantity," + \
                 " signature, capacity, handling, speed, (weapon_dmg_em + weapon_dmg_explosive + weapon_dmg_kinetic + weapon_dmg_thermal) AS weapon_power, weapon_turrets, weapon_tracking_speed, hull, shield, recycler_output, long_distance_capacity, droppods" + \
-                " FROM planet_ships LEFT JOIN db_ships ON (planet_ships.shipid = db_ships.id)" + \
+                " FROM gm_planet_ships LEFT JOIN dt_ships ON (gm_planet_ships.shipid = dt_ships.id)" + \
                 " WHERE planetid=" + str(self.CurrentPlanet) + \
                 " ORDER BY category, label"
 
@@ -185,14 +185,14 @@ class View(GlobalView):
             return
 
         # retrieve all ships id that exists in shipsArray
-        oRss = oConnExecuteAll("SELECT id FROM db_ships")
+        oRss = oConnExecuteAll("SELECT id FROM dt_ships")
 
         shipsArray = oRss
         shipsCount = len(oRss)
 
         # create a new fleet at the current planet with the given name
         
-        oRs = oConnExecute("SELECT sp_create_fleet(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + dosql(fleetname) + ")")
+        oRs = oConnExecute("SELECT user_fleet_create(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + dosql(fleetname) + ")")
         if not oRs:
             return
         
@@ -214,10 +214,10 @@ class View(GlobalView):
 
             # add the ships type by type
             if quantity > 0:
-                oRs = oConnExecute("SELECT * FROM sp_transfer_ships_to_fleet(" + str(self.UserId) + ", " + str(fleetid) + ", " + str(shipid) + ", " + str(quantity) + ")")
+                oRs = oConnExecute("SELECT * FROM user_planet_transfer_ships(" + str(self.UserId) + ", " + str(fleetid) + ", " + str(shipid) + ", " + str(quantity) + ")")
                 cant_use_ship = cant_use_ship or oRs[0] == 3
 
         # delete the fleet if there is no ships in it
-        oConnDoQuery("DELETE FROM fleets WHERE size=0 AND id=" + str(fleetid) + " AND ownerid=" + str(self.UserId))
+        oConnDoQuery("DELETE FROM gm_fleets WHERE size=0 AND id=" + str(fleetid) + " AND ownerid=" + str(self.UserId))
 
         if cant_use_ship and self.fleet_creation_error == "": self.fleet_creation_error = "ship_cant_be_used"

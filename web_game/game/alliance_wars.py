@@ -32,7 +32,7 @@ class View(GlobalView):
 
         if action == "pay":
             tag = request.GET.get("tag", "").strip()
-            oRs = oConnExecute("SELECT sp_alliance_war_pay_bill(" + str(self.UserId) + "," + dosql(self.tag) + ")")
+            oRs = oConnExecute("SELECT user_alliance_war_extend(" + str(self.UserId) + "," + dosql(self.tag) + ")")
 
             if oRs[0] == 0:
                 self.cease_success = "ok"
@@ -45,7 +45,7 @@ class View(GlobalView):
 
         elif action == "stop":
             self.tag = request.GET.get("tag", "").strip()
-            oRs = oConnExecute("SELECT sp_alliance_war_stop(" + str(self.UserId) + "," + dosql(self.tag) + ")")
+            oRs = oConnExecute("SELECT user_alliance_war_stop(" + str(self.UserId) + "," + dosql(self.tag) + ")")
 
             if oRs[0] == 0:
                 self.cease_success = "ok"
@@ -59,7 +59,7 @@ class View(GlobalView):
         elif action == "new2":
             self.tag = request.POST.get("tag", "").strip()
 
-            oRs = oConnExecute("SELECT sp_alliance_war_declare(" + str(self.UserId) + "," + dosql(self.tag) + ")")
+            oRs = oConnExecute("SELECT user_alliance_war_create(" + str(self.UserId) + "," + dosql(self.tag) + ")")
             if oRs[0] == 0:
                 self.result = "ok"
                 self.tag = ""
@@ -94,14 +94,14 @@ class View(GlobalView):
         orderby = orderby + ", tag"
 
         # List wars
-        query = "SELECT w.created, alliances.id, alliances.tag, alliances.name, cease_fire_requested, date_part('epoch', cease_fire_expire-now())::integer, w.can_fight < now() AS can_fight, True AS attacker, next_bill < now() + INTERVAL '1 week', sp_alliance_war_cost(allianceid2), next_bill"+ \
-                " FROM alliances_wars w" + \
-                "    INNER JOIN alliances ON (allianceid2 = alliances.id)" + \
+        query = "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name, cease_fire_requested, date_part('epoch', cease_fire_expire-now())::integer, w.can_fight < now() AS can_fight, True AS attacker, next_bill < now() + INTERVAL '1 week', internal_alliance_get_war_cost(allianceid2), next_bill"+ \
+                " FROM gm_alliance_wars w" + \
+                "    INNER JOIN gm_alliances ON (allianceid2 = gm_alliances.id)" + \
                 " WHERE allianceid1=" + str(self.AllianceId) + \
                 " UNION " + \
-                "SELECT w.created, alliances.id, alliances.tag, alliances.name, cease_fire_requested, date_part('epoch', cease_fire_expire-now())::integer, w.can_fight < now() AS can_fight, False AS attacker, False, 0, next_bill"+ \
-                " FROM alliances_wars w" + \
-                "    INNER JOIN alliances ON (allianceid1 = alliances.id)" + \
+                "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name, cease_fire_requested, date_part('epoch', cease_fire_expire-now())::integer, w.can_fight < now() AS can_fight, False AS attacker, False, 0, next_bill"+ \
+                " FROM gm_alliance_wars w" + \
+                "    INNER JOIN gm_alliances ON (allianceid1 = gm_alliances.id)" + \
                 " WHERE allianceid2=" + str(self.AllianceId) + \
                 " ORDER BY " + orderby
         oRss = oConnExecuteAll(query)
@@ -157,7 +157,7 @@ class View(GlobalView):
 
             self.tag = self.request.POST.get("tag").strip()
 
-            oRs = oConnExecute("SELECT id, tag, name, sp_alliance_war_cost(id) + (const_coef_score_to_war()*sp_alliance_value(" + str(self.AllianceId) + "))::integer FROM alliances WHERE lower(tag)=lower(" + dosql(self.tag) + ")")
+            oRs = oConnExecute("SELECT id, tag, name, internal_alliance_get_war_cost(id) + (static_alliance_war_cost_coeff()*internal_alliance_get_value(" + str(self.AllianceId) + "))::integer FROM gm_alliances WHERE lower(tag)=lower(" + dosql(self.tag) + ")")
             if oRs == None:
                 content.AssignValue("tag", self.tag)
 

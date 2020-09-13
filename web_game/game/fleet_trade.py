@@ -11,7 +11,7 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "fleets"
+        self.selected_menu = "gm_fleets"
         
         self.can_command_alliance_fleets = -1
         
@@ -23,7 +23,7 @@ class View(GlobalView):
         self.fleetid = ToInt(self.request.GET.get("id"), 0)
         
         if self.fleetid == 0:
-            return HttpResponseRedirect("/game/fleets/")
+            return HttpResponseRedirect("/game/gm_fleets/")
         
         self.RetrieveFleetOwnerId(self.fleetid)
         
@@ -40,7 +40,7 @@ class View(GlobalView):
     
         # retrieve fleet owner
         query = "SELECT ownerid" +\
-                " FROM vw_fleets as f" +\
+                " FROM vw_gm_fleets as f" +\
                 " WHERE (ownerid=" + str(self.UserId) + " OR (shared AND owner_alliance_id=" + str(self.can_command_alliance_fleets) + ")) AND id=" + str(self.fleetid)
         oRs = oConnExecute(query)
     
@@ -54,20 +54,20 @@ class View(GlobalView):
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," +\
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," +\
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
-                " FROM vw_fleets" +\
+                " FROM vw_gm_fleets" +\
                 " WHERE ownerid=" + str(self.fleet_owner_id) + " AND id="+str(self.fleetid)
         oRs = oConnExecute(query)
     
-        # if fleet doesn't exist, redirect to the list of fleets
+        # if fleet doesn't exist, redirect to the list of gm_fleets
         if oRs == None:
             if self.request.GET.get("a") == "open":
-                return HttpResponseRedirect("/game/fleets/")
+                return HttpResponseRedirect("/game/gm_fleets/")
             else:
-                return HttpResponseRedirect("/game/fleets/")
+                return HttpResponseRedirect("/game/gm_fleets/")
     
         relation = oRs[17]
     
-        # if fleet is moving or engaged, go back to the fleets
+        # if fleet is moving or engaged, go back to the gm_fleets
         if oRs[7] or oRs[3]:
             if self.request.GET.get("a") == "open":
                 relation = rWar
@@ -93,7 +93,7 @@ class View(GlobalView):
             query = "SELECT ore, hydrocarbon, scientists, soldiers," +\
                     " GREATEST(0, workers-GREATEST(workers_busy,workers_for_maintenance-workers_for_maintenance/2+1,500))," +\
                     " workers > workers_for_maintenance/2" +\
-                    " FROM vw_planets WHERE id="+str(oRs[10])
+                    " FROM vw_gm_planets WHERE id="+str(oRs[10])
             oRs = oConnExecute(query)
 
             content.AssignValue("planet_ore", oRs[0])
@@ -125,7 +125,7 @@ class View(GlobalView):
         workers = ToInt(self.request.GET.get("load_workers"), 0) - ToInt(self.request.GET.get("unload_workers"), 0)
     
         if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
-            oRs = oConnExecute("SELECT sp_transfer_resources_with_planet(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
+            oRs = oConnExecute("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
     
     def TransferResourcesViaPost(self, fleetid):
     
@@ -136,5 +136,5 @@ class View(GlobalView):
         workers = ToInt(self.request.POST.get("load_workers"), 0) - ToInt(self.request.POST.get("unload_workers"), 0)
     
         if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
-            oRs = oConnExecute("SELECT sp_transfer_resources_with_planet(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
+            oRs = oConnExecute("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
             return HttpResponseRedirect("/game/fleet/?id=" + str(self.fleetid) + "+trade=" + str(oRs[0]))

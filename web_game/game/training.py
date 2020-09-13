@@ -35,7 +35,7 @@ class View(GlobalView):
 
         query = "SELECT scientist_ore, scientist_hydrocarbon, scientist_credits," + \
                 " soldier_ore, soldier_hydrocarbon, soldier_credits" + \
-                " FROM sp_get_training_price(" + str(self.UserId) + ")"
+                " FROM internal_profile_get_training_price(" + str(self.UserId) + ")"
         oRs = oConnExecute(query)
 
         if oRs:
@@ -46,7 +46,7 @@ class View(GlobalView):
             content.AssignValue("soldier_hydrocarbon", oRs[4])
             content.AssignValue("soldier_credits", oRs[5])
 
-        query = "SELECT scientists, scientists_capacity, soldiers, soldiers_capacity, workers FROM vw_planets WHERE id="+str(self.CurrentPlanet)
+        query = "SELECT scientists, scientists_capacity, soldiers, soldiers_capacity, workers FROM vw_gm_planets WHERE id="+str(self.CurrentPlanet)
         oRs = oConnExecute(query)
 
         if oRs:
@@ -75,7 +75,7 @@ class View(GlobalView):
 
         # training in process
         query = "SELECT id, scientists, soldiers, int4(date_part('epoch', end_time-now()))" + \
-                " FROM planet_training_pending WHERE planetid="+str(self.CurrentPlanet)+" AND end_time IS NOT NULL" + \
+                " FROM gm_planet_trainings WHERE planetid="+str(self.CurrentPlanet)+" AND end_time IS NOT NULL" + \
                 " ORDER BY start_time"
         oRss = oConnExecuteAll(query)
 
@@ -100,11 +100,11 @@ class View(GlobalView):
             i = i + 1
 
         # queue
-        query = "SELECT planet_training_pending.id, planet_training_pending.scientists, planet_training_pending.soldiers," + \
-                "    int4(ceiling(1.0*planet_training_pending.scientists/GREATEST(1, training_scientists)) * date_part('epoch', INTERVAL '1 hour'))," + \
-                "    int4(ceiling(1.0*planet_training_pending.soldiers/GREATEST(1, training_soldiers)) * date_part('epoch', INTERVAL '1 hour'))" + \
-                " FROM planet_training_pending" + \
-                "    JOIN nav_planet ON (nav_planet.id=planet_training_pending.planetid)" + \
+        query = "SELECT gm_planet_trainings.id, gm_planet_trainings.scientists, gm_planet_trainings.soldiers," + \
+                "    int4(ceiling(1.0*gm_planet_trainings.scientists/GREATEST(1, training_scientists)) * date_part('epoch', INTERVAL '1 hour'))," + \
+                "    int4(ceiling(1.0*gm_planet_trainings.soldiers/GREATEST(1, training_soldiers)) * date_part('epoch', INTERVAL '1 hour'))" + \
+                " FROM gm_planet_trainings" + \
+                "    JOIN gm_planets ON (gm_planets.id=gm_planet_trainings.planetid)" + \
                 " WHERE planetid="+str(self.CurrentPlanet)+" AND end_time IS NULL" + \
                 " ORDER BY start_time"
         oRss = oConnExecuteAll(query)
@@ -134,7 +134,7 @@ class View(GlobalView):
 
     def Train(self, Scientists, Soldiers):
 
-        oRs = connExecuteRetry("SELECT * FROM sp_start_training(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + str(Scientists) + "," + str(Soldiers) + ")")
+        oRs = connExecuteRetry("SELECT * FROM user_planet_training_start(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + str(Scientists) + "," + str(Soldiers) + ")")
 
         if oRs:
             self.train_error = oRs[0]
@@ -142,6 +142,6 @@ class View(GlobalView):
             self.train_error = 1
 
     def CancelTraining(self, queueId):
-        connExecuteRetryNoRecords("SELECT * FROM sp_cancel_training(" + str(self.CurrentPlanet) + ", " + str(queueId) + ")")
+        connExecuteRetryNoRecords("SELECT * FROM user_planet_training_cancel(" + str(self.CurrentPlanet) + ", " + str(queueId) + ")")
         return HttpResponseRedirect("?")
 

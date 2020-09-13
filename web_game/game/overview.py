@@ -20,7 +20,7 @@ class View(GlobalView):
 
         ' redeem credits
         if request.QueryString("redeem") = "1" then
-            query = "UPDATE users SET credits = credits + " & dosql(credits) & " WHERE id=" & UserId
+            query = "UPDATE gm_profiles SET credits = credits + " & dosql(credits) & " WHERE id=" & UserId
             oConn.Execute query, , 128
             credits = 0
 
@@ -48,7 +48,7 @@ class View(GlobalView):
         cookieTest = request.COOKIES.get("display_fleets", "") + request.COOKIES.get("display_research", "")
 
         if cookieTest != "":
-            query = "UPDATE users SET password=" + dosql("cheat-") + " || now() WHERE id=" + UserId
+            query = "UPDATE gm_profiles SET password=" + dosql("cheat-") + " || now() WHERE id=" + UserId
             oConnDoQuery(query)
 
         content.Parse("orientation" + str(self.oPlayerInfo["orientation"]))
@@ -56,7 +56,7 @@ class View(GlobalView):
 
         # display Alliance Message of the Day (MotD)
         if self.AllianceId:
-            query = "SELECT announce, tag, name, defcon FROM alliances WHERE id=" + str(self.AllianceId)
+            query = "SELECT announce, tag, name, defcon FROM gm_alliances WHERE id=" + str(self.AllianceId)
             oRs = oConnExecute(query)
             if oRs == None: oRs = None
         else:
@@ -92,7 +92,7 @@ class View(GlobalView):
 
         if request.session.get("stat_rank") or request.session.get("stat_score") != self.oPlayerInfo["score"]:
 
-            query = "SELECT int4(count(1)), (SELECT int4(count(1)) FROM vw_players WHERE score >= "+str(self.oPlayerInfo["score"])+") FROM vw_players"
+            query = "SELECT int4(count(1)), (SELECT int4(count(1)) FROM vw_gm_profiles WHERE score >= "+str(self.oPlayerInfo["score"])+") FROM vw_gm_profiles"
             oRs = oConnExecute(query)
 
             if oRs:
@@ -105,7 +105,7 @@ class View(GlobalView):
         content.AssignValue("stat_players", request.session.get("stat_players"))
         content.AssignValue("stat_maxcolonies", int(self.oPlayerInfo["mod_planets"]))
 
-        query = "SELECT (SELECT score_prestige FROM users WHERE id="+str(self.UserId)+"), (SELECT int4(count(1)) FROM vw_players WHERE score_prestige >= (SELECT score_prestige FROM users WHERE id=" + str(self.UserId) + "))"
+        query = "SELECT (SELECT score_prestige FROM gm_profiles WHERE id="+str(self.UserId)+"), (SELECT int4(count(1)) FROM vw_gm_profiles WHERE score_prestige >= (SELECT score_prestige FROM gm_profiles WHERE id=" + str(self.UserId) + "))"
         oRs = oConnExecute(query)
 
         if oRs:
@@ -121,7 +121,7 @@ class View(GlobalView):
         #
         query = "SELECT count(1), sum(ore_production), sum(hydrocarbon_production), " + \
                 " int4(sum(workers)), int4(sum(scientists)), int4(sum(soldiers)), now()" + \
-                " FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId)
+                " FROM vw_gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId)
         oRs = oConnExecute(query)
 
         if oRs:
@@ -131,7 +131,7 @@ class View(GlobalView):
             content.AssignValue("stat_prod_ore", oRs[1])
             content.AssignValue("stat_prod_hydrocarbon", oRs[2])
 
-            oRs2 = oConnExecute("SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0) FROM fleets WHERE ownerid=" + str(self.UserId))
+            oRs2 = oConnExecute("SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0) FROM gm_fleets WHERE ownerid=" + str(self.UserId))
 
             content.AssignValue("stat_workers", oRs[3] + oRs2[0])
             content.AssignValue("stat_scientists", oRs[4] + oRs2[1])
@@ -141,8 +141,8 @@ class View(GlobalView):
         # view current buildings constructions
         #
         query = "SELECT p.id, p.name, p.galaxy, p.sector, p.planet, b.buildingid, b.remaining_time, destroying" +\
-                " FROM nav_planet AS p" +\
-                "	 LEFT JOIN vw_buildings_under_construction2 AS b ON (p.id=b.planetid)"+\
+                " FROM gm_planets AS p" +\
+                "	 LEFT JOIN vw_gm_planet_building_pendings AS b ON (p.id=b.planetid)"+\
                 " WHERE p.ownerid="+str(self.UserId)+\
                 " ORDER BY p.id, destroying, remaining_time DESC"
         oRs = oConnExecuteAll(query)
@@ -183,10 +183,10 @@ class View(GlobalView):
         # view current ships constructions
         #
         query = "SELECT p.id, p.name, p.galaxy, p.sector, p.planet, s.shipid, s.remaining_time, s.recycle, p.shipyard_next_continue IS NOT NULL, p.shipyard_suspended," +\
-                " (SELECT shipid FROM planet_ships_pending WHERE planetid=p.id ORDER BY start_time LIMIT 1)" +\
-                " FROM nav_planet AS p" +\
-                "	LEFT JOIN vw_ships_under_construction AS s ON (p.id=s.planetid AND p.ownerid=s.ownerid AND s.end_time IS NOT NULL)"+\
-                " WHERE (s.recycle OR EXISTS(SELECT 1 FROM planet_buildings WHERE (buildingid = 105 OR buildingid = 205) AND planetid=p.id)) AND p.ownerid=" + str(self.UserId) +\
+                " (SELECT shipid FROM gm_planet_ship_pendings WHERE planetid=p.id ORDER BY start_time LIMIT 1)" +\
+                " FROM gm_planets AS p" +\
+                "	LEFT JOIN vw_gm_planet_ship_pendings AS s ON (p.id=s.planetid AND p.ownerid=s.ownerid AND s.end_time IS NOT NULL)"+\
+                " WHERE (s.recycle OR EXISTS(SELECT 1 FROM gm_planet_buildings WHERE (buildingid = 105 OR buildingid = 205) AND planetid=p.id)) AND p.ownerid=" + str(self.UserId) +\
                 " ORDER BY p.id, s.remaining_time DESC"
         oRs = oConnExecuteAll(query)
 
@@ -232,7 +232,7 @@ class View(GlobalView):
         # view current research
         #
         query = "SELECT researchid, int4(date_part('epoch', end_time-now()))" +\
-                " FROM researches_pending" +\
+                " FROM gm_profile_research_pendings" +\
                 " WHERE userid=" + str(self.UserId)
         oRs = oConnExecuteAll(query)
 
@@ -248,20 +248,20 @@ class View(GlobalView):
         if i==0: content.Parse("noresearch")
 
         query =	"SELECT f.id, f.name, f.signature, f.ownerid, " +\
-                "COALESCE((( SELECT vw_relations.relation FROM vw_relations WHERE vw_relations.user1 = users.id AND vw_relations.user2 = f.ownerid)), -3) AS owner_relation, f.owner_name," +\
-                "f.planetid, f.planet_name, COALESCE((( SELECT vw_relations.relation FROM vw_relations WHERE vw_relations.user1 = users.id AND vw_relations.user2 = f.planet_ownerid)), -3) AS planet_owner_relation, f.planet_galaxy, f.planet_sector, f.planet_planet, " +\
-                "f.destplanetid, f.destplanet_name, COALESCE((( SELECT vw_relations.relation FROM vw_relations WHERE vw_relations.user1 = users.id AND vw_relations.user2 = f.destplanet_ownerid)), -3) AS destplanet_owner_relation, f.destplanet_galaxy, f.destplanet_sector, f.destplanet_planet, " +\
+                "COALESCE((( SELECT vw_gm_profile_relations.relation FROM vw_gm_profile_relations WHERE vw_gm_profile_relations.user1 = gm_profiles.id AND vw_gm_profile_relations.user2 = f.ownerid)), -3) AS owner_relation, f.owner_name," +\
+                "f.planetid, f.planet_name, COALESCE((( SELECT vw_gm_profile_relations.relation FROM vw_gm_profile_relations WHERE vw_gm_profile_relations.user1 = gm_profiles.id AND vw_gm_profile_relations.user2 = f.planet_ownerid)), -3) AS planet_owner_relation, f.planet_galaxy, f.planet_sector, f.planet_planet, " +\
+                "f.destplanetid, f.destplanet_name, COALESCE((( SELECT vw_gm_profile_relations.relation FROM vw_gm_profile_relations WHERE vw_gm_profile_relations.user1 = gm_profiles.id AND vw_gm_profile_relations.user2 = f.destplanet_ownerid)), -3) AS destplanet_owner_relation, f.destplanet_galaxy, f.destplanet_sector, f.destplanet_planet, " +\
                 "f.planet_owner_name, f.destplanet_owner_name, f.speed," +\
                 "COALESCE(f.remaining_time, 0), COALESCE(f.total_time-f.remaining_time, 0), " +\
-                "( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = users.id)) AS from_radarstrength, " +\
-                "( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = users.id)) AS to_radarstrength, " +\
+                "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.planet_galaxy AND gm_planets.sector = f.planet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = gm_profiles.id)) AS from_radarstrength, " +\
+                "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.destplanet_galaxy AND gm_planets.sector = f.destplanet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = gm_profiles.id)) AS to_radarstrength, " +\
                 "attackonsight" +\
-                " FROM users, vw_fleets f " +\
-                " WHERE users.id="+str(self.UserId)+" AND (""action"" = 1 OR ""action"" = -1) AND (ownerid="+str(self.UserId)+" OR (destplanetid IS NOT NULL AND destplanetid IN (SELECT id FROM nav_planet WHERE ownerid="+str(self.UserId)+")))" +\
+                " FROM gm_profiles, vw_gm_fleets f " +\
+                " WHERE gm_profiles.id="+str(self.UserId)+" AND (""action"" = 1 OR ""action"" = -1) AND (ownerid="+str(self.UserId)+" OR (destplanetid IS NOT NULL AND destplanetid IN (SELECT id FROM gm_planets WHERE ownerid="+str(self.UserId)+")))" +\
                 " ORDER BY ownerid, COALESCE(remaining_time, 0)"
         oRs = oConnExecuteAll(query)
 
-        fleets = []
+        gm_fleets = []
         i = 0
         if oRs:
             for item in oRs:
@@ -343,10 +343,10 @@ class View(GlobalView):
                         fleet["name"] = item[5]
                         fleet["hostile"] = True
     
-                    fleets.append(fleet)
+                    gm_fleets.append(fleet)
                     i = i + 1
 
         if i==0: content.Parse("nofleets")
-        content.AssignValue("fleets", fleets)
+        content.AssignValue("gm_fleets", gm_fleets)
         
         return self.Display(content)

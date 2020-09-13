@@ -9,20 +9,20 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "fleets.standby"
+        self.selected_menu = "gm_fleets.standby"
 
         return self.ListStandby()
 
-    # List the fleets owned by the player
+    # List the gm_fleets owned by the player
     def ListStandby(self):
-        content = GetTemplate(self.request, "fleets-standby")
+        content = GetTemplate(self.request, "gm_fleets-standby")
 
         # list the ships
-        query = "SELECT nav_planet.id, nav_planet.name, nav_planet.galaxy, nav_planet.sector, nav_planet.planet, shipid, quantity" + \
-                " FROM planet_ships" + \
-                "    INNER JOIN nav_planet ON (planet_ships.planetid = nav_planet.id)" + \
-                " WHERE nav_planet.ownerid =" + str(self.UserId) + \
-                " ORDER BY nav_planet.id, shipid"
+        query = "SELECT gm_planets.id, gm_planets.name, gm_planets.galaxy, gm_planets.sector, gm_planets.planet, shipid, quantity" + \
+                " FROM gm_planet_ships" + \
+                "    INNER JOIN gm_planets ON (gm_planet_ships.planetid = gm_planets.id)" + \
+                " WHERE gm_planets.ownerid =" + str(self.UserId) + \
+                " ORDER BY gm_planets.id, shipid"
         oRss = oConnExecuteAll(query)
 
         if oRss == None:

@@ -36,9 +36,9 @@ class View(GlobalView):
 
         query = "SELECT id, name, galaxy, sector, planet, ore, hydrocarbon, ore_capacity, hydrocarbon_capacity, planet_floor," + \
                 " ore_production, hydrocarbon_production," + \
-                " (sp_market_price((sp_get_resource_price(0, galaxy)).sell_ore, planet_stock_ore))," + \
-                " (sp_market_price((sp_get_resource_price(0, galaxy)).sell_hydrocarbon, planet_stock_hydrocarbon))" + \
-                " FROM vw_planets AS v" + \
+                " (tool_compute_market_price((internal_profile_get_resource_price(0, galaxy)).sell_ore, planet_stock_ore))," + \
+                " (tool_compute_market_price((internal_profile_get_resource_price(0, galaxy)).sell_hydrocarbon, planet_stock_hydrocarbon))" + \
+                " FROM vw_gm_planets AS v" + \
                 " WHERE floor > 0 AND v.ownerid="+str(self.UserId) + planet_query + \
                 " ORDER BY v.id"
         oRss = oConnExecuteAll(query)
@@ -120,7 +120,7 @@ class View(GlobalView):
         #RetrievePrices()
 
         # for each planet owned, check what the player sells
-        query = "SELECT id FROM nav_planet WHERE ownerid="+str(self.UserId)
+        query = "SELECT id FROM gm_planets WHERE ownerid="+str(self.UserId)
         planetsArray = oConnExecuteAll(query)
 
         for i in planetsArray:
@@ -131,7 +131,7 @@ class View(GlobalView):
             hydrocarbon = ToInt(self.request.POST.get("h" + str(planetid)), 0)
 
             if ore > 0 or hydrocarbon > 0:
-                query = "SELECT sp_market_sell(" + str(self.UserId) + "," + str(planetid) + "," + str(ore*1000) + "," + str(hydrocarbon*1000) + ")"
+                query = "SELECT user_planet_sell_resources(" + str(self.UserId) + "," + str(planetid) + "," + str(ore*1000) + "," + str(hydrocarbon*1000) + ")"
                 self.request.session["details"] = query
                 oRs = oConnExecute(query)
                 self.request.session["details"] = "done:"+query

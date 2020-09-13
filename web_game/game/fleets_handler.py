@@ -31,9 +31,9 @@ class View(ExileMixin, View):
             oldCat = ToInt(request.GET.get("old"), 0)
             newCat = ToInt(request.GET.get("new"), 0)
 
-            oRs = oConnExecute("SELECT sp_fleets_set_category(" + str(self.UserId) + "," + str(fleetid) + "," + str(oldCat) + "," + str(newCat) + ")")
+            oRs = oConnExecute("SELECT user_fleet_category_assign(" + str(self.UserId) + "," + str(fleetid) + "," + str(oldCat) + "," + str(newCat) + ")")
             if oRs and oRs[0]:
-                content = GetTemplate(self.request, "fleets-handler")
+                content = GetTemplate(self.request, "gm_fleets-handler")
 
                 content.AssignValue("id", fleetid)
                 content.AssignValue("old", oldCat)
@@ -46,10 +46,10 @@ class View(ExileMixin, View):
         if action == "newcat":
             name = request.GET.get("name")
 
-            content = GetTemplate(self.request, "fleets-handler")
+            content = GetTemplate(self.request, "gm_fleets-handler")
 
             if self.isValidCategoryName(name):
-                oRs = oConnExecute("SELECT sp_fleets_categories_add(" + str(self.UserId) + "," + dosql(name) + ")")
+                oRs = oConnExecute("SELECT user_fleet_category_create(" + str(self.UserId) + "," + dosql(name) + ")")
 
                 if oRs:
                     content.AssignValue("id", oRs[0])
@@ -68,10 +68,10 @@ class View(ExileMixin, View):
             name = request.GET.get("name")
             catid = ToInt(request.GET.get("id"), 0)
 
-            content = GetTemplate(self.request, "fleets-handler")
+            content = GetTemplate(self.request, "gm_fleets-handler")
 
             if name == "":
-                oRs = oConnExecute("SELECT sp_fleets_categories_delete(" + str(self.UserId) + "," + str(catid) + ")")
+                oRs = oConnExecute("SELECT user_fleet_category_delete(" + str(self.UserId) + "," + str(catid) + ")")
                 if oRs:
                     content.AssignValue("id", catid)
                     content.AssignValue("label", name)
@@ -80,7 +80,7 @@ class View(ExileMixin, View):
                     return render(self.request, content.template, content.data)
 
             elif self.isValidCategoryName(name):
-                oRs = oConnExecute("SELECT sp_fleets_categories_rename(" + str(self.UserId) + "," + str(catid) + "," + dosql(name) + ")")
+                oRs = oConnExecute("SELECT user_fleet_category_rename(" + str(self.UserId) + "," + str(catid) + "," + dosql(name) + ")")
 
                 if oRs:
                     content.AssignValue("id", catid)
@@ -94,7 +94,7 @@ class View(ExileMixin, View):
 
                 return render(self.request, content.template, content.data)
 
-        # retrieve list of fleets
+        # retrieve list of gm_fleets
         if action == "list":
             return self.GetFleetList()
 
@@ -121,16 +121,16 @@ class View(ExileMixin, View):
             p = re.compile("^[a-zA-Z0-9\- ]+$")
             return p.match(name)
 
-    # List the fleets owned by the player
+    # List the gm_fleets owned by the player
     def GetFleetList(self):
 
-        content = GetTemplate(self.request, "fleets-handler")
+        content = GetTemplate(self.request, "gm_fleets-handler")
 
-        query = "SELECT fleetid, fleets_ships.shipid, quantity" + \
-                " FROM fleets" + \
-                "    INNER JOIN fleets_ships ON (fleets.id=fleets_ships.fleetid)" + \
+        query = "SELECT fleetid, gm_fleet_ships.shipid, quantity" + \
+                " FROM gm_fleets" + \
+                "    INNER JOIN gm_fleet_ships ON (gm_fleets.id=gm_fleet_ships.fleetid)" + \
                 " WHERE ownerid=" + str(self.UserId) + \
-                " ORDER BY fleetid, fleets_ships.shipid"
+                " ORDER BY fleetid, gm_fleet_ships.shipid"
         ShipListArray = oConnExecuteAll(query)
 
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
@@ -138,14 +138,14 @@ class View(ExileMixin, View):
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," + \
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers," + \
                 " recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action," + \
-                "( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = "+str(self.UserId)+")) AS from_radarstrength, " + \
-                "( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = "+str(self.UserId)+")) AS to_radarstrength," + \
+                "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.planet_galaxy AND gm_planets.sector = f.planet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = "+str(self.UserId)+")) AS from_radarstrength, " + \
+                "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.destplanet_galaxy AND gm_planets.sector = f.destplanet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = "+str(self.UserId)+")) AS to_radarstrength," + \
                 " categoryid" + \
-                " FROM vw_fleets as f WHERE ownerid=" + str(self.UserId)
+                " FROM vw_gm_fleets as f WHERE ownerid=" + str(self.UserId)
         oRss = oConnExecuteAll(query)
 
         list = []
-        content.AssignValue("fleets", list)
+        content.AssignValue("gm_fleets", list)
         for oRs in oRss:
             item = {}
             list.append(item)

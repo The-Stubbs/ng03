@@ -26,7 +26,7 @@ class View(GlobalView):
             query = "SELECT id, category," + \
                     "cost_ore, cost_hydrocarbon, workers, floor, space, production_ore, production_hydrocarbon, energy_production, workers*maintenance_factor/100.0, upkeep, energy_consumption," + \
                     "storage_ore, storage_hydrocarbon, storage_energy" + \
-                    " FROM sp_list_available_buildings(" + str(self.UserId) + ") WHERE not is_planet_element"
+                    " FROM internal_planet_get_available_buildings(" + str(self.UserId) + ") WHERE not is_planet_element"
 
             oRss = oConnExecuteAll(query)
 
@@ -83,9 +83,9 @@ class View(GlobalView):
                 item["upkeep_credits"] = 0
                 item["upkeep_energy"] = oRs[12]
 
-        elif cat == "research":# display help on researches
+        elif cat == "research":# display help on gm_profile_researches
             query = "SELECT researchid, category, total_cost, level, levels" + \
-                    " FROM sp_list_researches(" + str(self.UserId) + ") WHERE level > 0 OR (researchable AND planet_elements_requirements_met)" + \
+                    " FROM internal_profile_get_researches_status(" + str(self.UserId) + ") WHERE level > 0 OR (researchable AND planet_elements_requirements_met)" + \
                     " ORDER BY category, researchid"
 
             oRss = oConnExecuteAll(query)
@@ -100,12 +100,12 @@ class View(GlobalView):
                 category = oRs[1]
 
                 if category != lastCategory:
-                    categ = {'id': category, 'researches':[]}
+                    categ = {'id': category, 'gm_profile_researches':[]}
                     list.append(categ)
                     lastCategory = category
 
                 item = {}
-                categ['researches'].append(item)
+                categ['gm_profile_researches'].append(item)
 
                 item["id"] = oRs[0]
                 item["name"] = getResearchLabel(oRs[0])
@@ -120,7 +120,7 @@ class View(GlobalView):
             query = "SELECT id, category, cost_ore, cost_hydrocarbon, crew," + \
                     " signature, capacity, handling, speed, weapon_turrets, weapon_dmg_em + weapon_dmg_explosive + weapon_dmg_kinetic + weapon_dmg_thermal AS weapon_power, " + \
                     " weapon_tracking_speed, hull, shield, recycler_output, long_distance_capacity, droppods, cost_energy, upkeep, required_vortex_strength, leadership" + \
-                    " FROM sp_list_available_ships(" + str(self.UserId) + ") WHERE new_shipid IS NULL"
+                    " FROM internal_planet_get_available_ships(" + str(self.UserId) + ") WHERE new_shipid IS NULL"
             oRss = oConnRows(query)
 
             category = -1

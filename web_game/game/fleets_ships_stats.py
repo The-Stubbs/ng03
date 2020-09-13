@@ -18,13 +18,13 @@ class View(GlobalView):
 
         # list ships that can be built on the planet
         query = "SELECT category, shipid, killed, lost" + \
-                " FROM users_ships_kills" + \
-                "    INNER JOIN db_ships ON (db_ships.id = users_ships_kills.shipid)" + \
+                " FROM gm_profile_kills" + \
+                "    INNER JOIN dt_ships ON (dt_ships.id = gm_profile_kills.shipid)" + \
                 " WHERE userid=" + str(self.UserId) + \
                 " ORDER BY shipid"
         oRss = oConnExecuteAll(query)
 
-        content = GetTemplate(self.request, "fleets-ships-stats")
+        content = GetTemplate(self.request, "gm_fleets-ships-stats")
 
         count = 0
         kills = 0

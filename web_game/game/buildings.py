@@ -57,7 +57,7 @@ class View(GlobalView):
                 " mod_production_ore, mod_production_hydrocarbon, mod_production_energy," + \
                 " ore_capacity, hydrocarbon_capacity," + \
                 " scientists, scientists_capacity, soldiers, soldiers_capacity, energy_production-energy_consumption" + \
-                " FROM vw_planets" + \
+                " FROM vw_gm_planets" + \
                 " WHERE id="+str(self.CurrentPlanet)
         oRs = oConnExecute(query)
     
@@ -83,7 +83,7 @@ class View(GlobalView):
         self.pSoldiersCapacity = oRs[15]
     
         # Retrieve buildings of current planet
-        query = "SELECT planetid, buildingid, quantity FROM planet_buildings WHERE quantity > 0 AND planetid=" + str(self.CurrentPlanet)
+        query = "SELECT planetid, buildingid, quantity FROM gm_planet_buildings WHERE quantity > 0 AND planetid=" + str(self.CurrentPlanet)
         oPlanetBuildings = oConnExecute(query)
         
         if not oPlanetBuildings:
@@ -178,14 +178,14 @@ class View(GlobalView):
     def ListBuildings(self):
     
         # count number of buildings under construction
-        oRs = oConnExecute("SELECT int4(count(*)) FROM planet_buildings_pending WHERE planetid=" + str(self.CurrentPlanet) + " LIMIT 1")
+        oRs = oConnExecute("SELECT int4(count(*)) FROM gm_planet_building_pendings WHERE planetid=" + str(self.CurrentPlanet) + " LIMIT 1")
         underConstructionCount = oRs[0]
     
         # list buildings that can be built on the planet
         query = "SELECT id, category, cost_prestige, cost_ore, cost_hydrocarbon, cost_energy, cost_credits, workers, floor, space," + \
                 "construction_maximum, quantity, build_status, construction_time, destroyable, '', production_ore, production_hydrocarbon, energy_production, buildings_requirements_met, destruction_time," + \
                 "upkeep, energy_consumption, buildable" + \
-                " FROM vw_buildings" + \
+                " FROM vw_gm_planet_buildings" + \
                 " WHERE planetid=" + str(self.CurrentPlanet) + " AND ((buildable AND research_requirements_met) or quantity > 0)"
     
         oRss = oConnExecute(query)
@@ -365,7 +365,7 @@ class View(GlobalView):
         return self.Display(content)
     
     def StartBuilding(self, BuildingId):
-        oRs = connExecuteRetry("SELECT sp_start_building(" + str(self.UserId) + "," + str(self.CurrentPlanet) + ", " + str(BuildingId) + ", false)")
+        oRs = connExecuteRetry("SELECT user_planet_building_start(" + str(self.UserId) + "," + str(self.CurrentPlanet) + ", " + str(BuildingId) + ", false)")
         
         if oRs and oRs[0] > 0:
             if oRs[0] == 1:
@@ -378,7 +378,7 @@ class View(GlobalView):
                 self.log_notice("buildings.asp", "already building this type of building", 0)
 
     def CancelBuilding(self, BuildingId):
-        connExecuteRetryNoRecords("SELECT sp_cancel_building(" + str(self.UserId) + "," + str(self.CurrentPlanet) + ", " + str(BuildingId) + ")")
+        connExecuteRetryNoRecords("SELECT user_planet_building_cancel(" + str(self.UserId) + "," + str(self.CurrentPlanet) + ", " + str(BuildingId) + ")")
     
     def DestroyBuilding(self, BuildingId):
-        connExecuteRetryNoRecords("SELECT sp_destroy_building(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + str(BuildingId) + ")")
+        connExecuteRetryNoRecords("SELECT user_planet_building_destroy(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + str(BuildingId) + ")")

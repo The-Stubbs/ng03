@@ -9,16 +9,16 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "reports"
+        self.selected_menu = "gm_profile_reports"
 
         cat = ToInt(request.GET.get("cat", ""), 0)
 
         return self.display_mails(cat)
 
-    # display list of messages
+    # display list of gm_mails
     def display_mails(self, cat):
         
-        content = GetTemplate(self.request, "reports")
+        content = GetTemplate(self.request, "gm_profile_reports")
 
         query = "SELECT type, subtype, datetime, battleid, fleetid, fleet_name," + \
                 " planetid, planet_name, galaxy, sector, planet," + \
@@ -29,11 +29,11 @@ class View(GlobalView):
                 " invasionid, spyid, spy_key, description, buildingid," + \
                 " upkeep_commanders, upkeep_planets, upkeep_scientists, upkeep_ships, upkeep_ships_in_position, upkeep_ships_parked, upkeep_soldiers," + \
                 " name" + \
-                " FROM vw_reports" + \
+                " FROM vw_gm_profile_reports" + \
                 " WHERE ownerid = " + str(self.UserId)
 
         #
-        # Limit the list to the current category or only display 100 reports if no categories specified
+        # Limit the list to the current category or only display 100 gm_profile_reports if no categories specified
         #
         if cat == 0:
             query = query + " ORDER BY datetime DESC LIMIT 100"
@@ -47,9 +47,9 @@ class View(GlobalView):
         if oRss == None: content.Parse("noreports")
         else:
             #
-            # List the reports returned by the query
+            # List the gm_profile_reports returned by the query
             #
-            reports = []
+            gm_profile_reports = []
             for oRs in oRss:
 
                 reportType = oRs[0]*100+oRs[1]
@@ -113,15 +113,15 @@ class View(GlobalView):
 
                     report["commandername"] = oRs[37]
 
-                    reports.append(report)
+                    gm_profile_reports.append(report)
                     
-            content.AssignValue("messages", reports)
+            content.AssignValue("gm_mails", gm_profile_reports)
 
             #
-            # List how many new reports there are for each category
+            # List how many new gm_profile_reports there are for each category
             #
             query = "SELECT r.type, int4(COUNT(1)) " + \
-                    " FROM reports AS r" + \
+                    " FROM gm_profile_reports AS r" + \
                     " WHERE datetime <= now()" + \
                     " GROUP BY r.type, r.ownerid, r.read_date" + \
                     " HAVING r.ownerid = " + str(self.UserId) + " AND read_date is null"
@@ -139,13 +139,13 @@ class View(GlobalView):
                 content.Parse("tabnav_000_new")
             
             if not self.IsImpersonating():
-                # flag only the current category of reports as read
+                # flag only the current category of gm_profile_reports as read
                 if cat != 0:
-                    oConnDoQuery("UPDATE reports SET read_date = now() WHERE ownerid = " + str(self.UserId) + " AND type = "+str(cat)+ " AND read_date is null AND datetime <= now()")
+                    oConnDoQuery("UPDATE gm_profile_reports SET read_date = now() WHERE ownerid = " + str(self.UserId) + " AND type = "+str(cat)+ " AND read_date is null AND datetime <= now()")
 
-                # flag all reports as read
+                # flag all gm_profile_reports as read
                 if self.request.GET.get("cat", "") == "0":
-                    oConnDoQuery("UPDATE reports SET read_date = now() WHERE ownerid = " + str(self.UserId) + " AND read_date is null AND datetime <= now()")
+                    oConnDoQuery("UPDATE gm_profile_reports SET read_date = now() WHERE ownerid = " + str(self.UserId) + " AND read_date is null AND datetime <= now()")
             
         content.Parse("tabnav_000")
         content.Parse("tabnav_100")

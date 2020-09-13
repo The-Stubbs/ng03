@@ -11,7 +11,7 @@ class View(GlobalView):
         
         self.selected_menu = "research"
 
-        oConnExecute("SELECT sp_update_researches(" + str(self.UserId) + ")")
+        oConnExecute("SELECT internal_profile_update_modifiers(" + str(self.UserId) + ")")
 
         Action = request.GET.get("a", "").lower()
         ResearchId = ToInt(request.GET.get("r"), 0)
@@ -23,27 +23,27 @@ class View(GlobalView):
             elif Action == "cancel":
                 self.CancelResearch(ResearchId)
             elif Action == "continue":
-                oConnDoQuery("UPDATE researches_pending SET looping=true WHERE userid=" + str(self.UserId) + " AND researchid=" + str(ResearchId))
+                oConnDoQuery("UPDATE gm_profile_research_pendings SET looping=true WHERE userid=" + str(self.UserId) + " AND researchid=" + str(ResearchId))
             elif Action == "stop":
-                oConnDoQuery("UPDATE researches_pending SET looping=false WHERE userid=" + str(self.UserId) + " AND researchid=" + str(ResearchId))
+                oConnDoQuery("UPDATE gm_profile_research_pendings SET looping=false WHERE userid=" + str(self.UserId) + " AND researchid=" + str(ResearchId))
                 
         return self.ListResearches()
 
     def HasEnoughFunds(self, credits):
         return credits <= 0 or self.oPlayerInfo["credits"] >= credits
 
-    # List all the available researches
+    # List all the available gm_profile_researches
     def ListResearches(self):
 
-        # count number of researches pending
-        oRs = oConnExecute("SELECT int4(count(1)) FROM researches_pending WHERE userid=" + str(self.UserId) + " LIMIT 1")
+        # count number of gm_profile_researches pending
+        oRs = oConnExecute("SELECT int4(count(1)) FROM gm_profile_research_pendings WHERE userid=" + str(self.UserId) + " LIMIT 1")
         underResearchCount = oRs[0]
 
         # list things that can be researched
         query = "SELECT researchid, category, total_cost, total_time, level, levels, researchable, buildings_requirements_met, status," + \
-                " (SELECT looping FROM researches_pending WHERE researchid = t.researchid AND userid=" + str(self.UserId) + ") AS looping," + \
+                " (SELECT looping FROM gm_profile_research_pendings WHERE researchid = t.researchid AND userid=" + str(self.UserId) + ") AS looping," + \
                 " expiration_time IS NOT NULL" + \
-                " FROM sp_list_researches(" + str(self.UserId) + ") AS t" + \
+                " FROM internal_profile_get_researches_status(" + str(self.UserId) + ") AS t" + \
                 " WHERE level > 0 OR (researchable AND planet_elements_requirements_met)"
         oRss = oConnExecute(query)
         
@@ -61,13 +61,13 @@ class View(GlobalView):
             CatId = oRs[1]
 
             if CatId != lastCategory:
-                category = {'id':CatId, 'researches':[]}
+                category = {'id':CatId, 'gm_profile_researches':[]}
                 categories.append(category)
                 lastCategory = CatId
                 itemCount = 0
             
             research = {}
-            category['researches'].append(research)
+            category['gm_profile_researches'].append(research)
             
             itemCount = itemCount + 1
 
@@ -125,7 +125,7 @@ class View(GlobalView):
         return self.Display(content)
 
     def StartResearch(self, ResearchId):
-        oConnExecute("SELECT * FROM sp_start_research(" + str(self.UserId) + ", " + str(ResearchId) + ", false)")
+        oConnExecute("SELECT * FROM user_research_start(" + str(self.UserId) + ", " + str(ResearchId) + ", false)")
 
     def CancelResearch(self, ResearchId):
-        oConnExecute("SELECT * FROM sp_cancel_research(" + str(self.UserId) + ", " + str(ResearchId) + ")")
+        oConnExecute("SELECT * FROM user_research_cancel(" + str(self.UserId) + ", " + str(ResearchId) + ")")

@@ -14,7 +14,7 @@ class View(GlobalView):
         return self.DisplayRankingAlliances(request.GET.get("tag"), request.GET.get("name"))
 
     def DisplayRankingAlliances(self, search_tag, search_name):
-        content = GetTemplate(self.request, "ranking-alliances")
+        content = GetTemplate(self.request, "ranking-gm_alliances")
 
         #
         # search by parameter
@@ -32,7 +32,7 @@ class View(GlobalView):
         
         reversed = False
         if col == 1:
-            orderby = "upper(alliances.name)"
+            orderby = "upper(gm_alliances.name)"
         elif col == 3:
             orderby = "members"
             reversed = True
@@ -42,7 +42,7 @@ class View(GlobalView):
         elif col == 6:
             orderby = "created"
         elif col == 7:
-            orderby = "upper(alliances.tag)"
+            orderby = "upper(gm_alliances.tag)"
 
         if self.request.GET.get("r", "") != "":
             reversed = not reversed
@@ -50,7 +50,7 @@ class View(GlobalView):
             content.Parse("r" + str(col))
 
         if reversed: orderby = orderby + " DESC"
-        orderby = orderby + ", upper(alliances.name)"
+        orderby = orderby + ", upper(gm_alliances.name)"
 
         content.AssignValue("sort_column", col)
 
@@ -65,8 +65,8 @@ class View(GlobalView):
 
         displayed = 25 # number of nations on each page
 
-        # retrieve number of alliances
-        query = "SELECT count(DISTINCT alliance_id) FROM users INNER JOIN alliances ON alliances.id=alliance_id WHERE alliances.visible"+searchby
+        # retrieve number of gm_alliances
+        query = "SELECT count(DISTINCT alliance_id) FROM gm_profiles INNER JOIN gm_alliances ON gm_alliances.id=alliance_id WHERE gm_alliances.visible"+searchby
         oRs = oConnExecute(query)
         size = int(oRs[0])
 
@@ -75,13 +75,13 @@ class View(GlobalView):
         if offset >= nb_pages: offset = nb_pages-1
         if offset < 0: offset = 0
 
-        query = "SELECT alliances.id, alliances.tag, alliances.name, alliances.score, count(*) AS members, sum(planets) AS planets," + \
-                " int4(alliances.score / count(*)) AS score_average, alliances.score-alliances.previous_score as score_delta," + \
-                " created, EXISTS(SELECT 1 FROM alliances_naps WHERE allianceid1=alliances.id AND allianceid2=" + str(sqlValue(self.AllianceId)) + ")," + \
-                " max_members, EXISTS(SELECT 1 FROM alliances_wars WHERE (allianceid1=alliances.id AND allianceid2=" + str(sqlValue(self.AllianceId)) + ") OR (allianceid1=" + str(sqlValue(self.AllianceId)) + " AND allianceid2=alliances.id))" + \
-                " FROM users INNER JOIN alliances ON alliances.id=alliance_id" + \
-                " WHERE alliances.visible"+searchby + \
-                " GROUP BY alliances.id, alliances.name, alliances.tag, alliances.score, alliances.previous_score, alliances.created, alliances.max_members" + \
+        query = "SELECT gm_alliances.id, gm_alliances.tag, gm_alliances.name, gm_alliances.score, count(*) AS members, sum(planets) AS planets," + \
+                " int4(gm_alliances.score / count(*)) AS score_average, gm_alliances.score-gm_alliances.previous_score as score_delta," + \
+                " created, EXISTS(SELECT 1 FROM gm_alliance_naps WHERE allianceid1=gm_alliances.id AND allianceid2=" + str(sqlValue(self.AllianceId)) + ")," + \
+                " max_members, EXISTS(SELECT 1 FROM gm_alliance_wars WHERE (allianceid1=gm_alliances.id AND allianceid2=" + str(sqlValue(self.AllianceId)) + ") OR (allianceid1=" + str(sqlValue(self.AllianceId)) + " AND allianceid2=gm_alliances.id))" + \
+                " FROM gm_profiles INNER JOIN gm_alliances ON gm_alliances.id=alliance_id" + \
+                " WHERE gm_alliances.visible"+searchby + \
+                " GROUP BY gm_alliances.id, gm_alliances.name, gm_alliances.tag, gm_alliances.score, gm_alliances.previous_score, gm_alliances.created, gm_alliances.max_members" + \
                 " ORDER BY "+orderby+ \
                 " OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
         oRss = oConnExecuteAll(query)
@@ -121,7 +121,7 @@ class View(GlobalView):
 
         i = 1
         list = []
-        content.AssignValue("alliances", list)
+        content.AssignValue("gm_alliances", list)
         for oRs in oRss:
             item = {}
             list.append(item)

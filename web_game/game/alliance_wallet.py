@@ -27,9 +27,9 @@ class View(GlobalView):
         id = self.request.GET.get("id", "")
 
         if action == "accept":
-            oConnExecute("SELECT sp_alliance_money_accept(" + str(self.UserId) + "," + dosql(id) + ")")
+            oConnExecute("SELECT user_alliance_money_request_accept(" + str(self.UserId) + "," + dosql(id) + ")")
         elif action == "deny":
-            oConnExecute("SELECT sp_alliance_money_deny(" + str(self.UserId) + "," + dosql(id) + ")")
+            oConnExecute("SELECT user_alliance_money_request_decline(" + str(self.UserId) + "," + dosql(id) + ")")
 
         #
         # player gives or self.requests credits
@@ -40,15 +40,15 @@ class View(GlobalView):
         if self.request.POST.get("cancel", "") != "":
             credits = 0
             description = ""
-            oConnExecute("SELECT sp_alliance_money_request("+str(self.UserId)+","+str(credits)+","+dosql(description)+")")
+            oConnExecute("SELECT user_alliance_money_request_create("+str(self.UserId)+","+str(credits)+","+dosql(description)+")")
 
         if credits != 0:
             if self.request.POST.get("request", "") != "":
-                oConnExecute("SELECT sp_alliance_money_request("+str(self.UserId)+","+str(credits)+","+dosql(description)+")")
+                oConnExecute("SELECT user_alliance_money_request_create("+str(self.UserId)+","+str(credits)+","+dosql(description)+")")
             elif self.request.POST.get("give") != "" and (credits > 0):
 
                 if self.can_give_money():
-                    oRs = oConnExecute("SELECT sp_alliance_transfer_money("+str(self.UserId)+","+str(credits)+","+dosql(description)+",0)")
+                    oRs = oConnExecute("SELECT user_alliance_give_money("+str(self.UserId)+","+str(credits)+","+dosql(description)+",0)")
                     if oRs[0] != 0: self.money_error = self.e_not_enough_money
                 else:
                     self.money_error = self.e_can_give_money_after_a_week
@@ -59,7 +59,7 @@ class View(GlobalView):
         taxrates = request.POST.get("taxrates", "")
 
         if taxrates != "":
-            connExecuteRetryNoRecords("SELECT sp_alliance_set_tax("+str(self.UserId)+","+dosql(taxrates)+")")
+            connExecuteRetryNoRecords("SELECT user_alliance_set_tax("+str(self.UserId)+","+dosql(taxrates)+")")
 
         #
         # retrieve which page is displayed
@@ -82,7 +82,7 @@ class View(GlobalView):
 
     def can_give_money(self):
 
-        oRs = oConnExecute("SELECT game_started < now() - INTERVAL '2 weeks' FROM users WHERE id=" + str(self.UserId))
+        oRs = oConnExecute("SELECT game_started < now() - INTERVAL '2 weeks' FROM gm_profiles WHERE id=" + str(self.UserId))
 
         return oRs and oRs[0]
 
@@ -93,13 +93,13 @@ class View(GlobalView):
 
         tpl.AssignValue("walletpage", cat)
 
-        oRs = oConnExecute("SELECT credits, tax FROM alliances WHERE id=" + str(self.AllianceId))
+        oRs = oConnExecute("SELECT credits, tax FROM gm_alliances WHERE id=" + str(self.AllianceId))
         tpl.AssignValue("credits", oRs[0])
         tpl.AssignValue("tax", oRs[1]/10)
 
         if self.oPlayerInfo["planets"] < 2: tpl.Parse("notax")
 
-        oRs = oConnExecute("SELECT COALESCE(sum(credits), 0) FROM alliances_wallet_journal WHERE allianceid=" + str(self.AllianceId) + " AND datetime >= now()-INTERVAL '24 hours'")
+        oRs = oConnExecute("SELECT COALESCE(sum(credits), 0) FROM gm_alliance_wallet_logs WHERE allianceid=" + str(self.AllianceId) + " AND datetime >= now()-INTERVAL '24 hours'")
         tpl.AssignValue("last24h", oRs[0])
 
         if self.money_error == self.e_not_enough_money:
@@ -159,7 +159,7 @@ class View(GlobalView):
             displayTaxes = ToInt(self.request.POST.get("taxes"), 0) == 1
             displayKicksBreaks = ToInt(self.request.POST.get("kicksbreaks"), 0) == 1
 
-            query = "UPDATE users SET" + \
+            query = "UPDATE gm_profiles SET" + \
                     " wallet_display[1]=" + str(displayGiftsRequests) + \
                     " ,wallet_display[2]=" + str(displaySetTax) + \
                     " ,wallet_display[3]=" + str(displayTaxes) + \
@@ -171,7 +171,7 @@ class View(GlobalView):
                     " COALESCE(wallet_display[2], True)," + \
                     " COALESCE(wallet_display[3], True)," + \
                     " COALESCE(wallet_display[4], True)" + \
-                    " FROM users" + \
+                    " FROM gm_profiles" + \
                     " WHERE id=" + str(self.UserId)
             oRs = oConnExecute(query)
 
@@ -193,7 +193,7 @@ class View(GlobalView):
 
         # List wallet journal
         query = "SELECT Max(datetime), userid, int4(sum(credits)), description, source, destination, type, groupid"+ \
-                " FROM alliances_wallet_journal"+ \
+                " FROM gm_alliance_wallet_logs"+ \
                 " WHERE allianceid=" + str(self.AllianceId) + query + " AND datetime >= now()-INTERVAL '1 week'"+ \
                 " GROUP BY userid, description, source, destination, type, groupid"+ \
                 " ORDER BY Max(datetime) DESC"+ \
@@ -256,13 +256,13 @@ class View(GlobalView):
         content = GetTemplate(self.request, "alliance-wallet-requests")
         content.AssignValue("walletpage", cat)
 
-        oRs = oConnExecute("SELECT credits FROM users WHERE id=" + str(self.UserId))
+        oRs = oConnExecute("SELECT credits FROM gm_profiles WHERE id=" + str(self.UserId))
         credits = oRs[0]
 
         content.AssignValue("player_credits", credits)
 
         query = "SELECT credits, description, result" + \
-                " FROM alliances_wallet_requests" + \
+                " FROM gm_alliance_money_requests" + \
                 " WHERE allianceid=" + str(self.AllianceId) + " AND userid=" + str(self.UserId)
 
         oRs = oConnExecute(query)
@@ -280,8 +280,8 @@ class View(GlobalView):
         if self.oAllianceRights["can_accept_money_requests"]:
             # List money self.requests
             query = "SELECT r.id, datetime, login, r.credits, r.description" + \
-                    " FROM alliances_wallet_requests r" + \
-                    "    INNER JOIN users ON users.id=r.userid" + \
+                    " FROM gm_alliance_money_requests r" + \
+                    "    INNER JOIN gm_profiles ON gm_profiles.id=r.userid" + \
                     " WHERE allianceid=" + str(self.AllianceId) + " AND result IS NULL"
 
             oRss = oConnExecuteAll(query)
@@ -314,7 +314,7 @@ class View(GlobalView):
         content = GetTemplate(self.request, "alliance-wallet-give")
         content.AssignValue("walletpage", cat)
 
-        oRs = oConnExecute("SELECT credits FROM users WHERE id=" + str(self.UserId))
+        oRs = oConnExecute("SELECT credits FROM gm_profiles WHERE id=" + str(self.UserId))
         content.AssignValue("player_credits", oRs[0])
 
         if self.can_give_money():
@@ -328,7 +328,7 @@ class View(GlobalView):
             # list gifts for the last 7 days
 
             query = "SELECT datetime, credits, source, description" + \
-                    " FROM alliances_wallet_journal" + \
+                    " FROM gm_alliance_wallet_logs" + \
                     " WHERE allianceid="+str(self.AllianceId)+" AND type=0 AND datetime >= now()-INTERVAL '1 week'" + \
                     " ORDER BY datetime DESC"
             oRss = oConnExecuteAll(query)
@@ -358,7 +358,7 @@ class View(GlobalView):
         content = GetTemplate(self.request, "alliance-wallet-taxrates")
         content.AssignValue("walletpage", cat)
 
-        oRs = oConnExecute("SELECT tax FROM alliances WHERE id=" + str(self.AllianceId))
+        oRs = oConnExecute("SELECT tax FROM gm_alliances WHERE id=" + str(self.AllianceId))
         tax = oRs[0]
 
         # List available taxes
@@ -385,7 +385,7 @@ class View(GlobalView):
         content.AssignValue("walletpage", cat)
 
         query = "SELECT date_trunc('day', datetime), int4(sum(GREATEST(0, credits))), int4(-sum(LEAST(0, credits)))" + \
-                " FROM alliances_wallet_journal" + \
+                " FROM gm_alliance_wallet_logs" + \
                 " WHERE allianceid=" + str(self.AllianceId) + \
                 " GROUP BY date_trunc('day', datetime)" + \
                 " ORDER BY date_trunc('day', datetime)"

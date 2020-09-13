@@ -14,5 +14,5 @@ class Command(BaseCommand):
         connectDB()
         start = timezone.now()
         while timezone.now() - start < timedelta(seconds=59):
-            oConnExecute("SELECT sp_execute_processes()")
+            oConnExecute("SELECT admin_execute_processes()")
             time.sleep(0.5)

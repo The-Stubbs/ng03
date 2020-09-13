@@ -41,9 +41,9 @@ class View(GlobalView):
     def displayGeneral(self, content):
 
         # Display alliance tag, name, description, creation date, number of members
-        query = "SELECT id, tag, name, description, created, (SELECT count(*) FROM users WHERE alliance_id=alliances.id), logo_url," + \
+        query = "SELECT id, tag, name, description, created, (SELECT count(*) FROM gm_profiles WHERE alliance_id=gm_alliances.id), logo_url," + \
                 " max_members" + \
-                " FROM alliances" + \
+                " FROM gm_alliances" + \
                 " WHERE id=" + str(self.AllianceId)
 
         oRs = oConnExecute(query)
@@ -68,7 +68,7 @@ class View(GlobalView):
     def displayMotD(self, content):
 
         # Display alliance MotD (message of the day)
-        query = "SELECT announce, defcon FROM alliances WHERE id=" + str(self.AllianceId)
+        query = "SELECT announce, defcon FROM gm_alliances WHERE id=" + str(self.AllianceId)
         oRs = oConnExecute(query)
 
         if oRs:
@@ -82,7 +82,7 @@ class View(GlobalView):
         query = "SELECT rankid, label, leader, can_invite_player, can_kick_player, can_create_nap, can_break_nap, can_ask_money, can_see_reports, " + \
                 " can_accept_money_requests, can_change_tax_rate, can_mail_alliance, is_default, members_displayed, can_manage_description, can_manage_announce, " + \
                 " enabled, can_see_members_info, can_order_other_fleets, can_use_alliance_radars" + \
-                " FROM alliances_ranks" + \
+                " FROM gm_alliance_ranks" + \
                 " WHERE allianceid=" + str(self.AllianceId) + \
                 " ORDER BY rankid"
         oRss = oConnRows(query)
@@ -163,7 +163,7 @@ class View(GlobalView):
             self.changes_status = "check_logo"
         else:
             # save updated information
-            oConnDoQuery("UPDATE alliances SET logo_url=" + dosql(logo) + ", description=" + dosql(description) + " WHERE id = " + str(self.AllianceId))
+            oConnDoQuery("UPDATE gm_alliances SET logo_url=" + dosql(logo) + ", description=" + dosql(description) + " WHERE id = " + str(self.AllianceId))
 
             self.changes_status = "done"
 
@@ -172,21 +172,21 @@ class View(GlobalView):
         defcon = ToInt(self.request.POST.get("defcon"), 5)
 
         # save updated information
-        oConnDoQuery("UPDATE alliances SET defcon=" + str(defcon) + ", announce=" + dosql(MotD) + " WHERE id = " + str(self.AllianceId))
+        oConnDoQuery("UPDATE gm_alliances SET defcon=" + str(defcon) + ", announce=" + dosql(MotD) + " WHERE id = " + str(self.AllianceId))
         self.changes_status = "done"
 
     def SaveRanks(self):
 
         # list ranks
         query = "SELECT rankid, leader" + \
-                " FROM alliances_ranks" + \
+                " FROM gm_alliance_ranks" + \
                 " WHERE allianceid=" + str(self.AllianceId) + \
                 " ORDER BY rankid"
         oRss = oConnExecuteAll(query)
         for oRs in oRss:
             name = self.request.POST.get("n" + str(oRs[0]), "").strip()
             if len(name) > 2:
-                query = "UPDATE alliances_ranks SET" + \
+                query = "UPDATE gm_alliance_ranks SET" + \
                         " label=" + dosql(name) + \
                         ", is_default=NOT leader AND " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_0"), False)) + \
                         ", can_invite_player=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_1"), False)) + \
@@ -204,7 +204,7 @@ class View(GlobalView):
                         ", members_displayed=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_13"), False)) + \
                         ", can_order_other_fleets=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_14"), False)) + \
                         ", can_use_alliance_radars=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_15"), False)) + \
-                        ", enabled=leader OR EXISTS(SELECT 1 FROM users WHERE alliance_id=" + str(self.AllianceId) + " AND alliance_rank=" + str(oRs[0])+ " LIMIT 1) OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_enabled"), False)) + " OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_0"), False)) + \
+                        ", enabled=leader OR EXISTS(SELECT 1 FROM gm_profiles WHERE alliance_id=" + str(self.AllianceId) + " AND alliance_rank=" + str(oRs[0])+ " LIMIT 1) OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_enabled"), False)) + " OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_0"), False)) + \
                         " WHERE allianceid=" + str(self.AllianceId) + " AND rankid=" + str(oRs[0])
 
                 oConnDoQuery(query)

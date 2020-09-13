@@ -14,7 +14,7 @@ class View(GlobalView):
 
         self.onlineusers_refreshtime = 60
 
-        self.selected_menu = "chat"
+        self.selected_menu = "gm_chats"
 
         chatid = ToInt(request.GET.get("id"), 0)
         action = request.GET.get("a")
@@ -42,7 +42,7 @@ class View(GlobalView):
             id = self.request.session.get("alliancechat_" + str(self.AllianceId))
 
             if id == None or id == "":
-                query = "SELECT chatid FROM alliances WHERE id=" + str(self.AllianceId)
+                query = "SELECT chatid FROM gm_alliances WHERE id=" + str(self.AllianceId)
                 oRs = oConnExecute(query)
 
                 if oRs:
@@ -54,7 +54,7 @@ class View(GlobalView):
     def addLine(self, chatid, msg):
         msg = msg.strip()[:260]
         if msg != "":
-            connExecuteRetryNoRecords("INSERT INTO chat_lines(chatid, allianceid, userid, login, message) VALUES(" + str(chatid) + "," + str(sqlValue(self.AllianceId)) + "," + str(self.UserId) + "," + dosql(self.oPlayerInfo["login"]) + "," + dosql(msg) + ")")
+            connExecuteRetryNoRecords("INSERT INTO gm_chat_lines(chatid, allianceid, userid, login, message) VALUES(" + str(chatid) + "," + str(sqlValue(self.AllianceId)) + "," + str(self.UserId) + "," + dosql(self.oPlayerInfo["login"]) + "," + dosql(msg) + ")")
         return HttpResponse(" ")
 
     def refreshContent(self, chatid):
@@ -69,21 +69,21 @@ class View(GlobalView):
         lastmsgid = self.request.session.get("lastchatmsg_" + str(chatid), "")
         if lastmsgid == "": lastmsgid = 0
 
-        query = "SELECT chat_lines.id, datetime, allianceid, login, message" + \
-                " FROM chat_lines" + \
-                " WHERE chatid=" + str(chatid) + " AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid="+ str(chatid) +" ORDER BY datetime DESC OFFSET 100 LIMIT 1), " + str(lastmsgid) + ")" + \
-                " ORDER BY chat_lines.id"
+        query = "SELECT gm_chat_lines.id, datetime, allianceid, login, message" + \
+                " FROM gm_chat_lines" + \
+                " WHERE chatid=" + str(chatid) + " AND gm_chat_lines.id > GREATEST((SELECT id FROM gm_chat_lines WHERE chatid="+ str(chatid) +" ORDER BY datetime DESC OFFSET 100 LIMIT 1), " + str(lastmsgid) + ")" + \
+                " ORDER BY gm_chat_lines.id"
         oRss = oConnExecuteAll(query)
 
         if oRss == None: oRss = None
 
-        # if there's no line to send and no list of users to send, exit
+        # if there's no line to send and no list of gm_profiles to send, exit
         if oRss == None and not refresh_userlist:
             return " " # return an empty string : fix safari "undefined XMLHttpRequest.status" bug
 
         # load the template
 
-        content = GetTemplate(self.request, "chat-handler")
+        content = GetTemplate(self.request, "gm_chats-handler")
         content.AssignValue("login", self.oPlayerInfo["login"])
         content.AssignValue("chatid", userChatId)
 
@@ -102,18 +102,18 @@ class View(GlobalView):
                 item["line"] = oRs[4]
                 item["alliancetag"] = getAllianceTag(oRs[2])
 
-        # update user lastactivity in the DB and retrieve users online only every 3 minutes
+        # update user lastactivity in the DB and retrieve gm_profiles online only every 3 minutes
         if refresh_userlist:
-            if self.request.session.get(sPrivilege) < 100:    # prevent admin from showing their presence in chat
-                connExecuteRetryNoRecords("INSERT INTO chat_onlineusers(chatid, userid) VALUES(" + str(chatid) + "," + str(self.UserId) + ")")
+            if self.request.session.get(sPrivilege) < 100:    # prevent admin from showing their presence in gm_chats
+                connExecuteRetryNoRecords("INSERT INTO gm_chat_online_profiles(chatid, userid) VALUES(" + str(chatid) + "," + str(self.UserId) + ")")
 
             # self.request.session["lastchatactivity_" + str(chatid)] = timezone.now()
 
-            # retrieve online users in chat
-            query = "SELECT users.alliance_id, users.login, date_part('epoch', now()-chat_onlineusers.lastactivity)" + \
-                    " FROM chat_onlineusers" + \
-                    "    INNER JOIN users ON (users.id=chat_onlineusers.userid)" + \
-                    " WHERE chat_onlineusers.lastactivity > now()-INTERVAL '10 minutes' AND chatid=" + str(chatid)
+            # retrieve online gm_profiles in gm_chats
+            query = "SELECT gm_profiles.alliance_id, gm_profiles.login, date_part('epoch', now()-gm_chat_online_profiles.lastactivity)" + \
+                    " FROM gm_chat_online_profiles" + \
+                    "    INNER JOIN gm_profiles ON (gm_profiles.id=gm_chat_online_profiles.userid)" + \
+                    " WHERE gm_chat_online_profiles.lastactivity > now()-INTERVAL '10 minutes' AND chatid=" + str(chatid)
             oRss = oConnExecuteAll(query)
 
             list = []
@@ -135,12 +135,12 @@ class View(GlobalView):
 
     def displayChatList(self):
 
-        content = GetTemplate(self.request, "chat-handler")
+        content = GetTemplate(self.request, "gm_chats-handler")
         content.AssignValue("login", self.oPlayerInfo["login"])
 
-        query = "SELECT name, topic, count(chat_onlineusers.userid)" + \
-                " FROM chat" + \
-                "    LEFT JOIN chat_onlineusers ON (chat_onlineusers.chatid = chat.id AND chat_onlineusers.lastactivity > now()-INTERVAL '10 minutes')" + \
+        query = "SELECT name, topic, count(gm_chat_online_profiles.userid)" + \
+                " FROM gm_chats" + \
+                "    LEFT JOIN gm_chat_online_profiles ON (gm_chat_online_profiles.chatid = gm_chats.id AND gm_chat_online_profiles.lastactivity > now()-INTERVAL '10 minutes')" + \
                 " WHERE name IS NOT NULL AND password = \'\' AND public" + \
                 " GROUP BY name, topic" + \
                 " ORDER BY length(name), name"
@@ -158,7 +158,7 @@ class View(GlobalView):
 
         return render(self.request, content.template, content.data)
 
-    # add a chat to the joined chat list
+    # add a gm_chats to the joined gm_chats list
     def addChat(self, chatid):
         result = True
 
@@ -172,7 +172,7 @@ class View(GlobalView):
         
         return result
 
-    # remove a chat from list
+    # remove a gm_chats from list
     def removeChat(self, chatid):
         if self.request.session.get("chat_joined_" + str(chatid)) == "1":
             self.request.session["chat_joined_" + str(chatid)] = ""
@@ -181,7 +181,7 @@ class View(GlobalView):
     def displayChat(self):
         self.request.session["chatinstance"] = ToInt(self.request.session.get("chatinstance"), 0) + 1
 
-        content = GetTemplate(self.request, "chat")
+        content = GetTemplate(self.request, "gm_chats")
         content.AssignValue("login", self.oPlayerInfo["login"])
         content.AssignValue("chatinstance", self.request.session.get("chatinstance"))
 
@@ -192,11 +192,11 @@ class View(GlobalView):
 
             content.Parse("alliance")
 
-        query = "SELECT chat.id, chat.name, chat.topic" + \
-                " FROM users_chats" + \
-                "    INNER JOIN chat ON (chat.id=users_chats.chatid AND ((chat.password = '') OR (chat.password = users_chats.password)))" + \
+        query = "SELECT gm_chats.id, gm_chats.name, gm_chats.topic" + \
+                " FROM gm_profile_chats" + \
+                "    INNER JOIN gm_chats ON (gm_chats.id=gm_profile_chats.chatid AND ((gm_chats.password = '') OR (gm_chats.password = gm_profile_chats.password)))" + \
                 " WHERE userid = " + str(self.UserId) + \
-                " ORDER BY users_chats.added"
+                " ORDER BY gm_profile_chats.added"
         oRss = oConnExecuteAll(query)
 
         list = []
@@ -214,19 +214,19 @@ class View(GlobalView):
 
         content.AssignValue("now", timezone.now())
 
-        content.Parse("chat")
+        content.Parse("gm_chats")
 
         return self.Display(content)
 
     def joinChat(self):
 
-        content = GetTemplate(self.request, "chat-handler")
+        content = GetTemplate(self.request, "gm_chats-handler")
         content.AssignValue("login", self.oPlayerInfo["login"])
 
         pwd = self.request.GET.get("pass", "").strip()
 
-        # join chat
-        query = "SELECT sp_chat_join(" + dosql(self.request.GET.get("chat", "").strip()) + "," + dosql(pwd) + ")"
+        # join gm_chats
+        query = "SELECT user_chat_join(" + dosql(self.request.GET.get("gm_chats", "").strip()) + "," + dosql(pwd) + ")"
         oRs = oConnExecute(query)
 
         chatid = oRs[0]
@@ -235,10 +235,10 @@ class View(GlobalView):
 
         if chatid != 0:
             # save the chatid to the user chatlist
-            query = "INSERT INTO users_chats(userid, chatid, password) VALUES(" + str(self.UserId) + "," + str(chatid) + "," + dosql(pwd) + ")"
+            query = "INSERT INTO gm_profile_chats(userid, chatid, password) VALUES(" + str(self.UserId) + "," + str(chatid) + "," + dosql(pwd) + ")"
             oConnDoQuery(query)
 
-            query = "SELECT name, topic FROM chat WHERE id=" + str(chatid)
+            query = "SELECT name, topic FROM gm_chats WHERE id=" + str(chatid)
             oRs = oConnExecute(query)
 
             if oRs:
@@ -263,10 +263,10 @@ class View(GlobalView):
 
         self.removeChat(chatid)
 
-        query = "DELETE FROM users_chats WHERE userid=" + str(self.UserId) + " AND chatid=" + str(chatid)
+        query = "DELETE FROM gm_profile_chats WHERE userid=" + str(self.UserId) + " AND chatid=" + str(chatid)
         oConnDoQuery(query)
 
-        query = "DELETE FROM chat WHERE id > 0 AND NOT public AND name IS NOT NULL AND id=" + str(chatid) + " AND (SELECT count(1) FROM users_chats WHERE chatid=chat.id) = 0"
+        query = "DELETE FROM gm_chats WHERE id > 0 AND NOT public AND name IS NOT NULL AND id=" + str(chatid) + " AND (SELECT count(1) FROM gm_profile_chats WHERE chatid=gm_chats.id) = 0"
         oConnDoQuery(query)
         
         return HttpResponse(" ")

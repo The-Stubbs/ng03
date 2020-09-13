@@ -27,8 +27,8 @@ class View(GlobalView):
         query = "SELECT i.id, i.time, i.planet_id, i.planet_name, i.attacker_name, i.defender_name, " + \
                 "i.attacker_succeeded, i.soldiers_total, i.soldiers_lost, i.def_soldiers_total, " + \
                 "i.def_soldiers_lost, i.def_scientists_total, i.def_scientists_lost, i.def_workers_total, " + \
-                "i.def_workers_lost, galaxy, sector, planet, sp_get_user("+str(readerid)+") " + \
-                "FROM invasions AS i INNER JOIN nav_planet ON nav_planet.id = i.planet_id WHERE i.id = "+str(invasionid)
+                "i.def_workers_lost, galaxy, sector, planet, internal_profile_get_name("+str(readerid)+") " + \
+                "FROM gm_invasions AS i INNER JOIN gm_planets ON gm_planets.id = i.planet_id WHERE i.id = "+str(invasionid)
         oRs = oConnExecute(query)
 
         if oRs == None:
@@ -42,8 +42,8 @@ class View(GlobalView):
             if self.oAllianceRights["can_see_reports"]:
                 # find the name of the member that did this invasion, either the attacker or the defender
                 query = "SELECT login" + \
-                        " FROM users" + \
-                        " WHERE (login="+dosql(oRs[4])+" OR login="+dosql(oRs[5])+") AND alliance_id="+str(self.AllianceId)+" AND alliance_joined <= (SELECT time FROM invasions WHERE id="+str(invasionid)+")"
+                        " FROM gm_profiles" + \
+                        " WHERE (login="+dosql(oRs[4])+" OR login="+dosql(oRs[5])+") AND alliance_id="+str(self.AllianceId)+" AND alliance_joined <= (SELECT time FROM gm_invasions WHERE id="+str(invasionid)+")"
                 oRs2 = oConnExecute(query)
                 if oRs2 == None:
                     return HttpResponseRedirect("/game/overview/")

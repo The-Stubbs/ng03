@@ -36,22 +36,22 @@ class View(GlobalView):
         self.hours = 24
 
         if action == "accept":
-            oRs = oConnExecute("SELECT sp_alliance_nap_accept(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            oRs = oConnExecute("SELECT user_alliance_nap_offer_accept(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
             if oRs[0] == 0:
                 self.nap_success = "ok"
             elif oRs[0] == 5:
                 self.nap_success = "too_many"
 
         elif action == "decline":
-            oConnExecute("SELECT sp_alliance_nap_decline(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            oConnExecute("SELECT user_alliance_nap_offer_decline(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
         elif action == "cancel":
-            oConnExecute("SELECT sp_alliance_nap_cancel(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            oConnExecute("SELECT user_alliance_nap_offer_cancel(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
         elif action == "sharelocs":
-            oConnExecute("SELECT sp_alliance_nap_toggle_share_locs(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            oConnExecute("SELECT user_alliance_nap_toggle_loc_sharing(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
         elif action == "shareradars":
-            oConnExecute("SELECT sp_alliance_nap_toggle_share_radars(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            oConnExecute("SELECT user_alliance_nap_toggle_radar_sharing(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
         elif action == "break":
-            oRs = oConnExecute("SELECT sp_alliance_nap_break(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            oRs = oConnExecute("SELECT user_alliance_nap_break(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
 
             if oRs[0] == 0:
                 self.break_success = "ok"
@@ -69,7 +69,7 @@ class View(GlobalView):
 
             self.hours = ToInt(request.POST.get("hours"), 0)
 
-            oRs = oConnExecute("SELECT sp_alliance_nap_request(" + str(self.UserId) + "," + dosql(self.tag) + "," + str(self.hours) + ")")
+            oRs = oConnExecute("SELECT user_alliance_nap_offer_create(" + str(self.UserId) + "," + dosql(self.tag) + "," + str(self.hours) + ")")
             if oRs[0] == 0:
                 self.invitation_success = "ok"
                 self.tag = ""
@@ -115,10 +115,10 @@ class View(GlobalView):
 
         # List Non Aggression Pacts
         query = "SELECT n.allianceid2, tag, name, "+ \
-                " (SELECT COALESCE(sum(score)/1000, 0) AS score FROM users WHERE alliance_id=allianceid2), n.created, date_part('epoch', n.break_interval)::integer, date_part('epoch', break_on-now())::integer," + \
+                " (SELECT COALESCE(sum(score)/1000, 0) AS score FROM gm_profiles WHERE alliance_id=allianceid2), n.created, date_part('epoch', n.break_interval)::integer, date_part('epoch', break_on-now())::integer," + \
                 " share_locs, share_radars" + \
-                " FROM alliances_naps n" + \
-                "    INNER JOIN alliances ON (allianceid2 = alliances.id)" + \
+                " FROM gm_alliance_naps n" + \
+                "    INNER JOIN gm_alliances ON (allianceid2 = gm_alliances.id)" + \
                 " WHERE allianceid1=" + str(self.AllianceId) + \
                 " ORDER BY " + orderby
         oRss = oConnExecuteAll(query)
@@ -177,11 +177,11 @@ class View(GlobalView):
 
     def displayPropositions(self, content):
 
-        # List NAPs that other alliances have offered
-        query = "SELECT alliances.tag, alliances.name, alliances_naps_offers.created, recruiters.login, declined, date_part('epoch', break_interval)::integer" + \
-                " FROM alliances_naps_offers" + \
-                "            INNER JOIN alliances ON alliances.id = alliances_naps_offers.allianceid" + \
-                "            LEFT JOIN users AS recruiters ON recruiters.id = alliances_naps_offers.recruiterid" + \
+        # List NAPs that other gm_alliances have offered
+        query = "SELECT gm_alliances.tag, gm_alliances.name, gm_alliance_nap_offers.created, recruiters.login, declined, date_part('epoch', break_interval)::integer" + \
+                " FROM gm_alliance_nap_offers" + \
+                "            INNER JOIN gm_alliances ON gm_alliances.id = gm_alliance_nap_offers.allianceid" + \
+                "            LEFT JOIN gm_profiles AS recruiters ON recruiters.id = gm_alliance_nap_offers.recruiterid" + \
                 " WHERE targetallianceid=" + str(self.AllianceId) + " AND NOT declined" + \
                 " ORDER BY created DESC"
         oRss = oConnExecuteAll(query)
@@ -213,11 +213,11 @@ class View(GlobalView):
 
     def displayRequests(self, content):
 
-        # List NAPs we proposed to other alliances
-        query = "SELECT alliances.tag, alliances.name, alliances_naps_offers.created, recruiters.login, declined, date_part('epoch', break_interval)::integer" + \
-                " FROM alliances_naps_offers" + \
-                "            INNER JOIN alliances ON alliances.id = alliances_naps_offers.targetallianceid" + \
-                "            LEFT JOIN users AS recruiters ON recruiters.id = alliances_naps_offers.recruiterid" + \
+        # List NAPs we proposed to other gm_alliances
+        query = "SELECT gm_alliances.tag, gm_alliances.name, gm_alliance_nap_offers.created, recruiters.login, declined, date_part('epoch', break_interval)::integer" + \
+                " FROM gm_alliance_nap_offers" + \
+                "            INNER JOIN gm_alliances ON gm_alliances.id = gm_alliance_nap_offers.targetallianceid" + \
+                "            LEFT JOIN gm_profiles AS recruiters ON recruiters.id = gm_alliance_nap_offers.recruiterid" + \
                 " WHERE allianceid=" + str(self.AllianceId) + \
                 " ORDER BY created DESC"
 
@@ -264,12 +264,12 @@ class View(GlobalView):
 
         if self.oAllianceRights["can_create_nap"] or self.oAllianceRights["can_break_nap"]:
 
-            query = "SELECT int4(count(*)) FROM alliances_naps_offers" + \
+            query = "SELECT int4(count(*)) FROM gm_alliance_nap_offers" + \
                     " WHERE targetallianceid=" + str(self.AllianceId) + " AND NOT declined"
             oRs = oConnExecute(query)
             content.AssignValue("proposition_count", oRs[0])
 
-            query = "SELECT int4(count(*)) FROM alliances_naps_offers" + \
+            query = "SELECT int4(count(*)) FROM gm_alliance_nap_offers" + \
                     " WHERE allianceid=" + str(self.AllianceId) + " AND NOT declined"
             oRs = oConnExecute(query)
             content.AssignValue("request_count", oRs[0])

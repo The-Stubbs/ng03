@@ -11,7 +11,7 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "fleets.fleets"
+        self.selected_menu = "gm_fleets.gm_fleets"
 
         self.action_result = ""
         self.move_fleet_result = ""
@@ -41,8 +41,8 @@ class View(GlobalView):
 
         # retrieve fleet owner
         query = "SELECT ownerid" + \
-                " FROM vw_fleets as f" + \
-                " WHERE (ownerid=" + str(self.UserId) + " OR (shared AND owner_alliance_id=" + str(self.can_command_alliance_fleets) + ")) AND id=" + str(fleetid) + " AND (SELECT privilege FROM users WHERE users.id = f.ownerid) = 0"
+                " FROM vw_gm_fleets as f" + \
+                " WHERE (ownerid=" + str(self.UserId) + " OR (shared AND owner_alliance_id=" + str(self.can_command_alliance_fleets) + ")) AND id=" + str(fleetid) + " AND (SELECT privilege FROM gm_profiles WHERE gm_profiles.id = f.ownerid) = 0"
         oRs = oConnExecute(query)
 
         if oRs:
@@ -58,22 +58,22 @@ class View(GlobalView):
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," + \
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers," + \
-                " recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action, total_time, idle_time, date_part('epoch', const_interval_before_invasion())," + \
+                " recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action, total_time, idle_time, date_part('epoch', static_planet_invasion_delay())," + \
                 " long_distance_capacity, droppods, warp_to,"+ \
-                "( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = "+str(self.UserId)+")) AS from_radarstrength, " + \
-                "( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = "+str(self.UserId)+")) AS to_radarstrength," + \
-                "firepower > 0, next_waypointid, (SELECT routeid FROM routes_waypoints WHERE id=f.next_waypointid), now(), spawn_ore + spawn_hydrocarbon," + \
-                "radar_jamming, planet_floor, real_signature, required_vortex_strength, upkeep, CASE WHEN planet_owner_relation IN (-1,-2) THEN const_upkeep_ships_in_position() ELSE const_upkeep_ships() END AS upkeep_multiplicator," + \
-                " ((sp_commander_fleet_bonus_efficiency(size::bigint - leadership, 2.0)-1.0)*100)::integer AS commander_efficiency, leadership, ownerid, shared," + \
-                " (SELECT prestige_points >= sp_get_prestige_cost_for_new_planet(planets) FROM users WHERE id=ownerid) AS can_take_planet," + \
-                " (SELECT sp_get_prestige_cost_for_new_planet(planets) FROM users WHERE id=ownerid) AS prestige_cost" + \
-                " FROM vw_fleets as f" + \
+                "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.planet_galaxy AND gm_planets.sector = f.planet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = "+str(self.UserId)+")) AS from_radarstrength, " + \
+                "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.destplanet_galaxy AND gm_planets.sector = f.destplanet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = "+str(self.UserId)+")) AS to_radarstrength," + \
+                "firepower > 0, next_waypointid, (SELECT routeid FROM gm_fleet_route_waypoints WHERE id=f.next_waypointid), now(), spawn_ore + spawn_hydrocarbon," + \
+                "radar_jamming, planet_floor, real_signature, required_vortex_strength, upkeep, CASE WHEN planet_owner_relation IN (-1,-2) THEN static_orbitting_fleet_ship_upkeep() ELSE static_fleet_ship_upkeep() END AS upkeep_multiplicator," + \
+                " ((internal_commander_get_fleet_bonus_efficiency(size::bigint - leadership, 2.0)-1.0)*100)::integer AS commander_efficiency, leadership, ownerid, shared," + \
+                " (SELECT prestige_points >= tool_compute_prestige_cost_for_new_planet(planets) FROM gm_profiles WHERE id=ownerid) AS can_take_planet," + \
+                " (SELECT tool_compute_prestige_cost_for_new_planet(planets) FROM gm_profiles WHERE id=ownerid) AS prestige_cost" + \
+                " FROM vw_gm_fleets as f" + \
                 " WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid)
         oRs = oConnExecute(query)
 
-        # if fleet doesnt exist, redirect to the last known planet orbit or display the fleets list
+        # if fleet doesnt exist, redirect to the last known planet orbit or display the gm_fleets list
         if oRs == None:
-            return HttpResponseRedirect("/game/fleets/")
+            return HttpResponseRedirect("/game/gm_fleets/")
 
         if self.AllianceId:
             if oRs[57]:
@@ -85,12 +85,12 @@ class View(GlobalView):
 
         if oRs[45]:
 
-            query = "SELECT routes_waypoints.id, ""action"", p.id, p.galaxy, p.sector, p.planet, p.name, sp_get_user(p.ownerid), sp_relation(p.ownerid,"+str(self.UserId)+")," + \
-                    " routes_waypoints.ore, routes_waypoints.hydrocarbon" + \
-                    " FROM routes_waypoints" + \
-                    "    LEFT JOIN nav_planet AS p ON (routes_waypoints.planetid=p.id)" + \
-                    " WHERE routeid=" + str(oRs[45]) + " AND routes_waypoints.id >= " + str(oRs[44]) + \
-                    " ORDER BY routes_waypoints.id"
+            query = "SELECT gm_fleet_route_waypoints.id, ""action"", p.id, p.galaxy, p.sector, p.planet, p.name, internal_profile_get_name(p.ownerid), internal_profile_get_relation(p.ownerid,"+str(self.UserId)+")," + \
+                    " gm_fleet_route_waypoints.ore, gm_fleet_route_waypoints.hydrocarbon" + \
+                    " FROM gm_fleet_route_waypoints" + \
+                    "    LEFT JOIN gm_planets AS p ON (gm_fleet_route_waypoints.planetid=p.id)" + \
+                    " WHERE routeid=" + str(oRs[45]) + " AND gm_fleet_route_waypoints.id >= " + str(oRs[44]) + \
+                    " ORDER BY gm_fleet_route_waypoints.id"
             RouteRss = oConnExecuteAll(query)
             
             actions = []
@@ -136,9 +136,9 @@ class View(GlobalView):
         #
         # list commmanders
         #
-        query = " SELECT c.id, c.name, c.fleetname, c.planetname, fleets.id AS available" + \
-                " FROM vw_commanders AS c" + \
-                "    LEFT JOIN fleets ON (c.fleetid=fleets.id AND c.ownerid=fleets.ownerid AND NOT engaged AND action=0)" + \
+        query = " SELECT c.id, c.name, c.fleetname, c.planetname, gm_fleets.id AS available" + \
+                " FROM vw_gm_profile_commanders AS c" + \
+                "    LEFT JOIN gm_fleets ON (c.fleetid=gm_fleets.id AND c.ownerid=gm_fleets.ownerid AND NOT engaged AND action=0)" + \
                 " WHERE c.ownerid=" + str(self.fleet_owner_id) + \
                 " ORDER BY c.fleetid IS NOT NULL, c.planetid IS NOT NULL, c.fleetid, c.planetid "
         oCmdListRss = oConnExecuteAll(query)
@@ -195,7 +195,7 @@ class View(GlobalView):
         if len(optgroup_planet['cmd_options']) > 0: optgroups.append(optgroup_planet)
         content.AssignValue("optgroups", optgroups)
         
-        if oRs[8] == None: # display "no commander" or "fire commander" in the combobox of commanders
+        if oRs[8] == None: # display "no commander" or "fire commander" in the combobox of gm_commanders
             content.Parse("none")
             content.Parse("nocommander")
         else:
@@ -266,19 +266,19 @@ class View(GlobalView):
             content.Parse("cant_setstance")
 
         #
-        # display fleets that are near the same planet as this fleet
-        # it allows to switch between the fleets and merge them quickly
+        # display gm_fleets that are near the same planet as this fleet
+        # it allows to switch between the gm_fleets and merge them quickly
         #
         
-        fleets = []
+        gm_fleets = []
         
         fleetCount = 0
         if oRs[34] != -1:
-            query = "SELECT vw_fleets.id, vw_fleets.name, size, signature, speed, cargo_capacity-cargo_free, cargo_capacity, action, ownerid, owner_name, alliances.tag, sp_relation("+str(self.UserId)+",ownerid)" + \
-                    " FROM vw_fleets" + \
-                    "    LEFT JOIN alliances ON alliances.id=owner_alliance_id" + \
-                    " WHERE planetid="+str(oRs[10])+" AND vw_fleets.id != "+str(oRs[0])+" AND NOT engaged AND action != 1 AND action != -1" + \
-                    " ORDER BY upper(vw_fleets.name)"
+            query = "SELECT vw_gm_fleets.id, vw_gm_fleets.name, size, signature, speed, cargo_capacity-cargo_free, cargo_capacity, action, ownerid, owner_name, gm_alliances.tag, internal_profile_get_relation("+str(self.UserId)+",ownerid)" + \
+                    " FROM vw_gm_fleets" + \
+                    "    LEFT JOIN gm_alliances ON gm_alliances.id=owner_alliance_id" + \
+                    " WHERE planetid="+str(oRs[10])+" AND vw_gm_fleets.id != "+str(oRs[0])+" AND NOT engaged AND action != 1 AND action != -1" + \
+                    " ORDER BY upper(vw_gm_fleets.name)"
             oFleetsRss = oConnExecuteAll(query)
 
             for oFleetsRs in oFleetsRss:
@@ -303,7 +303,7 @@ class View(GlobalView):
 
                     fleet["playerfleet"] = True
                     
-                    fleets.append(fleet)
+                    gm_fleets.append(fleet)
                     fleetCount = fleetCount + 1
                 else:
                     displayFleet = False
@@ -321,13 +321,13 @@ class View(GlobalView):
                         displayFleet = oRs[34] != 1
                         if displayFleet: fleet["enemy"] = True
 
-                    # only display ally/nap fleets when leaving a planet
+                    # only display ally/nap gm_fleets when leaving a planet
                     if displayFleet:
-                        fleets.append(fleet)
+                        gm_fleets.append(fleet)
                         fleetCount = fleetCount + 1
 
         if fleetCount == 0: content.Parse("nofleets")
-        else: content.AssignValue("fleets", fleets)
+        else: content.AssignValue("gm_fleets", gm_fleets)
 
         #
         # assign fleet current planet
@@ -424,7 +424,7 @@ class View(GlobalView):
                     content.Parse("result")
                 
                 #
-                # populate destination list, there are 2 groups : planets and fleets
+                # populate destination list, there are 2 groups : planets and gm_fleets
                 #
 
                 # retrieve planet list
@@ -453,11 +453,11 @@ class View(GlobalView):
                     content.AssignValue("planetgroup", planetgroup)
 
                 #
-                # list planets where we have fleets not on our planets
+                # list planets where we have gm_fleets not on our planets
                 #
                 query = " SELECT DISTINCT ON (f.planetid) f.name, f.planetid, f.planet_galaxy, f.planet_sector, f.planet_planet" + \
-                        " FROM vw_fleets AS f" + \
-                        "     LEFT JOIN nav_planet AS p ON (f.planetid=p.id)" + \
+                        " FROM vw_gm_fleets AS f" + \
+                        "     LEFT JOIN gm_planets AS p ON (f.planetid=p.id)" + \
                         " WHERE f.ownerid="+ str(self.UserId)+" AND p.ownerid IS DISTINCT FROM "+ str(self.UserId) + \
                         " ORDER BY f.planetid" + \
                         " LIMIT 200"
@@ -485,7 +485,7 @@ class View(GlobalView):
                 # list merchant planets in the galaxy of the fleet
                 #
                 query = " SELECT id, galaxy, sector, planet" + \
-                        " FROM nav_planet" + \
+                        " FROM gm_planets" + \
                         " WHERE ownerid=3"
 
                 if oRs[12]:
@@ -517,16 +517,16 @@ class View(GlobalView):
                 if self.request.session.get(sPrivilege) > 100:
 
                     #
-                    # list routes
+                    # list gm_fleet_routes
                     #
                     query = " SELECT id, name, repeat" + \
-                            " FROM routes" + \
+                            " FROM gm_fleet_routes" + \
                             " WHERE ownerid="+ str(self.UserId)
                     list_oRss = oConnExecuteAll(query)
 
                     if list_oRss == None: content.Parse("noroute")
                     else:
-                        routes = []
+                        gm_fleet_routes = []
                         for list_oRs in list_oRss:
                             route = {}
                             route["route_id"] = list_oRs[0]
@@ -534,9 +534,9 @@ class View(GlobalView):
 
                             if list_oRs[0] == oRs[45]: route["selected"] = True
 
-                            routes.append(route)
+                            gm_fleet_routes.append(route)
 
-                        content.AssignValue("routes", routes)
+                        content.AssignValue("gm_fleet_routes", gm_fleet_routes)
 
         if self.request.session.get(sPrivilege) > 100:
             content.Parse("showroute")
@@ -561,13 +561,13 @@ class View(GlobalView):
         #
         # display the list of ships in the fleet
         #
-        query = "SELECT db_ships.id, fleets_ships.quantity," + \
+        query = "SELECT dt_ships.id, gm_fleet_ships.quantity," + \
                 " signature, capacity, handling, speed, weapon_turrets, weapon_dmg_em+weapon_dmg_explosive+weapon_dmg_kinetic+weapon_dmg_thermal AS weapon_power, weapon_tracking_speed, hull, shield, recycler_output, long_distance_capacity, droppods," + \
-                " buildingid, sp_can_build_on(" + str(oRs[10]) + ", db_ships.buildingid," + str(planet_ownerid) + ")=0 AS can_build" + \
-                " FROM fleets_ships" + \
-                "    LEFT JOIN db_ships ON (fleets_ships.shipid = db_ships.id)" + \
+                " buildingid, internal_planet_can_build_on(" + str(oRs[10]) + ", dt_ships.buildingid," + str(planet_ownerid) + ")=0 AS can_build" + \
+                " FROM gm_fleet_ships" + \
+                "    LEFT JOIN dt_ships ON (gm_fleet_ships.shipid = dt_ships.id)" + \
                 " WHERE fleetid=" + str(fleetid) + \
-                " ORDER BY db_ships.category, db_ships.label"
+                " ORDER BY dt_ships.category, dt_ships.label"
         oRss = oConnRows(query)
 
         shipCount = 0
@@ -618,7 +618,7 @@ class View(GlobalView):
 
     def InstallBuilding(self, fleetid, shipid):
         
-        oRs = oConnExecute("SELECT sp_start_ship_building_installation(" + str(self.fleet_owner_id) + "," + str(fleetid) + "," + str(shipid) + ")")
+        oRs = oConnExecute("SELECT user_fleet_deploy(" + str(self.fleet_owner_id) + "," + str(fleetid) + "," + str(shipid) + ")")
 
         if oRs == None: return
 
@@ -645,15 +645,15 @@ class View(GlobalView):
             self.move_fleet_result = "bad_destination"
             return
         
-        oRs = oConnExecute("SELECT sp_move_fleet(" + str(self.fleet_owner_id) + "," + str(fleetid) + "," + str(g) + "," + str(s) + "," + str(p) + ")")
+        oRs = oConnExecute("SELECT user_fleet_move(" + str(self.fleet_owner_id) + "," + str(fleetid) + "," + str(g) + "," + str(s) + "," + str(p) + ")")
         if oRs:
             res = oRs[0]
 
             if res == 0:
                 if self.request.POST.get("movetype") == "1":
-                    oConnDoQuery("UPDATE fleets SET next_waypointid = sp_create_route_unload_move(planetid) WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+                    oConnDoQuery("UPDATE gm_fleets SET next_waypointid = internal_profile_create_fleet_route_unload_move(planetid) WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
                 elif self.request.POST.get("movetype") == "2":
-                    oConnDoQuery("UPDATE fleets SET next_waypointid = sp_create_route_recycle_move(planetid) WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+                    oConnDoQuery("UPDATE gm_fleets SET next_waypointid = internal_profile_create_fleet_route_recycle_move(planetid) WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
 
         else:
             res = 0
@@ -678,7 +678,7 @@ class View(GlobalView):
             self.move_fleet_result = "error_jump_to_same_point_limit_reached"
 
     def Invade(self, fleetid, droppods, take):
-        oRs = oConnExecute("SELECT sp_invade_planet(" + str(self.fleet_owner_id) + "," + str(fleetid) + ","+ str(droppods) +"," + str(ToBool(take, False)) +")")
+        oRs = oConnExecute("SELECT user_fleet_invade(" + str(self.fleet_owner_id) + "," + str(fleetid) + ","+ str(droppods) +"," + str(ToBool(take, False)) +")")
 
         res = oRs[0]
         
@@ -703,18 +703,18 @@ class View(GlobalView):
         elif self.request.POST.get("action") == "rename":
             fleetname = self.request.POST.get("newname").strip()
             if isValidObjectName(fleetname):
-                oConnDoQuery("UPDATE fleets SET name="+dosql(fleetname)+" WHERE action=0 AND not engaged AND ownerid=" + str(self.UserId) + " AND id=" + str(fleetid))
+                oConnDoQuery("UPDATE gm_fleets SET name="+dosql(fleetname)+" WHERE action=0 AND not engaged AND ownerid=" + str(self.UserId) + " AND id=" + str(fleetid))
             
         elif self.request.POST.get("action") == "assigncommander":
             # assign new commander
             if ToInt(self.request.POST.get("commander"), 0) != 0:
                 commanderid = dosql(self.request.POST.get("commander"))
-                oConnExecute("SELECT sp_commanders_assign(" + str(self.fleet_owner_id) + "," + str(commanderid) + ",NULL," + str(fleetid) + ")")
+                oConnExecute("SELECT user_commander_assign(" + str(self.fleet_owner_id) + "," + str(commanderid) + ",NULL," + str(fleetid) + ")")
             else:
                 # unassign current fleet commander
-                oConnDoQuery("UPDATE fleets SET commanderid=null WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+                oConnDoQuery("UPDATE gm_fleets SET commanderid=null WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
 
-            oConnExecute("SELECT sp_update_fleet_bonus(" + str(fleetid) + ")")
+            oConnExecute("SELECT internal_fleet_update_bonuses(" + str(fleetid) + ")")
         elif self.request.POST.get("action") == "move":
             if self.request.POST.get("loop") != "0":
                 log_notice("fleet.asp", "Move: parameter missing", 1)
@@ -722,29 +722,29 @@ class View(GlobalView):
             self.MoveFleet(fleetid)
 
         if self.request.GET.get("action") == "share":
-            oConnDoQuery("UPDATE fleets SET shared=not shared WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+            oConnDoQuery("UPDATE gm_fleets SET shared=not shared WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
         elif self.request.GET.get("action") == "abandon":
             oConnExecute("SELECT sp_abandon_fleet(" + str(self.UserId) + "," + str(fleetid) + ")")
         elif self.request.GET.get("action") == "attack":
-            oConnDoQuery("UPDATE fleets SET attackonsight=firepower > 0 WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+            oConnDoQuery("UPDATE gm_fleets SET attackonsight=firepower > 0 WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
         elif self.request.GET.get("action") == "defend":
-            oConnDoQuery("UPDATE fleets SET attackonsight=False WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
+            oConnDoQuery("UPDATE gm_fleets SET attackonsight=False WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
         elif self.request.GET.get("action") == "recycle":
-            oRs = oConnExecute("SELECT sp_start_recycling(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
+            oRs = oConnExecute("SELECT user_fleet_start_recycling(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
             if oRs[0] == -2:
                 self.action_result = "error_recycling"
             
         elif self.request.GET.get("action") == "stoprecycling":
-            oConnExecute("SELECT sp_cancel_recycling(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
+            oConnExecute("SELECT user_fleet_cancel_recycling(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
         elif self.request.GET.get("action") == "stopwaiting":
-            oConnExecute("SELECT sp_cancel_waiting(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
+            oConnExecute("SELECT user_fleet_cancel_waiting(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
         elif self.request.GET.get("action") == "merge":
             destfleetid = ToInt(self.request.GET.get("with"), 0)
-            oConnExecute("SELECT sp_merge_fleets(" + str(self.UserId) + "," + str(fleetid) + ","+ str(destfleetid) +")")
+            oConnExecute("SELECT user_fleet_merge(" + str(self.UserId) + "," + str(fleetid) + ","+ str(destfleetid) +")")
         elif self.request.GET.get("action") == "return":
-            oConnExecute("SELECT sp_cancel_move(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
+            oConnExecute("SELECT user_fleet_cancel_moving(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
         elif self.request.GET.get("action") == "install":
             shipid = ToInt(self.request.GET.get("s"), 0)
             self.InstallBuilding(fleetid, shipid)
         elif self.request.GET.get("action") == "warp":
-            oConnExecute("SELECT sp_warp_fleet(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
+            oConnExecute("SELECT user_fleet_warp(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")

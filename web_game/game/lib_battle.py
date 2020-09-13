@@ -6,11 +6,11 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
 
     # Retrieve/assign battle info
     query = "SELECT time, planetid, name, galaxy, sector, planet, rounds," + \
-            "EXISTS(SELECT 1 FROM battles_ships WHERE battleid=" + str(battleid) + " AND owner_id=" + str(creator) + " AND won LIMIT 1), MD5(key||"+str(creator)+")," + \
-            "EXISTS(SELECT 1 FROM battles_ships WHERE battleid=" + str(battleid) + " AND owner_id=" + str(creator) + " AND damages > 0 LIMIT 1) AS see_details" + \
-            " FROM battles" + \
-            "    INNER JOIN nav_planet ON (planetid=nav_planet.id)" + \
-            " WHERE battles.id = " + str(battleid)
+            "EXISTS(SELECT 1 FROM gm_battle_ships WHERE battleid=" + str(battleid) + " AND owner_id=" + str(creator) + " AND won LIMIT 1), MD5(key||"+str(creator)+")," + \
+            "EXISTS(SELECT 1 FROM gm_battle_ships WHERE battleid=" + str(battleid) + " AND owner_id=" + str(creator) + " AND damages > 0 LIMIT 1) AS see_details" + \
+            " FROM gm_battles" + \
+            "    INNER JOIN gm_planets ON (planetid=gm_planets.id)" + \
+            " WHERE gm_battles.id = " + str(battleid)
     oRs = oConnExecute(query)
 
     if oRs == None: return
@@ -39,15 +39,15 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
     showEnemyDetails = oRs[9] or hasWon or rounds > 1
 
     query = "SELECT fleet_id, shipid, destroyed_shipid, sum(count)" + \
-            " FROM battles_fleets" + \
-            "    INNER JOIN battles_fleets_ships_kills ON (battles_fleets.id=fleetid)" + \
+            " FROM gm_battle_fleets" + \
+            "    INNER JOIN gm_battle_fleet_ship_kills ON (gm_battle_fleets.id=fleetid)" + \
             " WHERE battleid=" + str(battleid) + \
             " GROUP BY fleet_id, shipid, destroyed_shipid" + \
             " ORDER BY sum(count) DESC"
     killsArray = oConnExecuteAll(query)
 
     query = "SELECT owner_name, fleet_name, shipid, shipcategory, shiplabel, count, lost, killed, won, relation1, owner_id , relation2, fleet_id, attacked, mod_shield, mod_handling, mod_tracking_speed, mod_damage, alliancetag" + \
-            " FROM sp_get_battle_result(" + str(battleid) + "," + str(creator) + "," + str(pointofview) + ")"
+            " FROM internal_battle_get_result(" + str(battleid) + "," + str(creator) + "," + str(pointofview) + ")"
 
     oRss = oConnExecuteAll(query)
 
@@ -63,7 +63,7 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
             
             playerName = oRs[0]
             if playerName != lastPlayerName:
-                opponent = { 'fleets':[], "count":0,  "lost":0, "killed":0, "after":0 }
+                opponent = { 'gm_fleets':[], "count":0,  "lost":0, "killed":0, "after":0 }
                 opponents.append(opponent)
                 
                 opponent["name"] = playerName
@@ -90,7 +90,7 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
             fleetId = oRs[12]
             if fleetId != lastFleetId:
                 fleet = { 'ships':[], "count":0,  "lost":0, "killed":0, "after":0 }
-                opponent['fleets'].append(fleet)
+                opponent['gm_fleets'].append(fleet)
                 
                 fleet["name"] = oRs[1]
                     

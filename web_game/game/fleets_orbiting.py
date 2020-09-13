@@ -9,23 +9,23 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "fleets.orbiting"
+        self.selected_menu = "gm_fleets.orbiting"
 
         return self.listFleetsOrbiting()
 
-    # list fleets not belonging to the player that are near his planets
+    # list gm_fleets not belonging to the player that are near his planets
     def listFleetsOrbiting(self):
 
-        content = GetTemplate(self.request, "fleets-orbiting")
+        content = GetTemplate(self.request, "gm_fleets-orbiting")
 
-        query = "SELECT nav_planet.id, nav_planet.name, nav_planet.galaxy, nav_planet.sector, nav_planet.planet," + \
-                " fleets.id, fleets.name, users.login, alliances.tag, sp_relation(fleets.ownerid, nav_planet.ownerid), fleets.signature" + \
-                " FROM nav_planet" + \
-                "    INNER JOIN fleets ON fleets.planetid=nav_planet.id" + \
-                "    INNER JOIN users ON fleets.ownerid=users.id" + \
-                "    LEFT JOIN alliances ON users.alliance_id=alliances.id" + \
-                " WHERE nav_planet.ownerid=" + str(self.UserId) + " AND fleets.ownerid != nav_planet.ownerid AND action != 1 AND action != -1" + \
-                " ORDER BY nav_planet.id, upper(alliances.tag), upper(fleets.name)"
+        query = "SELECT gm_planets.id, gm_planets.name, gm_planets.galaxy, gm_planets.sector, gm_planets.planet," + \
+                " gm_fleets.id, gm_fleets.name, gm_profiles.login, gm_alliances.tag, internal_profile_get_relation(gm_fleets.ownerid, gm_planets.ownerid), gm_fleets.signature" + \
+                " FROM gm_planets" + \
+                "    INNER JOIN gm_fleets ON gm_fleets.planetid=gm_planets.id" + \
+                "    INNER JOIN gm_profiles ON gm_fleets.ownerid=gm_profiles.id" + \
+                "    LEFT JOIN gm_alliances ON gm_profiles.alliance_id=gm_alliances.id" + \
+                " WHERE gm_planets.ownerid=" + str(self.UserId) + " AND gm_fleets.ownerid != gm_planets.ownerid AND action != 1 AND action != -1" + \
+                " ORDER BY gm_planets.id, upper(gm_alliances.tag), upper(gm_fleets.name)"
         oRss = oConnExecuteAll(query)
 
         if oRss == None:
@@ -39,7 +39,7 @@ class View(GlobalView):
             for oRs in oRss:
                 
                 if oRs[0] != lastplanetid:
-                    planet = { "fleets":[] }
+                    planet = { "gm_fleets":[] }
                     planets.append(planet)
                     
                     planet["planetid"] = oRs[0]
@@ -51,7 +51,7 @@ class View(GlobalView):
                     lastplanetid = oRs[0]
 
                 item = {}
-                planet["fleets"].append(item)
+                planet["gm_fleets"].append(item)
 
                 if (oRs[8]):
                     item["tag"] = oRs[8]

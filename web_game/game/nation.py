@@ -20,7 +20,7 @@ class View(GlobalView):
         content = GetTemplate(self.request, "nation-search")
 
         query = "SELECT login" + \
-                " FROM users" + \
+                " FROM gm_profiles" + \
                 " WHERE upper(login) ILIKE upper(" + str( "\'%" + nation + "%\'") + ")" + \
                 " ORDER BY upper(login)"
         oRss = oConnExecuteAll(query)
@@ -44,13 +44,13 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "nation")
 
-        query = "SELECT u.login, u.avatar_url, u.description, sp_relation(u.id, "+str(self.UserId)+"), " + \
+        query = "SELECT u.login, u.avatar_url, u.description, internal_profile_get_relation(u.id, "+str(self.UserId)+"), " + \
                 " u.alliance_id, a.tag, a.name, u.id, GREATEST(u.regdate, u.game_started) AS regdate, r.label," + \
                 " COALESCE(u.alliance_joined, u.regdate), u.alliance_taxes_paid, u.alliance_credits_given, u.alliance_credits_taken," + \
                 " u.id" + \
-                " FROM users AS u" + \
-                " LEFT JOIN alliances AS a ON (u.alliance_id = a.id) " + \
-                " LEFT JOIN alliances_ranks AS r ON (u.alliance_id = r.allianceid AND u.alliance_rank = r.rankid) " + \
+                " FROM gm_profiles AS u" + \
+                " LEFT JOIN gm_alliances AS a ON (u.alliance_id = a.id) " + \
+                " LEFT JOIN gm_alliance_ranks AS r ON (u.alliance_id = r.allianceid AND u.alliance_rank = r.rankid) " + \
                 " WHERE upper(u.login) = upper(" + dosql(nation) + ") LIMIT 1"
         oRs = oConnExecute(query)
 
@@ -82,7 +82,7 @@ class View(GlobalView):
             content.Parse("enemy")
         elif oRs[3] == rFriend:
             content.Parse("friend")
-        elif oRs[3] > rFriend:  # display planets + fleets of alliance members if has the rights for it
+        elif oRs[3] > rFriend:  # display planets + gm_fleets of alliance members if has the rights for it
 
             if oRs[3] == rAlliance:
                 content.Parse("ally")
@@ -98,7 +98,7 @@ class View(GlobalView):
 
                 if show_details:
                     # view current nation planets
-                    query = "SELECT name, galaxy, sector, planet FROM vw_planets WHERE ownerid=" + str(oRs[7])
+                    query = "SELECT name, galaxy, sector, planet FROM vw_gm_planets WHERE ownerid=" + str(oRs[7])
                     query = query + " ORDER BY id"
                     oPlanetsRs = oConnExecuteAll(query)
 
@@ -115,13 +115,13 @@ class View(GlobalView):
                         i["s"] = rs[2]
                         i["p"] = rs[3]
 
-                # view current nation fleets
+                # view current nation gm_fleets
 
                 query = "SELECT id, name, attackonsight, engaged, remaining_time, " + \
-                    " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, sp_relation(planet_ownerid, ownerid)," + \
-                    " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, sp_relation(destplanet_ownerid, ownerid)," + \
-                    " action, signature, sp_get_user_rs(ownerid, planet_galaxy, planet_sector), sp_get_user_rs(ownerid, destplanet_galaxy, destplanet_sector)" + \
-                    " FROM vw_fleets WHERE ownerid=" + str(oRs[7])
+                    " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, internal_profile_get_relation(planet_ownerid, ownerid)," + \
+                    " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, internal_profile_get_relation(destplanet_ownerid, ownerid)," + \
+                    " action, signature, internal_profile_get_sector_radar_strength(ownerid, planet_galaxy, planet_sector), internal_profile_get_sector_radar_strength(ownerid, destplanet_galaxy, destplanet_sector)" + \
+                    " FROM vw_gm_fleets WHERE ownerid=" + str(oRs[7])
 
                 if oRs[3] == rAlliance:
                     if not self.oAllianceRights["leader"]:
@@ -133,11 +133,11 @@ class View(GlobalView):
 
                 if oFleetsRs == None: content.Parse("nofleets")
 
-                fleets = []
-                content.AssignValue("fleets", fleets)
+                gm_fleets = []
+                content.AssignValue("gm_fleets", gm_fleets)
                 for rs in oFleetsRs:
                     i = {}
-                    fleets.append(i)
+                    gm_fleets.append(i)
                     i["fleetid"] = rs[0]
                     i["fleetname"] = rs[1]
                     i["planetid"] = rs[5]
@@ -196,13 +196,13 @@ class View(GlobalView):
             content.Parse("noalliance")
 
         query = "SELECT alliance_tag, alliance_name, joined, \"left\"" + \
-                " FROM users_alliance_history" + \
-                " WHERE userid = " + str(nationId) + " AND joined > (SELECT GREATEST(regdate, game_started) FROM users WHERE privilege < 100 AND id=" + str(nationId) + ")" + \
+                " FROM gm_log_profile_alliances" + \
+                " WHERE userid = " + str(nationId) + " AND joined > (SELECT GREATEST(regdate, game_started) FROM gm_profiles WHERE privilege < 100 AND id=" + str(nationId) + ")" + \
                 " ORDER BY joined DESC"
         oRss = oConnExecuteAll(query)
 
         list = []
-        content.AssignValue("alliances", list)
+        content.AssignValue("gm_alliances", list)
         for oRs in oRss:
             item = {}
             list.append(item)

@@ -40,7 +40,7 @@ class View(GlobalView):
 
             Id = ToInt(request.GET.get("mailid"), 0)
 
-            query = "SELECT sender, subject, body FROM messages WHERE ownerid=" + str(self.UserId) + " AND id=" + str(Id) + " LIMIT 1"
+            query = "SELECT sender, subject, body FROM gm_mails WHERE ownerid=" + str(self.UserId) + " AND id=" + str(Id) + " LIMIT 1"
             self.request.session["details"] = query
             oRs = oConnExecute(query)
 
@@ -89,7 +89,7 @@ class View(GlobalView):
                 if self.mailto == "":
                     self.sendmail_status = "mail_missing_to"
                 else:
-                    oRs = oConnExecute("SELECT sp_send_message("+ str(self.UserId) + "," + dosql(self.mailto) + "," + dosql(self.mailsubject) + "," + dosql(self.mailbody) + "," + str(self.moneyamount) + "," + str(self.bbcode) + ")")
+                    oRs = oConnExecute("SELECT user_mail_send("+ str(self.UserId) + "," + dosql(self.mailto) + "," + dosql(self.mailsubject) + "," + dosql(self.mailbody) + "," + str(self.moneyamount) + "," + str(self.bbcode) + ")")
 
                     if oRs[0] != 0:
                         if oRs[0] == 1:
@@ -101,7 +101,7 @@ class View(GlobalView):
                         elif oRs[0] == 4:
                             self.sendmail_status = "not_enough_credits" # not enough credits
                         elif oRs[0] == 9:
-                            self.sendmail_status = "blocked" # messages are blocked
+                            self.sendmail_status = "blocked" # gm_mails are blocked
 
                     else:
                         self.sendmail_status = "mail_sent"
@@ -120,15 +120,15 @@ class View(GlobalView):
                 query = query + " OR id=" + mailid
 
             if query != "False":
-                oConnDoQuery("UPDATE messages SET deleted=True WHERE (" + query + ") AND ownerid = " + str(self.UserId))
+                oConnDoQuery("UPDATE gm_mails SET deleted=True WHERE (" + query + ") AND ownerid = " + str(self.UserId))
 
         if request.GET.get("a", "") == "ignore":
-            oConnExecute("SELECT sp_ignore_sender(" + str(self.UserId) + "," + dosql(request.GET.get("user")) + ")")
+            oConnExecute("SELECT user_mail_ignore(" + str(self.UserId) + "," + dosql(request.GET.get("user")) + ")")
 
             return self.return_ignored_users
 
         if request.GET.get("a", "") == "unignore":
-            oConnDoQuery("DELETE FROM messages_ignore_list WHERE userid=" + str(self.UserId) + " AND ignored_userid=(SELECT id FROM users WHERE lower(login)=lower(" + dosql(request.GET.get("user")) + "))")
+            oConnDoQuery("DELETE FROM gm_mail_ignorees WHERE userid=" + str(self.UserId) + " AND ignored_userid=(SELECT id FROM gm_profiles WHERE lower(login)=lower(" + dosql(request.GET.get("user")) + "))")
 
             return self.return_ignored_users()
 
@@ -138,7 +138,7 @@ class View(GlobalView):
             return self.display_ignore_list()
         elif request.GET.get("a") == "unignorelist":
             for self.mailto in request.POST.getlist("unignore"):
-                oConnDoQuery("DELETE FROM messages_ignore_list WHERE userid=" + str(self.UserId) + " AND ignored_userid=" + dosql(self.mailto))
+                oConnDoQuery("DELETE FROM gm_mail_ignorees WHERE userid=" + str(self.UserId) + " AND ignored_userid=" + dosql(self.mailto))
 
             return self.display_ignore_list()
         elif request.GET.get("a") == "sent":
@@ -154,7 +154,7 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "mail-list")
 
-        displayed = 30 # number of messages displayed per page
+        displayed = 30 # number of gm_mails displayed per page
 
         #
         # Retrieve the offset from where to begin the display
@@ -166,7 +166,7 @@ class View(GlobalView):
         if self.request.session.get(sPrivilege) < 100: search_cond = "not deleted AND "
 
         # get total number of mails that could be displayed
-        query = "SELECT count(1) FROM messages WHERE "+search_cond+" ownerid = " + str(self.UserId)
+        query = "SELECT count(1) FROM gm_mails WHERE "+search_cond+" ownerid = " + str(self.UserId)
         oRs = oConnExecute(query)
         size = int(oRs[0])
         nb_pages = int(size/displayed)
@@ -205,14 +205,14 @@ class View(GlobalView):
         #display only if there are more than 1 page
         if nb_pages > 1: content.Parse("nav")
 
-        query = "SELECT sender, subject, body, datetime, messages.id, read_date, avatar_url, users.id, messages.credits," + \
-                " users.privilege, bbcode, owner, messages_ignore_list.added, alliances.tag"+ \
-                " FROM messages" + \
-                "    LEFT JOIN users ON (upper(users.login) = upper(messages.sender) AND messages.datetime >= users.game_started)" + \
-                "    LEFT JOIN alliances ON (users.alliance_id = alliances.id)" + \
-                "    LEFT JOIN messages_ignore_list ON (userid=" + str(self.UserId) + " AND ignored_userid = users.id)" + \
+        query = "SELECT sender, subject, body, datetime, gm_mails.id, read_date, avatar_url, gm_profiles.id, gm_mails.credits," + \
+                " gm_profiles.privilege, bbcode, owner, gm_mail_ignorees.added, gm_alliances.tag"+ \
+                " FROM gm_mails" + \
+                "    LEFT JOIN gm_profiles ON (upper(gm_profiles.login) = upper(gm_mails.sender) AND gm_mails.datetime >= gm_profiles.game_started)" + \
+                "    LEFT JOIN gm_alliances ON (gm_profiles.alliance_id = gm_alliances.id)" + \
+                "    LEFT JOIN gm_mail_ignorees ON (userid=" + str(self.UserId) + " AND ignored_userid = gm_profiles.id)" + \
                 " WHERE " + search_cond + " ownerid = " + str(self.UserId) + \
-                " ORDER BY datetime DESC, messages.id DESC" + \
+                " ORDER BY datetime DESC, gm_mails.id DESC" + \
                 " OFFSET " + str(offset*displayed) + " LIMIT "+str(displayed)
         oRss = oConnExecuteAll(query)
 
@@ -275,7 +275,7 @@ class View(GlobalView):
         if i == 0: content.Parse("nomails")
 
         if not self.IsImpersonating():
-            oRs = oConnDoQuery("UPDATE messages SET read_date = now() WHERE ownerid = " + str(self.UserId) + " AND read_date IS NULL" )
+            oRs = oConnDoQuery("UPDATE gm_mails SET read_date = now() WHERE ownerid = " + str(self.UserId) + " AND read_date IS NULL" )
 
         return self.Display(content)
 
@@ -299,7 +299,7 @@ class View(GlobalView):
         messages_filter = "datetime > now()-INTERVAL '2 weeks' AND "
 
         # get total number of mails that could be displayed
-        query = "SELECT count(1) FROM messages WHERE "+messages_filter+"senderid = " + str(self.UserId)
+        query = "SELECT count(1) FROM gm_mails WHERE "+messages_filter+"senderid = " + str(self.UserId)
         oRs = oConnExecute(query)
         size = int(oRs[0])
         nb_pages = int(size/displayed)
@@ -335,10 +335,10 @@ class View(GlobalView):
         #display only if there are more than 1 page
         if nb_pages > 1: content.Parse("nav")
 
-        query = "SELECT messages.id, owner, avatar_url, datetime, subject, body, messages.credits, users.id, bbcode, alliances.tag"+ \
-                " FROM messages" + \
-                "    LEFT JOIN users ON (/*upper(users.login) = upper(messages.owner)*/ users.id = messages.ownerid AND messages.datetime >= users.game_started)" + \
-                "    LEFT JOIN alliances ON (users.alliance_id = alliances.id)" + \
+        query = "SELECT gm_mails.id, owner, avatar_url, datetime, subject, body, gm_mails.credits, gm_profiles.id, bbcode, gm_alliances.tag"+ \
+                " FROM gm_mails" + \
+                "    LEFT JOIN gm_profiles ON (/*upper(gm_profiles.login) = upper(gm_mails.owner)*/ gm_profiles.id = gm_mails.ownerid AND gm_mails.datetime >= gm_profiles.game_started)" + \
+                "    LEFT JOIN gm_alliances ON (gm_profiles.alliance_id = gm_alliances.id)" + \
                 " WHERE "+messages_filter+"senderid = " + str(self.UserId) + \
                 " ORDER BY datetime DESC"
 
@@ -403,7 +403,7 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "mail-ignorelist")
 
-        oRss = oConnExecuteAll("SELECT ignored_userid, sp_get_user(ignored_userid), added, blocked FROM messages_ignore_list WHERE userid=" + str(self.UserId))
+        oRss = oConnExecuteAll("SELECT ignored_userid, internal_profile_get_name(ignored_userid), added, blocked FROM gm_mail_ignorees WHERE userid=" + str(self.UserId))
 
         i = 0
         list = []
@@ -428,7 +428,7 @@ class View(GlobalView):
 
         content = GetTemplate(self.request, "mails")
 
-        oRss = oConnExecuteAll("SELECT sp_get_user(ignored_userid) FROM messages_ignore_list WHERE userid=" + userid)
+        oRss = oConnExecuteAll("SELECT internal_profile_get_name(ignored_userid) FROM gm_mail_ignorees WHERE userid=" + userid)
         list = []
         for oRs in oRss:
             item = {}
@@ -454,7 +454,7 @@ class View(GlobalView):
 
         # fill the recent addressee list
 
-        oRss = oConnExecuteAll("SELECT * FROM sp_get_addressee_list(" + str(self.UserId) + ")")
+        oRss = oConnExecuteAll("SELECT * FROM internal_profile_get_addressees(" + str(self.UserId) + ")")
 
         list = []
         content.AssignValue("tos", list)
@@ -486,7 +486,7 @@ class View(GlobalView):
 
         # if is a payed account, append the autosignature text to message body
         if self.oPlayerInfo["paid"]:
-            oRs = oConnExecute("SELECT autosignature FROM users WHERE id="+userid)
+            oRs = oConnExecute("SELECT autosignature FROM gm_profiles WHERE id="+userid)
             if oRs:
                 body = body  + oRs[0]
 
@@ -497,7 +497,7 @@ class View(GlobalView):
         content.AssignValue("mail_credits", credits)
 
         #retrieve player's credits
-        oRs = oConnExecute("SELECT credits, now()-game_started > INTERVAL '2 weeks' AND security_level >= 3 FROM users WHERE id="+str(self.UserId))
+        oRs = oConnExecute("SELECT credits, now()-game_started > INTERVAL '2 weeks' AND security_level >= 3 FROM gm_profiles WHERE id="+str(self.UserId))
         content.AssignValue("player_credits", oRs[0])
         if oRs[1]: content.Parse("send_credits")
 

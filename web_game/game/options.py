@@ -14,7 +14,7 @@ class View(GlobalView):
         self.selected_menu = "options"
 
         if request.GET.get("frame") == "1":
-            oConnDoQuery("UPDATE users SET inframe=True WHERE id="+ str(self.UserId))
+            oConnDoQuery("UPDATE gm_profiles SET inframe=True WHERE id="+ str(self.UserId))
 
         holidays_breaktime = 7*24*60*60 # time before being able to set the holidays again
 
@@ -63,13 +63,13 @@ class View(GlobalView):
                     self.changes_status = "check_avatar"
                 else:
                     # save updated information
-                    query = "UPDATE users SET" + \
+                    query = "UPDATE gm_profiles SET" + \
                             " avatar_url=" + dosql(avatar) + ", description=" + dosql(description) + \
                             " WHERE id=" + str(self.UserId)
 
             elif self.optionCat == 2:
 
-                query = "UPDATE users SET" + \
+                query = "UPDATE gm_profiles SET" + \
                         " timers_enabled=" + str(timers_enabled) + \
                         " ,display_alliance_planet_name=" + str(display_alliance_planet_name) + \
                         " ,score_visibility=" + str(score_visibility)
@@ -90,26 +90,26 @@ class View(GlobalView):
                 query = query + " WHERE id=" + str(self.UserId)
             elif self.optionCat == 3:
                 if request.POST.get("holidays"):
-                    oRs = oConnExecute("SELECT COALESCE(int4(date_part('epoch', now()-last_holidays)), 10000000) AS holidays_cooldown, (SELECT 1 FROM users_holidays WHERE userid=users.id) FROM users WHERE id="+ str(self.UserId))
+                    oRs = oConnExecute("SELECT COALESCE(int4(date_part('epoch', now()-last_holidays)), 10000000) AS holidays_cooldown, (SELECT 1 FROM gm_profile_holidays WHERE userid=gm_profiles.id) FROM gm_profiles WHERE id="+ str(self.UserId))
 
                     if oRs[0] > holidays_breaktime and oRs[1] == None:
-                        query = "INSERT INTO users_holidays(userid, start_time, min_end_time, end_time) VALUES("+str(self.UserId)+",now()+INTERVAL '24 hours', now()+INTERVAL '72 hours', now()+INTERVAL '22 days')"
+                        query = "INSERT INTO gm_profile_holidays(userid, start_time, min_end_time, end_time) VALUES("+str(self.UserId)+",now()+INTERVAL '24 hours', now()+INTERVAL '72 hours', now()+INTERVAL '22 days')"
                         oConnDoQuery(query)
 
                         return HttpResponseRedirect("?cat=3")
 
             elif self.optionCat == 4:
 
-                oConnDoQuery("DELETE FROM users_reports WHERE userid="+str(self.UserId))
+                oConnDoQuery("DELETE FROM gm_profile_reports WHERE userid="+str(self.UserId))
 
                 for x in request.POST.getlist("r"):
                     typ = int(x / 100)
                     subtyp = x % 100
-                    oConnExecute("INSERT INTO users_reports(userid, type, subtype) VALUES("+str(self.UserId)+","+dosql(typ)+","+dosql(subtyp)+")")
+                    oConnExecute("INSERT INTO gm_profile_reports(userid, type, subtype) VALUES("+str(self.UserId)+","+dosql(typ)+","+dosql(subtyp)+")")
 
             elif self.optionCat == 5:
                 if autosignature != "":
-                    query = "UPDATE users SET" + \
+                    query = "UPDATE gm_profiles SET" + \
                             " autosignature=" + dosql(autosignature) + \
                             " WHERE id=" + str(self.UserId)
 
@@ -125,12 +125,12 @@ class View(GlobalView):
 
     def display_general(self, content):
 
-        query = "SELECT avatar_url, regdate, users.description, 0," + \
+        query = "SELECT avatar_url, regdate, gm_profiles.description, 0," + \
                 " alliance_id, a.tag, a.name, r.label" + \
-                " FROM users" + \
-                " LEFT JOIN alliances AS a ON (users.alliance_id = a.id)" + \
-                " LEFT JOIN alliances_ranks AS r ON (users.alliance_id = r.allianceid AND users.alliance_rank = r.rankid) " + \
-                " WHERE users.id = "+str(self.UserId)
+                " FROM gm_profiles" + \
+                " LEFT JOIN gm_alliances AS a ON (gm_profiles.alliance_id = a.id)" + \
+                " LEFT JOIN gm_alliance_ranks AS r ON (gm_profiles.alliance_id = r.allianceid AND gm_profiles.alliance_rank = r.rankid) " + \
+                " WHERE gm_profiles.id = "+str(self.UserId)
         oRs = oConnExecute(query)
 
         content.AssignValue("regdate", oRs[1])
@@ -156,7 +156,7 @@ class View(GlobalView):
 
     def display_options(self, content):
 
-        oRs = oConnExecute("SELECT int4(date_part('epoch', deletion_date-now())), timers_enabled, display_alliance_planet_name, email, score_visibility, skin FROM users WHERE id="+str(self.UserId))
+        oRs = oConnExecute("SELECT int4(date_part('epoch', deletion_date-now())), timers_enabled, display_alliance_planet_name, email, score_visibility, skin FROM gm_profiles WHERE id="+str(self.UserId))
 
         if oRs[0] == None:
             content.Parse("delete_account")
@@ -177,7 +177,7 @@ class View(GlobalView):
     def display_holidays(self, content):
 
         # check if holidays will be activated soon
-        oRs = oConnExecute("SELECT int4(date_part('epoch', start_time-now())) FROM users_holidays WHERE userid="+str(self.UserId))
+        oRs = oConnExecute("SELECT int4(date_part('epoch', start_time-now())) FROM gm_profile_holidays WHERE userid="+str(self.UserId))
 
         if oRs:
             remainingtime = oRs[0]
@@ -191,7 +191,7 @@ class View(GlobalView):
         else:
 
             # holidays can be activated only if never took any holidays or it was at least 7 days ago
-            oRs = oConnExecute("SELECT int4(date_part('epoch', now()-last_holidays)) FROM users WHERE id="+str(self.UserId))
+            oRs = oConnExecute("SELECT int4(date_part('epoch', now()-last_holidays)) FROM gm_profiles WHERE id="+str(self.UserId))
 
             if (oRs[0]) and oRs[0] < holidays_breaktime:
                 content.AssignValue("remaining_time", holidays_breaktime-oRs[0])
@@ -204,15 +204,15 @@ class View(GlobalView):
 
     def display_reports(self, content):
 
-        oRss = oConnExecuteAll("SELECT type*100+subtype FROM users_reports WHERE userid="+str(self.UserId))
+        oRss = oConnExecuteAll("SELECT type*100+subtype FROM gm_profile_reports WHERE userid="+str(self.UserId))
         for oRs in oRss:
             content.Parse("c"+str(oRs[0]))
 
-        content.Parse("reports")
+        content.Parse("gm_profile_reports")
 
     def display_mail(self, content):
 
-        oRs = oConnExecute("SELECT autosignature FROM users WHERE id="+str(self.UserId))
+        oRs = oConnExecute("SELECT autosignature FROM gm_profiles WHERE id="+str(self.UserId))
         if oRs:
             content.AssignValue("autosignature", oRs[0])
         else:

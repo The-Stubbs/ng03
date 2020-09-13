@@ -103,7 +103,7 @@ class GlobalView(ExileMixin, View):
     '''
     
     def log_notice(self, title, details, level):
-        query = "INSERT INTO log_notices (username, title, details, url, level) VALUES(" +\
+        query = "INSERT INTO gm_log_notices (username, title, details, url, level) VALUES(" +\
                 dosql(self.oPlayerInfo["login"]) + ", " +\
                 dosql(title[:127]) + "," +\
                 dosql(details[:127]) + "," +\
@@ -146,7 +146,7 @@ class GlobalView(ExileMixin, View):
         tpl_header = tpl
 
         # retrieve player credits and assign the value, don't use oPlayerInfo as the info may be outdated
-        query = "SELECT credits, prestige_points FROM users WHERE id=" + str(self.UserId) + " LIMIT 1"
+        query = "SELECT credits, prestige_points FROM gm_profiles WHERE id=" + str(self.UserId) + " LIMIT 1"
         oRs = oConnExecute(query)
         tpl_header.AssignValue("money", oRs[0])
         tpl_header.AssignValue("pp", oRs[1])
@@ -159,7 +159,7 @@ class GlobalView(ExileMixin, View):
                 "floor_occupied, floor," + \
                 "space_occupied, space, workers_for_maintenance," + \
                 "mod_production_ore, mod_production_hydrocarbon, energy, energy_capacity, soldiers, soldiers_capacity, scientists, scientists_capacity" +\
-                " FROM vw_planets WHERE id="+str(self.CurrentPlanet)
+                " FROM vw_gm_planets WHERE id="+str(self.CurrentPlanet)
         oRs = oConnExecute(query)
     
         tpl_header.AssignValue("ore", oRs[0])
@@ -248,7 +248,7 @@ class GlobalView(ExileMixin, View):
         else:
             # retrieve planet list
             query = "SELECT id, name, galaxy, sector, planet" + \
-                    " FROM nav_planet" + \
+                    " FROM gm_planets" + \
                     " WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId) + \
                     " ORDER BY id"
             oRs = oConnExecuteAll(query)
@@ -280,9 +280,9 @@ class GlobalView(ExileMixin, View):
         tpl_header.AssignValue("planets", planets)
     
         query = "SELECT buildingid" +\
-                " FROM planet_buildings INNER JOIN db_buildings ON (db_buildings.id=buildingid AND db_buildings.is_planet_element)" +\
+                " FROM gm_planet_buildings INNER JOIN dt_buildings ON (dt_buildings.id=buildingid AND dt_buildings.is_planet_element)" +\
                 " WHERE planetid="+str(self.CurrentPlanet)+\
-                " ORDER BY upper(db_buildings.label)"
+                " ORDER BY upper(dt_buildings.label)"
         oRs = oConnExecuteAll(query)
     
         i = 0
@@ -302,7 +302,7 @@ class GlobalView(ExileMixin, View):
         if i % 3 != 0: tpl_header.Parse("special")
 
     def FillHeaderCredits(self, tpl_header):
-        oRs = oConnExecute("SELECT credits FROM users WHERE id="+str(self.UserId))
+        oRs = oConnExecute("SELECT credits FROM gm_profiles WHERE id="+str(self.UserId))
         tpl_header.AssignValue("credits", oRs[0])
     
     #
@@ -313,9 +313,9 @@ class GlobalView(ExileMixin, View):
 
         tpl = tpl_layout
     
-        # retrieve number of new messages & reports
-        query = "SELECT (SELECT int4(COUNT(*)) FROM messages WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL)," + \
-                "(SELECT int4(COUNT(*)) FROM reports WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL AND datetime <= now());"
+        # retrieve number of new gm_mails & gm_profile_reports
+        query = "SELECT (SELECT int4(COUNT(*)) FROM gm_mails WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL)," + \
+                "(SELECT int4(COUNT(*)) FROM gm_profile_reports WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL AND datetime <= now());"
         oRs = oConnExecute(query)
         
         if oRs[0] > 0:
@@ -338,15 +338,15 @@ class GlobalView(ExileMixin, View):
         #
         if self.request.session.get("privilege", 0) >= 100:
             
-            query = "SELECT int4(MAX(id)) FROM log_http_errors"
+            query = "SELECT int4(MAX(id)) FROM gm_log_server_errors"
             oRs = oConnExecute(query)
             last_errorid = oRs[0]
     
-            query = "SELECT int4(MAX(id)) FROM log_notices"
+            query = "SELECT int4(MAX(id)) FROM gm_log_notices"
             oRs = oConnExecute(query)
             last_noticeid = oRs[0]
     
-            query = "SELECT COALESCE(dev_lasterror, 0), COALESCE(dev_lastnotice, 0) FROM users WHERE id=" + self.request.session.get(sLogonUserID)
+            query = "SELECT COALESCE(dev_lasterror, 0), COALESCE(dev_lastnotice, 0) FROM gm_profiles WHERE id=" + self.request.session.get(sLogonUserID)
             oRs = oConnExecute(query)
             if last_errorid > oRs[0]:
                 tpl.AssignValue("new_error", last_errorid-oRs[0])
@@ -398,9 +398,9 @@ class GlobalView(ExileMixin, View):
     
         dim oRs, query
     
-        ' retrieve number of new messages & reports
-        query = "SELECT (SELECT int4(COUNT(*)) FROM messages WHERE ownerid=" & UserId & " AND read_date is NULL)," & _
-                "(SELECT int4(COUNT(*)) FROM reports WHERE ownerid=" & UserId & " AND read_date is NULL AND datetime <= now());"
+        ' retrieve number of new gm_mails & gm_profile_reports
+        query = "SELECT (SELECT int4(COUNT(*)) FROM gm_mails WHERE ownerid=" & UserId & " AND read_date is NULL)," & _
+                "(SELECT int4(COUNT(*)) FROM gm_profile_reports WHERE ownerid=" & UserId & " AND read_date is NULL AND datetime <= now());"
         set oRs = oConn.Execute(query)
     
         tpl_xml.AssignValue "new_mail", oRs(0)
@@ -482,12 +482,12 @@ class GlobalView(ExileMixin, View):
                 tpl_layout.AssignValue("render_time",  (time.clock() - self.StartTime))
     
                 # Assign number of logged players
-                oRs = oConnExecute("SELECT int4(count(*)) FROM vw_players WHERE lastactivity >= now()-INTERVAL '20 minutes'")
+                oRs = oConnExecute("SELECT int4(count(*)) FROM vw_gm_profiles WHERE lastactivity >= now()-INTERVAL '20 minutes'")
                 tpl_layout.AssignValue("players", oRs[0])
                 tpl_layout.Parse("dev")
     
                 if self.oPlayerInfo["privilege"] == -2:
-                    oRs = oConnExecute("SELECT start_time, min_end_time, end_time FROM users_holidays WHERE userid="+str(self.UserId))
+                    oRs = oConnExecute("SELECT start_time, min_end_time, end_time FROM gm_profile_holidays WHERE userid="+str(self.UserId))
     
                     if oRs:
                         tpl_layout.AssignValue("start_datetime", oRs[0])
@@ -522,7 +522,7 @@ class GlobalView(ExileMixin, View):
                 end if
     
                 tpl_layout.Parse("ads"
-                oConn.Execute "UPDATE users SET displays_pages=displays_pages+1 WHERE id=" & UserId
+                oConn.Execute "UPDATE gm_profiles SET displays_pages=displays_pages+1 WHERE id=" & UserId
             '''
             
             tpl_layout.Parse("menu")
@@ -553,8 +553,8 @@ class GlobalView(ExileMixin, View):
                 "credits_bankruptcy, mod_planets, mod_commanders," +\
                 "ban_datetime, ban_expire, ban_reason, ban_reason_public, orientation, (paid_until IS NOT NULL AND paid_until > now()) AS paid," +\
                 " timers_enabled, display_alliance_planet_name, prestige_points, (inframe IS NOT NULL AND inframe) AS inframe, COALESCE(skin, 's_default') AS skin," +\
-                "lcid, security_level, (SELECT username FROM exile_nexus.users WHERE id=" + str(self.UserId) + ") AS username" +\
-                " FROM users" +\
+                "lcid, security_level, (SELECT username FROM exile_nexus.gm_profiles WHERE id=" + str(self.UserId) + ") AS username" +\
+                " FROM gm_profiles" +\
                 " WHERE id=" + str(self.UserId)
         self.oPlayerInfo = oConnRow(query)
         
@@ -595,7 +595,7 @@ class GlobalView(ExileMixin, View):
         if self.AllianceId:
             query = "SELECT label, leader, can_invite_player, can_kick_player, can_create_nap, can_break_nap, can_ask_money, can_see_reports, can_accept_money_requests, can_change_tax_rate, can_mail_alliance," +\
                     " can_manage_description, can_manage_announce, can_see_members_info, can_use_alliance_radars, can_order_other_fleets" +\
-                    " FROM alliances_ranks" +\
+                    " FROM gm_alliance_ranks" +\
                     " WHERE allianceid=" + str(self.AllianceId) + " AND rankid=" + str(self.AllianceRank)
             self.oAllianceRights = oConnRow(query)
     
@@ -604,7 +604,7 @@ class GlobalView(ExileMixin, View):
                 self.AllianceId = None
 
         # log activity
-        if not self.IsImpersonating(): oConnExecute("SELECT sp_log_activity(" + str(self.UserId) + "," + dosql(self.request.META.get("REMOTE_ADDR")) + "," + str(self.browserid) + ")")
+        if not self.IsImpersonating(): oConnExecute("SELECT internal_profile_log_activity(" + str(self.UserId) + "," + dosql(self.request.META.get("REMOTE_ADDR")) + "," + str(self.browserid) + ")")
 
     # set the new current planet, if the planet doesn't belong to the player then go back to the session planet
     def SetCurrentPlanet(self, planetid):
@@ -615,7 +615,7 @@ class GlobalView(ExileMixin, View):
         #
         if (planetid != "") and (planetid != self.CurrentPlanet):
             # check that the new planet belongs to the player
-            oRs = oConnExecute("SELECT galaxy, sector FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(planetid) + " and ownerid=" + str(self.UserId))
+            oRs = oConnExecute("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(planetid) + " and ownerid=" + str(self.UserId))
             if oRs:
                 self.CurrentPlanet = planetid
                 self.CurrentGalaxyId = oRs[0]
@@ -624,7 +624,7 @@ class GlobalView(ExileMixin, View):
     
                 # save the last planetid
                 if not self.request.user.is_impersonate:
-                    oConnDoQuery("UPDATE users SET lastplanetid=" + str(planetid) + " WHERE id=" + str(self.UserId))
+                    oConnDoQuery("UPDATE gm_profiles SET lastplanetid=" + str(planetid) + " WHERE id=" + str(self.UserId))
     
                 return
     
@@ -637,7 +637,7 @@ class GlobalView(ExileMixin, View):
     
         if self.CurrentPlanet != None:
             # check if the planet still belongs to the player
-            oRs = oConnExecute("SELECT galaxy, sector FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(self.CurrentPlanet) + " AND ownerid=" + str(self.UserId))
+            oRs = oConnExecute("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(self.CurrentPlanet) + " AND ownerid=" + str(self.UserId))
             if oRs:
                 # the planet still belongs to the player, exit
                 self.CurrentGalaxyId = oRs[0]
@@ -647,7 +647,7 @@ class GlobalView(ExileMixin, View):
             self.InvalidatePlanetList()
     
         # there is no active planet, select the first planet available
-        oRs = oConnExecute("SELECT id, galaxy, sector FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId) + " LIMIT 1")
+        oRs = oConnExecute("SELECT id, galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId) + " LIMIT 1")
     
         # if player owns no planets then the game is over
         if oRs == None:
@@ -668,7 +668,7 @@ class GlobalView(ExileMixin, View):
     
         # save the last planetid
         if not self.request.user.is_impersonate:
-            oConnDoQuery("UPDATE users SET lastplanetid=" + str(self.CurrentPlanet) + " WHERE id=" + str(self.UserId))
+            oConnDoQuery("UPDATE gm_profiles SET lastplanetid=" + str(self.CurrentPlanet) + " WHERE id=" + str(self.UserId))
     
         # a player may wish to destroy a building on a planet that belonged to him
         # if the planet doesn't belong to him anymore, the action may be performed on another planet

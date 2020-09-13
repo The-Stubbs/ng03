@@ -52,12 +52,12 @@ class View(GlobalView):
                 " planet_ownerid, planet_owner_name, planet_owner_relation," + \
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, " + \
                 " destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation, total_time," + \
-                " from_radarstrength, to_radarstrength, alliances.tag, radar_jamming, destplanet_radar_jamming" + \
-                " FROM vw_fleets_moving v" + \
-                "    LEFT JOIN alliances ON alliances.id = owner_alliance_id" + \
+                " from_radarstrength, to_radarstrength, gm_alliances.tag, radar_jamming, destplanet_radar_jamming" + \
+                " FROM vw_gm_moving_fleets v" + \
+                "    LEFT JOIN gm_alliances ON gm_alliances.id = owner_alliance_id" + \
                 " WHERE userid="+str(self.UserId)+" AND ("+ \
-                "    (planetid >= sp_first_planet("+str(galaxy)+","+str(sector)+") AND planetid <= sp_last_planet("+str(galaxy)+","+str(sector)+")) OR"+ \
-                "    (destplanetid >= sp_first_planet("+str(galaxy)+","+str(sector)+") AND destplanetid <= sp_last_planet("+str(galaxy)+","+str(sector)+")))" + \
+                "    (planetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND planetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")) OR"+ \
+                "    (destplanetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND destplanetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")))" + \
                 " ORDER BY remaining_time"
         oRss = oConnExecuteAll(query)
 
@@ -65,9 +65,9 @@ class View(GlobalView):
         loosing_time = 0 # seconds before our radar loses the fleet
         remaining_time = 0 # seconds before the fleet ends its travel
         movement_type = ""
-        movingfleetcount = 0        # fleets moving inside the sector
-        enteringfleetcount = 0    # fleets entering the sector
-        leavingfleetcount = 0    # fleets leaving the sector
+        movingfleetcount = 0        # gm_fleets moving inside the sector
+        enteringfleetcount = 0    # gm_fleets entering the sector
+        leavingfleetcount = 0    # gm_fleets leaving the sector
 
         movings = []
         enterings = []
@@ -81,9 +81,9 @@ class View(GlobalView):
             display_from = True
             display_to = True
 
-            # do not display NAP/enemy fleets moving to/from unknown planet if fleet is not within radar range
+            # do not display NAP/enemy gm_fleets moving to/from unknown planet if fleet is not within radar range
             if relation <= rFriend:
-                # compute how far our radar can detect fleets
+                # compute how far our radar can detect gm_fleets
                 # highest radar strength * width of a sector / speed * nbr of second in one hour
                 radarSpotting = sqrt(radarstrength)*6*1000/oRs[6]*3600
 
@@ -117,7 +117,7 @@ class View(GlobalView):
 
                 #
                 # determine the type of movement : intrasector, intersector (entering, leaving)
-                # also don't show signature of enemy fleets if we don't know or can't spy on the source AND target coords
+                # also don't show signature of enemy gm_fleets if we don't know or can't gm_spyings on the source AND target coords
                 #
                 if oRs[13] == galaxy and oRs[14] == sector:
                     if oRs[21] == galaxy and oRs[22] == sector:
@@ -226,10 +226,10 @@ class View(GlobalView):
             #
             query = "SELECT n.id, "+ \
                     " n.colonies > 0,"+ \
-                    " False AND EXISTS(SELECT 1 FROM nav_planet WHERE galaxy=n.id AND ownerid IN (SELECT friend FROM vw_friends WHERE vw_friends.userid="+str(self.UserId)+") LIMIT 1),"+ \
-                    " EXISTS(SELECT 1 FROM nav_planet WHERE galaxy=n.id AND ownerid IN (SELECT ally FROM vw_allies WHERE vw_allies.userid="+str(self.UserId)+") LIMIT 1),"+ \
-                    " EXISTS(SELECT 1 FROM nav_planet WHERE galaxy=n.id AND ownerid = "+str(self.UserId)+" LIMIT 1) AS hasplanets"+ \
-                    " FROM nav_galaxies AS n"+ \
+                    " False AND EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid IN (SELECT friend FROM vw_gm_friends WHERE vw_gm_friends.userid="+str(self.UserId)+") LIMIT 1),"+ \
+                    " EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid IN (SELECT ally FROM vw_allies WHERE vw_allies.userid="+str(self.UserId)+") LIMIT 1),"+ \
+                    " EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid = "+str(self.UserId)+" LIMIT 1) AS hasplanets"+ \
+                    " FROM gm_galaxies AS n"+ \
                     " ORDER BY n.id;"
             oRss = oConnExecuteAll(query)
 
@@ -259,18 +259,18 @@ class View(GlobalView):
             #
             # Display map of sectors for the given galaxy
             #
-            query = "SELECT sp_get_galaxy_planets(" + str(galaxy) + "," + str(self.UserId) + ")"
+            query = "SELECT internal_profile_get_galaxy_planets(" + str(galaxy) + "," + str(self.UserId) + ")"
             oRs = oConnExecute(query)
 
             content.AssignValue("map", oRs[0])
             content.AssignValue("mapgalaxy", oRs[0])
 
-            query = "SELECT alliances.tag, round(100.0 * sum(n.score) / (SELECT sum(score) FROM nav_planet WHERE galaxy=n.galaxy))" + \
-                    " FROM nav_planet AS n" + \
-                    "    INNER JOIN users ON (users.id = n.ownerid)" + \
-                    "    INNER JOIN alliances ON (users.alliance_id = alliances.id)" + \
+            query = "SELECT gm_alliances.tag, round(100.0 * sum(n.score) / (SELECT sum(score) FROM gm_planets WHERE galaxy=n.galaxy))" + \
+                    " FROM gm_planets AS n" + \
+                    "    INNER JOIN gm_profiles ON (gm_profiles.id = n.ownerid)" + \
+                    "    INNER JOIN gm_alliances ON (gm_profiles.alliance_id = gm_alliances.id)" + \
                     " WHERE galaxy=" + str(galaxy) + \
-                    " GROUP BY galaxy, alliances.tag" + \
+                    " GROUP BY galaxy, gm_alliances.tag" + \
                     " ORDER BY sum(n.score) DESC LIMIT 3"
             oRss = oConnExecuteAll(query)
 
@@ -281,11 +281,11 @@ class View(GlobalView):
 
                 nb = nb + 1
 
-            query = "SELECT date_part('epoch', protected_until-now()) FROM nav_galaxies WHERE id=" + str(galaxy)
+            query = "SELECT date_part('epoch', protected_until-now()) FROM gm_galaxies WHERE id=" + str(galaxy)
             oRs = oConnExecute(query)
             content.AssignValue("protected_until", int(oRs[0]))
 
-            query = "SELECT sell_ore, sell_hydrocarbon FROM sp_get_resource_price(" + str(self.UserId) + "," + str(galaxy) + ", false)"
+            query = "SELECT sell_ore, sell_hydrocarbon FROM internal_profile_get_resource_price(" + str(self.UserId) + "," + str(galaxy) + ", false)"
             oRs = oConnExecute(query)
 
             content.AssignValue("price_ore", oRs[0])
@@ -313,17 +313,17 @@ class View(GlobalView):
         content.AssignValue("sector7", self.GetSector(sector,-1, 0))
 
         #
-        # Retrieve/Save fleets in the sector
+        # Retrieve/Save gm_fleets in the sector
         #
         
-        query = "SELECT f.planetid, f.id, f.name, sp_relation(f.ownerid, "+str(self.UserId)+"), f.signature," + \
-                "    EXISTS(SELECT 1 FROM fleets AS fl WHERE fl.planetid=f.planetid and fl.action != 1 and fl.action != -1 and fl.ownerid IN (SELECT ally FROM vw_allies WHERE userid="+str(self.UserId)+") LIMIT 1)," + \
-                " action=1 OR action=-1, (SELECT tag FROM alliances WHERE id=users.alliance_id), login, shared," + \
-                "    EXISTS(SELECT 1 FROM fleets AS fl WHERE fl.planetid=f.planetid and fl.action != 1 and fl.action != -1 and fl.ownerid ="+str(self.UserId)+" LIMIT 1)" + \
-                " FROM fleets as f" + \
-                "    INNER JOIN users ON (f.ownerid=users.id)" + \
+        query = "SELECT f.planetid, f.id, f.name, internal_profile_get_relation(f.ownerid, "+str(self.UserId)+"), f.signature," + \
+                "    EXISTS(SELECT 1 FROM gm_fleets AS fl WHERE fl.planetid=f.planetid and fl.action != 1 and fl.action != -1 and fl.ownerid IN (SELECT ally FROM vw_allies WHERE userid="+str(self.UserId)+") LIMIT 1)," + \
+                " action=1 OR action=-1, (SELECT tag FROM gm_alliances WHERE id=gm_profiles.alliance_id), login, shared," + \
+                "    EXISTS(SELECT 1 FROM gm_fleets AS fl WHERE fl.planetid=f.planetid and fl.action != 1 and fl.action != -1 and fl.ownerid ="+str(self.UserId)+" LIMIT 1)" + \
+                " FROM gm_fleets as f" + \
+                "    INNER JOIN gm_profiles ON (f.ownerid=gm_profiles.id)" + \
                 " WHERE ((action != 1 AND action != -1) OR engaged) AND" + \
-                "    planetid >= sp_first_planet("+str(galaxy)+","+str(sector)+") AND planetid <= sp_last_planet("+str(galaxy)+","+str(sector)+")" + \
+                "    planetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND planetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")" + \
                 " ORDER BY f.planetid, upper(f.name)"
         oRss = oConnExecuteAll(query)
 
@@ -336,9 +336,9 @@ class View(GlobalView):
         #
 
         query = "SELECT planetid, label, description" + \
-                " FROM planet_buildings" + \
-                "    INNER JOIN db_buildings ON db_buildings.id=buildingid" + \
-                " WHERE planetid >= sp_first_planet("+str(galaxy)+","+str(sector)+") AND planetid <= sp_last_planet("+str(galaxy)+","+str(sector)+") AND is_planet_element" + \
+                " FROM gm_planet_buildings" + \
+                "    INNER JOIN dt_buildings ON dt_buildings.id=buildingid" + \
+                " WHERE planetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND planetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+") AND is_planet_element" + \
                 " ORDER BY planetid, upper(label)"
         oRss = oConnExecuteAll(query)
 
@@ -349,7 +349,7 @@ class View(GlobalView):
         #
         # Retrieve biggest radar strength in the sector that the player has access to
         #
-        query = "SELECT * FROM sp_get_user_rs("+str(self.UserId)+","+str(galaxy)+","+str(sector)+")"
+        query = "SELECT * FROM internal_profile_get_sector_radar_strength("+str(self.UserId)+","+str(galaxy)+","+str(sector)+")"
         oRs = oConnExecute(query)
         radarstrength = oRs[0]
 
@@ -361,17 +361,17 @@ class View(GlobalView):
         #
         # Main query : retrieve planets info in the sector
         #
-        query = "SELECT nav_planet.id, nav_planet.planet, nav_planet.name, nav_planet.ownerid,"+ \
-                " users.login, sp_relation(nav_planet.ownerid," + str(self.UserId) + "), floor, space, GREATEST(0, radar_strength), radar_jamming," + \
-                " orbit_ore, orbit_hydrocarbon, alliances.tag," + \
-                " (SELECT SUM(quantity*signature) FROM planet_ships LEFT JOIN db_ships ON (planet_ships.shipid = db_ships.id) WHERE planet_ships.planetid=nav_planet.id), " + \
+        query = "SELECT gm_planets.id, gm_planets.planet, gm_planets.name, gm_planets.ownerid,"+ \
+                " gm_profiles.login, internal_profile_get_relation(gm_planets.ownerid," + str(self.UserId) + "), floor, space, GREATEST(0, radar_strength), radar_jamming," + \
+                " orbit_ore, orbit_hydrocarbon, gm_alliances.tag," + \
+                " (SELECT SUM(quantity*signature) FROM gm_planet_ships LEFT JOIN dt_ships ON (gm_planet_ships.shipid = dt_ships.id) WHERE gm_planet_ships.planetid=gm_planets.id), " + \
                 " floor_occupied, planet_floor, production_frozen, warp_to IS NOT NULL OR vortex_strength > 0," + \
                 " planet_pct_ore, planet_pct_hydrocarbon, spawn_ore, spawn_hydrocarbon, vortex_strength," + \
                 " COALESCE(buy_ore, 0) AS buy_ore, COALESCE(buy_hydrocarbon, 0) as buy_hydrocarbon," + \
-                " sp_locs_shared(COALESCE(" + str(aid) + ", -1), COALESCE(users.alliance_id, -1)) AS locs_shared" + \
-                " FROM nav_planet"+ \
-                "    LEFT JOIN users ON (users.id = ownerid)"+ \
-                "    LEFT JOIN alliances ON (users.alliance_id=alliances.id)" + \
+                " internal_alliance_get_nap_location_sharing(COALESCE(" + str(aid) + ", -1), COALESCE(gm_profiles.alliance_id, -1)) AS locs_shared" + \
+                " FROM gm_planets"+ \
+                "    LEFT JOIN gm_profiles ON (gm_profiles.id = ownerid)"+ \
+                "    LEFT JOIN gm_alliances ON (gm_profiles.alliance_id=gm_alliances.id)" + \
                 " WHERE galaxy=" + str(galaxy) + " AND sector=" + str(sector) + \
                 " ORDER BY planet"
         oRss = oConnExecuteAll(query)
@@ -400,19 +400,19 @@ class View(GlobalView):
             hasPlanetInfo = True
 
             #
-            # list all the fleets around the current planet
+            # list all the gm_fleets around the current planet
             #
             allyfleetcount = 0
             friendfleetcount = 0
             enemyfleetcount = 0
             
-            planet['fleets'] = []
+            planet['gm_fleets'] = []
             fleetcount = 0
             if fleetsArray:
                 for i in fleetsArray:
                     if i[0] == planetid:
     
-                        # display fleets on : 
+                        # display gm_fleets on : 
                         #    alliance and own planets 
                         #    planets where we got a fleet or (a fleet of an alliance member and can_use_alliance_radars)
                         #    planets that our radar can detect
@@ -457,7 +457,7 @@ class View(GlobalView):
                                 # if planet is owned by the player: increase enemy fleet
                                 enemyfleetcount = enemyfleetcount + 1
     
-                            planet['fleets'].append(fleet)
+                            planet['gm_fleets'].append(fleet)
     
             planet["planetid"] = planetid
             planet["planet"] = oRs[1]
@@ -652,7 +652,7 @@ class View(GlobalView):
         content.Parse("galaxy_link")
         
         #
-        # Display fleets movements according to player radar strength
+        # Display gm_fleets movements according to player radar strength
         #
 
         if radarstrength > 0: self.displayRadar(content, galaxy, sector, radarstrength)

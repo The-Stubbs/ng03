@@ -48,7 +48,7 @@ class View(GlobalView):
 
         spotted = False
 
-        action = request.POST.get("spy")
+        action = request.POST.get("gm_spyings")
         self.level = ToInt(request.POST.get("level"), -1)
 
         if action == "nation":
@@ -89,7 +89,7 @@ class View(GlobalView):
         content.AssignValue("planet_cost_lvl_3", self.planet_cost_lvl_3)
 
         # display errors
-        intell_type = self.request.POST.get("spy", "")
+        intell_type = self.request.POST.get("gm_spyings", "")
 
         if self.intell_error != self.e_no_error:
             content.Parse(str(intell_type) + "_error" + str(self.intell_error))
@@ -99,16 +99,16 @@ class View(GlobalView):
         return self.Display(content)
 
     # action : type of order
-    # self.level : self.level of the recruited spy, determine spottedChance and -Modifier values
-    #  - spottedChance : chance that the spy has to be spotted per planet/fleet/building spied
-    #  - getinfoModifier : chance that the spy retrieve common info
-    #  - getmoreModifier : chance the the spy retrieve rare info
-    # spotted : set to True if spy has been spotted
+    # self.level : self.level of the recruited gm_spyings, determine spottedChance and -Modifier values
+    #  - spottedChance : chance that the gm_spyings has to be spotted per planet/fleet/building spied
+    #  - getinfoModifier : chance that the gm_spyings retrieve common info
+    #  - getmoreModifier : chance the the gm_spyings retrieve rare info
+    # spotted : set to True if gm_spyings has been spotted
     # id : spied user id
     # nation : spied user name
 
-    # self.category : intelligence self.category id for reports.asp
-    # type : action id for reports.asp
+    # self.category : intelligence self.category id for gm_profile_reports.asp
+    # type : action id for gm_profile_reports.asp
     # cost : action cost ; determined by action + self.level
 
     #
@@ -118,7 +118,7 @@ class View(GlobalView):
         typ = 1
 
         nation = self.request.POST.get("nation_name", "")
-        oRs = oConnExecute("SELECT id FROM users WHERE (privilege=-2 OR privilege=0) AND upper(login) = upper(" + dosql(nation) + ")")
+        oRs = oConnExecute("SELECT id FROM gm_profiles WHERE (privilege=-2 OR privilege=0) AND upper(login) = upper(" + dosql(nation) + ")")
         if oRs == None:
             self.intell_error = self.e_player_not_exists
             return
@@ -131,13 +131,13 @@ class View(GlobalView):
         #
         # Begin transaction
         #
-        oRs = oConnExecute("SELECT sp_create_spy('" + str(self.UserId) + "', int2(" + str(typ) + "), int2(" + str(self.level) + ") )")
+        oRs = oConnExecute("SELECT user_spying_create('" + str(self.UserId) + "', int2(" + str(typ) + "), int2(" + str(self.level) + ") )")
         reportid = oRs[0]
         if reportid < 0:
             self.intell_error = self.e_general_error
             return
 
-        oConnDoQuery("UPDATE spy SET target_name=sp_get_user(" + str(id) + ") WHERE id=" + str(reportid))
+        oConnDoQuery("UPDATE gm_spyings SET target_name=internal_profile_get_name(" + str(id) + ") WHERE id=" + str(reportid))
 
         nb_planet = 0
 
@@ -174,7 +174,7 @@ class View(GlobalView):
             self.intell_error = self.e_not_enough_money
             return
 
-        # test is the spy is spotted
+        # test is the gm_spyings is spotted
         spotted = random() < spottedChance
 
         #
@@ -182,64 +182,64 @@ class View(GlobalView):
         #
         query = " SELECT id, name, floor, space, pct_ore, pct_hydrocarbon," + \
                     " COALESCE((SELECT SUM(quantity*signature) " + \
-                    " FROM planet_ships " + \
-                    " LEFT JOIN db_ships ON (planet_ships.shipid = db_ships.id) " + \
-                    " WHERE planet_ships.planetid=vw_planets.id),0) " + \
-                " FROM vw_planets " + \
+                    " FROM gm_planet_ships " + \
+                    " LEFT JOIN dt_ships ON (gm_planet_ships.shipid = dt_ships.id) " + \
+                    " WHERE gm_planet_ships.planetid=vw_gm_planets.id),0) " + \
+                " FROM vw_gm_planets " + \
                 " WHERE ownerid=" + str(id) + \
                 " ORDER BY random() "
         oRss = oConnExecuteAll(query)
         for oRs in oRss:
-            # test if info is retrieved by the spy (failure probability increase for each new info)
+            # test if info is retrieved by the gm_spyings (failure probability increase for each new info)
             if planet_limit == 0 or nb_planet < planet_limit:
-                # add planet to the spy report
-                query = " INSERT INTO spy_planet(spy_id,  planet_id,  planet_name,  floor,  space, pct_ore, pct_hydrocarbon,  ground) " + \
+                # add planet to the gm_spyings report
+                query = " INSERT INTO gm_spying_planets(spy_id,  planet_id,  planet_name,  floor,  space, pct_ore, pct_hydrocarbon,  ground) " + \
                         " VALUES("+ str(reportid) +"," + str(oRs[0]) +"," + dosql(oRs[1]) +"," + str(oRs[2]) + "," + str(oRs[3]) + "," + str(oRs[4]) + "," + str(oRs[5]) + "," + str(oRs[6]) +")"
                 oConnDoQuery(query)
 
                 nb_planet = nb_planet + 1
 
         #
-        # For veteran spy, collect additionnal research infos
+        # For veteran gm_spyings, collect additionnal research infos
         #
         if self.level >= 2:
             query = " SELECT researchid, level " + \
-                    " FROM sp_list_researches(" + str(id) + ") " + \
+                    " FROM internal_profile_get_researches_status(" + str(id) + ") " + \
                     " WHERE level > 0" + \
                     " ORDER BY researchid "
             oRss = oConnExecuteAll(query)
 
             for oRs in oRss:
-                # add research info to spy report
-                query = " INSERT INTO spy_research(spy_id,  research_id,  research_level) " + \
+                # add research info to gm_spyings report
+                query = " INSERT INTO gm_spying_researches(spy_id,  research_id,  research_level) " + \
                         " VALUES("+ str(reportid) +", " + str(oRs[0]) +", " + str(oRs[1]) +") "
                 oConnDoQuery(query)
 
         #
-        # Add spy reports in report list
+        # Add gm_spyings gm_profile_reports in report list
         #
-        query = " INSERT INTO reports(ownerid, type, subtype, datetime, spyid, description) " + \
-                " VALUES(" + str(self.UserId) + ", " + str(self.category) + ", " + str(typ*10) + ", now() + " + str(spyingTime + nb_planet) + "*interval '1 minute', " + str(reportid) + ", sp_get_user(" + str(id) + ")) "
+        query = " INSERT INTO gm_profile_reports(ownerid, type, subtype, datetime, spyid, description) " + \
+                " VALUES(" + str(self.UserId) + ", " + str(self.category) + ", " + str(typ*10) + ", now() + " + str(spyingTime + nb_planet) + "*interval '1 minute', " + str(reportid) + ", internal_profile_get_name(" + str(id) + ")) "
 
         oConnDoQuery(query)
 
         if spotted and self.request.session.get("privilege", 0) < 100:
-            # update report if spy has been spotted
-            query = " UPDATE spy " + \
+            # update report if gm_spyings has been spotted
+            query = " UPDATE gm_spyings " + \
                     " SET spotted=" + str(spotted) + \
                     " WHERE id=" + str(reportid) + " AND userid=" + str(self.UserId)
             oConnDoQuery(query)
 
             # add report in spied nation's report list
-            query = " INSERT INTO reports(ownerid, type, subtype, datetime, spyid, description) " + \
-                    " VALUES(" + str(id) + ", " + str(self.category) + ", " + str(typ) + ", now() + " + str(spyingTime + nb_planet) + "*interval '40 seconds', " + str(reportid) + ", sp_get_user(" + str(self.UserId) + ")) "
+            query = " INSERT INTO gm_profile_reports(ownerid, type, subtype, datetime, spyid, description) " + \
+                    " VALUES(" + str(id) + ", " + str(self.category) + ", " + str(typ) + ", now() + " + str(spyingTime + nb_planet) + "*interval '40 seconds', " + str(reportid) + ", internal_profile_get_name(" + str(self.UserId) + ")) "
 
             oConnDoQuery(query)
 
         #
         # withdraw the operation cost from player's account
         #
-        query = "UPDATE users SET prestige_points=prestige_points - " + str(cost) + " WHERE id=" + str(self.UserId)
+        query = "UPDATE gm_profiles SET prestige_points=prestige_points - " + str(cost) + " WHERE id=" + str(self.UserId)
 
         oConnDoQuery(query)
 
@@ -256,7 +256,7 @@ class View(GlobalView):
 
         if self.request.session.get("privilege", 0) < 100:
 
-            oRs = oConnExecute("SELECT ownerid FROM nav_planet WHERE galaxy=" + str(g) + " AND sector=" + str(s) + " AND planet=" + str(p))
+            oRs = oConnExecute("SELECT ownerid FROM gm_planets WHERE galaxy=" + str(g) + " AND sector=" + str(s) + " AND planet=" + str(p))
     
             if oRs == None:
                 self.intell_error = self.e_planet_not_exists
@@ -268,7 +268,7 @@ class View(GlobalView):
         #
         # Begin transaction
         #
-        oRs = oConnExecute("SELECT sp_create_spy('" + str(self.UserId) + "', int2(" + str(typ) + "), int2(" + str(self.level) + ") )")
+        oRs = oConnExecute("SELECT user_spying_create('" + str(self.UserId) + "', int2(" + str(typ) + "), int2(" + str(self.level) + ") )")
         reportid = oRs[0]
         if reportid < 0:
             self.intell_error = self.e_general_error
@@ -300,17 +300,17 @@ class View(GlobalView):
             return
 
         # retrieve planet info list
-        query = " SELECT id, name, ownerid, sp_get_user(ownerid), floor, space, floor_occupied, space_occupied,  " + \
+        query = " SELECT id, name, ownerid, internal_profile_get_name(ownerid), floor, space, floor_occupied, space_occupied,  " + \
                     " COALESCE((SELECT SUM(quantity*signature) " + \
-                    " FROM planet_ships " + \
-                    " LEFT JOIN db_ships ON (planet_ships.shipid = db_ships.id) " + \
-                    " WHERE planet_ships.planetid=vw_planets.id),0), " + \
+                    " FROM gm_planet_ships " + \
+                    " LEFT JOIN dt_ships ON (gm_planet_ships.shipid = dt_ships.id) " + \
+                    " WHERE gm_planet_ships.planetid=vw_gm_planets.id),0), " + \
                 " ore, hydrocarbon, ore_capacity, hydrocarbon_capacity, ore_production, hydrocarbon_production, " + \
                 " energy_consumption, energy_production, " + \
                 " radar_strength, radar_jamming, colonization_datetime, orbit_ore, orbit_hydrocarbon, " + \
                 " workers, workers_capacity, scientists, scientists_capacity, soldiers, soldiers_capacity, " + \
                 " pct_ore, pct_hydrocarbon" + \
-                " FROM vw_planets " + \
+                " FROM vw_gm_planets " + \
                 " WHERE galaxy=" + str(g) + " AND sector=" + str(s) + " AND planet=" + str(p)
 
         oRs = oConnExecute(query)
@@ -318,7 +318,7 @@ class View(GlobalView):
             self.intell_error = self.e_planet_not_exists
             return
 
-        # test is the spy is spotted
+        # test is the gm_spyings is spotted
         spotted = random() < spottedChance
 
         if oRs:
@@ -329,7 +329,7 @@ class View(GlobalView):
 
             if oRs[2]:
             #
-            # somebody owns this planet, so the spy can retrieve several info on it
+            # somebody owns this planet, so the gm_spyings can retrieve several info on it
             #
                 # retrieve ownerid and planetname
                 id = oRs[2]
@@ -339,10 +339,10 @@ class View(GlobalView):
                     planetname = "''"
 
                 # set the owner of the planet as the target nation
-                oConnDoQuery("UPDATE spy SET target_name=sp_get_user(" + str(id) + ") WHERE id=" + str(reportid))
+                oConnDoQuery("UPDATE gm_spyings SET target_name=internal_profile_get_name(" + str(id) + ") WHERE id=" + str(reportid))
 
                 # basic info retrieved by all spies
-                query = " INSERT INTO spy_planet(spy_id,  planet_id,  planet_name, owner_name, floor, space, pct_ore, pct_hydrocarbon, ground ) " + \
+                query = " INSERT INTO gm_spying_planets(spy_id,  planet_id,  planet_name, owner_name, floor, space, pct_ore, pct_hydrocarbon, ground ) " + \
                         " VALUES ("+ str(reportid) +", " + sqlValue(oRs[0]) + "," + sqlValue(planetname) +"," + dosql(oRs[3]) +"," + \
                         sqlValue(oRs[4]) + "," + sqlValue(oRs[5]) + "," + sqlValue(oRs[28]) + "," + sqlValue(oRs[29]) + "," + sqlValue(oRs[8]) + ")"
 
@@ -350,7 +350,7 @@ class View(GlobalView):
 
                 # common info retrieved by spies which self.level >= 0 (actually, all)
                 if self.level >= 0:
-                    query = " UPDATE spy_planet SET"+ \
+                    query = " UPDATE gm_spying_planets SET"+ \
                             " radar_strength=" + sqlValue(oRs[17]) + ", radar_jamming=" + sqlValue(oRs[18]) + ", " + \
                             " orbit_ore=" + sqlValue(oRs[20]) + ", orbit_hydrocarbon=" + sqlValue(oRs[21]) + \
                             " WHERE spy_id=" + str(reportid) + " AND planet_id=" + sqlValue(oRs[0])
@@ -359,7 +359,7 @@ class View(GlobalView):
 
                 # uncommon info retrieved by skilled spies with self.level >= 1 : ore, hydrocarbon, energy
                 if self.level >= 1:
-                    query = "UPDATE spy_planet SET"+ \
+                    query = "UPDATE gm_spying_planets SET"+ \
                             " ore=" + sqlValue(oRs[9]) + ", hydrocarbon=" + sqlValue(oRs[10]) + \
                             ", ore_capacity=" + sqlValue(oRs[11]) + ", hydrocarbon_capacity=" + sqlValue(oRs[12]) + \
                             ", ore_production=" + sqlValue(oRs[13]) + ", hydrocarbon_production=" + sqlValue(oRs[14]) + \
@@ -372,7 +372,7 @@ class View(GlobalView):
                     #
                     # rare info that can be retrieved by veteran spies only : workers, scientists, soldiers
                     #
-                    query = "UPDATE spy_planet SET"+ \
+                    query = "UPDATE gm_spying_planets SET"+ \
                             " workers=" + sqlValue(oRs[22]) + ", workers_capacity=" + sqlValue(oRs[23]) + ", " + \
                             " scientists=" + sqlValue(oRs[24]) + ", scientists_capacity=" + sqlValue(oRs[25]) + ", " + \
                             " soldiers=" + sqlValue(oRs[26]) + ", soldiers_capacity=" + sqlValue(oRs[27]) + \
@@ -384,7 +384,7 @@ class View(GlobalView):
                     # Add the buildings of the planet under construction
                     #
                     query = "SELECT planetid, id, build_status, quantity, construction_maximum " + \
-                            " FROM vw_buildings AS b " + \
+                            " FROM vw_gm_planet_buildings AS b " + \
                             " WHERE planetid=" + str(planet) + " AND build_status IS NOT NULL"
 
                     oRss = oConnExecuteAll(query)
@@ -392,12 +392,12 @@ class View(GlobalView):
                         
                         rand1 = random()
 
-                        # test if info is correctly retrieved by the spy (error probability increase for each new info)
+                        # test if info is correctly retrieved by the gm_spyings (error probability increase for each new info)
                         qty = oRs[3]
 
                         if rand1 < ( getinfoModifier * i ) and oRs[4] != 1:
                             # if construction_maximum = 1: error is impossible : if there is 1 city, it can't exists more or less
-                            # info are always retrieved, but the spy may give a wrong number of constructions ( actually right number +/- 50% )
+                            # info are always retrieved, but the gm_spyings may give a wrong number of constructions ( actually right number +/- 50% )
 
                             # calculate maximum and minimum possible numbers of buildings
                             rndmax = int(oRs[3]*1.5)
@@ -407,7 +407,7 @@ class View(GlobalView):
                             if rndmin < 1: rndmin = 1
                             qty = int((rndmax-rndmin+1)*random()+rndmin)
 
-                        query = "INSERT INTO spy_building(spy_id, planet_id, building_id, endtime, quantity) " + \
+                        query = "INSERT INTO gm_spying_buildings(spy_id, planet_id, building_id, endtime, quantity) " + \
                                 " VALUES (" + str(reportid) + ", " + str(oRs[0]) + ", " + str(oRs[1]) + ", now() + " + str(oRs[2]) + "* interval '1 second', " + str(qty) + " )"
 
                         oConnDoQuery(query)
@@ -418,7 +418,7 @@ class View(GlobalView):
                     # Add the buildings of the planet
                     #
                     query = "SELECT planetid, id, quantity, construction_maximum" + \
-                            " FROM vw_buildings" + \
+                            " FROM vw_gm_planet_buildings" + \
                             " WHERE planetid=" + str(planet) + " AND quantity != 0 AND build_status IS NULL AND destruction_time IS NULL"
                     oRss = oConnExecuteAll(query)
                     i = 0
@@ -426,12 +426,12 @@ class View(GlobalView):
 
                         rand1 = random()
 
-                        # test if info is correctly retrieved by the spy (error probability increase for each new info)
+                        # test if info is correctly retrieved by the gm_spyings (error probability increase for each new info)
                         qty = oRs[2]
 
                         if rand1 < ( getinfoModifier * i ) and oRs[3] != 1:
                             # if construction_maximum = 1: error is impossible : if there is 1 city, it can't exists more or less
-                            # info are always retrieved, but the spy may give a wrong number of constructions ( actually right number +/- 50% )
+                            # info are always retrieved, but the gm_spyings may give a wrong number of constructions ( actually right number +/- 50% )
 
                             # calculate maximum and minimum possible numbers of buildings
                             rndmax = int(oRs[2]*1.5)
@@ -441,7 +441,7 @@ class View(GlobalView):
                             if rndmin < 1: rndmin = 1
                             qty = int((rndmax-rndmin+1)*random()+rndmin)
 
-                        query = " INSERT INTO spy_building(spy_id, planet_id, building_id, quantity) " + \
+                        query = " INSERT INTO gm_spying_buildings(spy_id, planet_id, building_id, quantity) " + \
                                 " VALUES(" + str(reportid) + ", " + str(oRs[0]) + ", " + str(oRs[1]) + ", " + str(qty) + " )"
 
                         oConnDoQuery(query)
@@ -452,36 +452,36 @@ class View(GlobalView):
                 #
                 # nobody own this planet
                 #
-                query = " INSERT INTO spy_planet(spy_id, planet_id, floor, space) " + \
+                query = " INSERT INTO gm_spying_planets(spy_id, planet_id, floor, space) " + \
                         " VALUES("+ str(reportid) +", " + sqlValue(oRs[0]) +", " + sqlValue(oRs[4]) +", " + sqlValue(oRs[5]) +") "
                 oConnDoQuery(query)
                 return
 
         #
-        # Add spy reports in report list
+        # Add gm_spyings gm_profile_reports in report list
         #
-        query = " INSERT INTO reports(ownerid, type, subtype, datetime, spyid, planetid) " + \
+        query = " INSERT INTO gm_profile_reports(ownerid, type, subtype, datetime, spyid, planetid) " + \
                 " VALUES(" + str(self.UserId) + ", " + str(self.category) + ", " + str(typ*10) + ", now()+" + str(spyingTime) + "*interval '1 minute', " + str(reportid) + ", " + str(planet) + ") "
 
         oConnDoQuery(query)
 
-        # update report if spy has been spotted
+        # update report if gm_spyings has been spotted
         if spotted and self.request.session.get("privilege", 0) < 100:
-            query = "UPDATE spy SET" + \
+            query = "UPDATE gm_spyings SET" + \
                     " spotted=" + str(spotted) + \
                     " WHERE id=" + str(reportid) + " AND userid=" + str(self.UserId)
 
             oConnDoQuery(query)
 
             # add report in spied nation's report list
-            query = " INSERT INTO reports(ownerid, type, subtype, datetime, spyid, planetid, description) " + \
-                    " VALUES(" + str(id) + "," + str(self.category) + "," + str(typ) + ", now()+" + str(spyingTime) + "*interval '40 seconds'," + str(reportid) + "," + str(planet) + ", sp_get_user(" + str(self.UserId) + "))"
+            query = " INSERT INTO gm_profile_reports(ownerid, type, subtype, datetime, spyid, planetid, description) " + \
+                    " VALUES(" + str(id) + "," + str(self.category) + "," + str(typ) + ", now()+" + str(spyingTime) + "*interval '40 seconds'," + str(reportid) + "," + str(planet) + ", internal_profile_get_name(" + str(self.UserId) + "))"
 
             oConnDoQuery(query)
 
         #
         # withdraw the operation cost from player's account
         #
-        query = "UPDATE users SET prestige_points = prestige_points - " + str(cost) + " WHERE id=" + str(self.UserId)
+        query = "UPDATE gm_profiles SET prestige_points = prestige_points - " + str(cost) + " WHERE id=" + str(self.UserId)
 
         oConnDoQuery(query)

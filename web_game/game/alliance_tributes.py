@@ -34,7 +34,7 @@ class View(GlobalView):
 
         if action == "cancel":
             self.tag = request.GET.get("tag").strip()
-            oRs = oConnExecute("SELECT sp_alliance_tribute_cancel(" + str(self.UserId) + "," + dosql(self.tag) + ")")
+            oRs = oConnExecute("SELECT user_alliance_tribute_cancel(" + str(self.UserId) + "," + dosql(self.tag) + ")")
 
             if oRs[0] == 0:
                 self.cease_success = "ok"
@@ -49,7 +49,7 @@ class View(GlobalView):
             self.credits = ToInt(request.POST.get("credits"), 0)
 
             if self.tag != "" and self.credits > 0:
-                oRs = oConnExecute("SELECT sp_alliance_tribute_new(" + str(self.UserId) + "," + dosql(self.tag) + "," + str(self.credits) + ")")
+                oRs = oConnExecute("SELECT user_alliance_tribute_create(" + str(self.UserId) + "," + dosql(self.tag) + "," + str(self.credits) + ")")
                 if oRs[0] == 0:
                     self.invitation_success = "ok"
                     self.tag = ""
@@ -82,9 +82,9 @@ class View(GlobalView):
         orderby = orderby + ", tag"
 
         # List
-        query = "SELECT w.created, alliances.id, alliances.tag, alliances.name, w.credits, w.next_transfer"+ \
-                " FROM alliances_tributes w" + \
-                "    INNER JOIN alliances ON (allianceid = alliances.id)" + \
+        query = "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name, w.credits, w.next_transfer"+ \
+                " FROM gm_alliance_tributes w" + \
+                "    INNER JOIN gm_alliances ON (allianceid = gm_alliances.id)" + \
                 " WHERE target_allianceid=" + str(self.AllianceId) + \
                 " ORDER BY " + orderby
         oRss = oConnExecuteAll(query)
@@ -127,9 +127,9 @@ class View(GlobalView):
         orderby = orderby + ", tag"
 
         # List
-        query = "SELECT w.created, alliances.id, alliances.tag, alliances.name, w.credits"+ \
-                " FROM alliances_tributes w" + \
-                "    INNER JOIN alliances ON (target_allianceid = alliances.id)" + \
+        query = "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name, w.credits"+ \
+                " FROM gm_alliance_tributes w" + \
+                "    INNER JOIN gm_alliances ON (target_allianceid = gm_alliances.id)" + \
                 " WHERE allianceid=" + str(self.AllianceId) + \
                 " ORDER BY " + orderby
         oRss = oConnExecuteAll(query)

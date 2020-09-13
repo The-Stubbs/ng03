@@ -27,8 +27,8 @@ class View(GlobalView):
                 " int4(upkeep_ships + ships_signature*cost_ships/24*"+str(hours)+"),"+ \
                 " int4(upkeep_ships_in_position + ships_in_position_signature*cost_ships_in_position/24*"+str(hours)+"),"+ \
                 " int4(upkeep_ships_parked + ships_parked_signature*cost_ships_parked/24*"+str(hours)+"),"+ \
-                " commanders, commanders_salary, cost_commanders, upkeep_commanders + int4(commanders_salary*cost_commanders/24*"+str(hours)+")" + \
-                " FROM vw_players_upkeep" + \
+                " gm_commanders, commanders_salary, cost_commanders, upkeep_commanders + int4(commanders_salary*cost_commanders/24*"+str(hours)+")" + \
+                " FROM vw_gm_profile_upkeeps" + \
                 " WHERE userid=" + str(self.UserId)
         oRs = oConnExecute(query)
 

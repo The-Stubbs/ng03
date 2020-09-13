@@ -9,7 +9,7 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "alliance.reports"
+        self.selected_menu = "alliance.gm_profile_reports"
 
         cat = ToInt(request.GET.get("cat"), 0)
 
@@ -18,10 +18,10 @@ class View(GlobalView):
 
         return self.display_reports(cat)
 
-    # display list of messages
+    # display list of gm_mails
     def display_reports(self, cat):
 
-        content = GetTemplate(self.request, "reports")
+        content = GetTemplate(self.request, "gm_profile_reports")
 
         query = "SELECT type, subtype, datetime, battleid, fleetid, fleet_name," + \
                 " planetid, planet_name, galaxy, sector, planet," + \
@@ -30,11 +30,11 @@ class View(GlobalView):
                 " ore, hydrocarbon, credits, scientists, soldiers, workers, username," + \
                 " alliance_tag, alliance_name," + \
                 " invasionid, spyid, spy_key, description, ownerid, invited_username, login, buildingid" + \
-                " FROM vw_alliances_reports" + \
+                " FROM vw_gm_alliance_reports" + \
                 " WHERE ownerallianceid = " + str(self.AllianceId)
 
         #
-        # Limit the list to the current category or only display 100 reports if no categories specified
+        # Limit the list to the current category or only display 100 gm_profile_reports if no categories specified
         #
         if cat == 0:
             query = query + " ORDER BY datetime DESC LIMIT 200"
@@ -46,10 +46,10 @@ class View(GlobalView):
         if oRss == None: content.Parse("noreports")
         else:
             #
-            # List the reports returned by the query
+            # List the gm_profile_reports returned by the query
             #
             list = []
-            content.AssignValue('messages', list)
+            content.AssignValue('gm_mails', list)
             for oRs in oRss:
                 reportType = oRs[0]*100+oRs[1]
                 if reportType != 133:

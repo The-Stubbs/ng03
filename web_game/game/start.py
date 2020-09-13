@@ -30,7 +30,7 @@ class View(ExileMixin, View):
             return HttpResponseRedirect("/")
 
         # check if it is the first login of the player
-        rs = oConnExecute("SELECT login FROM users WHERE resets=0 AND id=" + str(self.UserId))
+        rs = oConnExecute("SELECT login FROM gm_profiles WHERE resets=0 AND id=" + str(self.UserId))
         if not rs:
             return HttpResponseRedirect("/")
 
@@ -41,7 +41,7 @@ class View(ExileMixin, View):
             # try to rename user and catch any error
             try:
                 if isValidName(newName):
-                    oConnDoQuery("UPDATE users SET login=" + dosql(newName) + " WHERE id=" + str(self.UserId))
+                    oConnDoQuery("UPDATE gm_profiles SET login=" + dosql(newName) + " WHERE id=" + str(self.UserId))
                     userName = newName
                 else:
                     result = 11
@@ -58,34 +58,34 @@ class View(ExileMixin, View):
                     break
 
             if allowed:
-                oConnDoQuery("UPDATE users SET orientation=" + str(orientation) + " WHERE id=" + str(self.UserId))
+                oConnDoQuery("UPDATE gm_profiles SET orientation=" + str(orientation) + " WHERE id=" + str(self.UserId))
 
-                rs = oConnExecute("SELECT sp_reset_account(" + str(self.UserId) + "," + str(galaxy) + ")")
+                rs = oConnExecute("SELECT user_profile_reset(" + str(self.UserId) + "," + str(galaxy) + ")")
                 result = rs[0]
 
                 if result == 0:
     
                     if orientation == 1:    # merchant
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",10,1)")
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",11,1)")
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",12,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",10,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",11,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",12,1)")
     
                     elif orientation == 2:    # military
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",20,1)")
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",21,1)")
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",22,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",20,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",21,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",22,1)")
     
                     elif orientation == 3:    # scientist
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",30,1)")
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",31,1)")
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",32,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",30,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",31,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",32,1)")
     
                     elif orientation == 4:    # war lord
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",40,1)")
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",12,1)")
-                        oConnDoQuery("INSERT INTO researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",32,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",40,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",12,1)")
+                        oConnDoQuery("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.UserId) + ",32,1)")
     
-                    oConnExecute("SELECT sp_update_researches(" + str(self.UserId) + ")")
+                    oConnExecute("SELECT internal_profile_update_modifiers(" + str(self.UserId) + ")")
     
                     return HttpResponseRedirect("/game/overview/")
 
@@ -96,7 +96,7 @@ class View(ExileMixin, View):
         for i in allowedOrientations:
             content.Parse("orientation_" + str(i))
 
-        rss = oConnExecuteAll("SELECT id, recommended FROM sp_get_galaxy_info(" + str(self.UserId) + ")")
+        rss = oConnExecuteAll("SELECT id, recommended FROM internal_profile_get_galaxies_info(" + str(self.UserId) + ")")
 
         list = []
         content.AssignValue("galaxies", list)
