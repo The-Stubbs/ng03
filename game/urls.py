@@ -6,12 +6,12 @@ from django.views.generic.base import RedirectView
 
 from game.views import error_500
 
-from game.views import connection
+from game.views import connect
 
 from game.views import alliance
-from game.views import alliance_creation
+from game.views import alliance_create
 from game.views import alliance_invitations
-from game.views import alliance_management
+from game.views import alliance_manage
 from game.views import alliance_members
 from game.views import alliance_naps
 from game.views import alliance_reports
@@ -19,46 +19,47 @@ from game.views import alliance_tributes
 from game.views import alliance_wallet
 from game.views import alliance_wars
 from game.views import battle
+from game.views import battle_view
+from game.views import buildings
 from game.views import chats
 from game.views import commanders
-from game.views import empire_orbitting
-from game.views import empire_overview
-from game.views import empire_planets
-from game.views import empire_standby
-from game.views import empire_upkeep
 from game.views import fleet
 from game.views import fleet_ships
 from game.views import fleet_split
 from game.views import fleet_trade
+from game.views import fleets
+from game.views import fleets_handler
+from game.views import fleets_orbiting
+from game.views import fleets_ships_stats
+from game.views import fleets_standby
+from game.views import game_over
 from game.views import help
-from game.views import home_gameover
-from game.views import home_holidays
-from game.views import home_maintenance
-from game.views import home_starting
-from game.views import home_waiting
+from game.views import holidays
+from game.views import invasion
 from game.views import mails
+from game.views import maintenance
 from game.views import map
-from game.views import market_purchase
-from game.views import market_sale
-from game.views import mercenary
+from game.views import market_buy
+from game.views import market_sell
+from game.views import mercenary_intelligence
+from game.views import nation
+from game.views import notes
+from game.views import orbit
+from game.views import options
+from game.views import overview
+from game.views import planets
 from game.views import planet
-from game.views import planet_buildings
-from game.views import planet_orbit
-from game.views import planet_production
-from game.views import planet_shipyard
-from game.views import planet_trainings
-from game.views import profile
-from game.views import profile_fleetcategory
-from game.views import profile_notes
-from game.views import profile_options
-from game.views import profile_reports
-from game.views import profile_researches
-from game.views import profile_shipstats
+from game.views import production
 from game.views import ranking_alliances
 from game.views import ranking_players
-from game.views import report_battle
-from game.views import report_invasion
-from game.views import report_spying
+from game.views import reports
+from game.views import research
+from game.views import shipyard
+from game.views import spy_report
+from game.views import start
+from game.views import training
+from game.views import upkeep
+from game.views import wait
 
 
 
@@ -112,9 +113,9 @@ urlpatterns = [
     path('planets/', planets.View.as_view()),
     path('planet/', planet.View.as_view()),
     path('production/', production.View.as_view()),
-    path('ranking-gm_alliances/', ranking_alliances.View.as_view()),
+    path('ranking-alliances/', ranking_alliances.View.as_view()),
     path('ranking-players/', ranking_players.View.as_view()),
-    path('profile_reports/', gm_profile_reports.View.as_view()),
+    path('reports/', reports.View.as_view()),
     path('research/', research.View.as_view()),
     path('shipyard/', shipyard.View.as_view()),
     path('spyings-report/', spy_report.View.as_view()),
