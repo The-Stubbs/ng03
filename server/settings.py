@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'impersonate',
     #---------------------------------------------------------------------------
     'jobs',
-    'web_game',
+    'game',
     #---------------------------------------------------------------------------
 ]
 ################################################################################
@@ -79,7 +79,7 @@ ROOT_URLCONF = 'server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'web_game/game/templates'), ],
+        'DIRS': [os.path.join(BASE_DIR, 'game/templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,5 +139,5 @@ USE_I10N = True
 
 
 ################################################################################
-STATIC_ROOT = os.path.join(BASE_DIR, 'web_game')
+STATIC_ROOT = os.path.join(BASE_DIR, 'game')
 ################################################################################
