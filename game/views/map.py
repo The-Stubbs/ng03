@@ -2,7 +2,7 @@
 
 from math import sqrt
 
-from web_game.game._global import *
+from game.views.lib._global import *
 
 class View(GlobalView):
     

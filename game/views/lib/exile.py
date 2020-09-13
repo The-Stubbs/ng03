@@ -4,9 +4,9 @@ import time
 
 from django.http import HttpResponseRedirect
 
-from web_game.lib.config import *
-from web_game.lib.sql import *
-from web_game.lib.functions import *
+from game.lib.config import *
+from game.lib.sql import *
+from game.lib.functions import *
 
 class ExileMixin(BaseMixin):
 

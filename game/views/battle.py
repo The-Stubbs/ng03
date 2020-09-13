@@ -1,40 +1,43 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.views import View
+from game.views.lib._global import *
 
-from web_game.lib.exile import *
-from web_game.lib.template import *
+from game.game.lib_battle import *
 
-from web_game.game.lib_battle import *
-
-class View(ExileMixin, View):
+class View(GlobalView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
-        
-        battlekey = request.GET.get("key", "")
-        if battlekey == "": return HttpResponseRedirect("/game/gm_profile_reports/")
-        
-        creator = request.GET.get("by", "")
-        if creator == "": return HttpResponseRedirect("/game/gm_profile_reports/")
-        
-        fromview = request.GET.get("v", "")
-        if fromview == "": return HttpResponseRedirect("/game/gm_profile_reports/")
-        
-        id = request.GET.get("id", "")
-        if id == "": return HttpResponseRedirect("/game/gm_profile_reports/")
 
-        oKeyRs = oConnExecute(" SELECT 1 FROM gm_battles WHERE id="+str(id)+" AND "+dosql(battlekey)+"=MD5(key||"+dosql(creator)+") ")
-        if oKeyRs == None: return HttpResponseRedirect("/game/gm_profile_reports/")
-        
-        content = FormatBattle(self, id, creator, fromview, True)
-        
-        content.AssignValue("skin", "s_transparent")
-        content.AssignValue("timers_enabled", "false")
-        content.AssignValue("server", universe)
-        
-        return render(self.request, content.template, content.data)
+        self.selected_menu = "gm_battles"
+
+        id = ToInt(request.GET.get("id"), 0)
+        if id == 0:
+            return HttpResponseRedirect("/game/gm_profile_reports/")
+
+        creator = self.UserId
+
+        fromview = ToInt(request.GET.get("v"), self.UserId)
+
+        display_battle = True
+
+        # check that we took part in the battle to display it
+        oRs = oConnExecute("SELECT battleid FROM gm_battle_ships WHERE battleid=" + str(id) + " AND owner_id=" + str(self.UserId) + " LIMIT 1")
+        display_battle = oRs != None
+
+        if not display_battle and self.AllianceId:
+            if self.oAllianceRights["can_see_reports"]:
+                # check if it is a report from alliance gm_profile_reports
+                oRs = oConnExecute("SELECT owner_id FROM gm_battle_ships WHERE battleid=" + str(id) + " AND (SELECT alliance_id FROM gm_profiles WHERE id=owner_id)=" + str(self.AllianceId) + " LIMIT 1")
+                display_battle = oRs != None
+                if oRs:
+                    creator = oRs[0]#fromview
+
+        if display_battle:
+
+            content = FormatBattle(self, id, creator, fromview, False)
+            return self.Display(content)
+        else:
+            return HttpResponseRedirect("/game/gm_profile_reports/")

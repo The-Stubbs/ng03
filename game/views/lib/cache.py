@@ -3,8 +3,8 @@
 from django.core.cache import cache
 from django.utils import timezone
 
-from web_game.lib.exile import *
-from web_game.lib.sql import *
+from game.lib.exile import *
+from game.lib.sql import *
 
 # this script is made to cache some data from the sql server that doesn't change often
 

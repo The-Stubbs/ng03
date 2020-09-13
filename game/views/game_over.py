@@ -4,9 +4,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
 
-from web_game.lib.exile import *
-from web_game.lib.template import *
-from web_game.lib.accounts import *
+from game.lib.exile import *
+from game.lib.template import *
+from game.lib.accounts import *
 
 class View(ExileMixin, View):
 

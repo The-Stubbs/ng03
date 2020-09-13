@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.views import View
 
-from web_game.lib.exile import *
+from game.lib.exile import *
 
 class View(LoginRequiredMixin, ExileMixin, View):
 

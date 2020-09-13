@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from web_game.game._global import *
+from game.views.lib._global import *
 
-from web_game.lib.accounts import *
+from game.lib.accounts import *
 
 class View(GlobalView):
     
