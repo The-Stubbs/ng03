@@ -2,7 +2,7 @@
 
 from game.views.lib._global import *
 
-from game.game.lib_battle import *
+from game.views.lib.lib_battle import *
 
 class View(GlobalView):
 
