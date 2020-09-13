@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from game.lib.functions import *
+from game.views.lib.functions import *
 
 template_addsessioninfo=True
 
