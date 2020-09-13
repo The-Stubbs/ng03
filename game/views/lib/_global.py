@@ -7,8 +7,7 @@ from django.views import View
 
 from game.views.lib.exile import *
 from game.views.lib.template import *
-
-from game.game.cache import *
+from game.views.lib.cache import *
 
 class GlobalView(ExileMixin, View):
 
