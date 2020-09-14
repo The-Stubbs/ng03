@@ -28,7 +28,7 @@ from game.views import fleet_ships
 from game.views import fleet_split
 from game.views import fleet_trade
 from game.views import fleets
-from game.views import fleets_handler
+from game.views.lib import fleets_handler
 from game.views import fleets_orbiting
 from game.views import fleets_ships_stats
 from game.views import fleets_standby
@@ -94,7 +94,7 @@ urlpatterns = [
     path('fleets-orbiting/', fleets_orbiting.View.as_view()),
     path('fleets-ships-stats/', fleets_ships_stats.View.as_view()),
     path('fleets-standby/', fleets_standby.View.as_view()),
-    path('fleets/', gm_fleets.View.as_view()),
+    path('fleets/', fleets.View.as_view()),
     path('game-over/', game_over.View.as_view()),
     path('help/', help.View.as_view()),
     path('holidays/', holidays.View.as_view()),

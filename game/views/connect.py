@@ -55,7 +55,7 @@ class View(LoginRequiredMixin, ExileMixin, View):
             Session.LCID = resultData.lcid;
             '''
             
-            rs = oConnExecute('SELECT id, lastplanetid, privilege, resets FROM sp_account_connect(' + str(request.user.id) + ', 1036,' + dosql(self.ipaddress) + ',' + dosql(self.forwardedfor) + ',' + dosql(self.useragent) + ',' + str(self.browserid) + ')');
+            rs = oConnExecute('SELECT id, lastplanetid, privilege, resets FROM internal_profile_connect(' + str(request.user.id) + ', 1036,' + dosql(self.ipaddress) + ',' + dosql(self.forwardedfor) + ',' + dosql(self.useragent) + ',' + str(self.browserid) + ')');
 
             request.session[sUser] = rs[0]
             request.session[sPlanet] = rs[1]
