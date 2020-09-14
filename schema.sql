@@ -5025,10 +5025,24 @@ END;$$;
 ALTER FUNCTION ng03.internal_profile_check_for_new_commanders(_userid integer) OWNER TO exileng;
 
 --
+-- Name: connectinfo; Type: TYPE; Schema: static; Owner: exileng
+--
+
+CREATE TYPE ng03.connectinfo AS (
+	id integer,
+	privilege integer,
+	lastplanetid integer,
+	resets integer
+);
+
+
+ALTER TYPE ng03.connectinfo OWNER TO exileng;
+
+--
 -- Name: internal_profile_connect(integer, integer, inet, character varying, character varying, bigint); Type: FUNCTION; Schema: ng03; Owner: exileng
 --
 
-CREATE FUNCTION ng03.internal_profile_connect(_userid integer, _lcid integer, _address inet, _forwarded character varying, _browser character varying, _browserid bigint) RETURNS void
+CREATE FUNCTION ng03.internal_profile_connect(_userid integer, _lcid integer, _address inet, _forwarded character varying, _browser character varying, _browserid bigint)  RETURNS SETOF ng03.connectinfo
     LANGUAGE plpgsql
     AS $_$-- connect to a user
 
@@ -5039,6 +5053,8 @@ CREATE FUNCTION ng03.internal_profile_connect(_userid integer, _lcid integer, _a
 --  param3: connection address
 
 DECLARE
+
+	result ng03.connectinfo;
 
 	r_users record;
 
@@ -5101,6 +5117,16 @@ BEGIN
 		LIMIT 1;
 
 	END IF;
+
+	result.id = r_users.id;
+
+	result.privilege = r_users.privilege;
+
+	result.lastplanetid = r_users.lastplanetid;
+
+	result.resets = r_users.resets;
+
+	RETURN NEXT result;
 
 	connection_id := nextval('gm_profile_connections_id_seq');
 
@@ -7146,7 +7172,7 @@ CREATE FUNCTION ng03.process_daily_cleaning() RETURNS void
 
 	DELETE FROM gm_log_markets WHERE datetime < now()-INTERVAL '2 months';
 
-	DELETE FROM users_newemails WHERE expiration < now();
+	DELETE FROM gm_profiles_newemails WHERE expiration < now();
 
 	-- clean chats
 
