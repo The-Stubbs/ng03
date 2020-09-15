@@ -2,8 +2,6 @@
 
 from game.views.lib._global import *
 
-from game.views.lib.accounts import *
-
 class View(GlobalView):
 
     def dispatch(self, request, *args, **kwargs):

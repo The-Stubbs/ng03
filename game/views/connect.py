@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
-from django.views import View
-
-from game.views.lib.exile import *
+from game.views.lib._global import *
 
 class View(LoginRequiredMixin, ExileMixin, View):
 
@@ -17,45 +13,13 @@ class View(LoginRequiredMixin, ExileMixin, View):
 
     def get(self, request, *args, **kwargs):
     
-        return self.connect(request)
-    
-    def connect(self, request):
-        
-        '''
-        var url = urlNexus + 'authenticate.asp?id=' + Request.Cookies('authID') + '&address=' + Request.ServerVariables("REMOTE_ADDR");
-
-        var xml = Server.CreateObject("MSXML2.ServerXMLHTTP");
-
-        var resultData = {};
-
-        try {
-            xml.open("GET", url, true); // True specifies an asynchronous request
-            xml.send();
-
-            // Wait for up to 3 seconds if we've not gotten the data yet
-            if(xml.readyState != 4)
-                xml.waitForResponse(3);
-
-            if(xml.readyState == 4 && xml.status == 200) {
-                resultData = eval('(' + xml.responseText + ')');
-            }
-            else {
-                // Abort the XMLHttp request
-                xml.abort();
-
-                resultData = {userid:null, error:'Problem communicating with remote server...' }
-            }
-        } catch(e) {
-            resultData = {userid:null, error:e.message }
-        }
-        '''
-        
         if request.user.is_authenticated:
-            '''
-            Session.LCID = resultData.lcid;
-            '''
+
+            self.ipaddress = request.META.get("REMOTE_ADDR", "")
+            self.forwardedfor = request.META.get("HTTP_X_FORWARDED_FOR", "")
+            self.useragent = request.META.get("HTTP_USER_AGENT", "")
             
-            rs = oConnExecute('SELECT id, lastplanetid, privilege, resets FROM sp_account_connect(' + str(request.user.id) + ', 1036,' + dosql(self.ipaddress) + ',' + dosql(self.forwardedfor) + ',' + dosql(self.useragent) + ',' + str(self.browserid) + ')');
+            rs = oConnExecute('SELECT id, lastplanetid, privilege, resets FROM internal_profile_connect(' + str(request.user.id) + ', 1036,' + dosql(self.ipaddress) + ',' + dosql(self.forwardedfor) + ',' + dosql(self.useragent) + ',0)');
 
             request.session[sUser] = rs[0]
             request.session[sPlanet] = rs[1]
@@ -64,15 +28,7 @@ class View(LoginRequiredMixin, ExileMixin, View):
             
             if not request.session.get("isplaying"):
                 request.session["isplaying"] = True
-                '''
-                Application.lock();
-                Application("players") = Application("players") + 1;
-                Application.unlock();
-                '''
-            '''
-            Application("usersession" + rs(0).Value) = Session.SessionID;
-            '''
-            
+
             oConnDoQuery('UPDATE gm_profiles SET login=' + dosql(request.user.username) + ' WHERE id=' + str(rs[0]))
             
             if(rs[2] == -3):

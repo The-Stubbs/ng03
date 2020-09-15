@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.views import View
-
-from game.views.lib.exile import *
-from game.views.lib.template import *
-from game.views.lib.accounts import *
+from game.views.lib._global import *
 
 class View(ExileMixin, View):
 
@@ -48,43 +42,42 @@ class View(ExileMixin, View):
 
         changeNameError = ""
 
-        if allowedRetry:
-            action = request.POST.get("action")
+        action = request.POST.get("action")
 
-            if action == "retry":
-                # check if user wants to change name
-                if request.POST.get("login") != username:
+        if action == "retry":
+            # check if user wants to change name
+            if request.POST.get("login") != username:
 
-                    # check that the login is not banned
-                    oRs = oConnExecute("SELECT 1 FROM dt_banned_usernames WHERE " + dosql(username) + " ~* login LIMIT 1;")
-                    if oRs == None:
+                # check that the login is not banned
+                oRs = oConnExecute("SELECT 1 FROM dt_banned_usernames WHERE " + dosql(username) + " ~* login LIMIT 1;")
+                if oRs == None:
 
-                        # check that the username is correct
-                        if not isValidName(request.POST.get("login")):
-                            changeNameError = "check_username"
-                        else:
-                            # try to rename user and catch any error
-                            oConnDoQuery("UPDATE gm_profiles SET alliance_id=None WHERE id=" + str(self.UserId))
-
-                            oConnDoQuery("UPDATE gm_profiles SET login=" + dosql(request.POST.get("login")) + " WHERE id=" + str(self.UserId))
-
-                            if err.Number != 0:
-                                changeNameError = "username_exists"
-                            else:
-                                # update the commander name
-                                oConnDoQuery("UPDATE gm_commanders SET name=" + dosql(request.POST.get("login")) + " WHERE name=" + dosql(username) + " AND ownerid=" + str(self.UserId))
-
-                if changeNameError == "":
-                    oRs = oConnExecute("SELECT user_profile_reset(" + str(self.UserId) + "," + str(ToInt(request.POST.get("galaxy"), 1)) + ")")
-                    if oRs[0] == 0:
-                        return HttpResponseRedirect("/game/overview/")
-
+                    # check that the username is correct
+                    if not isValidName(request.POST.get("login")):
+                        changeNameError = "check_username"
                     else:
-                        reset_error = oRs[0]
+                        # try to rename user and catch any error
+                        oConnDoQuery("UPDATE gm_profiles SET alliance_id=None WHERE id=" + str(self.UserId))
 
-            elif action == "abandon":
-                oConnDoQuery("UPDATE gm_profiles SET deletion_date=now()/*+INTERVAL '2 days'*/ WHERE id=" + str(self.UserId))
-                return HttpResponseRedirect("/")
+                        oConnDoQuery("UPDATE gm_profiles SET login=" + dosql(request.POST.get("login")) + " WHERE id=" + str(self.UserId))
+
+                        if err.Number != 0:
+                            changeNameError = "username_exists"
+                        else:
+                            # update the commander name
+                            oConnDoQuery("UPDATE gm_commanders SET name=" + dosql(request.POST.get("login")) + " WHERE name=" + dosql(username) + " AND ownerid=" + str(self.UserId))
+
+            if changeNameError == "":
+                oRs = oConnExecute("SELECT user_profile_reset(" + str(self.UserId) + "," + str(ToInt(request.POST.get("galaxy"), 1)) + ")")
+                if oRs[0] == 0:
+                    return HttpResponseRedirect("/game/overview/")
+
+                else:
+                    reset_error = oRs[0]
+
+        elif action == "abandon":
+            oConnDoQuery("UPDATE gm_profiles SET deletion_date=now()/*+INTERVAL '2 days'*/ WHERE id=" + str(self.UserId))
+            return HttpResponseRedirect("/")
 
         # display Game Over page
         content = GetTemplate(self.request, "game-over")
@@ -111,7 +104,7 @@ class View(ExileMixin, View):
 
             content.Parse("changename")
         else:
-            if allowedRetry: content.Parse("retry")
+            content.Parse("retry")
             content.Parse("choice")
 
             if bankruptcy > 0:

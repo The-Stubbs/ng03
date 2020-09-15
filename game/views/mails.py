@@ -2,8 +2,6 @@
 
 from game.views.lib._global import *
 
-from game.views.lib.accounts import *
-
 class View(GlobalView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -481,8 +479,6 @@ class View(GlobalView):
 
         if (self.oAllianceRights):
             if self.oAllianceRights["can_mail_alliance"]: content.Parse("sendalliance")
-
-        if hasAdmins: content.Parse("sendadmins")
 
         # if is a payed account, append the autosignature text to message body
         if self.oPlayerInfo["paid"]:

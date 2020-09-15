@@ -17,6 +17,6 @@ urlpatterns = [
     #---------------------------------------------------------------------------
 ] \
 + static('/favicon.ico', document_root=settings.STATIC_ROOT + '/favicon.ico') \
-+ static('/assets/', document_root=settings.STATIC_ROOT + '/assets') \
++ static('/assets/', document_root=settings.STATIC_ROOT + '/') \
 + static('/scripts/', document_root=settings.STATIC_ROOT + '/scripts')
 ################################################################################

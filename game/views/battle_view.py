@@ -1,13 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.views import View
-
-from game.views.lib.exile import *
-from game.views.lib.template import *
-
-from game.game.lib_battle import *
+from game.views.lib._global import *
+from game.views.lib.lib_battle import *
 
 class View(ExileMixin, View):
 

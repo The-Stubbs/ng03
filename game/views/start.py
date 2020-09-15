@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.utils import timezone
-from django.views import View
-
-from game.views.lib.exile import *
-from game.views.lib.template import *
-from game.views.lib.accounts import *
+from game.views.lib._global import *
 
 class View(ExileMixin, View):
 
@@ -16,7 +9,7 @@ class View(ExileMixin, View):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        if not registration["enabled"] or (registration["until"] != None and timezone.now() > registration["until"]):
+        if not registration:
             content = GetTemplate(self.request, "start-closed")
             return render(self.request, content.template, content.data)
 
@@ -52,7 +45,7 @@ class View(ExileMixin, View):
             orientation = int(request.POST.get("orientation", 0))
             allowed = False
 
-            for i in allowedOrientations:
+            for i in [1,2,3]:
                 if i == orientation:
                     allowed = True
                     break
@@ -93,7 +86,7 @@ class View(ExileMixin, View):
         content = GetTemplate(self.request, "start")
         content.AssignValue("login", userName)
 
-        for i in allowedOrientations:
+        for i in [1,2,3]:
             content.Parse("orientation_" + str(i))
 
         rss = oConnExecuteAll("SELECT id, recommended FROM internal_profile_get_galaxies_info(" + str(self.UserId) + ")")
