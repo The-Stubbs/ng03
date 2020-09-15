@@ -1,13 +1,270 @@
 # -*- coding: utf-8 -*-
 
+import time
+
+from math import sqrt
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
+from django.utils import timezone
 
-from game.views.lib.exile import *
-from game.views.lib.template import *
-from game.views.lib.cache import *
+from django.db import connection
+
+universe = "ng03"
+
+maintenance = False
+registration = False
+
+urlNexus = "https://exileng.com/"
+
+rUninhabited = -3
+rWar = -2
+rHostile = -1
+rFriend = 0
+rAlliance = 1
+rSelf = 2
+
+sUser = "user"
+sPlanet = "planet"
+sPlanetList = "planetlist"
+sPlanetListCount = "planetlistcount"
+sPrivilege = "Privilege"
+sLogonUserID = "logonuserid"
+
+def dict_fetchall(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
+
+def dict_fetchone(cursor):
+    results = dict_fetchall(cursor)
+    if results: return results[0]
+    else: return None
+
+cursor = None
+
+def connectDB():
+    global cursor
+    cursor = connection.cursor()
+
+def oConnExecute(query):
+    cursor.execute(query)
+    results = cursor.fetchall()
+    if len(results) > 1: return results
+    elif results: return results[0]
+    return None
+
+def oConnExecuteAll(query):
+    cursor.execute(query)
+    return cursor.fetchall()
+    
+def oConnDoQuery(query):
+    cursor.execute(query)
+
+def oConnRow(query):
+    cursor.execute(query)
+    return dict_fetchone(cursor)
+
+def oConnRows(query):
+    cursor.execute(query)
+    return dict_fetchall(cursor)
+
+# return a quoted string for sql queries
+def dosql(ch):
+    ret = ch.replace('\\', '\\\\') 
+    ret = ret.replace('\'', '\'\'')
+    ret = '\'' + ret + '\''
+    return ret
+
+# return "null" if val is null or equals ''
+def sqlValue(val):
+    if val == None or val == "":
+        return "Null"
+    else:
+        return str(val)
+
+# tries to execute a query up to 3 times if it fails the first times
+def connExecuteRetry(query):
+    i = 0
+    while i < 5:
+        try:
+            i = 10
+            rs = oConnExecute(query)
+            return rs
+        except:
+            i = i + 1
+    return None
+    
+def connExecuteRetryNoRecords(query):
+    i = 0
+    while i < 5:
+        try:
+            i = 10
+            oConnExecute(query)
+        except:
+            i = i + 1
+
+def ToInt(s, defaultValue):
+    if(s == "" or s == None): return defaultValue
+    i = int(float(s))
+    if i == None:
+        return defaultValue
+    return i
+
+def ToBool(s, defaultValue):
+    if(s == "" or s == None): return defaultValue
+    i = int(float(s))
+    if i == 0:
+        return defaultValue
+    return True
+
+# -*- coding: utf-8 -*-
+
+import re
+
+#-------------------------------------------------------------------------------
+def isValidName(name):
+
+    name = name.strip()
+    if name == "" or len(name) < 2 or len(name) > 12:
+        return False
+    else:
+        p = re.compile('^[a-zA-Z0-9]+([ ]?[\-]?[ ]?[a-zA-Z0-9]+)*$')
+        return p.match(name)
+        
+#-------------------------------------------------------------------------------
+def isValidURL(url):
+
+    p = re.compile("^(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&%\$\-]+)*@)?((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.[a-zA-Z]{2,4})(\:[0-9]+)?(/[^/][a-zA-Z0-9\.\,\?\'\\/\+&%\$#\=~_\-@]*)*$")
+    return p.match(url)
+
+#-------------------------------------------------------------------------------
+def isValidObjectName(name):
+
+    name = name.strip()
+    if name == "" or len(name) < 2 or len(name) > 16:
+        return False
+    else:
+        p = re.compile("^[a-zA-Z0-9\- ]+$")
+        return p.match(myName)
+        
+#-------------------------------------------------------------------------------
+def isValidCategoryName(self, name):
+    
+    name = name.strip()
+    if name == "" or len(name) < 2 or len(name) > 32:
+        return False
+    else:
+        p = re.compile("^[a-zA-Z0-9\- ]+$")
+        return p.match(name)
+
+def retrieveBuildingsCache():
+    
+    # retrieve general buildings info
+    query = "SELECT id, storage_workers, energy_production, storage_ore, storage_hydrocarbon, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep FROM dt_buildings"
+    return oConnExecute(query)
+
+def retrieveBuildingsReqCache():
+    
+    # retrieve buildings requirements
+    # planet elements can't restrict the destruction of a building that made their construction possible
+    query = "SELECT buildingid, required_buildingid" +\
+            " FROM dt_building_building_reqs" +\
+            "    INNER JOIN dt_buildings ON (dt_buildings.id=dt_building_building_reqs.buildingid)" +\
+            " WHERE dt_buildings.destroyable"
+    return oConnExecute(query)
+
+def retrieveShipsCache():
+
+    # retrieve general Ships info
+    query = "SELECT id, label, description FROM dt_ships ORDER BY category, id"
+    return oConnExecute(query)
+
+def retrieveShipsReqCache():
+    
+    # retrieve buildings requirements for ships
+    query = "SELECT shipid, required_buildingid FROM dt_ship_building_reqs"
+    return oConnExecute(query)
+
+def retrieveResearchCache():
+
+    # retrieve Research info
+    query = "SELECT id, label, description FROM dt_researches"
+    return oConnExecute(query)
+
+def checkPlanetListCache(Session):
+    
+    # retrieve Research info
+    query = "SELECT id, name, galaxy, sector, planet FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(Session.get("user")) + " ORDER BY id"
+    return oConnExecuteAll(query)
+
+def getAllianceTag(allianceid):
+    oRs = oConnExecute("SELECT tag FROM gm_alliances WHERE id=" + str(allianceid))
+    if oRs:
+        return oRs[0]
+    else:
+        return ""
+
+def getBuildingLabel(buildingid):
+    for i in retrieveBuildingsCache():
+        if buildingid == i[0]:
+            return i[8]
+
+def getBuildingDescription(buildingid):
+    for i in retrieveBuildingsCache():
+        if buildingid == i[0]:
+            return i[9]
+
+def getShipLabel(ShipId):
+    for i in retrieveShipsCache():
+        if ShipId == i[0]:
+            return i[1]
+
+def getShipDescription(ShipId):
+    for i in retrieveShipsCache():
+        if ShipId == i[0]:
+            return i[2]
+
+def getResearchLabel(ResearchId):
+    for i in retrieveResearchCache():
+        if ResearchId == i[0]:
+            return i[1]
+
+class TemplaceContext():
+    
+    def __init__(self):
+        self.template = ""
+        self.data = {}
+
+    def AssignValue(self, key, value):
+        self.data[key] = value
+    
+    def Parse(self, key):
+        self.data[key] = True
+        
+# Return an initialized template
+def GetTemplate(request, name):
+    
+    result = TemplaceContext()
+    result.template = name + ".html"
+
+    result.AssignValue("PATH_IMAGES", "/assets/")
+    result.AssignValue("PATH_TEMPLATE", "/game/templates")
+
+    return result
+
+class ExileMixin:
+
+    def pre_dispatch(self, request, *args, **kwargs):
+
+        self.StartTime = time.clock()
+
+        if not maintenance: connectDB()
+        else: return HttpResponseRedirect('/game/maintenance/')
 
 class GlobalView(ExileMixin, View):
 
@@ -82,41 +339,6 @@ class GlobalView(ExileMixin, View):
     def IsImpersonating(self):
         return self.request.user.is_impersonate
 
-    '''
-    sub Impersonate(new_userid)
-        if Session(sPrivilege) >= 100 then
-            UserId = new_userid
-            Session.Contents(sUser) = new_userid
-            Session("ImpersonatingUser") = Session(sLogonUserID) <> new_userid
-    
-            InvalidatePlanetList()
-    
-            CurrentPlanet = 0
-            CurrentGalaxyId = 0
-            CurrentSectorId = 0
-    
-            Response.Redirect "/game/overview.asp"
-            Response.End
-        end if
-    end sub
-    '''
-    
-    def log_notice(self, title, details, level):
-        query = "INSERT INTO gm_log_notices (username, title, details, url, level) VALUES(" +\
-                dosql(self.oPlayerInfo["login"]) + ", " +\
-                dosql(title[:127]) + "," +\
-                dosql(details[:127]) + "," +\
-                dosql(self.scripturl[:127]) + "," +\
-                str(level) +\
-                ")"
-        oConnDoQuery(query)
-
-    '''
-    function Min(a, b)
-        if a < b then Min = a else Min = b
-    end function
-    '''
-    
     # Call this function when the name of a planet has changed or has been colonized or abandonned
     def InvalidatePlanetList(self):
         self.request.session[sPlanetList] = None
@@ -552,7 +774,7 @@ class GlobalView(ExileMixin, View):
                 "credits_bankruptcy, mod_planets, mod_commanders," +\
                 "ban_datetime, ban_expire, ban_reason, ban_reason_public, orientation, (paid_until IS NOT NULL AND paid_until > now()) AS paid," +\
                 " timers_enabled, display_alliance_planet_name, prestige_points, (inframe IS NOT NULL AND inframe) AS inframe, COALESCE(skin, 's_default') AS skin," +\
-                "lcid, security_level, (SELECT username FROM exile_nexus.gm_profiles WHERE id=" + str(self.UserId) + ") AS username" +\
+                "lcid, security_level, (SELECT username FROM public.auth_user WHERE id=" + str(self.UserId) + ") AS username" +\
                 " FROM gm_profiles" +\
                 " WHERE id=" + str(self.UserId)
         self.oPlayerInfo = oConnRow(query)
@@ -566,14 +788,6 @@ class GlobalView(ExileMixin, View):
     
         self.request.session["LCID"] = self.oPlayerInfo["lcid"]
     
-        if self.request.session.get(sPrivilege) < 100:
-            if self.request.COOKIES.get("login") == "":
-                self.request.COOKIES["login"] = self.oPlayerInfo["login"]
-            elif self.request.COOKIES.get("login") != self.oPlayerInfo["login"]:
-                self.log_notice("login cookie", "Last browser login cookie : \"" + self.request.COOKIES.get("login", "") + "\"", 1)
-                
-                self.request.COOKIES["login"] = self.oPlayerInfo["login"]
-
         if self.IsPlayerAccount():
             # Redirect to locked page
             if self.oPlayerInfo["privilege"] == -1: return HttpResponseRedirect("/game/locked/")
@@ -603,7 +817,7 @@ class GlobalView(ExileMixin, View):
                 self.AllianceId = None
 
         # log activity
-        if not self.IsImpersonating(): oConnExecute("SELECT internal_profile_log_activity(" + str(self.UserId) + "," + dosql(self.request.META.get("REMOTE_ADDR")) + "," + str(self.browserid) + ")")
+        if not self.IsImpersonating(): oConnExecute("SELECT internal_profile_log_activity(" + str(self.UserId) + "," + dosql(self.request.META.get("REMOTE_ADDR")) + ",0)")
 
     # set the new current planet, if the planet doesn't belong to the player then go back to the session planet
     def SetCurrentPlanet(self, planetid):
