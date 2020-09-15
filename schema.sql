@@ -5134,7 +5134,7 @@ BEGIN
 
 	INSERT INTO gm_profile_connections(id, userid, address, forwarded_address, browser, browserid)
 
-	VALUES(connection_id, r_users.id, sp__atoi(_address), substr(_forwarded, 1, 64), substr(_browser, 1, 128), _browserid);
+	VALUES(connection_id, r_users.id, _address, substr(_forwarded, 1, 64), substr(_browser, 1, 128), _browserid);
 
 	-- add multiaccount warnings
 
@@ -22380,7 +22380,7 @@ CREATE TABLE ng03.gm_profile_connections (
     datetime timestamp without time zone DEFAULT now() NOT NULL,
     forwarded_address character varying(64),
     browser character varying(128) DEFAULT ''::character varying NOT NULL,
-    address bigint NOT NULL,
+    address inet NOT NULL,
     browserid bigint NOT NULL,
     disconnected timestamp without time zone
 );
