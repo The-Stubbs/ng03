@@ -3,7 +3,7 @@
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date
 
-from game.views.lib._global import *
+from game.views._base import *
 
 class View(GlobalView):
 

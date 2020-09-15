@@ -2,7 +2,7 @@
 
 from random import *
 
-from game.views.lib._global import *
+from game.views._base import *
 
 class View(GlobalView):
 

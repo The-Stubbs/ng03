@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from game.views.lib._global import *
+from game.views._base import *
 
 class View(LoginRequiredMixin, ExileMixin, View):
 
