@@ -2,17 +2,17 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        if self.AllianceId == None:
-            self.selected_menu = "noalliance.invitations"
+        if self.allianceId == None:
+            self.selectedMenu = "noalliance.invitations"
         else:
-            self.selected_menu = "alliance.invitations"
+            self.selectedMenu = "alliance.invitations"
 
         self.sLeaveCost = "leavealliancecost"
 
@@ -22,7 +22,7 @@ class View(GlobalView):
         alliance_tag = request.GET.get("tag", "").strip()
 
         if action == "accept":
-            oRs = oConnExecute("SELECT user_alliance_invitation_accept(" + str(self.UserId) + "," + dosql(alliance_tag) + ")")
+            oRs = dbRow("SELECT user_alliance_invitation_accept(" + str(self.userId) + "," + sqlStr(alliance_tag) + ")")
 
             if oRs[0] == 0:
                 return HttpResponseRedirect("/game/alliance/")
@@ -33,10 +33,10 @@ class View(GlobalView):
                 self.invitation_status = "cant_rejoin_previous_alliance"
 
         elif action == "decline":
-            oConnExecute("SELECT user_alliance_invitation_decline(" + str(self.UserId) + "," + dosql(alliance_tag) + ")")
+            dbRow("SELECT user_alliance_invitation_decline(" + str(self.userId) + "," + sqlStr(alliance_tag) + ")")
         elif action == "leave":
             if self.request.session.get(self.sLeaveCost) and request.POST.get("leave") == 1:
-                oRs = oConnExecute("SELECT user_alliance_leave(" + str(self.UserId) + "," + self.request.session.get(self.sLeaveCost) + ")")
+                oRs = dbRow("SELECT user_alliance_leave(" + str(self.userId) + "," + self.request.session.get(self.sLeaveCost) + ")")
                 if oRs[0] == 0:
                     return HttpResponseRedirect("/game/alliance/")
 
@@ -46,19 +46,19 @@ class View(GlobalView):
         return self.DisplayInvitations()
 
     def DisplayInvitations(self):
-        content = GetTemplate(self.request, "alliance-invitations")
+        content = self.loadTemplate("alliance-invitations")
 
-        oRs = oConnExecute("SELECT date_part('epoch', static_alliance_joining_delay()) / 3600")
+        oRs = dbRow("SELECT date_part('epoch', static_alliance_joining_delay()) / 3600")
         content.AssignValue("hours_before_rejoin", int(oRs[0]))
 
         query = "SELECT gm_alliances.tag, gm_alliances.name, gm_alliance_invitations.created, gm_profiles.login" + \
                 " FROM gm_alliance_invitations" + \
                 "        INNER JOIN gm_alliances ON gm_alliances.id = gm_alliance_invitations.allianceid"+ \
                 "        LEFT JOIN gm_profiles ON gm_profiles.id = gm_alliance_invitations.recruiterid"+ \
-                " WHERE userid=" + str(self.UserId) + " AND NOT declined" + \
+                " WHERE userid=" + str(self.userId) + " AND NOT declined" + \
                 " ORDER BY created DESC"
 
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         i = 0
         list = []
@@ -72,8 +72,8 @@ class View(GlobalView):
 
             item["recruiter"] = oRs[3]
 
-            if self.oPlayerInfo["can_join_alliance"]:
-                if self.AllianceId:
+            if self.userInfo["can_join_alliance"]:
+                if self.allianceId:
                     item["cant_accept"] = True
                 else:
                     item["accept"] = True
@@ -91,12 +91,12 @@ class View(GlobalView):
         if i == 0: content.Parse("noinvitations")
 
         # Parse "cant_join" section if the player can't create/join an alliance
-        if not self.oPlayerInfo["can_join_alliance"]: content.Parse("cant_join")
+        if not self.userInfo["can_join_alliance"]: content.Parse("cant_join")
 
         # Display the "leave" section if the player is in an alliance
-        if self.AllianceId and self.oPlayerInfo["can_join_alliance"]:
+        if self.allianceId and self.userInfo["can_join_alliance"]:
 
-            oRs = oConnExecute("SELECT internal_profile_get_alliance_leaving_cost(" + str(self.UserId) + ")")
+            oRs = dbRow("SELECT internal_profile_get_alliance_leaving_cost(" + str(self.userId) + ")")
 
             self.request.session[self.sLeaveCost] = oRs[0]
             if self.request.session.get(self.sLeaveCost) < 2000: self.request.session[self.sLeaveCost] = 0
@@ -111,4 +111,4 @@ class View(GlobalView):
 
         self.FillHeaderCredits(content)
 
-        return self.Display(content)
+        return self.display(content)

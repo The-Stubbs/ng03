@@ -2,19 +2,19 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "ranking.players"
+        self.selectedMenu = "ranking.players"
 
         return self.DisplayRanking()
 
     def DisplayRanking(self):
-        content = GetTemplate(self.request, "ranking-players")
+        content = self.loadTemplate("ranking-players")
 
         #
         # Setup search by Alliance and Nation query string
@@ -35,7 +35,7 @@ class View(GlobalView):
 
         reversed = False
         if col == 1:
-            orderby = "CASE WHEN score_visibility=2 OR v.id="+str(self.UserId)+"THEN upper(login) ELSE '' END, upper(login)"
+            orderby = "CASE WHEN score_visibility=2 OR v.id="+str(self.userId)+"THEN upper(login) ELSE '' END, upper(login)"
         elif col == 2:
             orderby = "upper(gm_alliances.name)"
         elif col == 3:
@@ -62,7 +62,7 @@ class View(GlobalView):
                 " FROM vw_gm_profiles" + \
                 " WHERE True "+searchby + \
                 " ORDER BY score DESC OFFSET 9 LIMIT 1"
-        oRs = oConnExecute(query)
+        oRs = dbRow(query)
 
         if oRs == None:
             TenthUserScore = 0
@@ -81,12 +81,12 @@ class View(GlobalView):
                     " FROM vw_gm_profiles v LEFT JOIN gm_alliances ON gm_alliances.id=v.alliance_id" + \
                     " WHERE True "+searchby + \
                     " ORDER BY "+orderby
-            oRss = oConnExecuteAll(query)
+            oRss = dbRows(query)
 
             index = 0
             found = False
             for oRs in oRss:
-                if oRs[0] == self.UserId:
+                if oRs[0] == self.userId:
                     found = True
                     break
 
@@ -98,7 +98,7 @@ class View(GlobalView):
 
         # get total number of players that could be displayed
         query = "SELECT count(1) FROM vw_gm_profiles WHERE True "+searchby
-        oRs = oConnExecute(query)
+        oRs = dbRow(query)
         size = int(oRs[0])
         nb_pages = int(size/displayed)
         if nb_pages*displayed < size: nb_pages = nb_pages + 1
@@ -139,12 +139,12 @@ class View(GlobalView):
         # Retrieve players to display
         query = "SELECT login, v.score, v.score_prestige," + \
                 "COALESCE(date_part('day', now()-lastactivity), 15), gm_alliances.name, gm_alliances.tag, v.id, avatar_url, v.alliance_id, v.score-v.previous_score AS score_delta," + \
-                "v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.AllianceId))+") OR v.id="+str(self.UserId) + \
+                "v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.allianceId))+") OR v.id="+str(self.userId) + \
                 " FROM vw_gm_profiles v" + \
-                "    LEFT JOIN gm_alliances ON ((v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR v.id="+str(self.UserId)+" OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.AllianceId))+")) AND gm_alliances.id=v.alliance_id)" + \
+                "    LEFT JOIN gm_alliances ON ((v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR v.id="+str(self.userId)+" OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.allianceId))+")) AND gm_alliances.id=v.alliance_id)" + \
                 " WHERE True "+searchby + \
                 " ORDER BY "+orderby+" OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         if oRs == None: content.Parse("noresult")
 
@@ -187,9 +187,9 @@ class View(GlobalView):
                 item["2weeksplus"] = True
 
             if visible:
-                if oRs[6] == self.UserId:
+                if oRs[6] == self.userId:
                     item["self"] = True
-                elif self.AllianceId and oRs[8] == self.AllianceId:
+                elif self.allianceId and oRs[8] == self.allianceId:
                     item["ally"] = True
 
                 # show avatar only if top 10
@@ -208,4 +208,4 @@ class View(GlobalView):
 
             i = i + 1
 
-        return self.Display(content)
+        return self.display(content)

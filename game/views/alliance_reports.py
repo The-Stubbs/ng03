@@ -2,26 +2,26 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "alliance.gm_profile_reports"
+        self.selectedMenu = "alliance.gm_profile_reports"
 
         cat = ToInt(request.GET.get("cat"), 0)
 
-        if self.AllianceId == None: return HttpResponseRedirect("/game/alliance/")
-        if not self.oAllianceRights["can_see_reports"]: return HttpResponseRedirect("/game/alliance/")
+        if self.allianceId == None: return HttpResponseRedirect("/game/alliance/")
+        if not self.allianceRights["can_see_reports"]: return HttpResponseRedirect("/game/alliance/")
 
         return self.display_reports(cat)
 
     # display list of gm_mails
     def display_reports(self, cat):
 
-        content = GetTemplate(self.request, "gm_profile_reports")
+        content = self.loadTemplate("gm_profile_reports")
 
         query = "SELECT type, subtype, datetime, battleid, fleetid, fleet_name," + \
                 " planetid, planet_name, galaxy, sector, planet," + \
@@ -31,7 +31,7 @@ class View(GlobalView):
                 " alliance_tag, alliance_name," + \
                 " invasionid, spyid, spy_key, description, ownerid, invited_username, login, buildingid" + \
                 " FROM vw_gm_alliance_reports" + \
-                " WHERE ownerallianceid = " + str(self.AllianceId)
+                " WHERE ownerallianceid = " + str(self.allianceId)
 
         #
         # Limit the list to the current category or only display 100 gm_profile_reports if no categories specified
@@ -41,7 +41,7 @@ class View(GlobalView):
         else:
             query = query + " AND type = "+ str(cat) + " ORDER BY datetime DESC LIMIT 200"
 
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
         content.Parse("tabnav_"+str(cat)+"00_selected")
         if oRss == None: content.Parse("noreports")
         else:
@@ -110,4 +110,4 @@ class View(GlobalView):
         content.Parse("tabnav_800")
         content.Parse("tabnav")
 
-        return self.Display(content)
+        return self.display(content)

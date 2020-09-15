@@ -2,14 +2,14 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "gm_fleets"
+        self.selectedMenu = "gm_fleets"
 
         self.fleet_split_error = 0
         self.e_no_error = 0
@@ -33,9 +33,9 @@ class View(GlobalView):
     def DisplayExchangeForm(self, fleetid):
 
         if self.request.session.get(sPrivilege) > 100:
-            content = GetTemplate(self.request, "fleet-split")
+            content = self.loadTemplate("fleet-split")
         else:
-            content = GetTemplate(self.request, "fleet-split-old")
+            content = self.loadTemplate("fleet-split-old")
 
         # retrieve fleet name, size, position, destination
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
@@ -43,9 +43,9 @@ class View(GlobalView):
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers," + \
                 " action " + \
                 " FROM vw_gm_fleets" + \
-                " WHERE ownerid="+str(self.UserId)+" AND id="+str(fleetid)
+                " WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
 
-        oRs = oConnExecute(query)
+        oRs = dbRow(query)
 
         # if fleet doesn't exist, redirect to the list of gm_fleets
         if oRs == None:
@@ -78,7 +78,7 @@ class View(GlobalView):
                 " WHERE fleetid=" + str(fleetid) + \
                 " ORDER BY dt_ships.category, dt_ships.label"
 
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         list = []
         content.AssignValue("ships", list)
@@ -104,7 +104,7 @@ class View(GlobalView):
             item["t_workers"] = self.request.POST.get("load_workers")
             item["t_soldiers"] = self.request.POST.get("load_soldiers")
 
-        return self.Display(content)
+        return self.display(content)
 
     # split current fleet into 2 gm_fleets
     def SplitFleet(self, fleetid):
@@ -118,8 +118,8 @@ class View(GlobalView):
         #
         # retrieve the planet where the current fleet is patrolling
         #
-        query = "SELECT planetid FROM vw_gm_fleets WHERE ownerid="+str(self.UserId)+" AND id="+str(fleetid)
-        oRs = oConnExecute(query)
+        query = "SELECT planetid FROM vw_gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
+        oRs = dbRow(query)
         if oRs == None: return
 
         fleetplanetid = int(oRs[0])
@@ -130,8 +130,8 @@ class View(GlobalView):
         query = " SELECT id, action, cargo_ore, cargo_hydrocarbon, " + \
                 " cargo_scientists, cargo_soldiers, cargo_workers" + \
                 " FROM vw_gm_fleets" + \
-                " WHERE ownerid="+str(self.UserId)+" AND id="+str(fleetid)
-        oRs = oConnExecute(query)
+                " WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
+        oRs = dbRow(query)
 
         if oRs == None or (oRs[1] != 0):
             self.fleet_split_error = self.e_occupied
@@ -149,7 +149,7 @@ class View(GlobalView):
         #
         # 1/ create a new fleet at the current fleet planet with the given name
         #
-        oRs = oConnExecute("SELECT user_fleet_create(" + str(self.UserId) + "," + str(fleetplanetid) + "," + dosql(newfleetname) + ")")
+        oRs = dbRow("SELECT user_fleet_create(" + str(self.userId) + "," + str(fleetplanetid) + "," + sqlStr(newfleetname) + ")")
         if oRs == None:
             return
 
@@ -176,7 +176,7 @@ class View(GlobalView):
                     "COALESCE((SELECT quantity FROM gm_fleet_ships WHERE fleetid=" + str(fleetid) + " AND shipid = dt_ships.id), 0)" + \
                 " FROM dt_ships" + \
                 " ORDER BY dt_ships.category, dt_ships.label"
-        availableArray = oConnExecuteAll(query)
+        availableArray = dbRows(query)
 
         # for each available ship id, check if the player wants to add ships of this kind
         for i in availableArray:
@@ -188,11 +188,11 @@ class View(GlobalView):
                 # add the ships to the new fleet
                 query = " INSERT INTO gm_fleet_ships (fleetid, shipid, quantity)" + \
                         " VALUES (" + str(newfleetid) +","+ str(shipid) +","+ str(quantity) + ")"
-                oConnDoQuery(query)
+                dbExecute(query)
 
         # reset gm_fleets idleness, partly to prevent cheating and being able to do multiple gm_invasions with only a fleet
-        oConnDoQuery("UPDATE gm_fleets SET idle_since=now()" + \
-                        " WHERE ownerid =" + str(self.UserId) + " AND (id="+str(newfleetid)+" OR id="+str(fleetid)+")")
+        dbExecute("UPDATE gm_fleets SET idle_since=now()" + \
+                        " WHERE ownerid =" + str(self.userId) + " AND (id="+str(newfleetid)+" OR id="+str(fleetid)+")")
 
         #
         # 3/ Move the resources to the new fleet
@@ -201,7 +201,7 @@ class View(GlobalView):
         #
 
         # retrieve new fleet's cargo capacity
-        oRs = oConnExecute("SELECT cargo_capacity FROM vw_gm_fleets WHERE ownerid="+str(self.UserId)+" AND id="+str(newfleetid))
+        oRs = dbRow("SELECT cargo_capacity FROM vw_gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(newfleetid))
         if oRs == None:
                 return
 
@@ -224,19 +224,19 @@ class View(GlobalView):
 
         if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
             # a/ put the resources to the new fleet
-            oConnDoQuery("UPDATE gm_fleets SET" + \
+            dbExecute("UPDATE gm_fleets SET" + \
                         " cargo_ore="+str(ore)+", cargo_hydrocarbon="+str(hydrocarbon)+", " + \
                         " cargo_scientists="+str(scientists)+", cargo_soldiers="+str(soldiers)+", " + \
                         " cargo_workers="+str(workers) + \
-                        " WHERE id =" + str(newfleetid) + " AND ownerid =" + str(self.UserId))
+                        " WHERE id =" + str(newfleetid) + " AND ownerid =" + str(self.userId))
 
             # b/ remove the resources from the 'source# fleet
-            oConnDoQuery("UPDATE gm_fleets SET" + \
+            dbExecute("UPDATE gm_fleets SET" + \
                         " cargo_ore=cargo_ore-"+str(ore)+", cargo_hydrocarbon=cargo_hydrocarbon-"+str(hydrocarbon)+", " + \
                         " cargo_scientists=cargo_scientists-"+str(scientists)+", " + \
                         " cargo_soldiers=cargo_soldiers-"+str(soldiers)+", " + \
                         " cargo_workers=cargo_workers-"+str(workers) + \
-                        " WHERE id =" + str(fleetid) + " AND ownerid =" + str(self.UserId))
+                        " WHERE id =" + str(fleetid) + " AND ownerid =" + str(self.userId))
 
         #
         # 4/ Remove the ships from the 'source# fleet
@@ -251,10 +251,10 @@ class View(GlobalView):
                 query = " UPDATE gm_fleet_ships SET" + \
                         " quantity=quantity-" + str(quantity) + \
                         " WHERE fleetid=" + str(fleetid) + " AND shipid=" + str(shipid)
-                oConnDoQuery(query)
+                dbExecute(query)
 
-        query = "DELETE FROM gm_fleets WHERE ownerid=" + str(self.UserId) + " AND size=0"
-        oConnDoQuery(query)
+        query = "DELETE FROM gm_fleets WHERE ownerid=" + str(self.userId) + " AND size=0"
+        dbExecute(query)
 
         return HttpResponseRedirect("/game/fleet/?id="+str(newfleetid))
 

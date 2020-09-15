@@ -2,7 +2,7 @@
 
 from game.views._base import *
 
-class View(ExileMixin, View):
+class View(BaseMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
 
@@ -11,13 +11,13 @@ class View(ExileMixin, View):
 
         reset_error = 0
 
-        self.UserId = ToInt(self.request.session.get("user"), "")
+        self.userId = ToInt(self.request.session.get("user"), "")
 
-        if self.UserId == "":
+        if self.userId == "":
             return HttpResponseRedirect("/")
 
         # check that the player has no more planets
-        oRs = oConnExecute("SELECT int4(count(1)) FROM gm_planets WHERE ownerid=" + str(self.UserId))
+        oRs = dbRow("SELECT int4(count(1)) FROM gm_planets WHERE ownerid=" + str(self.userId))
         if oRs == None:
             return HttpResponseRedirect("/")
 
@@ -25,8 +25,8 @@ class View(ExileMixin, View):
 
         # retreive player username and number of resets
 
-        query = "SELECT login, resets, credits_bankruptcy, int4(score_research) FROM gm_profiles WHERE id=" + str(self.UserId)
-        oRs = oConnExecute(query)
+        query = "SELECT login, resets, credits_bankruptcy, int4(score_research) FROM gm_profiles WHERE id=" + str(self.userId)
+        oRs = dbRow(query)
 
         username = oRs[0]
         resets = oRs[1]
@@ -49,7 +49,7 @@ class View(ExileMixin, View):
             if request.POST.get("login") != username:
 
                 # check that the login is not banned
-                oRs = oConnExecute("SELECT 1 FROM dt_banned_usernames WHERE " + dosql(username) + " ~* login LIMIT 1;")
+                oRs = dbRow("SELECT 1 FROM dt_banned_usernames WHERE " + sqlStr(username) + " ~* login LIMIT 1;")
                 if oRs == None:
 
                     # check that the username is correct
@@ -57,18 +57,18 @@ class View(ExileMixin, View):
                         changeNameError = "check_username"
                     else:
                         # try to rename user and catch any error
-                        oConnDoQuery("UPDATE gm_profiles SET alliance_id=None WHERE id=" + str(self.UserId))
+                        dbExecute("UPDATE gm_profiles SET alliance_id=None WHERE id=" + str(self.userId))
 
-                        oConnDoQuery("UPDATE gm_profiles SET login=" + dosql(request.POST.get("login")) + " WHERE id=" + str(self.UserId))
+                        dbExecute("UPDATE gm_profiles SET login=" + sqlStr(request.POST.get("login")) + " WHERE id=" + str(self.userId))
 
                         if err.Number != 0:
                             changeNameError = "username_exists"
                         else:
                             # update the commander name
-                            oConnDoQuery("UPDATE gm_commanders SET name=" + dosql(request.POST.get("login")) + " WHERE name=" + dosql(username) + " AND ownerid=" + str(self.UserId))
+                            dbExecute("UPDATE gm_commanders SET name=" + sqlStr(request.POST.get("login")) + " WHERE name=" + sqlStr(username) + " AND ownerid=" + str(self.userId))
 
             if changeNameError == "":
-                oRs = oConnExecute("SELECT user_profile_reset(" + str(self.UserId) + "," + str(ToInt(request.POST.get("galaxy"), 1)) + ")")
+                oRs = dbRow("SELECT user_profile_reset(" + str(self.userId) + "," + str(ToInt(request.POST.get("galaxy"), 1)) + ")")
                 if oRs[0] == 0:
                     return HttpResponseRedirect("/game/overview/")
 
@@ -76,17 +76,17 @@ class View(ExileMixin, View):
                     reset_error = oRs[0]
 
         elif action == "abandon":
-            oConnDoQuery("UPDATE gm_profiles SET deletion_date=now()/*+INTERVAL '2 days'*/ WHERE id=" + str(self.UserId))
+            dbExecute("UPDATE gm_profiles SET deletion_date=now()/*+INTERVAL '2 days'*/ WHERE id=" + str(self.userId))
             return HttpResponseRedirect("/")
 
         # display Game Over page
-        content = GetTemplate(self.request, "game-over")
+        content = self.loadTemplate("game-over")
         content.AssignValue("login", username)
 
         if changeNameError != "": action = "continue"
 
         if action == "continue":
-            oRss = oConnExecuteAll("SELECT id, recommended FROM internal_profile_get_galaxies_info(" + str(self.UserId) + ")")
+            oRss = dbRows("SELECT id, recommended FROM internal_profile_get_galaxies_info(" + str(self.userId) + ")")
 
             list = []
             for oRs in oRss:
@@ -116,7 +116,7 @@ class View(ExileMixin, View):
             if reset_error == 4:
                 content.Parse("no_free_planet")
             else:
-                content.AssignValue("userid", self.UserId)
+                content.AssignValue("userid", self.userId)
                 content.AssignValue("reset_error", reset_error)
                 content.Parse("reset_error")
 

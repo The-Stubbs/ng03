@@ -2,19 +2,19 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "ranking"
+        self.selectedMenu = "ranking"
 
         return self.DisplayRankingAlliances(request.GET.get("tag"), request.GET.get("name"))
 
     def DisplayRankingAlliances(self, search_tag, search_name):
-        content = GetTemplate(self.request, "ranking-gm_alliances")
+        content = self.loadTemplate("ranking-gm_alliances")
 
         #
         # search by parameter
@@ -67,7 +67,7 @@ class View(GlobalView):
 
         # retrieve number of gm_alliances
         query = "SELECT count(DISTINCT alliance_id) FROM gm_profiles INNER JOIN gm_alliances ON gm_alliances.id=alliance_id WHERE gm_alliances.visible"+searchby
-        oRs = oConnExecute(query)
+        oRs = dbRow(query)
         size = int(oRs[0])
 
         nb_pages = int(size/displayed)
@@ -77,14 +77,14 @@ class View(GlobalView):
 
         query = "SELECT gm_alliances.id, gm_alliances.tag, gm_alliances.name, gm_alliances.score, count(*) AS members, sum(planets) AS planets," + \
                 " int4(gm_alliances.score / count(*)) AS score_average, gm_alliances.score-gm_alliances.previous_score as score_delta," + \
-                " created, EXISTS(SELECT 1 FROM gm_alliance_naps WHERE allianceid1=gm_alliances.id AND allianceid2=" + str(sqlValue(self.AllianceId)) + ")," + \
-                " max_members, EXISTS(SELECT 1 FROM gm_alliance_wars WHERE (allianceid1=gm_alliances.id AND allianceid2=" + str(sqlValue(self.AllianceId)) + ") OR (allianceid1=" + str(sqlValue(self.AllianceId)) + " AND allianceid2=gm_alliances.id))" + \
+                " created, EXISTS(SELECT 1 FROM gm_alliance_naps WHERE allianceid1=gm_alliances.id AND allianceid2=" + str(sqlValue(self.allianceId)) + ")," + \
+                " max_members, EXISTS(SELECT 1 FROM gm_alliance_wars WHERE (allianceid1=gm_alliances.id AND allianceid2=" + str(sqlValue(self.allianceId)) + ") OR (allianceid1=" + str(sqlValue(self.allianceId)) + " AND allianceid2=gm_alliances.id))" + \
                 " FROM gm_profiles INNER JOIN gm_alliances ON gm_alliances.id=alliance_id" + \
                 " WHERE gm_alliances.visible"+searchby + \
                 " GROUP BY gm_alliances.id, gm_alliances.name, gm_alliances.tag, gm_alliances.score, gm_alliances.previous_score, gm_alliances.created, gm_alliances.max_members" + \
                 " ORDER BY "+orderby+ \
                 " OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         if oRs == None: content.Parse("noresult")
 
@@ -140,7 +140,7 @@ class View(GlobalView):
             if oRs[6] > 0: item["plus"] = True
             if oRs[6] < 0: item["minus"] = True
 
-            if self.AllianceId and oRs[0] == self.AllianceId: item["playeralliance"] = True
+            if self.allianceId and oRs[0] == self.allianceId: item["playeralliance"] = True
             if oRs[9]:
                 item["nap"] = True
             elif oRs[11]:
@@ -148,4 +148,4 @@ class View(GlobalView):
 
             i = i + 1
 
-        return self.Display(content)
+        return self.display(content)

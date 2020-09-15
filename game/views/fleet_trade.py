@@ -2,21 +2,21 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "gm_fleets"
+        self.selectedMenu = "gm_fleets"
         
         self.can_command_alliance_fleets = -1
         
-        if self.AllianceId and self.hasRight("can_order_other_fleets"):
-            self.can_command_alliance_fleets = self.AllianceId
+        if self.allianceId and self.hasRight("can_order_other_fleets"):
+            self.can_command_alliance_fleets = self.allianceId
         
-        self.fleet_owner_id = self.UserId
+        self.fleet_owner_id = self.userId
         
         self.fleetid = ToInt(self.request.GET.get("id"), 0)
         
@@ -37,24 +37,24 @@ class View(GlobalView):
     def RetrieveFleetOwnerId(self, fleetid):
     
         # retrieve fleet owner
-        query = "SELECT ownerid" +\
-                " FROM vw_gm_fleets as f" +\
-                " WHERE (ownerid=" + str(self.UserId) + " OR (shared AND owner_alliance_id=" + str(self.can_command_alliance_fleets) + ")) AND id=" + str(self.fleetid)
-        oRs = oConnExecute(query)
+        query = "SELECT ownerid" + \
+                " FROM vw_gm_fleets as f" + \
+                " WHERE (ownerid=" + str(self.userId) + " OR (shared AND owner_alliance_id=" + str(self.can_command_alliance_fleets) + ")) AND id=" + str(self.fleetid)
+        oRs = dbRow(query)
     
         self.fleet_owner_id = oRs[0]
     
     # display fleet info
     def DisplayExchangeForm(self, fleetid):
-        content = GetTemplate(self.request, "fleet-trade")
+        content = self.loadTemplate("fleet-trade")
     
         # retrieve fleet name, size, position, destination
-        query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," +\
-                " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," +\
+        query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
+                " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
-                " FROM vw_gm_fleets" +\
+                " FROM vw_gm_fleets" + \
                 " WHERE ownerid=" + str(self.fleet_owner_id) + " AND id="+str(self.fleetid)
-        oRs = oConnExecute(query)
+        oRs = dbRow(query)
     
         # if fleet doesn't exist, redirect to the list of gm_fleets
         if oRs == None:
@@ -88,11 +88,11 @@ class View(GlobalView):
     
         if relation == rSelf:
             # retrieve planet ore, hydrocarbon, workers, relation
-            query = "SELECT ore, hydrocarbon, scientists, soldiers," +\
-                    " GREATEST(0, workers-GREATEST(workers_busy,workers_for_maintenance-workers_for_maintenance/2+1,500))," +\
-                    " workers > workers_for_maintenance/2" +\
+            query = "SELECT ore, hydrocarbon, scientists, soldiers," + \
+                    " GREATEST(0, workers-GREATEST(workers_busy,workers_for_maintenance-workers_for_maintenance/2+1,500))," + \
+                    " workers > workers_for_maintenance/2" + \
                     " FROM vw_gm_planets WHERE id="+str(oRs[10])
-            oRs = oConnExecute(query)
+            oRs = dbRow(query)
 
             content.AssignValue("planet_ore", oRs[0])
             content.AssignValue("planet_hydrocarbon", oRs[1])
@@ -112,7 +112,7 @@ class View(GlobalView):
         else:
             content.Parse("cargo")
     
-        return self.Display(content)
+        return self.display(content)
     
     def TransferResources(self, fleetid):
     
@@ -123,7 +123,7 @@ class View(GlobalView):
         workers = ToInt(self.request.GET.get("load_workers"), 0) - ToInt(self.request.GET.get("unload_workers"), 0)
     
         if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
-            oRs = oConnExecute("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
+            oRs = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
     
     def TransferResourcesViaPost(self, fleetid):
     
@@ -134,5 +134,5 @@ class View(GlobalView):
         workers = ToInt(self.request.POST.get("load_workers"), 0) - ToInt(self.request.POST.get("unload_workers"), 0)
     
         if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
-            oRs = oConnExecute("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
+            oRs = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
             return HttpResponseRedirect("/game/fleet/?id=" + str(self.fleetid) + "+trade=" + str(oRs[0]))

@@ -2,14 +2,14 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "gm_fleets"
+        self.selectedMenu = "gm_fleets"
 
         self.e_no_error = 0
         self.e_bad_destination = 1
@@ -32,15 +32,15 @@ class View(GlobalView):
     # display fleet info
     def DisplayFleet(self, fleetid):
 
-        content = GetTemplate(self.request, "fleet-ships")
+        content = self.loadTemplate("fleet-ships")
 
         # retrieve fleet name, size, position, destination
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
-                " FROM vw_gm_fleets WHERE ownerid="+str(self.UserId)+" AND id="+str(fleetid)
+                " FROM vw_gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
 
-        oRs = oConnExecute(query)
+        oRs = dbRow(query)
 
         # if fleet doesn't exist, redirect to the list of gm_fleets
         if oRs == None:
@@ -68,7 +68,7 @@ class View(GlobalView):
                     " FROM dt_ships" + \
                     " ORDER BY dt_ships.category, dt_ships.label"
 
-            oRss = oConnExecuteAll(query)
+            oRss = dbRows(query)
 
             list = []
             content.AssignValue("shiplist", list)
@@ -87,7 +87,7 @@ class View(GlobalView):
 
             content.Parse("can_manage")
 
-        return self.Display(content)
+        return self.display(content)
 
     # Transfer ships between the planet and the fleet
     def TransferShips(self, fleetid):
@@ -96,7 +96,7 @@ class View(GlobalView):
 
         # if units are removed, the fleet may be destroyed so retrieve the planetid where the fleet is
         if self.fleet_planet == 0:
-            oRs = oConnExecute("SELECT planetid FROM gm_fleets WHERE id=" + str(fleetid))
+            oRs = dbRow("SELECT planetid FROM gm_fleets WHERE id=" + str(fleetid))
 
             if oRs == None:
                 self.fleet_planet = -1
@@ -104,7 +104,7 @@ class View(GlobalView):
                 self.fleet_planet = oRs[0]
 
         # retrieve the list of all existing ships
-        shipsArray = oConnExecute("SELECT id FROM dt_ships")
+        shipsArray = dbRow("SELECT id FROM dt_ships")
 
         # for each ship id, check if the player wants to add ships of this kind
         for i in shipsArray:
@@ -113,7 +113,7 @@ class View(GlobalView):
             quantity = ToInt(self.request.POST.get("addship" + str(shipid)), 0)
 
             if quantity > 0:
-                oConnExecute("SELECT user_planet_transfer_ships(" + str(self.UserId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
+                dbRow("SELECT user_planet_transfer_ships(" + str(self.userId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
 
         # for each ship id, check if the player wants to remove ships of this kind
         for i in shipsArray:
@@ -122,10 +122,10 @@ class View(GlobalView):
             quantity = ToInt(self.request.POST.get("removeship" + str(shipid)), 0)
             if quantity > 0:
                 ShipsRemoved = ShipsRemoved + quantity
-                oConnExecute("SELECT user_fleet_transfer_ships(" + str(self.UserId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
+                dbRow("SELECT user_fleet_transfer_ships(" + str(self.userId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
 
         if ShipsRemoved > 0:
-            oRs = oConnExecute("SELECT id FROM gm_fleets WHERE id=" + str(fleetid))
+            oRs = dbRow("SELECT id FROM gm_fleets WHERE id=" + str(fleetid))
 
             if oRs == None:
                 if self.fleet_planet > 0:

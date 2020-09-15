@@ -2,14 +2,14 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "alliance.naps"
+        self.selectedMenu = "alliance.naps"
 
         self.invitation_success = ""
         self.break_success = ""
@@ -18,15 +18,15 @@ class View(GlobalView):
         cat = ToInt(request.GET.get("cat"), 0)
         if cat < 1 or cat > 3: cat = 1
 
-        if not self.oAllianceRights["can_create_nap"] and cat == 3: cat = 1
-        if not (self.oAllianceRights["can_create_nap"] or self.oAllianceRights["can_break_nap"]) and cat != 1: cat = 1
+        if not self.allianceRights["can_create_nap"] and cat == 3: cat = 1
+        if not (self.allianceRights["can_create_nap"] or self.allianceRights["can_break_nap"]) and cat != 1: cat = 1
 
         #
         # Process actions
         #
 
         # redirect the player to the alliance page if he is not part of an alliance
-        if self.AllianceId == None:
+        if self.allianceId == None:
             return HttpResponseRedirect("/game/alliance/")
 
         action = request.GET.get("a", "")
@@ -36,22 +36,22 @@ class View(GlobalView):
         self.hours = 24
 
         if action == "accept":
-            oRs = oConnExecute("SELECT user_alliance_nap_offer_accept(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            oRs = dbRow("SELECT user_alliance_nap_offer_accept(" + str(self.userId) + "," + sqlStr(targetalliancetag) + ")")
             if oRs[0] == 0:
                 self.nap_success = "ok"
             elif oRs[0] == 5:
                 self.nap_success = "too_many"
 
         elif action == "decline":
-            oConnExecute("SELECT user_alliance_nap_offer_decline(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            dbRow("SELECT user_alliance_nap_offer_decline(" + str(self.userId) + "," + sqlStr(targetalliancetag) + ")")
         elif action == "cancel":
-            oConnExecute("SELECT user_alliance_nap_offer_cancel(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            dbRow("SELECT user_alliance_nap_offer_cancel(" + str(self.userId) + "," + sqlStr(targetalliancetag) + ")")
         elif action == "sharelocs":
-            oConnExecute("SELECT user_alliance_nap_toggle_loc_sharing(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            dbRow("SELECT user_alliance_nap_toggle_loc_sharing(" + str(self.userId) + "," + sqlStr(targetalliancetag) + ")")
         elif action == "shareradars":
-            oConnExecute("SELECT user_alliance_nap_toggle_radar_sharing(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            dbRow("SELECT user_alliance_nap_toggle_radar_sharing(" + str(self.userId) + "," + sqlStr(targetalliancetag) + ")")
         elif action == "break":
-            oRs = oConnExecute("SELECT user_alliance_nap_break(" + str(self.UserId) + "," + dosql(targetalliancetag) + ")")
+            oRs = dbRow("SELECT user_alliance_nap_break(" + str(self.userId) + "," + sqlStr(targetalliancetag) + ")")
 
             if oRs[0] == 0:
                 self.break_success = "ok"
@@ -69,7 +69,7 @@ class View(GlobalView):
 
             self.hours = ToInt(request.POST.get("hours"), 0)
 
-            oRs = oConnExecute("SELECT user_alliance_nap_offer_create(" + str(self.UserId) + "," + dosql(self.tag) + "," + str(self.hours) + ")")
+            oRs = dbRow("SELECT user_alliance_nap_offer_create(" + str(self.userId) + "," + sqlStr(self.tag) + "," + str(self.hours) + ")")
             if oRs[0] == 0:
                 self.invitation_success = "ok"
                 self.tag = ""
@@ -119,9 +119,9 @@ class View(GlobalView):
                 " share_locs, share_radars" + \
                 " FROM gm_alliance_naps n" + \
                 "    INNER JOIN gm_alliances ON (allianceid2 = gm_alliances.id)" + \
-                " WHERE allianceid1=" + str(self.AllianceId) + \
+                " WHERE allianceid1=" + str(self.allianceId) + \
                 " ORDER BY " + orderby
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         i = 0
         list = []
@@ -148,7 +148,7 @@ class View(GlobalView):
             else:
                 item["locs_not_shared"] = True
 
-            if self.oAllianceRights["can_create_nap"]:
+            if self.allianceRights["can_create_nap"]:
                 item["toggle_share_locs"] = True
 
             if oRs[8]:
@@ -156,10 +156,10 @@ class View(GlobalView):
             else:
                 item["radars_not_shared"] = True
 
-            if self.oAllianceRights["can_create_nap"]:
+            if self.allianceRights["can_create_nap"]:
                 item["toggle_share_radars"] = True
 
-            if self.oAllianceRights["can_break_nap"]:
+            if self.allianceRights["can_break_nap"]:
                 if oRs[6] == None:
                     item["break"] = True
                 else:
@@ -167,7 +167,7 @@ class View(GlobalView):
 
             i = i + 1
 
-        if self.oAllianceRights["can_break_nap"] and (i > 0): content.Parse("break")
+        if self.allianceRights["can_break_nap"] and (i > 0): content.Parse("break")
 
         if i == 0: content.Parse("nonaps")
 
@@ -182,9 +182,9 @@ class View(GlobalView):
                 " FROM gm_alliance_nap_offers" + \
                 "            INNER JOIN gm_alliances ON gm_alliances.id = gm_alliance_nap_offers.allianceid" + \
                 "            LEFT JOIN gm_profiles AS recruiters ON recruiters.id = gm_alliance_nap_offers.recruiterid" + \
-                " WHERE targetallianceid=" + str(self.AllianceId) + " AND NOT declined" + \
+                " WHERE targetallianceid=" + str(self.allianceId) + " AND NOT declined" + \
                 " ORDER BY created DESC"
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         i = 0
         list = []
@@ -218,10 +218,10 @@ class View(GlobalView):
                 " FROM gm_alliance_nap_offers" + \
                 "            INNER JOIN gm_alliances ON gm_alliances.id = gm_alliance_nap_offers.targetallianceid" + \
                 "            LEFT JOIN gm_profiles AS recruiters ON recruiters.id = gm_alliance_nap_offers.recruiterid" + \
-                " WHERE allianceid=" + str(self.AllianceId) + \
+                " WHERE allianceid=" + str(self.allianceId) + \
                 " ORDER BY created DESC"
 
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         i = 0
         list = []
@@ -252,7 +252,7 @@ class View(GlobalView):
         content.AssignValue("hours", self.hours)
 
     def displayPage(self, cat):
-        content = GetTemplate(self.request, "alliance-naps")
+        content = self.loadTemplate("alliance-naps")
         content.AssignValue("cat", cat)
 
         if cat == 1:
@@ -262,22 +262,22 @@ class View(GlobalView):
         elif cat == 3:
             self.displayRequests(content)
 
-        if self.oAllianceRights["can_create_nap"] or self.oAllianceRights["can_break_nap"]:
+        if self.allianceRights["can_create_nap"] or self.allianceRights["can_break_nap"]:
 
             query = "SELECT int4(count(*)) FROM gm_alliance_nap_offers" + \
-                    " WHERE targetallianceid=" + str(self.AllianceId) + " AND NOT declined"
-            oRs = oConnExecute(query)
+                    " WHERE targetallianceid=" + str(self.allianceId) + " AND NOT declined"
+            oRs = dbRow(query)
             content.AssignValue("proposition_count", oRs[0])
 
             query = "SELECT int4(count(*)) FROM gm_alliance_nap_offers" + \
-                    " WHERE allianceid=" + str(self.AllianceId) + " AND NOT declined"
-            oRs = oConnExecute(query)
+                    " WHERE allianceid=" + str(self.allianceId) + " AND NOT declined"
+            oRs = dbRow(query)
             content.AssignValue("request_count", oRs[0])
 
             content.Parse("cat" + str(cat) + "_selected")
             content.Parse("cat1")
             content.Parse("cat2")
-            if self.oAllianceRights["can_create_nap"]: content.Parse("cat3")
+            if self.allianceRights["can_create_nap"]: content.Parse("cat3")
             content.Parse("nav")
 
-        return self.Display(content)
+        return self.display(content)

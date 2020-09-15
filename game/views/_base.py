@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 
+import re
 import time
 
 from math import sqrt
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import connection
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.views import View
 from django.utils import timezone
-
-from django.db import connection
+from django.views import View
 
 universe = "ng03"
 
 maintenance = False
 registration = False
-
-urlNexus = "https://exileng.com/"
 
 rUninhabited = -3
 rWar = -2
@@ -26,109 +24,98 @@ rFriend = 0
 rAlliance = 1
 rSelf = 2
 
-sUser = "user"
 sPlanet = "planet"
-sPlanetList = "planetlist"
-sPlanetListCount = "planetlistcount"
-sPrivilege = "Privilege"
-sLogonUserID = "logonuserid"
+sPrivilege = "privilege"
 
-def dict_fetchall(cursor):
+cursor = None
+
+#-------------------------------------------------------------------------------
+def dbRow(query):
+    cursor.execute(query)
+    return cursor.fetchone()
+
+#-------------------------------------------------------------------------------
+def dbRowRetry(query):
+    i = 0
+    while i < 5:
+        try:
+            i = 10
+            return dbRow(query)
+        except:
+            i = i + 1
+    return None
+
+#-------------------------------------------------------------------------------
+def dbRows(query):
+    cursor.execute(query)
+    return cursor.fetchall()
+    
+#-------------------------------------------------------------------------------
+def dictFetchAll(cursor):
     columns = [col[0] for col in cursor.description]
     return [
         dict(zip(columns, row))
         for row in cursor.fetchall()
     ]
 
-def dict_fetchone(cursor):
-    results = dict_fetchall(cursor)
+#-------------------------------------------------------------------------------
+def dictFetchOne(cursor):
+    results = dictFetchAll(cursor)
     if results: return results[0]
     else: return None
 
-cursor = None
-
-def connectDB():
-    global cursor
-    cursor = connection.cursor()
-
-def oConnExecute(query):
+#-------------------------------------------------------------------------------
+def dbDictRow(query):
     cursor.execute(query)
-    results = cursor.fetchall()
-    if len(results) > 1: return results
-    elif results: return results[0]
-    return None
+    return dictFetchOne(cursor)
 
-def oConnExecuteAll(query):
+#-------------------------------------------------------------------------------
+def dbDictRows(query):
     cursor.execute(query)
-    return cursor.fetchall()
+    return dictFetchAll(cursor)
     
-def oConnDoQuery(query):
+#-------------------------------------------------------------------------------
+def dbExecute(query):
     cursor.execute(query)
+    
+#-------------------------------------------------------------------------------
+def dbExecuteRetryNoRow(query):
+    i = 0
+    while i < 5:
+        try:
+            i = 10
+            dbRow(query)
+        except:
+            i = i + 1
 
-def oConnRow(query):
-    cursor.execute(query)
-    return dict_fetchone(cursor)
-
-def oConnRows(query):
-    cursor.execute(query)
-    return dict_fetchall(cursor)
-
-# return a quoted string for sql queries
-def dosql(ch):
-    ret = ch.replace('\\', '\\\\') 
+#-------------------------------------------------------------------------------
+def sqlStr(text):
+    ret = text.replace('\\', '\\\\') 
     ret = ret.replace('\'', '\'\'')
     ret = '\'' + ret + '\''
     return ret
 
-# return "null" if val is null or equals ''
+#-------------------------------------------------------------------------------
 def sqlValue(val):
-    if val == None or val == "":
-        return "Null"
-    else:
-        return str(val)
+    if val == None or val == "": return "Null"
+    else: return str(val)
 
-# tries to execute a query up to 3 times if it fails the first times
-def connExecuteRetry(query):
-    i = 0
-    while i < 5:
-        try:
-            i = 10
-            rs = oConnExecute(query)
-            return rs
-        except:
-            i = i + 1
-    return None
-    
-def connExecuteRetryNoRecords(query):
-    i = 0
-    while i < 5:
-        try:
-            i = 10
-            oConnExecute(query)
-        except:
-            i = i + 1
-
+#-------------------------------------------------------------------------------
 def ToInt(s, defaultValue):
     if(s == "" or s == None): return defaultValue
     i = int(float(s))
-    if i == None:
-        return defaultValue
+    if i == None: return defaultValue
     return i
 
+#-------------------------------------------------------------------------------
 def ToBool(s, defaultValue):
     if(s == "" or s == None): return defaultValue
     i = int(float(s))
-    if i == 0:
-        return defaultValue
+    if i == 0: return defaultValue
     return True
-
-# -*- coding: utf-8 -*-
-
-import re
 
 #-------------------------------------------------------------------------------
 def isValidName(name):
-
     name = name.strip()
     if name == "" or len(name) < 2 or len(name) > 12:
         return False
@@ -138,13 +125,12 @@ def isValidName(name):
         
 #-------------------------------------------------------------------------------
 def isValidURL(url):
-
-    p = re.compile("^(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&%\$\-]+)*@)?((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.[a-zA-Z]{2,4})(\:[0-9]+)?(/[^/][a-zA-Z0-9\.\,\?\'\\/\+&%\$#\=~_\-@]*)*$")
+    url = url.strip()
+    p = re.compile("^(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&%\$\-]+)*@)?((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|([a-zA-Z0-9\-]+ \.)*[a-zA-Z0-9\-]+ \.[a-zA-Z]{2,4})(\:[0-9]+)?(/[^/][a-zA-Z0-9\.\,\?\'\\/\+&%\$#\=~_\-@]*)*$")
     return p.match(url)
 
 #-------------------------------------------------------------------------------
 def isValidObjectName(name):
-
     name = name.strip()
     if name == "" or len(name) < 2 or len(name) > 16:
         return False
@@ -153,786 +139,425 @@ def isValidObjectName(name):
         return p.match(myName)
         
 #-------------------------------------------------------------------------------
-def isValidCategoryName(self, name):
-    
+def isValidCategoryName(name):
     name = name.strip()
     if name == "" or len(name) < 2 or len(name) > 32:
         return False
     else:
         p = re.compile("^[a-zA-Z0-9\- ]+$")
         return p.match(name)
-
-def retrieveBuildingsCache():
-    
-    # retrieve general buildings info
-    query = "SELECT id, storage_workers, energy_production, storage_ore, storage_hydrocarbon, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep FROM dt_buildings"
-    return oConnExecute(query)
-
-def retrieveBuildingsReqCache():
-    
-    # retrieve buildings requirements
-    # planet elements can't restrict the destruction of a building that made their construction possible
-    query = "SELECT buildingid, required_buildingid" +\
-            " FROM dt_building_building_reqs" +\
-            "    INNER JOIN dt_buildings ON (dt_buildings.id=dt_building_building_reqs.buildingid)" +\
-            " WHERE dt_buildings.destroyable"
-    return oConnExecute(query)
-
-def retrieveShipsCache():
-
-    # retrieve general Ships info
-    query = "SELECT id, label, description FROM dt_ships ORDER BY category, id"
-    return oConnExecute(query)
-
-def retrieveShipsReqCache():
-    
-    # retrieve buildings requirements for ships
-    query = "SELECT shipid, required_buildingid FROM dt_ship_building_reqs"
-    return oConnExecute(query)
-
-def retrieveResearchCache():
-
-    # retrieve Research info
-    query = "SELECT id, label, description FROM dt_researches"
-    return oConnExecute(query)
-
-def checkPlanetListCache(Session):
-    
-    # retrieve Research info
-    query = "SELECT id, name, galaxy, sector, planet FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(Session.get("user")) + " ORDER BY id"
-    return oConnExecuteAll(query)
-
-def getAllianceTag(allianceid):
-    oRs = oConnExecute("SELECT tag FROM gm_alliances WHERE id=" + str(allianceid))
-    if oRs:
-        return oRs[0]
-    else:
-        return ""
-
-def getBuildingLabel(buildingid):
-    for i in retrieveBuildingsCache():
-        if buildingid == i[0]:
-            return i[8]
-
-def getBuildingDescription(buildingid):
-    for i in retrieveBuildingsCache():
-        if buildingid == i[0]:
-            return i[9]
-
-def getShipLabel(ShipId):
-    for i in retrieveShipsCache():
-        if ShipId == i[0]:
-            return i[1]
-
-def getShipDescription(ShipId):
-    for i in retrieveShipsCache():
-        if ShipId == i[0]:
-            return i[2]
-
-def getResearchLabel(ResearchId):
-    for i in retrieveResearchCache():
-        if ResearchId == i[0]:
-            return i[1]
-
-class TemplaceContext():
-    
-    def __init__(self):
-        self.template = ""
-        self.data = {}
-
-    def AssignValue(self, key, value):
-        self.data[key] = value
-    
-    def Parse(self, key):
-        self.data[key] = True
         
-# Return an initialized template
-def GetTemplate(request, name):
-    
-    result = TemplaceContext()
-    result.template = name + ".html"
+#-------------------------------------------------------------------------------
+def isValidAlliancename(name):
+    name = name.strip()
+    if name == "" or len(name) < 4 or len(name) > 32:
+        return False
+    else:
+        p = re.compile("^[a-zA-Z0-9]+([ ]?[.]?[\-]?[ ]?[a-zA-Z0-9]+)*$")
+        return p.match(name)
+        
+#-------------------------------------------------------------------------------
+def isValidAlliancetag(tag):
+    tag = tag.strip()
+    if tag == "" or len(tag) < 2 or len(tag) > 4:
+        return False
+    else:
+        p = re.compile("^[a-zA-Z0-9]+$")
+        return p.match(tag)
+        
+#-------------------------------------------------------------------------------
+def isValiddescription(self, description):
+    return len(description) < 8192
 
-    result.AssignValue("PATH_IMAGES", "/assets/")
-    result.AssignValue("PATH_TEMPLATE", "/game/templates")
+#-------------------------------------------------------------------------------
+def dtBuildings():
+    query = "SELECT id, storage_workers, energy_production, storage_ore, storage_hydrocarbon, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep FROM dt_buildings"
+    return dbRow(query)
 
-    return result
+#-------------------------------------------------------------------------------
+def dtBuildingBuildingReqs():
+    query = "SELECT buildingid, required_buildingid" + \
+            " FROM dt_building_building_reqs" + \
+            "    INNER JOIN dt_buildings ON (dt_buildings.id=dt_building_building_reqs.buildingid)" + \
+            " WHERE dt_buildings.destroyable"
+    return dbRow(query)
 
-class ExileMixin:
+#-------------------------------------------------------------------------------
+def dtShips():
+    query = "SELECT id, label, description FROM dt_ships ORDER BY category, id"
+    return dbRow(query)
+
+#-------------------------------------------------------------------------------
+def dtShipBuildingReqs():
+    query = "SELECT shipid, required_buildingid FROM dt_ship_building_reqs"
+    return dbRow(query)
+
+#-------------------------------------------------------------------------------
+class BaseMixin(LoginRequiredMixin):
 
     def pre_dispatch(self, request, *args, **kwargs):
 
-        self.StartTime = time.clock()
+        if maintenance: return HttpResponseRedirect('/game/maintenance/')
+            
+        global cursor
+        cursor = connection.cursor()
 
-        if not maintenance: connectDB()
-        else: return HttpResponseRedirect('/game/maintenance/')
+#-------------------------------------------------------------------------------
+class BaseView(BaseMixin, View):
 
-class GlobalView(ExileMixin, View):
-
-    CurrentPlanet = None
-    CurrentGalaxyId = None
-    CurrentSectorId = None
-    scrollY = 0 # how much will be scrolled in vertical after the page is loaded
-    showHeader = False
-    url_extra_params = ""
-    pageTerminated = False
-    displayAlliancePlanetName = True
-    pagelogged = False
-    selected_menu = ""
+    currentPlanetId = None
+    currentGalaxy = None
+    currentSector = None
     
+    scrollY = 0
+    showHeader = False
+    selectedMenu = ""
+    
+    #---------------------------------------------------------------------------
     def pre_dispatch(self, request, *args, **kwargs):
         
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        if not request.session.get(sUser):
-            return HttpResponseRedirect("/") # Redirect to home page
-
-        request.session["details"] = ""
+        self.userId = request.user.id
         
-        # Check that this session is still valid
-        response = self.CheckSessionValidity()
-        if response: return response
+        # --- user checking & info
         
-        # Check for the planet querystring parameter and if the current planet belongs to the player
-        response = self.CheckCurrentPlanetValidity()
-        if response: return response
-        
-        referer = self.request.META.get("HTTP_REFERER", "")
-        
-        if referer != "":
-        
-            # extract the website part from the referer url
-            posslash = referer[8:].find("/")
-            if posslash > 0:
-                websitename = referer[8:posslash-8]
-            else:
-                websitename = referer[8:]
-        
-            if not "exileng.com" in referer.lower() and not referer.lower() in request.META.get("LOCAL_ADDR") and not "viewtopic" in referer.lower() and not "forum" in referer.lower():
-                oConnExecute("SELECT sp_log_referer("+str(self.UserId)+","+dosql(referer) + ")")
-
-    def hasRight(self, right):
-        if self.oAllianceRights == None:
-            return True
-        else:
-            return self.oAllianceRights["leader"] or self.oAllianceRights[right]
+        query = "SELECT ""login"", privilege, lastlogin, credits, lastplanetid, deletion_date, score, planets, previous_score," + \
+                " alliance_id, alliance_rank, leave_alliance_datetime IS NULL AND (alliance_left IS NULL OR alliance_left < now()) AS can_join_alliance," + \
+                " credits_bankruptcy, mod_planets, mod_commanders, orientation," + \
+                " prestige_points, COALESCE(skin, 's_default') AS skin," + \
+                " (SELECT username FROM public.auth_user WHERE id=" + str(self.userId) + ") AS username" + \
+                " FROM gm_profiles" + \
+                " WHERE id=" + str(self.userId)
+        self.userInfo = dbDictRow(query)        
+        if self.userInfo == None: return HttpResponseRedirect("/")
     
-    def getPlanetName(self, relation, radar_strength, ownerName, planetName):
-        if relation == rSelf:
-            return planetName if planetName else ""
+        if self.userInfo["privilege"] == -1: return HttpResponseRedirect("/game/locked/")
+        if self.userInfo["privilege"] == -2: return HttpResponseRedirect("/game/holidays/")
+        if self.userInfo["privilege"] == -3: return HttpResponseRedirect("/game/wait/")
+        
+        if self.userInfo["credits_bankruptcy"] <= 0: return HttpResponseRedirect("/game/game-over/")
+        
+        self.allianceId = self.userInfo["alliance_id"]
+        self.allianceRankId = self.userInfo["alliance_rank"]
+        self.allianceRights = None
+        
+        # --- alliance info
+        
+        if self.allianceId:
+            query = "SELECT label, leader, can_invite_player, can_kick_player, can_create_nap, can_break_nap, can_ask_money, can_see_reports, can_accept_money_requests, can_change_tax_rate, can_mail_alliance," + \
+                    " can_manage_description, can_manage_announce, can_see_members_info, can_use_alliance_radars, can_order_other_fleets" + \
+                    " FROM gm_alliance_ranks" + \
+                    " WHERE allianceid=" + str(self.allianceId) + " AND rankid=" + str(self.allianceRankId)
+            self.allianceRights = dbDictRow(query)
+
+        if not request.user.is_impersonate:
+            dbRow("SELECT internal_profile_log_activity(" + str(self.userId) + "," + sqlStr(self.request.META.get("REMOTE_ADDR")) + ",0)")
+        
+        # --- set current planet
+        
+        planetId = ToInt(request.GET.get("planet"), 0)
+        if planetId != 0:
+        
+            oRs = dbRow("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(planetId) + " and ownerid=" + str(self.userId))
+            if oRs:
+            
+                self.currentPlanetId = planetId
+                self.currentGalaxy = oRs[0]
+                self.currentSector = oRs[1]
+
+                request.session[sPlanet] = planetId
+    
+                if not self.request.user.is_impersonate:
+                    dbExecute("UPDATE gm_profiles SET lastplanetid=" + str(planetId) + " WHERE id=" + str(self.userId))
+    
+        # --- current planet checking & info
+        
+        self.currentPlanetId = request.session.get(sPlanet, "")    
+        if self.currentPlanetId != "":
+        
+            oRs = dbRow("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(self.currentPlanetId) + " AND ownerid=" + str(self.userId))
+            if oRs:
+
+                self.currentGalaxy = oRs[0]
+                self.currentSector = oRs[1]
+            
+        if self.currentGalaxy == None or self.currentSector == None:
+        
+            oRs = dbRow("SELECT id, galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.userId) + " LIMIT 1")
+            if oRs == None: return HttpResponseRedirect("/game/game-over/")
+        
+            self.currentPlanetId = oRs[0]
+            self.currentGalaxy = oRs[1]
+            self.currentSector = oRs[2]
+            
+            self.request.session[sPlanet] = self.currentPlanetId
+        
+            if not self.request.user.is_impersonate:
+                dbExecute("UPDATE gm_profiles SET lastplanetid=" + str(self.currentPlanetId) + " WHERE id=" + str(self.userId))
+    
+            return HttpResponseRedirect("/game/overview/")
+
+    #---------------------------------------------------------------------------
+    def get(self, request, *args, **kwargs):
+    
+        content = self.loadTemplate(self.template_name)
+        
+        pageData = {}
+        self.fillContent(request, pageData)
+        content["pagedata"] = pageData
+        
+        return self.display(content)
+
+    #---------------------------------------------------------------------------
+    def post(self, request, *args, **kwargs):
+        
+        action = request.POST.get("action", "")
+        if action != "":
+            error = self.processAction(request, action)
+            if error == 0:
+                return HttpResponseRedirect(self.success_url)
+            else:
+                content = self.loadTemplate(self.template_name)
+                
+                if error: content["error_" + action] = error
+                else: content["error_unknown"] = True
+                
+                pageData = {}
+                self.fillContent(request, pageData)
+                content["pagedata"] = pageData
+                
+                return self.display(content)
+
+    #---------------------------------------------------------------------------
+    def hasRight(self, right):
+    
+        if self.allianceRights == None: return True
+        else: return self.allianceRights["leader"] or self.allianceRights[right]
+    
+    #---------------------------------------------------------------------------
+    def getPlanetName(self, relation, radarStrength, ownerName, planetName):
+
+        if relation == rSelf: return planetName if planetName else ""
         elif relation == rAlliance:
-            if self.displayAlliancePlanetName:
-                return planetName if planetName else ""
-            else:
-                return ownerName if ownerName else ""
-        elif relation == rFriend:
-            return ownerName if ownerName else ""
-        else:
-            if radar_strength > 0:
-                return ownerName if ownerName else ""
-            else:
-                return ""
+            if self.displayAlliancePlanetName: return planetName if planetName else ""
+            else: return ownerName if ownerName else ""
+        elif relation == rFriend: return ownerName if ownerName else ""
+        elif radarStrength > 0: return ownerName if ownerName else ""
+        else: return ""
 
-    def IsPlayerAccount(self):
-        return self.request.session.get(sPrivilege) > -50 and self.request.session.get(sPrivilege) < 50
-
-    def IsImpersonating(self):
-        return self.request.user.is_impersonate
-
-    # Call this function when the name of a planet has changed or has been colonized or abandonned
-    def InvalidatePlanetList(self):
-        self.request.session[sPlanetList] = None
-
-    # return image of a planet according to its it and its floor
-    def planetimg(self,id,floor):
-        img = 1+(floor + id) % 21
+    #---------------------------------------------------------------------------
+    def getPlanetImg(self, id, floor):
+    
+        img = 1 + (floor + id) % 21
         if img < 10: img = "0" + str(img)
         return str(img)
 
-    # return the percentage of the current value compared to max value
+    #---------------------------------------------------------------------------
     def getpercent(self, current, max, slice):
-        if (current >= max) or (max == 0):
-            return 100
-        else:
-            return slice*int(100 * current / max / slice)
-
-    #
-    # Parse the header, list the planets owned by the player and show the resources of the current planet
-    #
-    def FillHeader(self, tpl):
-        if self.CurrentPlanet == 0:
-            return
-
-        # Initialize the header
-        tpl_header = tpl
-
-        # retrieve player credits and assign the value, don't use oPlayerInfo as the info may be outdated
-        query = "SELECT credits, prestige_points FROM gm_profiles WHERE id=" + str(self.UserId) + " LIMIT 1"
-        oRs = oConnExecute(query)
-        tpl_header.AssignValue("money", oRs[0])
-        tpl_header.AssignValue("pp", oRs[1])
     
-        # assign current planet ore, hydrocarbon, workers and energy
-        query = "SELECT ore, ore_production, ore_capacity," + \
-                "hydrocarbon, hydrocarbon_production, hydrocarbon_capacity," + \
-                "workers, workers_busy, workers_capacity," + \
-                "energy_consumption, energy_production," + \
-                "floor_occupied, floor," + \
-                "space_occupied, space, workers_for_maintenance," + \
-                "mod_production_ore, mod_production_hydrocarbon, energy, energy_capacity, soldiers, soldiers_capacity, scientists, scientists_capacity" +\
-                " FROM vw_gm_planets WHERE id="+str(self.CurrentPlanet)
-        oRs = oConnExecute(query)
-    
-        tpl_header.AssignValue("ore", oRs[0])
-        tpl_header.AssignValue("ore_production", oRs[1])
-        tpl_header.AssignValue("ore_capacity", oRs[2])
-    
-        # compute ore level : ore / capacity
-        ore_level = self.getpercent(oRs[0], oRs[2], 10)
-    
-        if ore_level >= 90:
-            tpl_header.Parse("high_ore")
-        elif ore_level >= 70:
-            tpl_header.Parse("medium_ore")
-        else:
-            tpl_header.Parse("normal_ore")
-    
-        tpl_header.AssignValue("hydrocarbon", oRs[3])
-        tpl_header.AssignValue("hydrocarbon_production", oRs[4])
-        tpl_header.AssignValue("hydrocarbon_capacity", oRs[5])
-    
-        hydrocarbon_level = self.getpercent(oRs[3], oRs[5], 10)
-    
-        if hydrocarbon_level >= 90:
-            tpl_header.Parse("high_hydrocarbon")
-        elif hydrocarbon_level >= 70:
-            tpl_header.Parse("medium_hydrocarbon")
-        else:
-            tpl_header.Parse("normal_hydrocarbon")
-    
-        tpl_header.AssignValue("workers", oRs[6])
-        tpl_header.AssignValue("workers_capacity", oRs[8])
-        tpl_header.AssignValue("workers_idle", oRs[6] - oRs[7])
-    
-        if oRs[6] < oRs[15]: tpl_header.Parse("workers_low")
-    
-        tpl_header.AssignValue("soldiers", oRs[20])
-        tpl_header.AssignValue("soldiers_capacity", oRs[21])
-    
-        if oRs[20]*250 < oRs[6]+oRs[22]: tpl_header.Parse("soldiers_low")
-    
-        tpl_header.AssignValue("scientists", oRs[22])
-        tpl_header.AssignValue("scientists_capacity", oRs[23])
-    
-        tpl_header.AssignValue("energy_consumption", oRs[9])
-        tpl_header.AssignValue("energy_totalproduction", oRs[10])
-        tpl_header.AssignValue("energy_production", oRs[10]-oRs[9])
-    
-        tpl_header.AssignValue("energy", oRs[18])
-        tpl_header.AssignValue("energy_capacity", oRs[19])
-    
-        if oRs[9] > oRs[10]: tpl_header.Parse("energy_low")
-    
-        if oRs[9] > oRs[10]: tpl_header.Parse("energy_production_minus")
-        else: tpl_header.Parse("energy_production_normal")
-    
-        tpl_header.AssignValue("floor_occupied", oRs[11])
-        tpl_header.AssignValue("floor", oRs[12])
-    
-        tpl_header.AssignValue("space_occupied", oRs[13])
-        tpl_header.AssignValue("space", oRs[14])
-    
-        # ore/hydro production colors
-        if oRs[16] >= 0 and oRs[6] >= oRs[15]:
-            tpl_header.Parse("normal_ore_production")
-        else:
-            tpl_header.Parse("medium_ore_production")
-
-        if oRs[17] >= 0 and oRs[6] >= oRs[15]:
-            tpl_header.Parse("normal_hydrocarbon_production")
-        else:
-            tpl_header.Parse("medium_hydrocarbon_production")
-
-        #
-        # Fill the planet list
-        #
-        if self.url_extra_params != "":
-            tpl_header.AssignValue("url", "?" + url_extra_params + "&planet=")
-        else:
-            tpl_header.AssignValue("url", "?planet=")
-
-        # cache the list of planets as they are not supposed to change unless a colonization occurs
-        # in case of colonization, let the colonize script reset the session value
-        if self.request.session.get(sPlanetList):
-            planetListArray = self.request.session.get(sPlanetList)
-            planetListCount = self.request.session.get(sPlanetListCount)
-        else:
-            # retrieve planet list
-            query = "SELECT id, name, galaxy, sector, planet" + \
-                    " FROM gm_planets" + \
-                    " WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId) + \
-                    " ORDER BY id"
-            oRs = oConnExecuteAll(query)
-    
-            if oRs == None:
-                planetListCount = -1
-            else:
-                planetListArray = oRs
-                planetListCount = len(oRs)
-    
-            self.request.session[sPlanetList] = planetListArray
-            self.request.session[sPlanetListCount] = planetListCount
-
-        planets = []
-        for item in planetListArray:
-            id = item[0]
-    
-            planet = {}
-            planets.append(planet)
-            
-            planet["id"] = id
-            planet["name"] = item[1]
-            planet["g"] = item[2]
-            planet["s"] = item[3]
-            planet["p"] = item[4]
-    
-            if id == self.CurrentPlanet: planet["selected"] = True
-    
-        tpl_header.AssignValue("planets", planets)
-    
-        query = "SELECT buildingid" +\
-                " FROM gm_planet_buildings INNER JOIN dt_buildings ON (dt_buildings.id=buildingid AND dt_buildings.is_planet_element)" +\
-                " WHERE planetid="+str(self.CurrentPlanet)+\
-                " ORDER BY upper(dt_buildings.label)"
-        oRs = oConnExecuteAll(query)
-    
-        i = 0
-        if oRs:
-            for item in oRs:
-
-                if i % 3 == 0:
-                    tpl_header.AssignValue("special1", getBuildingLabel(item[0]))
-                elif i % 3 == 1:
-                    tpl_header.AssignValue("special2", getBuildingLabel(item[0]))
-                else:
-                    tpl_header.AssignValue("special3", getBuildingLabel(item[0]))
-                    tpl_header.AssignValue("special")
+        if current >= max or max == 0: return 100
+        else: return slice * int(100 * current / max / slice)
+                 
+    #---------------------------------------------------------------------------
+    def loadTemplate(self, name):
         
-                i = i + 1
-    
-        if i % 3 != 0: tpl_header.Parse("special")
-
-    def FillHeaderCredits(self, tpl_header):
-        oRs = oConnExecute("SELECT credits FROM gm_profiles WHERE id="+str(self.UserId))
-        tpl_header.AssignValue("credits", oRs[0])
-    
-    #
-    # Parse the menu
-    #
-    def FillMenu(self, tpl_layout):
-        # Initialize the menu template
-
-        tpl = tpl_layout
-    
-        # retrieve number of new gm_mails & gm_profile_reports
-        query = "SELECT (SELECT int4(COUNT(*)) FROM gm_mails WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL)," + \
-                "(SELECT int4(COUNT(*)) FROM gm_profile_reports WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL AND datetime <= now());"
-        oRs = oConnExecute(query)
+        self.template = name + ".html"
         
-        if oRs[0] > 0:
-            tpl.AssignValue("new_mail", oRs[0])
+        content = {}
+        content["PATH_IMAGES"] = "/assets/"
 
-        if oRs[1] > 0:
-            tpl.AssignValue("new_report", oRs[1])
+        return content
 
-        if self.oAllianceRights:
-            if self.oAllianceRights["leader"] or self.oAllianceRights["can_manage_description"] or self.oAllianceRights["can_manage_announce"]: tpl.Parse("show_management")
-            if self.oAllianceRights["leader"] or self.oAllianceRights["can_see_reports"]: tpl.Parse("show_reports")
-            if self.oAllianceRights["leader"] or self.oAllianceRights["can_see_members_info"]: tpl.Parse("show_members")
+    #---------------------------------------------------------------------------
+    def display(self, content):
+
+        content["userid"] = self.userId
+        content["server"] = universe
+        content["credits"] = self.userInfo["credits"]
+        content["delete_datetime"] = self.userInfo["deletion_date"]
+        
+        if self.userInfo["skin"]: content["skin"] = self.userInfo["skin"]
+        else: content["skin"] = "s_transparent"]
+
+        if self.scrollY != 0: content["scrolly"] = self.scrollY
+        
+        if self.userInfo["credits"] < 0: content["bankruptcy_hours"] = self.userInfo["credits_bankruptcy"]
+
+        # --- menu data
+
+        query = "SELECT (SELECT int4(COUNT(*)) FROM gm_mails WHERE ownerid=" + str(self.userId) + " AND read_date is NULL)," + \
+                "(SELECT int4(COUNT(*)) FROM gm_profile_reports WHERE ownerid=" + str(self.userId) + " AND read_date is NULL AND datetime <= now());"
+        oRs = dbRow(query)
+        
+        content["new_mail"] = oRs[0]
+        content["new_report"] = oRs[1]
+
+        if self.allianceRights:
+            if self.allianceRights["leader"] or self.allianceRights["can_manage_description"] or self.allianceRights["can_manage_announce"]: content["show_management"] = True
+            if self.allianceRights["leader"] or self.allianceRights["can_see_reports"]: content["show_reports"] = True
+            if self.allianceRights["leader"] or self.allianceRights["can_see_members_info"]: content["show_members"] = True
+        
+        content["cur_planetid"] = self.currentPlanetId
+        content["cur_g"] = self.currentGalaxy
+        content["cur_s"] = self.currentSector
+        content["cur_p"] = ((self.currentPlanetId - 1) % 25) + 1
     
-        if self.SecurityLevel >= 3:
-            tpl.Parse("show_mercenary")
-            tpl.Parse("show_alliance")
-    
-        #
-        # Fill admin info
-        #
-        if self.request.session.get("privilege", 0) >= 100:
-            
-            query = "SELECT int4(MAX(id)) FROM gm_log_server_errors"
-            oRs = oConnExecute(query)
-            last_errorid = oRs[0]
-    
-            query = "SELECT int4(MAX(id)) FROM gm_log_notices"
-            oRs = oConnExecute(query)
-            last_noticeid = oRs[0]
-    
-            query = "SELECT COALESCE(dev_lasterror, 0), COALESCE(dev_lastnotice, 0) FROM gm_profiles WHERE id=" + self.request.session.get(sLogonUserID)
-            oRs = oConnExecute(query)
-            if last_errorid > oRs[0]:
-                tpl.AssignValue("new_error", last_errorid-oRs[0])
-    
-            if last_noticeid > oRs[1]:
-                tpl.AssignValue("new_notice", last_noticeid-oRs[1])
-    
-            tpl.Parse("dev")
-    
-        tpl.AssignValue("planetid", self.CurrentPlanet)
-    
-        tpl.AssignValue("cur_g", self.CurrentGalaxyId)
-        tpl.AssignValue("cur_s", self.CurrentSectorId)
-        tpl.AssignValue("cur_p", ((self.CurrentPlanet-1) % 25) + 1)
-    
-        tpl.AssignValue("selectedmenu", self.selected_menu.replace(".","_"))
-    
-        if self.selected_menu != "":
-            blockname = self.selected_menu + "_selected"
+        if content["selectedMenu"] != "":
+            blockname = content["selectedMenu"] + "_selected"
     
             while blockname != "":
-                tpl.Parse(blockname)
+                content[blockname] = True
     
                 i = blockname.rfind(".")
                 if i > 0: i = i - 1
                 blockname = blockname[:i]
-
-        # Assign the menu
-        tpl_layout.AssignValue("menu", True)
-
-    def logpage(self):
-        self.pagelogged = True
-
-    '''
-    sub RedirectTo(url)
-        logpage()
     
-        pageTerminated = true
-    
-        Response.Redirect url
-        Response.End
-    end sub
-    '''
-    
-    '''
-    sub displayXML(tpl)
-        dim tpl_xml
-        set tpl_xml = GetTemplate("layoutxml")
-    
-        dim oRs, query
-    
-        ' retrieve number of new gm_mails & gm_profile_reports
-        query = "SELECT (SELECT int4(COUNT(*)) FROM gm_mails WHERE ownerid=" & UserId & " AND read_date is NULL)," & _
-                "(SELECT int4(COUNT(*)) FROM gm_profile_reports WHERE ownerid=" & UserId & " AND read_date is NULL AND datetime <= now());"
-        set oRs = oConn.Execute(query)
-    
-        tpl_xml.AssignValue "new_mail", oRs(0)
-        tpl_xml.AssignValue "new_report", oRs(1)
-    
-        tpl_xml.AssignValue "content", tpl.output
-        tpl_xml.AssignValue "selectedmenu", Replace(selected_menu,".","_")
-        tpl_xml.Parse ""
-    
-        response.contentType = "text/xml"
-    
-        Session("details") = "sending page"
-        response.write tpl_xml.output
-    end sub
-    '''
-
-    #
-    # Display the tpl content with the default layout template
-    #
-    def Display(self, tpl):
+        content["selectedmenu"] = content["selectedMenu"].replace(".", "_")
         
-        if self.request.GET.get("xml") == "1":
-            return self.displayXML(tpl)
-        else:
-            tpl_layout = tpl
-    
-            # Initialize the layout
-            if self.oPlayerInfo["skin"]:
-                tpl_layout.AssignValue("skin", self.oPlayerInfo["skin"])
-            else:
-                tpl_layout.AssignValue("skin", "s_transparent")
+        if self.showHeader == True:
 
-            #
-            # Fill and parse the header template
-            #
-            if self.showHeader == True: self.FillHeader(tpl_layout)
-    
-            #
-            # Fill and parse the menu template
-            #
-            self.FillMenu(tpl_layout)
-    
-            #
-            # Fill and parse the layout template
-            #
-            if self.oPlayerInfo["timers_enabled"]: tpl_layout.AssignValue("timers_enabled", "true")
-            else: tpl_layout.AssignValue("timers_enabled", "false")
-    
-            #Assign the context/header
-            if self.showHeader == True:
-                tpl_layout.Parse("context")
-
-            # Assign the scroll value if is assigned
-            tpl_layout.AssignValue("scrolly", self.scrollY)
-            if self.scrollY != 0: tpl_layout.Parse("scroll")
+            # --- user info
             
-            if self.oPlayerInfo["deletion_date"]:
-                tpl_layout.AssignValue("delete_datetime", self.oPlayerInfo["deletion_date"])
-                tpl_layout.Parse("deleting")
-
-            if self.oPlayerInfo["credits"] < 0:
-                bankrupt_hours = self.oPlayerInfo["credits_bankruptcy"]
-    
-                tpl_layout.AssignValue("bankruptcy_hours", bankrupt_hours)
-                tpl_layout.Parse("hours")
-    
-                tpl_layout.Parse("creditswarning")
-
-            #
-            # Fill admin info
-            #
-            if self.request.session.get(sPrivilege) > 100:
-    
-                if self.IsImpersonating():
-                    tpl_layout.AssignValue("login", self.oPlayerInfo["login"])
-                    tpl_layout.Parse("impersonating")
-                    
-                # Assign the time taken to generate the page
-                tpl_layout.AssignValue("render_time",  (time.clock() - self.StartTime))
-    
-                # Assign number of logged players
-                oRs = oConnExecute("SELECT int4(count(*)) FROM vw_gm_profiles WHERE lastactivity >= now()-INTERVAL '20 minutes'")
-                tpl_layout.AssignValue("players", oRs[0])
-                tpl_layout.Parse("dev")
-    
-                if self.oPlayerInfo["privilege"] == -2:
-                    oRs = oConnExecute("SELECT start_time, min_end_time, end_time FROM gm_profile_holidays WHERE userid="+str(self.UserId))
-    
-                    if oRs:
-                        tpl_layout.AssignValue("start_datetime", oRs[0])
-                        tpl_layout.AssignValue("min_end_datetime", oRs[1])
-                        tpl_layout.AssignValue("end_datetime", oRs[2])
-                        tpl_layout.Parse("onholidays")
-    
-                if self.oPlayerInfo["privilege"] == -1:
-                    tpl_layout.AssignValue("ban_datetime", self.oPlayerInfo["ban_datetime"])
-                    tpl_layout.AssignValue("ban_reason", self.oPlayerInfo["ban_reason"])
-                    tpl_layout.AssignValue("ban_reason_public", self.oPlayerInfo["ban_reason_public"])
-    
-                    if self.oPlayerInfo["ban_expire"]:
-                        tpl_layout.AssignValue("ban_expire_datetime", self.oPlayerInfo["ban_expire"])
-                        tpl_layout.Parse("banned.expire")
-    
-                    tpl_layout.Parse("banned")
-
-            tpl_layout.AssignValue("userid", self.UserId)
-            tpl_layout.AssignValue("server", universe)
-    
-            '''
-            if not oPlayerInfo("paid") and Session(sPrivilege) < 100:
-    
-                connectNexusDB
-                set oRs = oNexusConn.Execute("SELECT sp_ad_get_code(" & UserId & ")")
-                if not oRs.EOF:
-                    if not isnull(oRs[0]):
-                        tpl_layout.AssignValue("ad_code", oRs[0]
-                        tpl_layout.Parse("ads.code"
-                    end if
-                end if
-    
-                tpl_layout.Parse("ads"
-                oConn.Execute "UPDATE gm_profiles SET displays_pages=displays_pages+1 WHERE id=" & UserId
-            '''
+            query = "SELECT credits, prestige_points FROM gm_profiles WHERE id=" + str(self.userId) + " LIMIT 1"
+            oRs = dbRow(query)
             
-            tpl_layout.Parse("menu")
-    
-            if not self.oPlayerInfo["inframe"]:
-                tpl_layout.Parse("test_frame")
-            
-            #
-            # Write the template to the client
-            #
-            self.request.session["details"] = "sending page"
-    
-        self.logpage()
-
-        return render(self.request, tpl_layout.template, tpl_layout.data)
-
-    #
-    # Check that our user is valid, otherwise redirect user to home page
-    #
-    def CheckSessionValidity(self):
-        self.UserId = self.request.session.get(sUser)
-    
-        # check that this session is still used
-        # if a user tries to login multiple times, the first sessions are abandonned
-
-        query = "SELECT ""login"", privilege, lastlogin, credits, lastplanetid, deletion_date, score, planets, previous_score," +\
-                "alliance_id, alliance_rank, leave_alliance_datetime IS NULL AND (alliance_left IS NULL OR alliance_left < now()) AS can_join_alliance," +\
-                "credits_bankruptcy, mod_planets, mod_commanders," +\
-                "ban_datetime, ban_expire, ban_reason, ban_reason_public, orientation, (paid_until IS NOT NULL AND paid_until > now()) AS paid," +\
-                " timers_enabled, display_alliance_planet_name, prestige_points, (inframe IS NOT NULL AND inframe) AS inframe, COALESCE(skin, 's_default') AS skin," +\
-                "lcid, security_level, (SELECT username FROM public.auth_user WHERE id=" + str(self.UserId) + ") AS username" +\
-                " FROM gm_profiles" +\
-                " WHERE id=" + str(self.UserId)
-        self.oPlayerInfo = oConnRow(query)
+            content["money"] = oRs[0]
+            content["pp"] = oRs[1]
         
-        # check account still exists or that the player didn't connect with another account meanwhile
-        if self.oPlayerInfo == None:
-            return HttpResponseRedirect("/") # Redirect to home page
-    
-        self.SecurityLevel = self.oPlayerInfo["security_level"]
-        self.displayAlliancePlanetName = self.oPlayerInfo["display_alliance_planet_name"]
-    
-        self.request.session["LCID"] = self.oPlayerInfo["lcid"]
-    
-        if self.IsPlayerAccount():
-            # Redirect to locked page
-            if self.oPlayerInfo["privilege"] == -1: return HttpResponseRedirect("/game/locked/")
-    
-            # Redirect to holidays page
-            if self.oPlayerInfo["privilege"] == -2: return HttpResponseRedirect("/game/holidays/")
-    
-            # Redirect to wait page
-            if self.oPlayerInfo["privilege"] == -3: return HttpResponseRedirect("/game/wait/")
-    
-            # Redirect to game-over page
-            if self.oPlayerInfo["credits_bankruptcy"] <= 0: return HttpResponseRedirect("/game/game-over/")
+            # --- current planet info
+            
+            query = "SELECT ore, ore_production, ore_capacity," + \
+                    "hydrocarbon, hydrocarbon_production, hydrocarbon_capacity," + \
+                    "workers, workers_busy, workers_capacity," + \
+                    "energy_consumption, energy_production," + \
+                    "floor_occupied, floor," + \
+                    "space_occupied, space, workers_for_maintenance," + \
+                    "mod_production_ore, mod_production_hydrocarbon, energy, energy_capacity, soldiers, soldiers_capacity, scientists, scientists_capacity" + \
+                    " FROM vw_gm_planets WHERE id=" + str(self.currentPlanetId)
+            oRs = dbRow(query)
+        
+            content["ore"] = oRs[0]
+            content["ore_prod"] = oRs[1]
+            content["ore_stock"] = oRs[2]
+            content["ore_level"] = self.getpercent(oRs[0], oRs[2], 10)
+            
+            if oRs[16] >= 0 and oRs[6] >= oRs[15]: content["ore_prod_normal"] = True
+            else: content["ore_prod_medium"] = True
+        
+            content["hydro"] = oRs[3]
+            content["hydro_prod"] = oRs[4]
+            content["hydro_stock"] = oRs[5]
+            content["hydro_level"] = self.getpercent(oRs[3], oRs[5], 10)
+            
+            if oRs[17] >= 0 and oRs[6] >= oRs[15]: content["hydro_prod_normal"] = True
+            else: content["hydro_prod_medium"] = True
+        
+            content["worker"] = oRs[6]
+            content["worker_stock"] = oRs[8]
+            content["worker_idle"] = oRs[6] - oRs[7]
+            content["worker_maintenance"] = oRs[15]
+        
+            content["soldier"] = oRs[20]
+            content["soldier_capacity"] = oRs[21]
+            if oRs[20] * 250 < oRs[6] + oRs[22]: content["soldier_low"] = True
+        
+            content["scientist"] = oRs[22]
+            content["scientist_stock"] = oRs[23]
+        
+            content["energy"] = oRs[18]
+            content["energy_capacity"] = oRs[19]
+            content["energy_production"] = oRs[10] - oRs[9]       
+            if oRs[9] > oRs[10]: content["energy_low"] = True
+        
+            content["floor"] = oRs[12]
+            content["floor_occupied"] = oRs[11]
+        
+            content["space"] = oRs[14]
+            content["space_occupied"] = oRs[13]
 
-        self.AllianceId = self.oPlayerInfo["alliance_id"]
-        self.AllianceRank = self.oPlayerInfo["alliance_rank"]
-        self.oAllianceRights = None
-    
-        if self.AllianceId:
-            query = "SELECT label, leader, can_invite_player, can_kick_player, can_create_nap, can_break_nap, can_ask_money, can_see_reports, can_accept_money_requests, can_change_tax_rate, can_mail_alliance," +\
-                    " can_manage_description, can_manage_announce, can_see_members_info, can_use_alliance_radars, can_order_other_fleets" +\
-                    " FROM gm_alliance_ranks" +\
-                    " WHERE allianceid=" + str(self.AllianceId) + " AND rankid=" + str(self.AllianceRank)
-            self.oAllianceRights = oConnRow(query)
-    
-            if self.oAllianceRights == None:
-                self.oAllianceRights = None
-                self.AllianceId = None
+            # --- user planet list
 
-        # log activity
-        if not self.IsImpersonating(): oConnExecute("SELECT internal_profile_log_activity(" + str(self.UserId) + "," + dosql(self.request.META.get("REMOTE_ADDR")) + ",0)")
+            planets = []
+            content["planets"] = planets
+            
+            query = "SELECT id, name, galaxy, sector, planet" + \
+                    " FROM gm_planets" + \
+                    " WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.userId) + \
+                    " ORDER BY id"
+            rows = dbRows(query)            
+            for row in rows:
+        
+                planet = {}
+                planets.append(planet)
+                
+                planet["id"] = row[0]
+                planet["name"] = row[1]
+                planet["g"] = row[2]
+                planet["s"] = row[3]
+                planet["p"] = row[4]
+        
+                if row[0] == self.currentPlanetId: planet["selected"] = True
+            
+            # --- current planet bonuses
+            
+            query = "SELECT buildingid" + \
+                    " FROM gm_planet_buildings INNER JOIN dt_buildings ON (dt_buildings.id=buildingid AND dt_buildings.is_planet_element)" + \
+                    " WHERE planetid=" + str(self.currentPlanetId) + \
+                    " ORDER BY upper(dt_buildings.label)"
+            rows = dbRows(query)
+            if rows:
+                i = 0
+                for row in rows:
 
-    # set the new current planet, if the planet doesn't belong to the player then go back to the session planet
-    def SetCurrentPlanet(self, planetid):
-    
-        #
-        # Check if a parameter is given and if different than the current planet
-        # In that case, try to set it as the new planet : check that this planet belongs to the player
-        #
-        if (planetid != "") and (planetid != self.CurrentPlanet):
-            # check that the new planet belongs to the player
-            oRs = oConnExecute("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(planetid) + " and ownerid=" + str(self.UserId))
-            if oRs:
-                self.CurrentPlanet = planetid
-                self.CurrentGalaxyId = oRs[0]
-                self.CurrentSectorId = oRs[1]
-                self.request.session[sPlanet] = planetid
-    
-                # save the last planetid
-                if not self.request.user.is_impersonate:
-                    oConnDoQuery("UPDATE gm_profiles SET lastplanetid=" + str(planetid) + " WHERE id=" + str(self.UserId))
-    
-                return
-    
-            self.InvalidatePlanetList()
-    
-        # 
-        # retrieve current planet from session
-        #
-        self.CurrentPlanet = self.request.session.get(sPlanet, "")
-    
-        if self.CurrentPlanet != None:
-            # check if the planet still belongs to the player
-            oRs = oConnExecute("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(self.CurrentPlanet) + " AND ownerid=" + str(self.UserId))
-            if oRs:
-                # the planet still belongs to the player, exit
-                self.CurrentGalaxyId = oRs[0]
-                self.CurrentSectorId = oRs[1]
-                return
-    
-            self.InvalidatePlanetList()
-    
-        # there is no active planet, select the first planet available
-        oRs = oConnExecute("SELECT id, galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId) + " LIMIT 1")
-    
-        # if player owns no planets then the game is over
-        if oRs == None:
-            if self.IsPlayerAccount():
-                return HttpResponseRedirect("/game/game-over/")
-            else:
-                self.CurrentPlanet = 0
-                self.CurrentGalaxyId = 0
-                self.CurrentSectorId = 0
-    
-                return
-    
-        # assign planet id
-        self.CurrentPlanet = oRs[0]
-        self.CurrentGalaxyId = oRs[1]
-        self.CurrentSectorId = oRs[2]
-        self.request.session[sPlanet] = self.CurrentPlanet
-    
-        # save the last planetid
-        if not self.request.user.is_impersonate:
-            oConnDoQuery("UPDATE gm_profiles SET lastplanetid=" + str(self.CurrentPlanet) + " WHERE id=" + str(self.UserId))
-    
-        # a player may wish to destroy a building on a planet that belonged to him
-        # if the planet doesn't belong to him anymore, the action may be performed on another planet
-        # so we redirect the user to the overview to prevent executing an order on another planet
-        return HttpResponseRedirect("/game/overview/")
-    
-    #
-    # check if a planet is given in the querystring and that it belongs to the player
-    #
-    def CheckCurrentPlanetValidity(self):
-    
-        # retrieve planet parameter if any
-        id = ToInt(self.request.GET.get("planet"), "")
-    
-        return self.SetCurrentPlanet(id)
+                    if i % 3 == 0:
+                        content["special1"] = getBuildingLabel(row[0])
+                    elif i % 3 == 1:
+                        content["special2"] = getBuildingLabel(row[0])
+                    else:
+                        content["special3"] = getBuildingLabel(row[0])
+                        content["special"] = True
+            
+                    i = i + 1
+        
+            if i % 3 != 0: content["special"] = True
+            
+            content["context"] = True
 
-def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
+        return render(self.request, self.template, content)
+    
+#-------------------------------------------------------------------------------
+def formatBattle(view, battleid, creator, pointofview, ispubliclink):
 
-    # Retrieve/assign battle info
+    content = {}
+    
+    # --- battle info
+    
     query = "SELECT time, planetid, name, galaxy, sector, planet, rounds," + \
-            "EXISTS(SELECT 1 FROM gm_battle_ships WHERE battleid=" + str(battleid) + " AND owner_id=" + str(creator) + " AND won LIMIT 1), MD5(key||"+str(creator)+")," + \
-            "EXISTS(SELECT 1 FROM gm_battle_ships WHERE battleid=" + str(battleid) + " AND owner_id=" + str(creator) + " AND damages > 0 LIMIT 1) AS see_details" + \
+            " EXISTS(SELECT 1 FROM gm_battle_ships WHERE battleid=" + str(battleid) + " AND owner_id=" + str(creator) + " AND won LIMIT 1), MD5(key||" + str(creator) + ")," + \
+            " EXISTS(SELECT 1 FROM gm_battle_ships WHERE battleid=" + str(battleid) + " AND owner_id=" + str(creator) + " AND damages > 0 LIMIT 1) AS see_details" + \
             " FROM gm_battles" + \
             "    INNER JOIN gm_planets ON (planetid=gm_planets.id)" + \
             " WHERE gm_battles.id = " + str(battleid)
-    oRs = oConnExecute(query)
+    row = dbRow(query)
+    if row == None: return None
 
-    if oRs == None: return
-
-    content = GetTemplate(view.request, "battle")
-
-    content.AssignValue("battleid", battleid)
-    content.AssignValue("userid", creator)
-    content.AssignValue("key", oRs[8])
+    content["battleid"] = battleid
+    content["userid"] = creator
+    content["key"] = row[8]
+    content["time"] = row[0]
+    content["planetid"] = row[1]
+    content["planetname"] = row[2]
+    content["g"] = row[3]
+    content["s"] = row[4]
+    content["p"] = row[5]
+    content["rounds"] = row[6]
 
     if not ispubliclink:
-        # link for the freely viewable report of this battle
-        content.AssignValue("baseurl", view.request.META.get("HTTP_HOST"))
-        content.Parse("publiclink")
+        content["baseurl"] = view.request.META.get("HTTP_HOST")
 
-    content.AssignValue("time", oRs[0])
-    content.AssignValue("planetid", oRs[1])
-    content.AssignValue("planet", oRs[2])
-    content.AssignValue("g", oRs[3])
-    content.AssignValue("s", oRs[4])
-    content.AssignValue("p", oRs[5])
-    content.AssignValue("rounds", oRs[6])
-
-    rounds = oRs[6]
-    hasWon = oRs[7]
-    showEnemyDetails = oRs[9] or hasWon or rounds > 1
+    # --- kills data
 
     query = "SELECT fleet_id, shipid, destroyed_shipid, sum(count)" + \
             " FROM gm_battle_fleets" + \
@@ -940,125 +565,115 @@ def FormatBattle(view, battleid, creator, pointofview, ispubliclink):
             " WHERE battleid=" + str(battleid) + \
             " GROUP BY fleet_id, shipid, destroyed_shipid" + \
             " ORDER BY sum(count) DESC"
-    killsArray = oConnExecuteAll(query)
+    kills = dbRows(query)
+
+    # --- battle data
+
+    rounds = row[6]
+    hasWon = row[7]
+    showEnemyDetails = row[9] or hasWon or rounds > 1
 
     query = "SELECT owner_name, fleet_name, shipid, shipcategory, shiplabel, count, lost, killed, won, relation1, owner_id , relation2, fleet_id, attacked, mod_shield, mod_handling, mod_tracking_speed, mod_damage, alliancetag" + \
             " FROM internal_battle_get_result(" + str(battleid) + "," + str(creator) + "," + str(pointofview) + ")"
-
-    oRss = oConnExecuteAll(query)
-
-    if oRss:
+    rows = dbRows(query)
+    if rows:
+    
         opponents = []
-        content.AssignValue("opponents", opponents)
+        content["opponents"] = opponents
         
         lastFleetId = -1
         lastCategory = -1
         lastPlayerName = ""
         
-        for oRs in oRss:
+        for row in rows:
             
-            playerName = oRs[0]
-            if playerName != lastPlayerName:
+            if row[0] != lastPlayerName:
+                lastPlayerName = row[0]
+                
                 opponent = { 'gm_fleets':[], "count":0,  "lost":0, "killed":0, "after":0 }
                 opponents.append(opponent)
                 
                 opponent["name"] = playerName
-                opponent["view"] = oRs[10]
+                opponent["view"] = row[10]
+                opponent["stance"] = row[13]                
+                opponent["tag"] = row[18]
                 
                 if ispubliclink: opponent["public"] = True
-                
-                if oRs[13]: opponent["attack"] = True
-                else: opponent["defend"] = True
-                
-                if oRs[18]:
-                    opponent["alliancetag"] = oRs[18]
-                    opponent["alliance"] = True
                     
-                if oRs[11] == rSelf: opponent["self"] = True
-                elif oRs[11] == rAlliance: opponent["ally"] = True
-                elif oRs[11] == rFriend: opponent["friend"] = True
+                if row[11] == rSelf: opponent["self"] = True
+                elif row[11] == rAlliance: opponent["ally"] = True
+                elif row[11] == rFriend: opponent["friend"] = True
                 else: opponent["enemy"] = True
                 
-                if oRs[8]: opponent["won"] = True
-                
-                lastPlayerName = playerName
+                if row[8]: opponent["won"] = True
             
-            fleetId = oRs[12]
-            if fleetId != lastFleetId:
-                fleet = { 'ships':[], "count":0,  "lost":0, "killed":0, "after":0 }
-                opponent['gm_fleets'].append(fleet)
+            if row[12] != lastFleetId:
+                lastFleetId = row[12]
                 
-                fleet["name"] = oRs[1]
+                fleet = { 'ships':[], "count":0,  "lost":0, "killed":0, "after":0 }
+                opponent['fleets'].append(fleet)
+                
+                fleet["name"] = row[1]
                     
-                if oRs[11] == rSelf: fleet["self"] = True
-                elif oRs[11] == rAlliance: fleet["ally"] = True
-                elif oRs[11] == rFriend: fleet["friend"] = True
+                if row[11] == rSelf: fleet["self"] = True
+                elif row[11] == rAlliance: fleet["ally"] = True
+                elif row[11] == rFriend: fleet["friend"] = True
                 else: fleet["enemy"] = True
                 
-                if not showEnemyDetails and oRs[9] < rFriend:
+                if not showEnemyDetails and row[9] < rFriend:
                     fleet["mod_shield"] = "?"
                     fleet["mod_handling"] = "?"
                     fleet["mod_tracking_speed"] = "?"
                     fleet["mod_damage"] = "?"
                 else:
-                    fleet["mod_shield"] = oRs[14]
-                    fleet["mod_handling"] = oRs[15]
-                    fleet["mod_tracking_speed"] = oRs[16]
-                    fleet["mod_damage"] = oRs[17]
-                
-                lastFleetId = fleetId
+                    fleet["mod_shield"] = row[14]
+                    fleet["mod_handling"] = row[15]
+                    fleet["mod_tracking_speed"] = row[16]
+                    fleet["mod_damage"] = row[17]
             
-            if showEnemyDetails or oRs[9] >= rFriend:
-                
-                # if not a friend and there was no more than a fixed number of rounds, display ships by category and not their name
-                if not hasWon and rounds <= 1 and oRs[9] < rFriend:
+            if showEnemyDetails or row[9] >= rFriend:
+                if not hasWon and rounds <= 1 and row[9] < rFriend:
                     
-                    category = oRs[3]
-                    if category != lastCategory:
+                    if row[3] != lastCategory:
+                        lastCategory = row[3]
+                        
                         ship = { "ships":0, "lost":0, "killed":0, "after":0 }
                         fleet['ships'].append(ship)
                         
-                        ship["category" + str(category)] = True
-                        
-                        lastCategory = category
-                
-                    ship["ships"] += oRs[5]
-                    ship["lost"] += oRs[6]
-                    ship["killed"] += oRs[7]
-                    ship["after"] += oRs[5]-oRs[6]
+                        ship["category"] = row[3]
+                                        
+                    ship["ships"] += row[5]
+                    ship["lost"] += row[6]
+                    ship["killed"] += row[7]
+                    ship["after"] += row[5] - row[6]
                     
                 else:
                     ship = { 'kills':[] }
                     fleet['ships'].append(ship)
                     
-                    ship["label"] = oRs[4]
-                    ship["ships"] = oRs[5]
-                    ship["lost"] = oRs[6]
-                    ship["killed"] = oRs[7]
-                    ship["after"] = oRs[5]-oRs[6]
+                    ship["label"] = row[4]
+                    ship["ships"] = row[5]
+                    ship["lost"] = row[6]
+                    ship["killed"] = row[7]
+                    ship["after"] = row[5] - row[6]
                     
-                    killed = 0
-                    for i in killsArray:
-                        if oRs[12] == i[0] and oRs[2] == i[1]:
+                    for i in kills:
+                        if row[12] == i[0] and row[2] == i[1]:
+                        
                             kill = {}
                             ship['kills'].append(kill)
                             
-                            kill["killed_name"] = getShipLabel(i[2])
-                            kill["killed_count"] = i[3]
-                            
-                            killed = killed + 1 # count how many different ships were destroyed
+                            kill["name"] = getShipLabel(i[2])
+                            kill["count"] = i[3]
         
-                    if killed == 0: ship["killed_zero"] = True
-                    if killed > 1: ship["killed_total"] = True
-        
-                fleet["count"] += oRs[5]
-                fleet["lost"] += oRs[6]
-                fleet["killed"] += oRs[7]
-                fleet["after"] += oRs[5]-oRs[6]
-        
-                opponent["count"] += oRs[5]
-                opponent["lost"] += oRs[6]
-                opponent["killed"] += oRs[7]
-                opponent["after"] += oRs[5]-oRs[6]
+                fleet["count"] += row[5]
+                fleet["lost"] += row[6]
+                fleet["killed"] += row[7]
+                fleet["after"] += row[5] - row[6]
+                
+                opponent["count"] += row[5]
+                opponent["lost"] += row[6]
+                opponent["killed"] += row[7]
+                opponent["after"] += row[5] - row[6]
                 
     return content

@@ -2,14 +2,14 @@
 
 from game.views._base import *
 
-class View(GlobalView):
+class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "planet"
+        self.selectedMenu = "planet"
 
         self.showHeader = True
 
@@ -20,58 +20,58 @@ class View(GlobalView):
 
         if request.POST.get("action") == "assigncommander":
             if ToInt(request.POST.get("commander"), 0) != 0: # assign selected commander
-                query = "SELECT * FROM user_commander_assign(" + str(self.UserId) + "," + str(ToInt(request.POST.get("commander"), 0)) + "," + str(self.CurrentPlanet) + ",null)"
-                oConnDoQuery(query)
+                query = "SELECT * FROM user_commander_assign(" + str(self.userId) + "," + str(ToInt(request.POST.get("commander"), 0)) + "," + str(self.currentPlanetId) + ",null)"
+                dbExecute(query)
             else:
                 # unassign current planet commander
-                query = "UPDATE gm_planets SET commanderid=null WHERE ownerid=" + str(self.UserId) + " AND id=" + str(self.CurrentPlanet)
-                oConnDoQuery(query)
+                query = "UPDATE gm_planets SET commanderid=null WHERE ownerid=" + str(self.userId) + " AND id=" + str(self.currentPlanetId)
+                dbExecute(query)
 
         elif request.POST.get("action") == "rename":
             if not isValidObjectName(request.POST.get("name")):
                 self.planet_error = self.e_rename_bad_name
             else:
-                query = "UPDATE gm_planets SET name=" + dosql(request.POST.get("name")) + \
-                        " WHERE ownerid=" + str(self.UserId) + " AND id=" + str(self.CurrentPlanet)
+                query = "UPDATE gm_planets SET name=" + sqlStr(request.POST.get("name")) + \
+                        " WHERE ownerid=" + str(self.userId) + " AND id=" + str(self.currentPlanetId)
 
-                oConnDoQuery(query)
+                dbExecute(query)
 
-                self.InvalidatePlanetList()
+                
 
         elif request.POST.get("action") == "firescientists":
             amount = ToInt(request.POST.get("amount"), 0)
-            oConnExecute("SELECT user_planet_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + str(amount) + ",0,0)")
+            dbRow("SELECT user_planet_dismiss_staff(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + str(amount) + ",0,0)")
         elif request.POST.get("action") == "firesoldiers":
             amount = ToInt(request.POST.get("amount"), 0)
-            oConnExecute("SELECT user_planet_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + "0," + str(amount) + ",0)")
+            dbRow("SELECT user_planet_dismiss_staff(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + "0," + str(amount) + ",0)")
         elif request.POST.get("action") == "fireworkers":
             amount = ToInt(request.POST.get("amount"), 0)
-            oConnExecute("SELECT user_planet_dismiss_staff(" + str(self.UserId) + "," + str(self.CurrentPlanet) + "," + "0,0," + str(amount) + ")")
+            dbRow("SELECT user_planet_dismiss_staff(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + "0,0," + str(amount) + ")")
 
         elif request.POST.get("action") == "abandon":
-            oConnExecute("SELECT sp_abandon_planet(" + str(self.UserId) + "," + str(self.CurrentPlanet) + ")")
-            self.InvalidatePlanetList()
+            dbRow("SELECT sp_abandon_planet(" + str(self.userId) + "," + str(self.currentPlanetId) + ")")
+            
             return HttpResponseRedirect("/game/overview/")
 
         elif request.POST.get("action") == "resources_price":
             query = "UPDATE gm_planets SET" + \
                     " buy_ore = GREATEST(0, LEAST(1000, " + str(ToInt(request.POST.get("buy_ore"), 0)) + "))" + \
                     " ,buy_hydrocarbon = GREATEST(0, LEAST(1000, " + str(ToInt(request.POST.get("buy_hydrocarbon"), 0)) + "))" + \
-                    " WHERE ownerid=" + str(self.UserId) + " AND id=" + str(self.CurrentPlanet)
-            oConnDoQuery(query)
+                    " WHERE ownerid=" + str(self.userId) + " AND id=" + str(self.currentPlanetId)
+            dbExecute(query)
 
         if request.GET.get("a") == "suspend":
-            oConnExecute("SELECT internal_planet_update_production_date(" + str(self.CurrentPlanet) + ")")
-            oConnDoQuery("UPDATE gm_planets SET mod_production_workers=0, recruit_workers=False WHERE ownerid=" + str(self.UserId) + " AND id=" + str(self.CurrentPlanet) )
+            dbRow("SELECT internal_planet_update_production_date(" + str(self.currentPlanetId) + ")")
+            dbExecute("UPDATE gm_planets SET mod_production_workers=0, recruit_workers=False WHERE ownerid=" + str(self.userId) + " AND id=" + str(self.currentPlanetId) )
         elif request.GET.get("a")== "resume":
-            oConnDoQuery("UPDATE gm_planets SET recruit_workers=True WHERE ownerid=" + str(self.UserId) + " AND id=" + str(self.CurrentPlanet) )
-            oConnExecute("SELECT internal_planet_update_data(" + str(self.CurrentPlanet) + ")")
+            dbExecute("UPDATE gm_planets SET recruit_workers=True WHERE ownerid=" + str(self.userId) + " AND id=" + str(self.currentPlanetId) )
+            dbRow("SELECT internal_planet_update_data(" + str(self.currentPlanetId) + ")")
 
         return self.DisplayPlanet()
 
     def DisplayPlanet(self):
 
-        content = GetTemplate(self.request, "planet")
+        content = self.loadTemplate("planet")
 
         CmdReq=""
 
@@ -79,14 +79,14 @@ class View(GlobalView):
                 "floor_occupied, floor, space_occupied, space, workers, workers_capacity, mod_production_workers," + \
                 "scientists, scientists_capacity, soldiers, soldiers_capacity, commanderid, recruit_workers," + \
                 "planet_floor, COALESCE(buy_ore, 0), COALESCE(buy_hydrocarbon, 0)" + \
-                " FROM vw_gm_planets WHERE id=" + str(self.CurrentPlanet)
+                " FROM vw_gm_planets WHERE id=" + str(self.currentPlanetId)
 
-        oRs = oConnExecute(query)
+        oRs = dbRow(query)
 
         if oRs:
             content.AssignValue("planet_id", oRs[0])
             content.AssignValue("planet_name", oRs[1])
-            content.AssignValue("planet_img", self.planetimg(oRs[0], oRs[18]))
+            content.AssignValue("planet_img", self.getPlanetImg(oRs[0], oRs[18]))
 
             content.AssignValue("pla_g", oRs[2])
             content.AssignValue("pla_s", oRs[3])
@@ -119,7 +119,7 @@ class View(GlobalView):
 
             # retrieve commander assigned to this planet
             if oRs[16]:
-                oCmdRs = oConnExecute("SELECT name FROM gm_commanders WHERE ownerid="+str(self.UserId)+" AND id="+str(oRs[16]))
+                oCmdRs = dbRow("SELECT name FROM gm_commanders WHERE ownerid="+str(self.userId)+" AND id="+str(oRs[16]))
                 content.AssignValue("commandername", oCmdRs[0])
                 CmdId = oRs[16]
                 content.Parse("commander")
@@ -136,9 +136,9 @@ class View(GlobalView):
 
         query = " SELECT id, name, fleetname, planetname, fleetid " + \
                 " FROM vw_gm_profile_commanders" + \
-                " WHERE ownerid="+str(self.UserId) + \
+                " WHERE ownerid="+str(self.userId) + \
                 " ORDER BY fleetid IS NOT NULL, planetid IS NOT NULL, fleetid, planetid "
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         lastItem = ""
         item = ""
@@ -173,7 +173,7 @@ class View(GlobalView):
 
             if item == "fleet":
                 item["name"] = oRs[2]
-                activityRs = oConnExecute("SELECT dest_planetid, engaged, action FROM gm_fleets WHERE ownerid="+str(self.UserId)+" AND id="+str(oRs[4]))
+                activityRs = dbRow("SELECT dest_planetid, engaged, action FROM gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(oRs[4]))
                 if activityRs[0] == None and (not activityRs[1]) and activityRs[2]==0:
                     item["assigned"] = True
                 else:
@@ -185,10 +185,10 @@ class View(GlobalView):
 
         # view current buildings constructions
         query = "SELECT buildingid, remaining_time, destroying" + \
-                " FROM vw_gm_planet_building_pendings WHERE planetid="+str(self.CurrentPlanet) + \
+                " FROM vw_gm_planet_building_pendings WHERE planetid="+str(self.currentPlanetId) + \
                 " ORDER BY remaining_time DESC"
 
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         i = 0
         list = []
@@ -209,11 +209,11 @@ class View(GlobalView):
 
         query = "SELECT shipid, remaining_time, recycle" + \
                 " FROM vw_gm_planet_ship_pendings" + \
-                " WHERE ownerid=" + str(self.UserId) + " AND planetid=" + str(self.CurrentPlanet) + " AND end_time IS NOT NULL" + \
+                " WHERE ownerid=" + str(self.userId) + " AND planetid=" + str(self.currentPlanetId) + " AND end_time IS NOT NULL" + \
                 " ORDER BY remaining_time DESC"
 
         # view current ships constructions
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         i = 0
 
@@ -235,12 +235,12 @@ class View(GlobalView):
 
         # list the gm_fleets near the planet
         query = "SELECT id, name, attackonsight, engaged, size, signature, commanderid, (SELECT name FROM gm_commanders WHERE id=commanderid) as commandername," + \
-                " action, internal_profile_get_relation(ownerid, " + str(self.UserId) + ") AS relation, internal_profile_get_name(ownerid) AS ownername" + \
+                " action, internal_profile_get_relation(ownerid, " + str(self.userId) + ") AS relation, internal_profile_get_name(ownerid) AS ownername" + \
                 " FROM gm_fleets" + \
-                " WHERE action != -1 AND action != 1 AND planetid=" + str(self.CurrentPlanet) + \
+                " WHERE action != -1 AND action != 1 AND planetid=" + str(self.currentPlanetId) + \
                 " ORDER BY upper(name)"
 
-        oRss = oConnExecuteAll(query)
+        oRss = dbRows(query)
 
         i = 0
 
@@ -291,4 +291,4 @@ class View(GlobalView):
 
         content.Parse("ondev")
 
-        return self.Display(content)
+        return self.display(content)
