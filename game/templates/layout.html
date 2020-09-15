@@ -38,7 +38,7 @@
 </div>
 
 <script>
-var timers_enabled={{timers_enabled}};
+var timers_enabled=true;
 var startTime;
 </script>
 
@@ -130,9 +130,9 @@ var startTime;
 <div id="bg"><!-- --></div>
 
 <div id="main">
-{% if menu %}<div id="leftnav">{% include 'menu.html' %}{% if dev %}<div>{{render_time|floatformat:4}}</div><div>Joueurs: {{players|intcomma}}</div>{% endif %}</div>{% endif %}
+<div id="leftnav">{% include 'menu.html' %}</div>
 
-<div{% if menu %} id="content"{% endif %} align="center">
+<div id="content" align="center">
 	{% if context %}<div id="status">{% include 'header.html' %}</div>{% endif %}
 	<div id="page">{% block content %}{% endblock %}</div>
 </div>

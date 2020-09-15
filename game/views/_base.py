@@ -379,7 +379,7 @@ class BaseView(BaseMixin, View):
         content["delete_datetime"] = self.userInfo["deletion_date"]
         
         if self.userInfo["skin"]: content["skin"] = self.userInfo["skin"]
-        else: content["skin"] = "s_transparent"]
+        else: content["skin"] = "s_transparent"
 
         if self.scrollY != 0: content["scrolly"] = self.scrollY
         
@@ -404,8 +404,8 @@ class BaseView(BaseMixin, View):
         content["cur_s"] = self.currentSector
         content["cur_p"] = ((self.currentPlanetId - 1) % 25) + 1
     
-        if content["selectedMenu"] != "":
-            blockname = content["selectedMenu"] + "_selected"
+        if self.selectedMenu != "":
+            blockname = self.selectedMenu + "_selected"
     
             while blockname != "":
                 content[blockname] = True
@@ -414,7 +414,7 @@ class BaseView(BaseMixin, View):
                 if i > 0: i = i - 1
                 blockname = blockname[:i]
     
-        content["selectedmenu"] = content["selectedMenu"].replace(".", "_")
+        content["selectedmenu"] = self.selectedMenu.replace(".", "_")
         
         if self.showHeader == True:
 
