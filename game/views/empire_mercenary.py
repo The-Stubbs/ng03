@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from random import *
-
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -11,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "intelligence"
+        self.selected_menu = "intelligence"
 
         self.nation_cost_lvl_0 = 250
         self.nation_cost_lvl_1 = 500
@@ -115,12 +114,12 @@ class View(BaseView):
         typ = 1
 
         nation = self.request.POST.get("nation_name", "")
-        oRs = dbRow("SELECT id FROM gm_profiles WHERE (privilege=-2 OR privilege=0) AND upper(login) = upper(" + sqlStr(nation) + ")")
-        if oRs == None:
+        row = dbRow("SELECT id FROM gm_profiles WHERE (privilege=-2 OR privilege=0) AND upper(login) = upper(" + sqlStr(nation) + ")")
+        if row == None:
             self.intell_error = self.e_player_not_exists
             return
         else:
-            id = oRs[0]
+            id = row[0]
             if id == self.userId:
                 self.intell_error = self.e_own_nation_planet
                 return
@@ -128,8 +127,8 @@ class View(BaseView):
         #
         # Begin transaction
         #
-        oRs = dbRow("SELECT user_spying_create('" + str(self.userId) + "', int2(" + str(typ) + "), int2(" + str(self.level) + ") )")
-        reportid = oRs[0]
+        row = dbRow("SELECT user_spying_create('" + str(self.userId) + "', int2(" + str(typ) + "), int2(" + str(self.level) + ") )")
+        reportid = row[0]
         if reportid < 0:
             self.intell_error = self.e_general_error
             return
@@ -186,12 +185,12 @@ class View(BaseView):
                 " WHERE ownerid=" + str(id) + \
                 " ORDER BY random() "
         oRss = dbRows(query)
-        for oRs in oRss:
+        for row in oRss:
             # test if info is retrieved by the gm_spyings (failure probability increase for each new info)
             if planet_limit == 0 or nb_planet < planet_limit:
                 # add planet to the gm_spyings report
                 query = " INSERT INTO gm_spying_planets(spy_id,  planet_id,  planet_name,  floor,  space, pct_ore, pct_hydrocarbon,  ground) " + \
-                        " VALUES("+ str(reportid) +"," + str(oRs[0]) +"," + sqlStr(oRs[1]) +"," + str(oRs[2]) + "," + str(oRs[3]) + "," + str(oRs[4]) + "," + str(oRs[5]) + "," + str(oRs[6]) +")"
+                        " VALUES("+ str(reportid) +"," + str(row[0]) +"," + sqlStr(row[1]) +"," + str(row[2]) + "," + str(row[3]) + "," + str(row[4]) + "," + str(row[5]) + "," + str(row[6]) +")"
                 dbExecute(query)
 
                 nb_planet = nb_planet + 1
@@ -206,10 +205,10 @@ class View(BaseView):
                     " ORDER BY researchid "
             oRss = dbRows(query)
 
-            for oRs in oRss:
+            for row in oRss:
                 # add research info to gm_spyings report
                 query = " INSERT INTO gm_spying_researches(spy_id,  research_id,  research_level) " + \
-                        " VALUES("+ str(reportid) +", " + str(oRs[0]) +", " + str(oRs[1]) +") "
+                        " VALUES("+ str(reportid) +", " + str(row[0]) +", " + str(row[1]) +") "
                 dbExecute(query)
 
         #
@@ -253,20 +252,20 @@ class View(BaseView):
 
         if self.request.session.get("privilege", 0) < 100:
 
-            oRs = dbRow("SELECT ownerid FROM gm_planets WHERE galaxy=" + str(g) + " AND sector=" + str(s) + " AND planet=" + str(p))
+            row = dbRow("SELECT ownerid FROM gm_planets WHERE galaxy=" + str(g) + " AND sector=" + str(s) + " AND planet=" + str(p))
     
-            if oRs == None:
+            if row == None:
                 self.intell_error = self.e_planet_not_exists
                 return
-            elif oRs[0] == self.userId:
+            elif row[0] == self.userId:
                 self.intell_error = self.e_own_nation_planet
                 return
 
         #
         # Begin transaction
         #
-        oRs = dbRow("SELECT user_spying_create('" + str(self.userId) + "', int2(" + str(typ) + "), int2(" + str(self.level) + ") )")
-        reportid = oRs[0]
+        row = dbRow("SELECT user_spying_create('" + str(self.userId) + "', int2(" + str(typ) + "), int2(" + str(self.level) + ") )")
+        reportid = row[0]
         if reportid < 0:
             self.intell_error = self.e_general_error
             return
@@ -310,28 +309,28 @@ class View(BaseView):
                 " FROM vw_gm_planets " + \
                 " WHERE galaxy=" + str(g) + " AND sector=" + str(s) + " AND planet=" + str(p)
 
-        oRs = dbRow(query)
-        if oRs == None:
+        row = dbRow(query)
+        if row == None:
             self.intell_error = self.e_planet_not_exists
             return
 
         # test is the gm_spyings is spotted
         spotted = random() < spottedChance
 
-        if oRs:
+        if row:
 
-            planet = oRs[0]
+            planet = row[0]
 
             if self.request.session.get("privilege", 0) > 100: return
 
-            if oRs[2]:
+            if row[2]:
             #
             # somebody owns this planet, so the gm_spyings can retrieve several info on it
             #
                 # retrieve ownerid and planetname
-                id = oRs[2]
-                if oRs[1]:
-                    planetname = sqlStr(oRs[1])
+                id = row[2]
+                if row[1]:
+                    planetname = sqlStr(row[1])
                 else:
                     planetname = "''"
 
@@ -340,28 +339,28 @@ class View(BaseView):
 
                 # basic info retrieved by all spies
                 query = " INSERT INTO gm_spying_planets(spy_id,  planet_id,  planet_name, owner_name, floor, space, pct_ore, pct_hydrocarbon, ground ) " + \
-                        " VALUES ("+ str(reportid) +", " + sqlValue(oRs[0]) + "," + sqlValue(planetname) +"," + sqlStr(oRs[3]) +"," + \
-                        sqlValue(oRs[4]) + "," + sqlValue(oRs[5]) + "," + sqlValue(oRs[28]) + "," + sqlValue(oRs[29]) + "," + sqlValue(oRs[8]) + ")"
+                        " VALUES ("+ str(reportid) +", " + sqlValue(row[0]) + "," + sqlValue(planetname) +"," + sqlStr(row[3]) +"," + \
+                        sqlValue(row[4]) + "," + sqlValue(row[5]) + "," + sqlValue(row[28]) + "," + sqlValue(row[29]) + "," + sqlValue(row[8]) + ")"
 
                 dbExecute(query)
 
                 # common info retrieved by spies which self.level >= 0 (actually, all)
                 if self.level >= 0:
-                    query = " UPDATE gm_spying_planets SET"+ \
-                            " radar_strength=" + sqlValue(oRs[17]) + ", radar_jamming=" + sqlValue(oRs[18]) + ", " + \
-                            " orbit_ore=" + sqlValue(oRs[20]) + ", orbit_hydrocarbon=" + sqlValue(oRs[21]) + \
-                            " WHERE spy_id=" + str(reportid) + " AND planet_id=" + sqlValue(oRs[0])
+                    query = " UPDATE gm_spying_planets SET" + \
+                            " radar_strength=" + sqlValue(row[17]) + ", radar_jamming=" + sqlValue(row[18]) + ", " + \
+                            " orbit_ore=" + sqlValue(row[20]) + ", orbit_hydrocarbon=" + sqlValue(row[21]) + \
+                            " WHERE spy_id=" + str(reportid) + " AND planet_id=" + sqlValue(row[0])
 
                     dbExecute(query)
 
                 # uncommon info retrieved by skilled spies with self.level >= 1 : ore, hydrocarbon, energy
                 if self.level >= 1:
-                    query = "UPDATE gm_spying_planets SET"+ \
-                            " ore=" + sqlValue(oRs[9]) + ", hydrocarbon=" + sqlValue(oRs[10]) + \
-                            ", ore_capacity=" + sqlValue(oRs[11]) + ", hydrocarbon_capacity=" + sqlValue(oRs[12]) + \
-                            ", ore_production=" + sqlValue(oRs[13]) + ", hydrocarbon_production=" + sqlValue(oRs[14]) + \
-                            ", energy_consumption=" + sqlValue(oRs[15]) + ", energy_production=" + sqlValue(oRs[16]) + \
-                            " WHERE spy_id=" + str(reportid) + " AND planet_id=" + sqlValue(oRs[0])
+                    query = "UPDATE gm_spying_planets SET" + \
+                            " ore=" + sqlValue(row[9]) + ", hydrocarbon=" + sqlValue(row[10]) + \
+                            ", ore_capacity=" + sqlValue(row[11]) + ", hydrocarbon_capacity=" + sqlValue(row[12]) + \
+                            ", ore_production=" + sqlValue(row[13]) + ", hydrocarbon_production=" + sqlValue(row[14]) + \
+                            ", energy_consumption=" + sqlValue(row[15]) + ", energy_production=" + sqlValue(row[16]) + \
+                            " WHERE spy_id=" + str(reportid) + " AND planet_id=" + sqlValue(row[0])
 
                     dbExecute(query)
 
@@ -369,11 +368,11 @@ class View(BaseView):
                     #
                     # rare info that can be retrieved by veteran spies only : workers, scientists, soldiers
                     #
-                    query = "UPDATE gm_spying_planets SET"+ \
-                            " workers=" + sqlValue(oRs[22]) + ", workers_capacity=" + sqlValue(oRs[23]) + ", " + \
-                            " scientists=" + sqlValue(oRs[24]) + ", scientists_capacity=" + sqlValue(oRs[25]) + ", " + \
-                            " soldiers=" + sqlValue(oRs[26]) + ", soldiers_capacity=" + sqlValue(oRs[27]) + \
-                            " WHERE spy_id=" + str(reportid) + " AND planet_id=" + sqlValue(oRs[0])
+                    query = "UPDATE gm_spying_planets SET" + \
+                            " workers=" + sqlValue(row[22]) + ", workers_capacity=" + sqlValue(row[23]) + ", " + \
+                            " scientists=" + sqlValue(row[24]) + ", scientists_capacity=" + sqlValue(row[25]) + ", " + \
+                            " soldiers=" + sqlValue(row[26]) + ", soldiers_capacity=" + sqlValue(row[27]) + \
+                            " WHERE spy_id=" + str(reportid) + " AND planet_id=" + sqlValue(row[0])
 
                     dbExecute(query)
 
@@ -385,27 +384,27 @@ class View(BaseView):
                             " WHERE planetid=" + str(planet) + " AND build_status IS NOT NULL"
 
                     oRss = dbRows(query)
-                    for oRs in oRss:
+                    for row in oRss:
                         
                         rand1 = random()
 
                         # test if info is correctly retrieved by the gm_spyings (error probability increase for each new info)
-                        qty = oRs[3]
+                        qty = row[3]
 
-                        if rand1 < ( getinfoModifier * i ) and oRs[4] != 1:
+                        if rand1 < ( getinfoModifier * i ) and row[4] != 1:
                             # if construction_maximum = 1: error is impossible : if there is 1 city, it can't exists more or less
                             # info are always retrieved, but the gm_spyings may give a wrong number of constructions ( actually right number +/- 50% )
 
                             # calculate maximum and minimum possible numbers of buildings
-                            rndmax = int(oRs[3]*1.5)
-                            if rndmax <= oRs[3]: rndmax = rndmax + 1
-                            rndmax = min(rndmax, oRs[4])
-                            rndmin = int(oRs[3]*0.5)
+                            rndmax = int(row[3]*1.5)
+                            if rndmax <= row[3]: rndmax = rndmax + 1
+                            rndmax = min(rndmax, row[4])
+                            rndmin = int(row[3]*0.5)
                             if rndmin < 1: rndmin = 1
                             qty = int((rndmax-rndmin+1)*random()+rndmin)
 
                         query = "INSERT INTO gm_spying_buildings(spy_id, planet_id, building_id, endtime, quantity) " + \
-                                " VALUES (" + str(reportid) + ", " + str(oRs[0]) + ", " + str(oRs[1]) + ", now() + " + str(oRs[2]) + "* interval '1 second', " + str(qty) + " )"
+                                " VALUES (" + str(reportid) + ", " + str(row[0]) + ", " + str(row[1]) + ", now() + " + str(row[2]) + "* interval '1 second', " + str(qty) + " )"
 
                         dbExecute(query)
 
@@ -419,27 +418,27 @@ class View(BaseView):
                             " WHERE planetid=" + str(planet) + " AND quantity != 0 AND build_status IS NULL AND destruction_time IS NULL"
                     oRss = dbRows(query)
                     i = 0
-                    for oRs in oRss:
+                    for row in oRss:
 
                         rand1 = random()
 
                         # test if info is correctly retrieved by the gm_spyings (error probability increase for each new info)
-                        qty = oRs[2]
+                        qty = row[2]
 
-                        if rand1 < ( getinfoModifier * i ) and oRs[3] != 1:
+                        if rand1 < ( getinfoModifier * i ) and row[3] != 1:
                             # if construction_maximum = 1: error is impossible : if there is 1 city, it can't exists more or less
                             # info are always retrieved, but the gm_spyings may give a wrong number of constructions ( actually right number +/- 50% )
 
                             # calculate maximum and minimum possible numbers of buildings
-                            rndmax = int(oRs[2]*1.5)
-                            if rndmax <= oRs[2]: rndmax = rndmax + 1
-                            rndmax = min(rndmax, oRs[3])
-                            rndmin = int(oRs[2]*0.5)
+                            rndmax = int(row[2]*1.5)
+                            if rndmax <= row[2]: rndmax = rndmax + 1
+                            rndmax = min(rndmax, row[3])
+                            rndmin = int(row[2]*0.5)
                             if rndmin < 1: rndmin = 1
                             qty = int((rndmax-rndmin+1)*random()+rndmin)
 
                         query = " INSERT INTO gm_spying_buildings(spy_id, planet_id, building_id, quantity) " + \
-                                " VALUES(" + str(reportid) + ", " + str(oRs[0]) + ", " + str(oRs[1]) + ", " + str(qty) + " )"
+                                " VALUES(" + str(reportid) + ", " + str(row[0]) + ", " + str(row[1]) + ", " + str(qty) + " )"
 
                         dbExecute(query)
                         
@@ -450,7 +449,7 @@ class View(BaseView):
                 # nobody own this planet
                 #
                 query = " INSERT INTO gm_spying_planets(spy_id, planet_id, floor, space) " + \
-                        " VALUES("+ str(reportid) +", " + sqlValue(oRs[0]) +", " + sqlValue(oRs[4]) +", " + sqlValue(oRs[5]) +") "
+                        " VALUES("+ str(reportid) +", " + sqlValue(row[0]) +", " + sqlValue(row[4]) +", " + sqlValue(row[5]) +") "
                 dbExecute(query)
                 return
 

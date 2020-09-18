@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "gm_fleets.gm_fleets"
+        self.selected_menu = "gm_fleets.gm_fleets"
 
         self.action_result = ""
         self.move_fleet_result = ""
@@ -41,10 +42,10 @@ class View(BaseView):
         query = "SELECT ownerid" + \
                 " FROM vw_gm_fleets as f" + \
                 " WHERE (ownerid=" + str(self.userId) + " OR (shared AND owner_alliance_id=" + str(self.can_command_alliance_fleets) + ")) AND id=" + str(fleetid) + " AND (SELECT privilege FROM gm_profiles WHERE gm_profiles.id = f.ownerid) = 0"
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs:
-            self.fleet_owner_id = oRs[0]
+        if row:
+            self.fleet_owner_id = row[0]
 
     # display fleet info
     def DisplayFleet(self, fleetid):
@@ -57,7 +58,7 @@ class View(BaseView):
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," + \
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers," + \
                 " recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action, total_time, idle_time, date_part('epoch', static_planet_invasion_delay())," + \
-                " long_distance_capacity, droppods, warp_to,"+ \
+                " long_distance_capacity, droppods, warp_to," + \
                 "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.planet_galaxy AND gm_planets.sector = f.planet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = "+str(self.userId)+")) AS from_radarstrength, " + \
                 "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.destplanet_galaxy AND gm_planets.sector = f.destplanet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = "+str(self.userId)+")) AS to_radarstrength," + \
                 "firepower > 0, next_waypointid, (SELECT routeid FROM gm_fleet_route_waypoints WHERE id=f.next_waypointid), now(), spawn_ore + spawn_hydrocarbon," + \
@@ -67,27 +68,27 @@ class View(BaseView):
                 " (SELECT tool_compute_prestige_cost_for_new_planet(planets) FROM gm_profiles WHERE id=ownerid) AS prestige_cost" + \
                 " FROM vw_gm_fleets as f" + \
                 " WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid)
-        oRs = dbRow(query)
+        row = dbRow(query)
 
         # if fleet doesnt exist, redirect to the last known planet orbit or display the gm_fleets list
-        if oRs == None:
+        if row == None:
             return HttpResponseRedirect("/game/gm_fleets/")
 
         if self.allianceId:
-            if oRs[57]:
+            if row[57]:
                 content.Parse("shared")
             else:
                 content.Parse("not_shared")
             
-        content.AssignValue("now", oRs[46])
+        content.AssignValue("now", row[46])
 
-        if oRs[45]:
+        if row[45]:
 
             query = "SELECT gm_fleet_route_waypoints.id, ""action"", p.id, p.galaxy, p.sector, p.planet, p.name, internal_profile_get_name(p.ownerid), internal_profile_get_relation(p.ownerid,"+str(self.userId)+")," + \
                     " gm_fleet_route_waypoints.ore, gm_fleet_route_waypoints.hydrocarbon" + \
                     " FROM gm_fleet_route_waypoints" + \
                     "    LEFT JOIN gm_planets AS p ON (gm_fleet_route_waypoints.planetid=p.id)" + \
-                    " WHERE routeid=" + str(oRs[45]) + " AND gm_fleet_route_waypoints.id >= " + str(oRs[44]) + \
+                    " WHERE routeid=" + str(row[45]) + " AND gm_fleet_route_waypoints.id >= " + str(row[44]) + \
                     " ORDER BY gm_fleet_route_waypoints.id"
             RouteRss = dbRows(query)
             
@@ -167,7 +168,7 @@ class View(BaseView):
                 content.Parse("optgroup."+item)
             
             # check if the commander is the commander of the fleet we display
-            if oRs[8] == oCmdListRs[0]: cmd["selected"] = True
+            if row[8] == oCmdListRs[0]: cmd["selected"] = True
 
             cmd["cmd_id"] = oCmdListRs[0]
             cmd["cmd_name"] = oCmdListRs[1]
@@ -193,68 +194,68 @@ class View(BaseView):
         if len(optgroup_planet['cmd_options']) > 0: optgroups.append(optgroup_planet)
         content.AssignValue("optgroups", optgroups)
         
-        if oRs[8] == None: # display "no commander" or "fire commander" in the combobox of gm_commanders
+        if row[8] == None: # display "no commander" or "fire commander" in the combobox of gm_commanders
             content.Parse("none")
             content.Parse("nocommander")
         else:
             content.Parse("unassigncommander")
 
-            content.AssignValue("commanderid", oRs[8])
-            content.AssignValue("commandername", oRs[9])
+            content.AssignValue("commanderid", row[8])
+            content.AssignValue("commandername", row[9])
             content.Parse("commander")
 
-        content.AssignValue("fleet_leadership", oRs[55])
-        content.AssignValue("fleet_commander_efficiency", oRs[54])
-        content.AssignValue("fleet_signature", oRs[5])
-        content.AssignValue("fleet_real_signature", oRs[50])
-        content.AssignValue("fleet_upkeep", oRs[52])
-        content.AssignValue("fleet_upkeep_multiplicator", oRs[53])
-        content.AssignValue("fleet_long_distance_capacity", oRs[38])
-        content.AssignValue("fleet_required_vortex_strength", oRs[51])
-        content.AssignValue("fleet_droppods", oRs[39])
+        content.AssignValue("fleet_leadership", row[55])
+        content.AssignValue("fleet_commander_efficiency", row[54])
+        content.AssignValue("fleet_signature", row[5])
+        content.AssignValue("fleet_real_signature", row[50])
+        content.AssignValue("fleet_upkeep", row[52])
+        content.AssignValue("fleet_upkeep_multiplicator", row[53])
+        content.AssignValue("fleet_long_distance_capacity", row[38])
+        content.AssignValue("fleet_required_vortex_strength", row[51])
+        content.AssignValue("fleet_droppods", row[39])
 
-        if oRs[39] <= 0: content.Parse("hide_droppods")
+        if row[39] <= 0: content.Parse("hide_droppods")
 
-        if oRs[38] < oRs[50]: content.Parse("insufficient_long_distance_capacity")
+        if row[38] < row[50]: content.Parse("insufficient_long_distance_capacity")
 
         # display resources in cargo and its capacity
-        content.AssignValue("fleet_ore", oRs[27])
-        content.AssignValue("fleet_hydrocarbon", oRs[28])
-        content.AssignValue("fleet_scientists", oRs[29])
-        content.AssignValue("fleet_soldiers", oRs[30])
-        content.AssignValue("fleet_workers", oRs[31])
+        content.AssignValue("fleet_ore", row[27])
+        content.AssignValue("fleet_hydrocarbon", row[28])
+        content.AssignValue("fleet_scientists", row[29])
+        content.AssignValue("fleet_soldiers", row[30])
+        content.AssignValue("fleet_workers", row[31])
 
-        content.AssignValue("fleet_load", oRs[27] + oRs[28] + oRs[29] + oRs[30] + oRs[31])
-        content.AssignValue("fleet_capacity", oRs[26])
+        content.AssignValue("fleet_load", row[27] + row[28] + row[29] + row[30] + row[31])
+        content.AssignValue("fleet_capacity", row[26])
 
-        if oRs[26] <= 0:
+        if row[26] <= 0:
             content.Parse("hide_cargo")
 
         content.AssignValue("fleetid", fleetid)
-        content.AssignValue("fleetname", oRs[1])
-        content.AssignValue("fleet_size", oRs[4])
-        content.AssignValue("fleet_speed", oRs[6])
-        content.AssignValue("recycler_output", oRs[32])
+        content.AssignValue("fleetname", row[1])
+        content.AssignValue("fleet_size", row[4])
+        content.AssignValue("fleet_speed", row[6])
+        content.AssignValue("recycler_output", row[32])
 
-        if oRs[32] <= 0: content.Parse("hide_recycling")
+        if row[32] <= 0: content.Parse("hide_recycling")
 
         # Assign remaining time
-        if oRs[7]:
-            content.AssignValue("time", oRs[7])
+        if row[7]:
+            content.AssignValue("time", row[7])
         else:
             content.AssignValue("time", 0)
 
         #
         # display the fleet stance
         #
-        if oRs[2]:
+        if row[2]:
             content.Parse("attack")
         else:
             content.Parse("defend")
 
         # if the fleet can be set to attack (firepower > 0)
-        if oRs[43]:
-            if oRs[2]:
+        if row[43]:
+            if row[2]:
                 content.Parse("setstance_defend")
             else:
                 content.Parse("setstance_attack")
@@ -271,11 +272,11 @@ class View(BaseView):
         gm_fleets = []
         
         fleetCount = 0
-        if oRs[34] != -1:
+        if row[34] != -1:
             query = "SELECT vw_gm_fleets.id, vw_gm_fleets.name, size, signature, speed, cargo_capacity-cargo_free, cargo_capacity, action, ownerid, owner_name, gm_alliances.tag, internal_profile_get_relation("+str(self.userId)+",ownerid)" + \
                     " FROM vw_gm_fleets" + \
                     "    LEFT JOIN gm_alliances ON gm_alliances.id=owner_alliance_id" + \
-                    " WHERE planetid="+str(oRs[10])+" AND vw_gm_fleets.id != "+str(oRs[0])+" AND NOT engaged AND action != 1 AND action != -1" + \
+                    " WHERE planetid="+str(row[10])+" AND vw_gm_fleets.id != "+str(row[0])+" AND NOT engaged AND action != 1 AND action != -1" + \
                     " ORDER BY upper(vw_gm_fleets.name)"
             oFleetsRss = dbRows(query)
 
@@ -286,8 +287,8 @@ class View(BaseView):
                 fleet["name"] = oFleetsRs[1]
                 fleet["size"] = oFleetsRs[2]
 
-                # oRs[48) radar_jamming of planet
-                if oRs[17] > rFriend or oFleetsRs[11] > rFriend or oRs[48] == 0 or oRs[41] > oRs[48]:
+                # row[48) radar_jamming of planet
+                if row[17] > rFriend or oFleetsRs[11] > rFriend or row[48] == 0 or row[41] > row[48]:
                     fleet["signature"] = oFleetsRs[3]
                 else:
                     fleet["signature"] = 0
@@ -297,7 +298,7 @@ class View(BaseView):
                 fleet["cargo_capacity"] = oFleetsRs[6]
 
                 if oFleetsRs[8] == self.userId:
-                    if oRs[34] == 0 and oFleetsRs[7] == 0: fleet["merge"] = True
+                    if row[34] == 0 and oFleetsRs[7] == 0: fleet["merge"] = True
 
                     fleet["playerfleet"] = True
                     
@@ -316,7 +317,7 @@ class View(BaseView):
                         displayFleet = True
                         fleet["friend"] = True
                     elif oFleetsRs[11] == -1:
-                        displayFleet = oRs[34] != 1
+                        displayFleet = row[34] != 1
                         if displayFleet: fleet["enemy"] = True
 
                     # only display ally/nap gm_fleets when leaving a planet
@@ -330,78 +331,78 @@ class View(BaseView):
         #
         # assign fleet current planet
         #
-        content.AssignValue("planetid", oRs[10])
-        content.AssignValue("g", oRs[12])
-        content.AssignValue("s", oRs[13])
-        content.AssignValue("p", oRs[14])
-        content.AssignValue("relation", oRs[17])
-        content.AssignValue("planetname", self.getPlanetName(oRs[17], oRs[41], oRs[16], oRs[11]))
+        content.AssignValue("planetid", row[10])
+        content.AssignValue("g", row[12])
+        content.AssignValue("s", row[13])
+        content.AssignValue("p", row[14])
+        content.AssignValue("relation", row[17])
+        content.AssignValue("planetname", self.getPlanetName(row[17], row[41], row[16], row[11]))
         
-        if oRs[34] == -1 or oRs[34] == 1: # fleet is moving when dest_planetid is not None
+        if row[34] == -1 or row[34] == 1: # fleet is moving when dest_planetid is not None
 
             # Assign destination planet
-            content.AssignValue("t_planetid", oRs[18])
-            content.AssignValue("t_g", oRs[20])
-            content.AssignValue("t_s", oRs[21])
-            content.AssignValue("t_p", oRs[22])
-            content.AssignValue("t_relation", oRs[25])
-            content.AssignValue("t_planetname", self.getPlanetName(oRs[25], oRs[42], oRs[24], oRs[19]))
+            content.AssignValue("t_planetid", row[18])
+            content.AssignValue("t_g", row[20])
+            content.AssignValue("t_s", row[21])
+            content.AssignValue("t_p", row[22])
+            content.AssignValue("t_relation", row[25])
+            content.AssignValue("t_planetname", self.getPlanetName(row[25], row[42], row[24], row[19]))
 
             # display Cancel Move orders if fleet has covered less than 100 units of distance, or during 2 minutes
             # and if from_planet is not None
-            timelimit = int(100/oRs[6]*3600)
+            timelimit = int(100/row[6]*3600)
             if timelimit < 120: timelimit = 120
 
-            if not oRs[3] and oRs[35]-oRs[7] < timelimit and oRs[10]:
-                content.AssignValue("timelimit", timelimit-(oRs[35]-oRs[7]))
+            if not row[3] and row[35]-row[7] < timelimit and row[10]:
+                content.AssignValue("timelimit", timelimit-(row[35]-row[7]))
                 content.Parse("cancel_moving")
 
-            if oRs[10]: content.Parse("from")
+            if row[10]: content.Parse("from")
 
             content.Parse("moving")
         else:
-            if oRs[3]: #if is engaged
+            if row[3]: #if is engaged
                 content.Parse("fighting")
-            elif oRs[34] == 2:
+            elif row[34] == 2:
                 content.Parse("recycling")
-            elif oRs[34] == 4:
+            elif row[34] == 4:
                 content.Parse("waiting")
             else:
 
-                if oRs[40]: content.Parse("warp")
+                if row[40]: content.Parse("warp")
 
-                if oRs[32] == 0 or (not oRs[33] and oRs[47] == 0): # if no recycler or nothing to recycle
+                if row[32] == 0 or (not row[33] and row[47] == 0): # if no recycler or nothing to recycle
                     content.Parse("cant_recycle")
                 else:
                     content.Parse("recycle")
 
-                self.can_install_building = ((oRs[15] == None) or (oRs[17] >= rHostile)) and (oRs[40] == None)
+                self.can_install_building = ((row[15] == None) or (row[17] >= rHostile)) and (row[40] == None)
 
                 # assign buildings that can be installed
                 # only possible if not moving, not engaged, planet is owned by self or by nobody and is not a vortex
 
-                if oRs[17] >= rFriend:
+                if row[17] >= rFriend:
                     content.Parse("unloadcargo")
 
-                if oRs[17] == rSelf and oRs[49] > 0:
+                if row[17] == rSelf and row[49] > 0:
                     content.Parse("loadcargo")
                     content.Parse("manage")
 
-                if oRs[34] == 0 and oRs[4] > 1 and self.fleet_owner_id == self.userId:
+                if row[34] == 0 and row[4] > 1 and self.fleet_owner_id == self.userId:
                     content.Parse("split")
 
-                if oRs[15] and oRs[17] < rFriend and oRs[30] > 0:
+                if row[15] and row[17] < rFriend and row[30] > 0:
                     # fleet has to wait some time (defined in DB) before being able to invade
-                    # oRs[37] is the value returned by const_seconds_before_invasion() from DB
-                    if oRs[36] < oRs[37]: t = oRs[37] - oRs[36]
+                    # row[37] is the value returned by const_seconds_before_invasion() from DB
+                    if row[36] < row[37]: t = row[37] - row[36]
                     else: t = 0 
                     content.AssignValue("invade_time", int(t))
 
-                    if oRs[39] == 0:
+                    if row[39] == 0:
                         content.Parse("cant_invade")
                     else:
-                        if oRs[58]:
-                            content.AssignValue("prestige", oRs[59])
+                        if row[58]:
+                            content.AssignValue("prestige", row[59])
                             content.Parse("can_take")
 
                         content.Parse("invade")
@@ -409,14 +410,14 @@ class View(BaseView):
                 else:
                     content.Parse("cant_invade")
 
-                if oRs[34] == 0:
+                if row[34] == 0:
                     content.Parse("patrolling") # standing by/patrolling
                     content.Parse("idle")
 
             #
             # Fleet idling
             #
-            if oRs[34] == 0:
+            if row[34] == 0:
                 if self.move_fleet_result != "":
                     content.Parse(self.move_fleet_result)
                     content.Parse("result")
@@ -442,7 +443,7 @@ class View(BaseView):
                         planet["to_s"] = i[3]
                         planet["to_p"] = i[4]
 
-                        if i[0] == oRs[10]:
+                        if i[0] == row[10]:
                             planet["selected"] = True
                             hasAPlanetSelected = True
 
@@ -472,7 +473,7 @@ class View(BaseView):
                     fleet["to_s"] = list_oRs[3]
                     fleet["to_p"] = list_oRs[4]
 
-                    if list_oRs[1] == oRs[10] and not hasAPlanetSelected: fleet["selected"] = True
+                    if list_oRs[1] == row[10] and not hasAPlanetSelected: fleet["selected"] = True
 
                     fleetgroup.append(fleet)
                     index += 1
@@ -487,8 +488,8 @@ class View(BaseView):
                         " FROM gm_planets" + \
                         " WHERE ownerid=3"
 
-                if oRs[12]:
-                    query = query + " AND galaxy=" + str(oRs[12])
+                if row[12]:
+                    query = query + " AND galaxy=" + str(row[12])
 
                 query = query + " ORDER BY id"
 
@@ -503,7 +504,7 @@ class View(BaseView):
                     merchant["to_s"] = list_oRs[2]
                     merchant["to_p"] = list_oRs[3]
 
-                    if list_oRs[0] == oRs[10] and not hasAPlanetSelected: merchant["selected"] = True
+                    if list_oRs[0] == row[10] and not hasAPlanetSelected: merchant["selected"] = True
 
                     merchantplanetsgroup.append(merchant)
                     index += 1
@@ -531,7 +532,7 @@ class View(BaseView):
                             route["route_id"] = list_oRs[0]
                             route["route_name"] = list_oRs[1]
 
-                            if list_oRs[0] == oRs[45]: route["selected"] = True
+                            if list_oRs[0] == row[45]: route["selected"] = True
 
                             gm_fleet_routes.append(route)
 
@@ -545,14 +546,14 @@ class View(BaseView):
 
         content.Parse("overview")
 
-        if oRs[15]:
-            planet_ownerid = oRs[15]
+        if row[15]:
+            planet_ownerid = row[15]
         else:
             planet_ownerid = self.userId
 
         # display header
-        if oRs[34] == 0 and oRs[17] == rSelf:
-            self.currentPlanetId = oRs[10]
+        if row[34] == 0 and row[17] == rSelf:
+            self.currentPlanetId = row[10]
             self.FillHeader(content)
         else:
             self.FillHeaderCredits(content)
@@ -562,7 +563,7 @@ class View(BaseView):
         #
         query = "SELECT dt_ships.id, gm_fleet_ships.quantity," + \
                 " signature, capacity, handling, speed, weapon_turrets, weapon_dmg_em+weapon_dmg_explosive+weapon_dmg_kinetic+weapon_dmg_thermal AS weapon_power, weapon_tracking_speed, hull, shield, recycler_output, long_distance_capacity, droppods," + \
-                " buildingid, internal_planet_can_build_on(" + str(oRs[10]) + ", dt_ships.buildingid," + str(planet_ownerid) + ")=0 AS can_build" + \
+                " buildingid, internal_planet_can_build_on(" + str(row[10]) + ", dt_ships.buildingid," + str(planet_ownerid) + ")=0 AS can_build" + \
                 " FROM gm_fleet_ships" + \
                 "    LEFT JOIN dt_ships ON (gm_fleet_ships.shipid = dt_ships.id)" + \
                 " WHERE fleetid=" + str(fleetid) + \
@@ -572,35 +573,35 @@ class View(BaseView):
         shipCount = 0
 
         ships = []
-        for oRs in oRss:
+        for row in oRss:
             ship = {}
             shipCount = shipCount + 1
 
-            ship["id"] = oRs["id"]
-            ship["quantity"] = oRs["quantity"]
+            ship["id"] = row["id"]
+            ship["quantity"] = row["quantity"]
 
             # assign ship label, description + characteristics
-            ship["name"] = getShipLabel(oRs["id"])
-            ship["description"] = getShipDescription(oRs["id"])
+            ship["name"] = getShipLabel(row["id"])
+            ship["description"] = getShipDescription(row["id"])
 
-            ship["ship_signature"] = oRs["signature"]
-            ship["ship_cargo"] = oRs["capacity"]
-            ship["ship_handling"] = oRs["handling"]
-            ship["ship_speed"] = oRs["speed"]
+            ship["ship_signature"] = row["signature"]
+            ship["ship_cargo"] = row["capacity"]
+            ship["ship_handling"] = row["handling"]
+            ship["ship_speed"] = row["speed"]
 
-            ship["ship_turrets"] = oRs["weapon_turrets"]
-            ship["ship_power"] = oRs["weapon_power"]
-            ship["ship_tracking_speed"] = oRs["weapon_tracking_speed"]
+            ship["ship_turrets"] = row["weapon_turrets"]
+            ship["ship_power"] = row["weapon_power"]
+            ship["ship_tracking_speed"] = row["weapon_tracking_speed"]
 
-            ship["ship_hull"] = oRs["hull"]
-            ship["ship_shield"] = oRs["shield"]
+            ship["ship_hull"] = row["hull"]
+            ship["ship_shield"] = row["shield"]
 
-            ship["ship_recycler_output"] = oRs["recycler_output"]
-            ship["ship_long_distance_capacity"] = oRs["long_distance_capacity"]
-            ship["ship_droppods"] = oRs["droppods"]
+            ship["ship_recycler_output"] = row["recycler_output"]
+            ship["ship_long_distance_capacity"] = row["long_distance_capacity"]
+            ship["ship_droppods"] = row["droppods"]
 
-            if oRs["buildingid"]:
-                if self.can_install_building and oRs["can_build"]:
+            if row["buildingid"]:
+                if self.can_install_building and row["can_build"]:
                     ship["install"] = True
                 else:
                     ship["cant_install"] = True
@@ -617,21 +618,21 @@ class View(BaseView):
 
     def InstallBuilding(self, fleetid, shipid):
         
-        oRs = dbRow("SELECT user_fleet_deploy(" + str(self.fleet_owner_id) + "," + str(fleetid) + "," + str(shipid) + ")")
+        row = dbRow("SELECT user_fleet_deploy(" + str(self.fleet_owner_id) + "," + str(fleetid) + "," + str(shipid) + ")")
 
-        if oRs == None: return
+        if row == None: return
 
-        if oRs[0] >= 0:
+        if row[0] >= 0:
             # set as the new planet in == it has been colonized, the player expects to see its new planet after colonization
-            self.currentPlanetId = oRs[0]
+            self.currentPlanetId = row[0]
 
             # invalidate planet list to reload it in == a planet has been colonized
             
-        elif oRs[0] == -7:
+        elif row[0] == -7:
             self.action_result = "error_max_planets_reached"
-        elif oRs[0] == -8:
+        elif row[0] == -8:
             self.action_result = "error_deploy_enemy_ships"
-        elif oRs[0] == -11:
+        elif row[0] == -11:
             self.action_result = "error_deploy_too_many_safe_planets"
 
     def MoveFleet(self, fleetid):
@@ -644,9 +645,9 @@ class View(BaseView):
             self.move_fleet_result = "bad_destination"
             return
         
-        oRs = dbRow("SELECT user_fleet_move(" + str(self.fleet_owner_id) + "," + str(fleetid) + "," + str(g) + "," + str(s) + "," + str(p) + ")")
-        if oRs:
-            res = oRs[0]
+        row = dbRow("SELECT user_fleet_move(" + str(self.fleet_owner_id) + "," + str(fleetid) + "," + str(g) + "," + str(s) + "," + str(p) + ")")
+        if row:
+            res = row[0]
 
             if res == 0:
                 if self.request.POST.get("movetype") == "1":
@@ -675,9 +676,9 @@ class View(BaseView):
             self.move_fleet_result = "error_jump_to_same_point_limit_reached"
 
     def Invade(self, fleetid, droppods, take):
-        oRs = dbRow("SELECT user_fleet_invade(" + str(self.fleet_owner_id) + "," + str(fleetid) + ","+ str(droppods) +"," + str(ToBool(take, False)) +")")
+        row = dbRow("SELECT user_fleet_invade(" + str(self.fleet_owner_id) + "," + str(fleetid) + ","+ str(droppods) +"," + str(ToBool(take, False)) +")")
 
-        res = oRs[0]
+        res = row[0]
         
         if res == -1:
             self.action_result = "error_soldiers"
@@ -724,8 +725,8 @@ class View(BaseView):
         elif self.request.GET.get("action") == "defend":
             dbExecute("UPDATE gm_fleets SET attackonsight=False WHERE ownerid=" + str(self.fleet_owner_id) + " AND id=" + str(fleetid))
         elif self.request.GET.get("action") == "recycle":
-            oRs = dbRow("SELECT user_fleet_start_recycling(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
-            if oRs[0] == -2:
+            row = dbRow("SELECT user_fleet_start_recycling(" + str(self.fleet_owner_id) + "," + str(fleetid) + ")")
+            if row[0] == -2:
                 self.action_result = "error_recycling"
             
         elif self.request.GET.get("action") == "stoprecycling":

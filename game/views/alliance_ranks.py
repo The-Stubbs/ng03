@@ -2,207 +2,109 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = "/game/alliance-ranks/"
+    template_name = "alliance-ranks"
+    selected_menu = "alliance.ranks"
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "alliance.manage"
-
         if self.allianceId == None: return HttpResponseRedirect("/game/alliance/")
-        if not (self.allianceRights["leader"] or self.allianceRights["can_manage_description"] or self.allianceRights["can_manage_announce"]): return HttpResponseRedirect("/game/alliance/")
-
-        cat = ToInt(request.GET.get("cat", ""), 1)
-        if cat < 1 or cat > 3: cat = 1
-
-        if cat == 3 and not self.allianceRights["leader"]: cat=1
-        if cat == 1 and not (self.allianceRights["leader"] or self.allianceRights["can_manage_description"]): cat=2
-        if cat == 2 and not (self.allianceRights["leader"] or self.allianceRights["can_manage_announce"]): cat=1
+        if not self.hasRight("can_manage_description" and not self.hasRight("can_manage_announce"): return HttpResponseRedirect("/game/alliance/")
         
-        self.changes_status = ""
+        return super().dispatch(request, *args, **kwargs)
 
-        if request.POST.get("submit", "") != "":
-            if cat == 1:
-                self.SaveGeneral()
-            elif cat == 2:
-                self.SaveMotD()
-            elif cat == 3:
-                self.SaveRanks()
+    #---------------------------------------------------------------------------
+    def processAction(self, request, action):
 
-        return self.displayOptions(cat)
+        if action == "save":
+        
+            query = "SELECT rankid, leader" + \
+                    " FROM gm_alliance_ranks" + \
+                    " WHERE allianceid=" + str(self.allianceId) + \
+                    " ORDER BY rankid"
+            rows = dbRows(query)
+            if rows:
+                for row in rows:
+                
+                    name = request.POST.get("n" + str(row[0]), "").strip()
+                    if len(name) > 2:
+                        query = "UPDATE gm_alliance_ranks SET" + \
+                                " label=" + sqlStr(name) + \
+                                ", is_default=NOT leader AND " + str(ToBool(request.POST.get("c" + str(row[0]) + "_0"), False)) + \
+                                ", can_invite_player=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_1"), False)) + \
+                                ", can_kick_player=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_2"), False)) + \
+                                ", can_create_nap=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_3"), False)) + \
+                                ", can_break_nap=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_4"), False)) + \
+                                ", can_ask_money=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_5"), False)) + \
+                                ", can_see_reports=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_6"), False)) + \
+                                ", can_accept_money_requests=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_7"), False)) + \
+                                ", can_change_tax_rate=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_8"), False)) + \
+                                ", can_mail_alliance=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_9"), False)) + \
+                                ", can_manage_description=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_10"), False)) + \
+                                ", can_manage_announce=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_11"), False)) + \
+                                ", can_see_members_info=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_12"), False)) + \
+                                ", members_displayed=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_13"), False)) + \
+                                ", can_order_other_fleets=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_14"), False)) + \
+                                ", can_use_alliance_radars=leader OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_15"), False)) + \
+                                ", enabled=leader OR EXISTS(SELECT 1 FROM gm_profiles WHERE alliance_id=" + str(self.allianceId) + " AND alliance_rank=" + str(row[0])+ " LIMIT 1) OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_enabled"), False)) + " OR " + str(ToBool(request.POST.get("c" + str(row[0]) + "_0"), False)) + \
+                                " WHERE allianceid=" + str(self.allianceId) + " AND rankid=" + str(row[0])
+                        dbExecute(query)
+            return 0
+ 
+    #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
 
-    #
-    # Display alliance description page
-    #
-    def displayGeneral(self, content):
-
-        # Display alliance tag, name, description, creation date, number of members
-        query = "SELECT id, tag, name, description, created, (SELECT count(*) FROM gm_profiles WHERE alliance_id=gm_alliances.id), logo_url," + \
-                " max_members" + \
-                " FROM gm_alliances" + \
-                " WHERE id=" + str(self.allianceId)
-
-        oRs = dbRow(query)
-
-        if oRs:
-            content.AssignValue("tag", oRs[1])
-            content.AssignValue("name", oRs[2])
-            content.AssignValue("description", oRs[3])
-            content.AssignValue("created", oRs[4])
-            content.AssignValue("members", oRs[5])
-            content.AssignValue("max_members", oRs[7])
-
-            if oRs[6] != "":
-                content.AssignValue("logo_url", oRs[6])
-                content.Parse("logo")
-
-        content.Parse("general")
-
-    #
-    # Display alliance MotD (message of the day)
-    #
-    def displayMotD(self, content):
-
-        # Display alliance MotD (message of the day)
-        query = "SELECT announce, defcon FROM gm_alliances WHERE id=" + str(self.allianceId)
-        oRs = dbRow(query)
-
-        if oRs:
-            content.AssignValue("announce", oRs[0])
-            content.Parse("defcon_" + str(oRs[1]))
-
-        content.Parse("motd")
-
-    def displayRanks(self, content):
-        # list ranks
+        # --- ranks data
+        
+        data["ranks"] = []
+        
         query = "SELECT rankid, label, leader, can_invite_player, can_kick_player, can_create_nap, can_break_nap, can_ask_money, can_see_reports, " + \
                 " can_accept_money_requests, can_change_tax_rate, can_mail_alliance, is_default, members_displayed, can_manage_description, can_manage_announce, " + \
                 " enabled, can_see_members_info, can_order_other_fleets, can_use_alliance_radars" + \
                 " FROM gm_alliance_ranks" + \
                 " WHERE allianceid=" + str(self.allianceId) + \
                 " ORDER BY rankid"
-        oRss = dbDictRows(query)
-        list = []
-        for oRs in oRss:
-            item = {}
-            item["rank_id"] = oRs["rankid"]
-            item["rank_label"] = oRs["label"]
+        rows = dbDictRows(query)
+        if rows:
+            for row in rows:
+            
+                rank = {}
+                data["ranks"].append(rank)
+                
+                rank["id"] = row["rankid"]
+                rank["name"] = row["label"]
+                rank["disabled"] = row["leader"]
 
-            if oRs["leader"]: item["disabled"] = True
+                if row["leader"] or row["enabled"]: rank["enabled"] = True
+                if not row["leader"] and row["is_default"]: rank["checked_0"] = True
 
-            if oRs["leader"] or oRs["enabled"]: item["checked_enabled"] = True
+                if row["leader"] or row["can_invite_player"]: rank["checked_1"] = True
+                if row["leader"] or row["can_kick_player"]: rank["checked_2"] = True
 
-            if oRs["leader"] or oRs["is_default"] and not oRs["leader"]: item["checked_0"] = True
+                if row["leader"] or row["can_create_nap"]: rank["checked_3"] = True
+                if row["leader"] or row["can_break_nap"]: rank["checked_4"] = True
 
-            if oRs["leader"] or oRs["can_invite_player"]: item["checked_1"] = True
-            if oRs["leader"] or oRs["can_kick_player"]: item["checked_2"] = True
+                if row["leader"] or row["can_ask_money"]: rank["checked_5"] = True
+                if row["leader"] or row["can_see_reports"]: rank["checked_6"] = True
 
-            if oRs["leader"] or oRs["can_create_nap"]: item["checked_3"] = True
-            if oRs["leader"] or oRs["can_break_nap"]: item["checked_4"] = True
+                if row["leader"] or row["can_accept_money_requests"]: rank["checked_7"] = True
+                if row["leader"] or row["can_change_tax_rate"]: rank["checked_8"] = True
 
-            if oRs["leader"] or oRs["can_ask_money"]: item["checked_5"] = True
-            if oRs["leader"] or oRs["can_see_reports"]: item["checked_6"] = True
+                if row["leader"] or row["can_mail_alliance"]: rank["checked_9"] = True
 
-            if oRs["leader"] or oRs["can_accept_money_requests"]: item["checked_7"] = True
-            if oRs["leader"] or oRs["can_change_tax_rate"]: item["checked_8"] = True
+                if row["leader"] or row["can_manage_description"]: rank["checked_10"] = True
+                if row["leader"] or row["can_manage_announce"]: rank["checked_11"] = True
 
-            if oRs["leader"] or oRs["can_mail_alliance"]: item["checked_9"] = True
+                if row["leader"] or row["can_see_members_info"]: rank["checked_12"] = True
 
-            if oRs["leader"] or oRs["can_manage_description"]: item["checked_10"] = True
-            if oRs["leader"] or oRs["can_manage_announce"]: item["checked_11"] = True
+                if row["leader"] or row["members_displayed"]: rank["checked_13"] = True
 
-            if oRs["leader"] or oRs["can_see_members_info"]: item["checked_12"] = True
-
-            if oRs["leader"] or oRs["members_displayed"]: item["checked_13"] = True
-
-            if oRs["leader"] or oRs["can_order_other_fleets"]: item["checked_14"] = True
-            if oRs["leader"] or oRs["can_use_alliance_radars"]: item["checked_15"] = True
-
-            list.append(item)
-
-        content.AssignValue("ranks", list)
-
-    #
-    # Load template and display the right page
-    #
-    def displayOptions(self, cat):
-
-        content = self.loadTemplate("alliance-manage")
-        content.AssignValue("cat", cat)
-        
-        if cat == 1:
-            self.displayGeneral(content)
-        elif cat == 2:
-            self.displayMotD(content)
-        elif cat == 3:
-            self.displayRanks(content)
-
-        if self.changes_status != "":
-            content.Parse(self.changes_status)
-            content.Parse("error")
-
-        content.Parse("cat"+str(cat)+"_selected")
-        if self.allianceRights["leader"] or self.allianceRights["can_manage_description"]: content.Parse("cat1")
-        if self.allianceRights["leader"] or self.allianceRights["can_manage_announce"]: content.Parse("cat2")
-        if self.allianceRights["leader"]: content.Parse("cat3")
-        content.Parse("nav")
-
-        return self.display(content)
-
-    def SaveGeneral(self):
-
-        logo = self.request.POST.get("logo", "").strip()
-        description = self.request.POST.get("description", "").strip()
-
-        if logo != "" and not isValidURL(logo):
-            #logo is invalid
-            self.changes_status = "check_logo"
-        else:
-            # save updated information
-            dbExecute("UPDATE gm_alliances SET logo_url=" + sqlStr(logo) + ", description=" + sqlStr(description) + " WHERE id = " + str(self.allianceId))
-
-            self.changes_status = "done"
-
-    def SaveMotD(self):
-        MotD = self.request.POST.get("motd").strip()
-        defcon = ToInt(self.request.POST.get("defcon"), 5)
-
-        # save updated information
-        dbExecute("UPDATE gm_alliances SET defcon=" + str(defcon) + ", announce=" + sqlStr(MotD) + " WHERE id = " + str(self.allianceId))
-        self.changes_status = "done"
-
-    def SaveRanks(self):
-
-        # list ranks
-        query = "SELECT rankid, leader" + \
-                " FROM gm_alliance_ranks" + \
-                " WHERE allianceid=" + str(self.allianceId) + \
-                " ORDER BY rankid"
-        oRss = dbRows(query)
-        for oRs in oRss:
-            name = self.request.POST.get("n" + str(oRs[0]), "").strip()
-            if len(name) > 2:
-                query = "UPDATE gm_alliance_ranks SET" + \
-                        " label=" + sqlStr(name) + \
-                        ", is_default=NOT leader AND " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_0"), False)) + \
-                        ", can_invite_player=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_1"), False)) + \
-                        ", can_kick_player=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_2"), False)) + \
-                        ", can_create_nap=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_3"), False)) + \
-                        ", can_break_nap=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_4"), False)) + \
-                        ", can_ask_money=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_5"), False)) + \
-                        ", can_see_reports=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_6"), False)) + \
-                        ", can_accept_money_requests=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_7"), False)) + \
-                        ", can_change_tax_rate=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_8"), False)) + \
-                        ", can_mail_alliance=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_9"), False)) + \
-                        ", can_manage_description=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_10"), False)) + \
-                        ", can_manage_announce=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_11"), False)) + \
-                        ", can_see_members_info=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_12"), False)) + \
-                        ", members_displayed=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_13"), False)) + \
-                        ", can_order_other_fleets=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_14"), False)) + \
-                        ", can_use_alliance_radars=leader OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_15"), False)) + \
-                        ", enabled=leader OR EXISTS(SELECT 1 FROM gm_profiles WHERE alliance_id=" + str(self.allianceId) + " AND alliance_rank=" + str(oRs[0])+ " LIMIT 1) OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_enabled"), False)) + " OR " + str(ToBool(self.request.POST.get("c" + str(oRs[0]) + "_0"), False)) + \
-                        " WHERE allianceid=" + str(self.allianceId) + " AND rankid=" + str(oRs[0])
-
-                dbExecute(query)
+                if row["leader"] or row["can_order_other_fleets"]: rank["checked_14"] = True
+                if row["leader"] or row["can_use_alliance_radars"]: rank["checked_15"] = True

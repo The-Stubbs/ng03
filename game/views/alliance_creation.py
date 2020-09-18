@@ -6,8 +6,8 @@ from game.views._base import *
 class View(BaseView):
 
     success_url = "/game/alliance/"
-    template_name = "alliance-create"
-    selectedMenu = "noalliance.create"
+    template_name = "alliance-creation"
+    selected_menu = "alliance.creation"
 
     #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
@@ -15,6 +15,8 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
+        if self.allianceId: return HttpResponseRedirect("/game/alliance/")
+
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
@@ -38,11 +40,14 @@ class View(BaseView):
 
     #---------------------------------------------------------------------------
     def fillContent(self, request, data):
-
+        
+        # --- user rights
+        
         if self.userInfo["can_join_alliance"]:
-
-            data["tag"] = request.POST.get("tag", "")
-            data["name"] = request.POST.get("name", "")
-            data["description"] = request.POST.get("description", "")
-
             data["can_create"] = True
+        
+        # --- form data
+        
+        data["tag"] = request.POST.get("tag", "")
+        data["name"] = request.POST.get("name", "")
+        data["description"] = request.POST.get("description", "")

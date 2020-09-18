@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -26,7 +27,7 @@ class View(BaseView):
         self.max_build = 3
         self.max_ship = 3
 
-        self.selectedMenu = "gm_commanders"
+        self.selected_menu = "gm_commanders"
 
         CommanderId = ToInt(request.GET.get("id"), 0)
         NewName = request.GET.get("name")
@@ -68,8 +69,8 @@ class View(BaseView):
         dbRow("SELECT internal_profile_check_for_new_commanders(" + str(self.userId) + ")")
 
         # retrieve how many gm_commanders are controled by the player
-        oRs = dbRow("SELECT int4(count(1)) FROM gm_commanders WHERE recruited <= now() AND ownerid=" + str(self.userId))
-        can_engage_commander = oRs[0] < self.userInfo["mod_commanders"]
+        row = dbRow("SELECT int4(count(1)) FROM gm_commanders WHERE recruited <= now() AND ownerid=" + str(self.userId))
+        can_engage_commander = row[0] < self.userInfo["mod_commanders"]
 
         # Retrieve all the gm_commanders belonging to the player
         query = "SELECT c.id, c.name, c.recruited, points, added, salary, can_be_fired, " + \
@@ -93,16 +94,16 @@ class View(BaseView):
         content.AssignValue("commander_list", gm_commanders)
         available_commanders = []
         content.AssignValue("available_commanders", available_commanders)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             
-            item["id"] = oRs[0]
-            item["name"] = oRs[1]
-            item["recruited"] = oRs[2]
-            item["added"] = oRs[4]
-            item["salary"] = oRs[5]
+            item["id"] = row[0]
+            item["name"] = row[1]
+            item["recruited"] = row[2]
+            item["added"] = row[4]
+            item["salary"] = row[5]
 
-            if oRs[2] == None:
+            if row[2] == None:
                 available_commanders.append(item)
                 section = "available_commanders"
                 available_commanders_count = available_commanders_count + 1
@@ -117,25 +118,25 @@ class View(BaseView):
                 section = "gm_commanders"
                 commanders_count = commanders_count + 1
 
-                if oRs[6]:
+                if row[6]:
                     item["can_fire"] = True
                 else:
                     item["cant_fire"] = True
 
-            if oRs[7] == None: # commander is not assigned to a planet
-                if oRs[12] == None: # nor to a fleet
+            if row[7] == None: # commander is not assigned to a planet
+                if row[12] == None: # nor to a fleet
                     item["not_assigned"] = True
                 else:
-                    item["fleetid"] = oRs[12]
-                    item["commandment"] = oRs[13]
+                    item["fleetid"] = row[12]
+                    item["commandment"] = row[13]
                     item["fleet_command"] = True
 
             else:
-                item["planetid"] = oRs[7]
-                item["g"] = oRs[8]
-                item["s"] = oRs[9]
-                item["p"] = oRs[10]
-                item["commandment"] = oRs[11]
+                item["planetid"] = row[7]
+                item["g"] = row[8]
+                item["s"] = row[9]
+                item["p"] = row[10]
+                item["commandment"] = row[11]
                 item["planet_command"] = True
 
             #
@@ -143,22 +144,22 @@ class View(BaseView):
             #
             item["bonuses"] = []
             for i in range(14, 26):
-                if oRs[i] != 1.0:
+                if row[i] != 1.0:
                     bonus = {}
                     bonus["description" + str(i)] = True
-                    self.DisplayBonus(item, bonus, round((oRs[i]-1.0)*100))
+                    self.DisplayBonus(item, bonus, round((row[i]-1.0)*100))
 
-            if oRs[26] and oRs[28]:
-                item["prestige"] = oRs[27]
+            if row[26] and row[28]:
+                item["prestige"] = row[27]
                 item["train"] = True
             else:
-                if oRs[28]:
+                if row[28]:
                     item["cant_train"] = True
                 else:
                     item["cant_train_anymore"] = True
 
-            if oRs[3] > 0:
-                item["points"] = oRs[3]
+            if row[3] > 0:
+                item["points"] = row[3]
                 item["levelup"] = True
 
         content.AssignValue("max_commanders", int(self.userInfo["mod_commanders"]))
@@ -184,29 +185,29 @@ class View(BaseView):
                     " mod_construction_speed_buildings, mod_construction_speed_ships," + \
                     " points, name" + \
                     " FROM gm_commanders WHERE id=" + str(CommanderId) + " AND ownerid=" + str(self.userId)
-            oRs = dbRow(query)
+            row = dbRow(query)
 
-            if oRs == None:
+            if row == None:
                 # commander not found !
                return HttpResponseRedirect("/game/gm_commanders/")
 
-            content.AssignValue("name", oRs[13])
-            content.AssignValue("maxpoints", oRs[12])
+            content.AssignValue("name", row[13])
+            content.AssignValue("maxpoints", row[12])
 
-            content.AssignValue("ore", str(oRs[0]).replace(",", "."))
-            content.AssignValue("hydrocarbon", str(oRs[1]).replace(",", "."))
-            content.AssignValue("energy", str(oRs[2]).replace(",", "."))
-            content.AssignValue("workers", str(oRs[3]).replace(",", "."))
+            content.AssignValue("ore", str(row[0]).replace(",", "."))
+            content.AssignValue("hydrocarbon", str(row[1]).replace(",", "."))
+            content.AssignValue("energy", str(row[2]).replace(",", "."))
+            content.AssignValue("workers", str(row[3]).replace(",", "."))
 
-            content.AssignValue("speed", str(oRs[4]).replace(",", "."))
-            content.AssignValue("shield", str(oRs[5]).replace(",", "."))
-            content.AssignValue("handling", str(oRs[6]).replace(",", "."))
-            content.AssignValue("targeting", str(oRs[7]).replace(",", "."))
-            content.AssignValue("damages", str(oRs[8]).replace(",", "."))
-            content.AssignValue("signature", str(oRs[9]).replace(",", "."))
+            content.AssignValue("speed", str(row[4]).replace(",", "."))
+            content.AssignValue("shield", str(row[5]).replace(",", "."))
+            content.AssignValue("handling", str(row[6]).replace(",", "."))
+            content.AssignValue("targeting", str(row[7]).replace(",", "."))
+            content.AssignValue("damages", str(row[8]).replace(",", "."))
+            content.AssignValue("signature", str(row[9]).replace(",", "."))
 
-            content.AssignValue("build", str(oRs[10]).replace(",", "."))
-            content.AssignValue("ship", str(oRs[11]).replace(",", "."))
+            content.AssignValue("build", str(row[10]).replace(",", "."))
+            content.AssignValue("ship", str(row[11]).replace(",", "."))
 
             content.AssignValue("max_ore", str(self.max_ore).replace(",", "."))
             content.AssignValue("max_hydrocarbon", str(self.max_hydrocarbon).replace(",", "."))
@@ -278,11 +279,11 @@ class View(BaseView):
                     " mod_construction_speed_buildings, mod_construction_speed_ships" + \
                     " FROM gm_commanders" + \
                     " WHERE id=" + str(CommanderId) + " AND ownerid=" + str(self.userId)
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs[0] <= self.max_ore+0.0001 and oRs[1] <= self.max_hydrocarbon+0.0001 and oRs[2] <= self.max_energy+0.0001 and oRs[3] <= self.max_workers+0.0001 and \
-            oRs[4] <= self.max_speed+0.0001 and oRs[5] <= self.max_shield+0.0001 and oRs[6] <= self.max_handling+0.0001 and oRs[7] <= self.max_targeting+0.0001 and oRs[8] <= self.max_damages+0.0001 and oRs[9] <= self.max_signature+0.0001 and \
-            oRs[10] <= self.max_build+0.0001 and oRs[11] <= self.max_ship+0.0001:
+        if row[0] <= self.max_ore+0.0001 and row[1] <= self.max_hydrocarbon+0.0001 and row[2] <= self.max_energy+0.0001 and row[3] <= self.max_workers+0.0001 and \
+            row[4] <= self.max_speed+0.0001 and row[5] <= self.max_shield+0.0001 and row[6] <= self.max_handling+0.0001 and row[7] <= self.max_targeting+0.0001 and row[8] <= self.max_damages+0.0001 and row[9] <= self.max_signature+0.0001 and \
+            row[10] <= self.max_build+0.0001 and row[11] <= self.max_ship+0.0001:
 
             query = "SELECT internal_fleet_update_bonuses(id) FROM gm_fleets WHERE commanderid=" + str(CommanderId)
             dbExecute(query)

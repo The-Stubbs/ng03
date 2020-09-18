@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -19,8 +20,8 @@ class View(BaseView):
             newCat = ToInt(request.GET.get("new"), 0)
             fleetid = ToInt(request.GET.get("id"), 0)
 
-            oRs = dbRow("SELECT user_fleet_category_assign(" + str(self.userId) + "," + str(fleetid) + "," + str(oldCat) + "," + str(newCat) + ")")
-            if oRs and oRs[0]:
+            row = dbRow("SELECT user_fleet_category_assign(" + str(self.userId) + "," + str(fleetid) + "," + str(oldCat) + "," + str(newCat) + ")")
+            if row and row[0]:
                 
                 content = self.loadTemplate("fleets-handler")
 
@@ -41,10 +42,10 @@ class View(BaseView):
             content = self.loadTemplate("fleets-handler")
 
             if self.isValidCategoryName(name):
-                oRs = dbRow("SELECT user_fleet_category_create(" + str(self.userId) + "," + sqlStr(name) + ")")
+                row = dbRow("SELECT user_fleet_category_create(" + str(self.userId) + "," + sqlStr(name) + ")")
 
-                if oRs:
-                    content.AssignValue("id", oRs[0])
+                if row:
+                    content.AssignValue("id", row[0])
                     content.AssignValue("label", name)
                     content.Parse("category")
 
@@ -63,8 +64,8 @@ class View(BaseView):
             content = self.loadTemplate("fleets-handler")
 
             if name == "":
-                oRs = dbRow("SELECT user_fleet_category_delete(" + str(self.userId) + "," + str(catid) + ")")
-                if oRs:
+                row = dbRow("SELECT user_fleet_category_delete(" + str(self.userId) + "," + str(catid) + ")")
+                if row:
                     content.AssignValue("id", catid)
                     content.AssignValue("label", name)
                     content.Parse("category")
@@ -72,9 +73,9 @@ class View(BaseView):
                     return render(self.request, content.template, content.data)
 
             elif self.isValidCategoryName(name):
-                oRs = dbRow("SELECT user_fleet_category_rename(" + str(self.userId) + "," + str(catid) + "," + sqlStr(name) + ")")
+                row = dbRow("SELECT user_fleet_category_rename(" + str(self.userId) + "," + str(catid) + "," + sqlStr(name) + ")")
 
-                if oRs:
+                if row:
                     content.AssignValue("id", catid)
                     content.AssignValue("label", name)
                     content.Parse("category")
@@ -86,7 +87,7 @@ class View(BaseView):
 
                 return render(self.request, content.template, content.data)
         
-        self.selectedMenu = "fleets.fleets"
+        self.selected_menu = "fleets.fleets"
 
         content = self.loadTemplate("fleets")
 
@@ -102,13 +103,13 @@ class View(BaseView):
         oRss = dbRows(query)
         
         if oRss:
-            for oRs in oRss:
+            for row in oRss:
 
                 category = {}
                 categories.append(category)
                 
-                category["id"] = oRs[0]
-                category["label"] = oRs[1]
+                category["id"] = row[0]
+                category["label"] = row[1]
 
         # --- fleets
 
@@ -127,58 +128,58 @@ class View(BaseView):
         oRss = dbRows(query)
         
         if oRss:
-            for oRs in oRss:
+            for row in oRss:
                 
                 fleet = {}
                 fleets.append(fleet)
                 
-                fleet["id"] = oRs[0]
-                fleet["name"] = oRs[1]
-                fleet["category"] = oRs[37]
-                fleet["size"] = oRs[4]
-                fleet["signature"] = oRs[5]
-                fleet["cargo_load"] = oRs[27] + oRs[28] + oRs[29] + oRs[30] + oRs[31]
-                fleet["cargo_capacity"] = oRs[26]
-                fleet["cargo_ore"] = oRs[27]
-                fleet["cargo_hydrocarbon"] = oRs[28]
-                fleet["cargo_scientists"] = oRs[29]
-                fleet["cargo_soldiers"] = oRs[30]
-                fleet["cargo_workers"] = oRs[31]
-                fleet["commander_name"] = oRs[9]
-                fleet["action"] = abs(oRs[34])
-                fleet["stance"] = oRs[2]
-                fleet["time"] = oRs[7]
+                fleet["id"] = row[0]
+                fleet["name"] = row[1]
+                fleet["category"] = row[37]
+                fleet["size"] = row[4]
+                fleet["signature"] = row[5]
+                fleet["cargo_load"] = row[27] + row[28] + row[29] + row[30] + row[31]
+                fleet["cargo_capacity"] = row[26]
+                fleet["cargo_ore"] = row[27]
+                fleet["cargo_hydrocarbon"] = row[28]
+                fleet["cargo_scientists"] = row[29]
+                fleet["cargo_soldiers"] = row[30]
+                fleet["cargo_workers"] = row[31]
+                fleet["commander_name"] = row[9]
+                fleet["action"] = abs(row[34])
+                fleet["stance"] = row[2]
+                fleet["time"] = row[7]
     
-                if oRs[3]: fleet["action"] = "x"
+                if row[3]: fleet["action"] = "x"
     
-                if oRs[10]:
+                if row[10]:
                     origin = {}
                     fleet["planet"] = origin
                     
-                    origin["id"] = oRs[10]
-                    origin["g"] = oRs[12]
-                    origin["s"] = oRs[13]
-                    origin["p"] = oRs[14]
-                    origin["relation"] = oRs[17]
-                    origin["name"] = self.getPlanetName(oRs[17], oRs[35], oRs[16], oRs[11])
+                    origin["id"] = row[10]
+                    origin["g"] = row[12]
+                    origin["s"] = row[13]
+                    origin["p"] = row[14]
+                    origin["relation"] = row[17]
+                    origin["name"] = self.getPlanetName(row[17], row[35], row[16], row[11])
     
-                if oRs[18]:
+                if row[18]:
                     destination = {}
                     fleet["destination"] = destination
                     
-                    destination["id"] = oRs[18]
-                    destination["g"] = oRs[20]
-                    destination["s"] = oRs[21]
-                    destination["p"] = oRs[22]
-                    destination["relation"] = oRs[25]
-                    destination["name"] = self.getPlanetName(oRs[25], oRs[36], oRs[24], oRs[19])
+                    destination["id"] = row[18]
+                    destination["g"] = row[20]
+                    destination["s"] = row[21]
+                    destination["p"] = row[22]
+                    destination["relation"] = row[25]
+                    destination["name"] = self.getPlanetName(row[25], row[36], row[24], row[19])
     
                 fleet["ships"] = []
                 
                 query = "SELECT fleetid, gm_fleet_ships.shipid, quantity" + \
                         " FROM gm_fleets" + \
                         "    INNER JOIN gm_fleet_ships ON (gm_fleets.id=gm_fleet_ships.fleetid)" + \
-                        " WHERE fleetid=" + str(oRs[0]) + " AND ownerid=" + str(self.userId) + \
+                        " WHERE fleetid=" + str(row[0]) + " AND ownerid=" + str(self.userId) + \
                         " ORDER BY fleetid, gm_fleet_ships.shipid"
                 oRss2 = dbRows(query)
                 

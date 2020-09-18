@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "ranking.players"
+        self.selected_menu = "ranking.players"
 
         return self.DisplayRanking()
 
@@ -62,12 +63,12 @@ class View(BaseView):
                 " FROM vw_gm_profiles" + \
                 " WHERE True "+searchby + \
                 " ORDER BY score DESC OFFSET 9 LIMIT 1"
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs == None:
+        if row == None:
             TenthUserScore = 0
         else:
-            TenthUserScore = oRs[0]
+            TenthUserScore = row[0]
 
         displayed = 100 # number of nations displayed per page
 
@@ -85,8 +86,8 @@ class View(BaseView):
 
             index = 0
             found = False
-            for oRs in oRss:
-                if oRs[0] == self.userId:
+            for row in oRss:
+                if row[0] == self.userId:
                     found = True
                     break
 
@@ -98,8 +99,8 @@ class View(BaseView):
 
         # get total number of players that could be displayed
         query = "SELECT count(1) FROM vw_gm_profiles WHERE True "+searchby
-        oRs = dbRow(query)
-        size = int(oRs[0])
+        row = dbRow(query)
+        size = int(row[0])
         nb_pages = int(size/displayed)
         if nb_pages*displayed < size: nb_pages = nb_pages + 1
         if offset >= nb_pages: offset = nb_pages-1
@@ -146,58 +147,58 @@ class View(BaseView):
                 " ORDER BY "+orderby+" OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
         oRss = dbRows(query)
 
-        if oRs == None: content.Parse("noresult")
+        if row == None: content.Parse("noresult")
 
         i = 1
         list = []
         content.AssignValue("players", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
             item["place"] = offset*displayed+i
-            item["username"] = oRs[0]
+            item["username"] = row[0]
 
-            visible = oRs[10]
+            visible = row[10]
 
-            if visible and oRs[4]:
-                item["alliancename"] = oRs[4]
-                item["alliancetag"] = oRs[5]
+            if visible and row[4]:
+                item["alliancename"] = row[4]
+                item["alliancetag"] = row[5]
                 item["alliance"] = True
             else:
                 item["noalliance"] = True
 
-            item["score"] = oRs[1]
-            item["score_battle"] = oRs[2]
+            item["score"] = row[1]
+            item["score_battle"] = row[2]
             if visible:
-                item["score_delta"] = oRs[9]
-                if oRs[9] > 0: item["plus"] = True
-                if oRs[9] < 0: item["minus"] = True
+                item["score_delta"] = row[9]
+                if row[9] > 0: item["plus"] = True
+                if row[9] < 0: item["minus"] = True
             else:
                 item["score_delta"] = ""
 
-            item["stat_colonies"] = oRs[2]
-            item["last_login"] = oRs[3]
+            item["stat_colonies"] = row[2]
+            item["last_login"] = row[3]
 
-            if oRs[3] <= 7:
+            if row[3] <= 7:
                 item["recently"] = True
-            elif oRs[3] <= 14:
+            elif row[3] <= 14:
                 item["1weekplus"] = True
-            elif oRs[3] > 14:
+            elif row[3] > 14:
                 item["2weeksplus"] = True
 
             if visible:
-                if oRs[6] == self.userId:
+                if row[6] == self.userId:
                     item["self"] = True
-                elif self.allianceId and oRs[8] == self.allianceId:
+                elif self.allianceId and row[8] == self.allianceId:
                     item["ally"] = True
 
                 # show avatar only if top 10
-                if oRs[1] >= TenthUserScore:
-                    if oRs[7] == None or oRs[7] == "":
+                if row[1] >= TenthUserScore:
+                    if row[7] == None or row[7] == "":
                         item["noavatar"] = True
                     else:
-                        item["avatar_url"] = oRs[7]
+                        item["avatar_url"] = row[7]
                         item["avatar"] = True
 
                     item["top10avatar"] = True

@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "buildings"
+        self.selected_menu = "buildings"
         
         self.showHeader = True
         
@@ -59,28 +60,28 @@ class View(BaseView):
                 " scientists, scientists_capacity, soldiers, soldiers_capacity, energy_production-energy_consumption" + \
                 " FROM vw_gm_planets" + \
                 " WHERE id="+str(self.currentPlanetId)
-        oRs = dbRow(query)
+        row = dbRow(query)
     
-        if oRs == None: return
+        if row == None: return
     
-        self.OreBonus = oRs[7]
-        self.HydroBonus = oRs[8]
-        self.EnergyBonus = oRs[9]
-        self.pOre = oRs[0]
-        self.pHydrocarbon = oRs[1]
-        self.pWorkers = oRs[2]
-        self.pVacantWorkers = oRs[3]
-        self.pEnergy = oRs[4]
-        self.pFloor = oRs[5]
-        self.pSpace = oRs[6]
-        self.pBonusEnergy = oRs[9]
-        self.pOreCapacity = oRs[10]
-        self.pHydrocarbonCapacity = oRs[11]
+        self.OreBonus = row[7]
+        self.HydroBonus = row[8]
+        self.EnergyBonus = row[9]
+        self.pOre = row[0]
+        self.pHydrocarbon = row[1]
+        self.pWorkers = row[2]
+        self.pVacantWorkers = row[3]
+        self.pEnergy = row[4]
+        self.pFloor = row[5]
+        self.pSpace = row[6]
+        self.pBonusEnergy = row[9]
+        self.pOreCapacity = row[10]
+        self.pHydrocarbonCapacity = row[11]
     
-        self.pScientists = oRs[12]
-        self.pScientistsCapacity = oRs[13]
-        self.pSoldiers = oRs[14]
-        self.pSoldiersCapacity = oRs[15]
+        self.pScientists = row[12]
+        self.pScientistsCapacity = row[13]
+        self.pSoldiers = row[14]
+        self.pSoldiersCapacity = row[15]
     
         # Retrieve buildings of current planet
         query = "SELECT planetid, buildingid, quantity FROM gm_planet_buildings WHERE quantity > 0 AND planetid=" + str(self.currentPlanetId)
@@ -178,8 +179,8 @@ class View(BaseView):
     def ListBuildings(self):
     
         # count number of buildings under construction
-        oRs = dbRow("SELECT int4(count(*)) FROM gm_planet_building_pendings WHERE planetid=" + str(self.currentPlanetId) + " LIMIT 1")
-        underConstructionCount = oRs[0]
+        row = dbRow("SELECT int4(count(*)) FROM gm_planet_building_pendings WHERE planetid=" + str(self.currentPlanetId) + " LIMIT 1")
+        underConstructionCount = row[0]
     
         # list buildings that can be built on the planet
         query = "SELECT id, category, cost_prestige, cost_ore, cost_hydrocarbon, cost_energy, cost_credits, workers, floor, space," + \
@@ -198,13 +199,13 @@ class View(BaseView):
             
         categories = []
         index = 1
-        for oRs in oRss:
+        for row in oRss:
             # if can be built or has some already built, display it
-            if oRs[19] or oRs[11] > 0:
+            if row[19] or row[11] > 0:
         
-                BuildingId = oRs[0]
+                BuildingId = row[0]
         
-                CatId = oRs[1]
+                CatId = row[1]
         
                 if CatId != lastCategory:
                     category = {'id': CatId, 'buildings':[]}
@@ -213,23 +214,23 @@ class View(BaseView):
                     
                 building = {}
                 building["id"] = BuildingId
-                building["name"] = getBuildingLabel(oRs[0])
+                building["name"] = getBuildingLabel(row[0])
         
-                building["ore"] = oRs[3]
-                building["hydrocarbon"] = oRs[4]
-                building["energy"] = oRs[5]
-                building["credits"] = oRs[6]
-                building["workers"] = oRs[7]
-                building["prestige"] = oRs[2]
+                building["ore"] = row[3]
+                building["hydrocarbon"] = row[4]
+                building["energy"] = row[5]
+                building["credits"] = row[6]
+                building["workers"] = row[7]
+                building["prestige"] = row[2]
         
-                building["floor"] = oRs[8]
-                building["space"] = oRs[9]
-                building["time"] = oRs[13]
-                building["description"] = getBuildingDescription(oRs[0])
+                building["floor"] = row[8]
+                building["space"] = row[9]
+                building["time"] = row[13]
+                building["description"] = getBuildingDescription(row[0])
         
-                OreProd= oRs[16]
-                HydroProd= oRs[17]
-                EnergyProd= oRs[18]
+                OreProd= row[16]
+                HydroProd= row[17]
+                EnergyProd= row[18]
         
                 building["ore_prod"] = int(OreProd)
                 building["hydro_prod"] = int(HydroProd)
@@ -261,12 +262,12 @@ class View(BaseView):
                     building["tipprod.energy"] = True
                     building["tipprod"] = True
                 
-                maximum = oRs[10]
-                quantity = oRs[11]
+                maximum = row[10]
+                quantity = row[11]
         
                 building["quantity"] = quantity
         
-                status = oRs[12]
+                status = row[12]
         
                 building["remainingtime"] = ""
                 building["nextdestroytime"] = ""
@@ -278,7 +279,7 @@ class View(BaseView):
                     building["underconstruction"] = True
                     building["isbuilding"] = True
         
-                elif not oRs[23]:
+                elif not row[23]:
                     building["limitreached"] = True
                 elif (quantity > 0) and (quantity >= maximum):
                     if quantity == 1:
@@ -286,7 +287,7 @@ class View(BaseView):
                     else:
                         building["limitreached"] = True
                     
-                elif not oRs[19]:
+                elif not row[19]:
         
                     building["buildings_required"] = True
         
@@ -294,31 +295,31 @@ class View(BaseView):
                     notenoughspace = False
                     notenoughresources = False
         
-                    if oRs[8] > self.pFloor:
+                    if row[8] > self.pFloor:
                         building["not_enough_floor"] = True
                         notenoughspace = True
                         
-                    if oRs[9] > self.pSpace:
+                    if row[9] > self.pSpace:
                         building["not_enough_space"] = True
                         notenoughspace = True
                         
-                    if oRs[2] > 0 and oRs[2] > self.userInfo["prestige_points"]:
+                    if row[2] > 0 and row[2] > self.userInfo["prestige_points"]:
                         building["not_enough_prestige"] = True
                         notenoughresources = True
                         
-                    if oRs[3] > 0 and oRs[3] > self.pOre:
+                    if row[3] > 0 and row[3] > self.pOre:
                         building["not_enough_ore"] = True
                         notenoughresources = True
                         
-                    if oRs[4] > 0 and oRs[4] > self.pHydrocarbon:
+                    if row[4] > 0 and row[4] > self.pHydrocarbon:
                         building["not_enough_hydrocarbon"] = True
                         notenoughresources = True
                     
-                    if oRs[5] > 0 and oRs[5] > self.pEnergy:
+                    if row[5] > 0 and row[5] > self.pEnergy:
                         building["not_enough_energy"] = True
                         notenoughresources = True
                         
-                    if oRs[7] > 0 and oRs[7] > self.pWorkers:
+                    if row[7] > 0 and row[7] > self.pWorkers:
                         building["not_enough_workers"] = True
                         notenoughresources = True
                     
@@ -330,10 +331,10 @@ class View(BaseView):
                     else:
                         building["build"] = True
 
-                if (quantity > 0) and oRs[14]:
+                if (quantity > 0) and row[14]:
         
-                    if oRs[20]:
-                        building["nextdestroytime"] = oRs[20]
+                    if row[20]:
+                        building["nextdestroytime"] = row[20]
                         building["next_destruction_in"] = True
                         building["isdestroying"] = True
                     elif not self.HasEnoughWorkersToDestroy(BuildingId):
@@ -352,8 +353,8 @@ class View(BaseView):
                 index = index + 1
         
                 building["workers_for_maintenance"] = self.getBuildingMaintenanceWorkers(BuildingId)
-                building["upkeep"] = oRs[21]
-                building["upkeep_energy"] = oRs[22]
+                building["upkeep"] = row[21]
+                building["upkeep_energy"] = row[22]
         
                 category['buildings'].append(building)
     
@@ -365,7 +366,7 @@ class View(BaseView):
         return self.display(content)
     
     def StartBuilding(self, BuildingId):
-        oRs = dbRowRetry("SELECT user_planet_building_start(" + str(self.userId) + "," + str(self.currentPlanetId) + ", " + str(BuildingId) + ", false)")
+        row = dbRowRetry("SELECT user_planet_building_start(" + str(self.userId) + "," + str(self.currentPlanetId) + ", " + str(BuildingId) + ", false)")
         
     def CancelBuilding(self, BuildingId):
         dbExecuteRetryNoRow("SELECT user_planet_building_cancel(" + str(self.userId) + "," + str(self.currentPlanetId) + ", " + str(BuildingId) + ")")

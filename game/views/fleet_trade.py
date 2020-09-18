@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "gm_fleets"
+        self.selected_menu = "gm_fleets"
         
         self.can_command_alliance_fleets = -1
         
@@ -40,9 +41,9 @@ class View(BaseView):
         query = "SELECT ownerid" + \
                 " FROM vw_gm_fleets as f" + \
                 " WHERE (ownerid=" + str(self.userId) + " OR (shared AND owner_alliance_id=" + str(self.can_command_alliance_fleets) + ")) AND id=" + str(self.fleetid)
-        oRs = dbRow(query)
+        row = dbRow(query)
     
-        self.fleet_owner_id = oRs[0]
+        self.fleet_owner_id = row[0]
     
     # display fleet info
     def DisplayExchangeForm(self, fleetid):
@@ -54,53 +55,53 @@ class View(BaseView):
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
                 " FROM vw_gm_fleets" + \
                 " WHERE ownerid=" + str(self.fleet_owner_id) + " AND id="+str(self.fleetid)
-        oRs = dbRow(query)
+        row = dbRow(query)
     
         # if fleet doesn't exist, redirect to the list of gm_fleets
-        if oRs == None:
+        if row == None:
             if self.request.GET.get("a") == "open":
                 return HttpResponseRedirect("/game/gm_fleets/")
             else:
                 return HttpResponseRedirect("/game/gm_fleets/")
     
-        relation = oRs[17]
+        relation = row[17]
     
         # if fleet is moving or engaged, go back to the gm_fleets
-        if oRs[7] or oRs[3]:
+        if row[7] or row[3]:
             if self.request.GET.get("a") == "open":
                 relation = rWar
             else:
                 return HttpResponseRedirect("/game/fleet/?id=" + str(self.fleetid))
             
         content.AssignValue("fleetid", self.fleetid)
-        content.AssignValue("fleetname", oRs[1])
-        content.AssignValue("size", oRs[4])
-        content.AssignValue("speed", oRs[6])
+        content.AssignValue("fleetname", row[1])
+        content.AssignValue("size", row[4])
+        content.AssignValue("speed", row[6])
     
-        content.AssignValue("fleet_capacity", oRs[18])
-        content.AssignValue("fleet_ore", oRs[19])
-        content.AssignValue("fleet_hydrocarbon", oRs[20])
-        content.AssignValue("fleet_scientists", oRs[21])
-        content.AssignValue("fleet_soldiers", oRs[22])
-        content.AssignValue("fleet_workers", oRs[23])
+        content.AssignValue("fleet_capacity", row[18])
+        content.AssignValue("fleet_ore", row[19])
+        content.AssignValue("fleet_hydrocarbon", row[20])
+        content.AssignValue("fleet_scientists", row[21])
+        content.AssignValue("fleet_soldiers", row[22])
+        content.AssignValue("fleet_workers", row[23])
     
-        content.AssignValue("fleet_load", oRs[19] + oRs[20] + oRs[21] + oRs[22] + oRs[23])
+        content.AssignValue("fleet_load", row[19] + row[20] + row[21] + row[22] + row[23])
     
         if relation == rSelf:
             # retrieve planet ore, hydrocarbon, workers, relation
             query = "SELECT ore, hydrocarbon, scientists, soldiers," + \
                     " GREATEST(0, workers-GREATEST(workers_busy,workers_for_maintenance-workers_for_maintenance/2+1,500))," + \
                     " workers > workers_for_maintenance/2" + \
-                    " FROM vw_gm_planets WHERE id="+str(oRs[10])
-            oRs = dbRow(query)
+                    " FROM vw_gm_planets WHERE id="+str(row[10])
+            row = dbRow(query)
 
-            content.AssignValue("planet_ore", oRs[0])
-            content.AssignValue("planet_hydrocarbon", oRs[1])
-            content.AssignValue("planet_scientists", oRs[2])
-            content.AssignValue("planet_soldiers", oRs[3])
-            content.AssignValue("planet_workers", oRs[4])
+            content.AssignValue("planet_ore", row[0])
+            content.AssignValue("planet_hydrocarbon", row[1])
+            content.AssignValue("planet_scientists", row[2])
+            content.AssignValue("planet_soldiers", row[3])
+            content.AssignValue("planet_workers", row[4])
 
-            if not oRs[5]:
+            if not row[5]:
                 content.AssignValue("planet_ore", 0)
                 content.AssignValue("planet_hydrocarbon", 0)
                 content.Parse("not_enough_workers_to_load")
@@ -123,7 +124,7 @@ class View(BaseView):
         workers = ToInt(self.request.GET.get("load_workers"), 0) - ToInt(self.request.GET.get("unload_workers"), 0)
     
         if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
-            oRs = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
+            row = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
     
     def TransferResourcesViaPost(self, fleetid):
     
@@ -134,5 +135,5 @@ class View(BaseView):
         workers = ToInt(self.request.POST.get("load_workers"), 0) - ToInt(self.request.POST.get("unload_workers"), 0)
     
         if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
-            oRs = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
-            return HttpResponseRedirect("/game/fleet/?id=" + str(self.fleetid) + "+trade=" + str(oRs[0]))
+            row = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
+            return HttpResponseRedirect("/game/fleet/?id=" + str(self.fleetid) + "+trade=" + str(row[0]))

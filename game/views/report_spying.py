@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "intelligence"
+        self.selected_menu = "intelligence"
 
         self.id = request.GET.get("id", "")
         if self.id == "":
@@ -29,21 +30,21 @@ class View(BaseView):
                 " FROM gm_spyings" + \
                 " WHERE id="+str(self.id)+" AND key="+sqlStr(key)
 
-        oRs = dbRow(query)
+        row = dbRow(query)
 
         # check if report exists and if given key is correct otherwise redirect to the gm_profile_reports
-        if oRs == None:
+        if row == None:
             return HttpResponseRedirect("/game/gm_profile_reports/")
 
         else:
-            #user = oRs[2]
-            typ = oRs[3]
-            self.level = oRs[4]
-            self.spydate = oRs[5]
+            #user = row[2]
+            typ = row[3]
+            self.level = row[4]
+            self.spydate = row[5]
 
-            if oRs[6]: self.credits = oRs[6]
-            self.spotted = oRs[7]
-            if oRs[8]: self.target = oRs[8]
+            if row[6]: self.credits = row[6]
+            self.spotted = row[7]
+            if row[8]: self.target = row[8]
 
         if typ == 1:
             return self.DisplayNation()
@@ -75,25 +76,25 @@ class View(BaseView):
 
         list = []
         content.AssignValue("planets", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            if oRs[2]:
-                item["planet"] = oRs[2]
+            if row[2]:
+                item["planet"] = row[2]
             else:
                 item["planet"] = target
 
-            item["g"] = oRs[6]
-            item["s"] = oRs[7]
-            item["p"] = oRs[8]
+            item["g"] = row[6]
+            item["s"] = row[7]
+            item["p"] = row[8]
 
-            item["floor"] = oRs[3]
-            item["space"] = oRs[4]
-            item["ground"] = oRs[5]
+            item["floor"] = row[3]
+            item["space"] = row[4]
+            item["ground"] = row[5]
 
-            item["pct_ore"] = oRs[9]
-            item["pct_hydrocarbon"] = oRs[10]
+            item["pct_ore"] = row[9]
+            item["pct_hydrocarbon"] = row[10]
 
             nbplanet = nbplanet + 1
 
@@ -114,9 +115,9 @@ class View(BaseView):
         lastCategory = -1
 
         cats = []
-        for oRs in oRss:
+        for row in oRss:
 
-            category = oRs[0]
+            category = row[0]
 
             if category != lastCategory:
                 cat = { "list":[] }
@@ -127,9 +128,9 @@ class View(BaseView):
             itemCount = itemCount + 1
 
             item = {}
-            item["research"] = getResearchLabel(oRs[1])
-            item["level"] = oRs[2]
-            item["levels"] = oRs[3]
+            item["research"] = getResearchLabel(row[1])
+            item["level"] = row[2]
+            item["levels"] = row[3]
 
             nbresearch = nbresearch + 1
 
@@ -168,53 +169,53 @@ class View(BaseView):
                     " ON ( s.planet_id=gm_planets.id) " + \
                 " WHERE spy_id=" + str(self.id)
 
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs == None:
+        if row == None:
             return HttpResponseRedirect("/game/gm_profile_reports/")
 
-        planet = oRs[1]
+        planet = row[1]
 
         # display basic info
-        content.AssignValue("name", oRs[2])
-        content.AssignValue("location", str(oRs[25]) + ":" + str(oRs[26]) + ":" + str(oRs[27]))
-        content.AssignValue("floor", oRs[4])
-        content.AssignValue("space", oRs[5])
-        content.AssignValue("ground", oRs[6])
+        content.AssignValue("name", row[2])
+        content.AssignValue("location", str(row[25]) + ":" + str(row[26]) + ":" + str(row[27]))
+        content.AssignValue("floor", row[4])
+        content.AssignValue("space", row[5])
+        content.AssignValue("ground", row[6])
 
-        content.AssignValue("pct_ore", oRs[28])
-        content.AssignValue("pct_hydrocarbon", oRs[29])
+        content.AssignValue("pct_ore", row[28])
+        content.AssignValue("pct_hydrocarbon", row[29])
 
-        if oRs[3]:
-            content.AssignValue("owner", oRs[3])
+        if row[3]:
+            content.AssignValue("owner", row[3])
         else:
             content.Parse("no_owner")
 
-        if oRs[7]: # display common info
-            content.AssignValue("ore", oRs[7])
-            content.AssignValue("hydrocarbon", oRs[8])
-            content.AssignValue("ore_capacity", oRs[9])
-            content.AssignValue("hydrocarbon_capacity", oRs[10])
-            content.AssignValue("ore_prod", oRs[11])
-            content.AssignValue("hydrocarbon_prod", oRs[12])
-            content.AssignValue("energy_consumption", oRs[13])
-            content.AssignValue("energy_prod", oRs[14])
+        if row[7]: # display common info
+            content.AssignValue("ore", row[7])
+            content.AssignValue("hydrocarbon", row[8])
+            content.AssignValue("ore_capacity", row[9])
+            content.AssignValue("hydrocarbon_capacity", row[10])
+            content.AssignValue("ore_prod", row[11])
+            content.AssignValue("hydrocarbon_prod", row[12])
+            content.AssignValue("energy_consumption", row[13])
+            content.AssignValue("energy_prod", row[14])
             content.Parse("common")
 
-        if oRs[15]: # display rare info
-            content.AssignValue("workers", oRs[15])
-            content.AssignValue("workers_cap", oRs[16])
-            content.AssignValue("scientists", oRs[17])
-            content.AssignValue("scientists_cap", oRs[18])
-            content.AssignValue("soldiers", oRs[19])
-            content.AssignValue("soldiers_cap", oRs[20])
+        if row[15]: # display rare info
+            content.AssignValue("workers", row[15])
+            content.AssignValue("workers_cap", row[16])
+            content.AssignValue("scientists", row[17])
+            content.AssignValue("scientists_cap", row[18])
+            content.AssignValue("soldiers", row[19])
+            content.AssignValue("soldiers_cap", row[20])
             content.Parse("rare")
 
-        if oRs[21]: # display uncommon info
-            content.AssignValue("radar_strength", oRs[21])
-            content.AssignValue("radar_jamming", oRs[22])
-            content.AssignValue("orbit_ore", oRs[23])
-            content.AssignValue("orbit_hydrocarbon", oRs[24])
+        if row[21]: # display uncommon info
+            content.AssignValue("radar_strength", row[21])
+            content.AssignValue("radar_jamming", row[22])
+            content.AssignValue("orbit_ore", row[23])
+            content.AssignValue("orbit_hydrocarbon", row[24])
             content.Parse("uncommon")
 
         # display pending buildings
@@ -230,13 +231,13 @@ class View(BaseView):
         if oRss:
             list = []
             content.AssignValue("buildings_pendings", list)
-            for oRs in oRss:
+            for row in oRss:
                 item = {}
                 list.append(item)
                 
-                item["building"] = oRs[2]
-                item["qty"] = oRs[1]
-                item["endtime"] = oRs[3]
+                item["building"] = row[2]
+                item["qty"] = row[1]
+                item["endtime"] = row[3]
 
         # display built buildings
         query = " SELECT s.building_id, s.quantity, label, s.endtime, category " + \
@@ -251,12 +252,12 @@ class View(BaseView):
         if oRss:
             list = []
             content.AssignValue("buildings", list)
-            for oRs in oRss:
+            for row in oRss:
                 item = {}
                 list.append(item)
                 
-                item["building"] = oRs[2]
-                item["qty"] = oRs[1]
+                item["building"] = row[2]
+                item["qty"] = row[1]
 
         content.AssignValue("date", self.spydate)
         content.AssignValue("nation", self.target)

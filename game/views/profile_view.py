@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "nation"
+        self.selected_menu = "nation"
 
         return self.display_nation()
 
@@ -25,11 +26,11 @@ class View(BaseView):
 
         list = []
         content.AssignValue("nations", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["nation"] = oRs[0]
+            item["nation"] = row[0]
 
         return self.display(content)
 
@@ -50,39 +51,39 @@ class View(BaseView):
                 " LEFT JOIN gm_alliances AS a ON (u.alliance_id = a.id) " + \
                 " LEFT JOIN gm_alliance_ranks AS r ON (u.alliance_id = r.allianceid AND u.alliance_rank = r.rankid) " + \
                 " WHERE upper(u.login) = upper(" + sqlStr(nation) + ") LIMIT 1"
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs == None:
+        if row == None:
             if nation != "":
                 return self.display_nation_search(nation)
             else:
                 return HttpResponseRedirect("/game/nation/")
 
-        nationId = oRs[7]
+        nationId = row[7]
 
-        content.AssignValue("name", oRs[0])
-        content.AssignValue("regdate", oRs[8])
+        content.AssignValue("name", row[0])
+        content.AssignValue("regdate", row[8])
 
-        content.AssignValue("alliance_joined", oRs[10])
+        content.AssignValue("alliance_joined", row[10])
 
-        if oRs[1] == None or oRs[1] == "":
+        if row[1] == None or row[1] == "":
             content.Parse("noavatar")
         else:
-            content.AssignValue("avatar_url", oRs[1])
+            content.AssignValue("avatar_url", row[1])
             content.Parse("avatar")
 
-        if oRs[7] != self.userId: content.Parse("sendmail")
+        if row[7] != self.userId: content.Parse("sendmail")
 
-        if oRs[2] and oRs[2] != "":
-            content.AssignValue("description", oRs[2])
+        if row[2] and row[2] != "":
+            content.AssignValue("description", row[2])
 
-        if oRs[3] < rFriend:
+        if row[3] < rFriend:
             content.Parse("enemy")
-        elif oRs[3] == rFriend:
+        elif row[3] == rFriend:
             content.Parse("friend")
-        elif oRs[3] > rFriend:  # display planets + gm_fleets of alliance members if has the rights for it
+        elif row[3] > rFriend:  # display planets + gm_fleets of alliance members if has the rights for it
 
-            if oRs[3] == rAlliance:
+            if row[3] == rAlliance:
                 content.Parse("ally")
                 show_details = self.allianceRights["leader"] or self.allianceRights["can_see_members_info"]
             else:
@@ -90,13 +91,13 @@ class View(BaseView):
                 show_details = True
 
             if show_details:
-                if oRs[3] == rAlliance:
+                if row[3] == rAlliance:
                     if not self.allianceRights["leader"]:
                         show_details = False
 
                 if show_details:
                     # view current nation planets
-                    query = "SELECT name, galaxy, sector, planet FROM vw_gm_planets WHERE ownerid=" + str(oRs[7])
+                    query = "SELECT name, galaxy, sector, planet FROM vw_gm_planets WHERE ownerid=" + str(row[7])
                     query = query + " ORDER BY id"
                     oPlanetsRs = dbRows(query)
 
@@ -119,9 +120,9 @@ class View(BaseView):
                     " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, internal_profile_get_relation(planet_ownerid, ownerid)," + \
                     " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, internal_profile_get_relation(destplanet_ownerid, ownerid)," + \
                     " action, signature, internal_profile_get_sector_radar_strength(ownerid, planet_galaxy, planet_sector), internal_profile_get_sector_radar_strength(ownerid, destplanet_galaxy, destplanet_sector)" + \
-                    " FROM vw_gm_fleets WHERE ownerid=" + str(oRs[7])
+                    " FROM vw_gm_fleets WHERE ownerid=" + str(row[7])
 
-                if oRs[3] == rAlliance:
+                if row[3] == rAlliance:
                     if not self.allianceRights["leader"]:
                         query = query + " AND action != 0"
 
@@ -151,7 +152,7 @@ class View(BaseView):
                     i["relation"] = rs[12]
                     i["planetname"] = self.getPlanetName(rs[12], rs[23], rs[11], rs[6])
 
-                    if oRs[3] == rAlliance:
+                    if row[3] == rAlliance:
                         i["ally"] = True
                     else:
                         i["owned"] = True
@@ -175,16 +176,16 @@ class View(BaseView):
 
                 content.Parse("allied")
 
-        if oRs[4] == None:
-            content.AssignValue("alliancename", oRs[6])
-            content.AssignValue("alliancetag", oRs[5])
-            content.AssignValue("rank_label", oRs[9])
+        if row[4] == None:
+            content.AssignValue("alliancename", row[6])
+            content.AssignValue("alliancetag", row[5])
+            content.AssignValue("rank_label", row[9])
 
-            if oRs[3] == rSelf:
+            if row[3] == rSelf:
                 content.Parse("self")
-            elif oRs[3] == rAlliance:
+            elif row[3] == rAlliance:
                 content.Parse("ally")
-            elif oRs[3] == rFriend:
+            elif row[3] == rFriend:
                 content.Parse("friend")
             else:
                 content.Parse("enemy")
@@ -201,13 +202,13 @@ class View(BaseView):
 
         list = []
         content.AssignValue("gm_alliances", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["history_tag"] = oRs[0]
-            item["history_name"] = oRs[1]
-            item["joined"] = oRs[2]
-            item["left"] = oRs[3]
+            item["history_tag"] = row[0]
+            item["history_name"] = row[1]
+            item["joined"] = row[2]
+            item["left"] = row[3]
 
         return self.display(content)

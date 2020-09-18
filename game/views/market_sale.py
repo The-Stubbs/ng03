@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "merchants.sell"
+        self.selected_menu = "merchants.sell"
 
         self.ExecuteOrder()
 
@@ -48,56 +49,56 @@ class View(BaseView):
         i = 1
         list = []
         content.AssignValue("m_planets", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            p_img = 1+(oRs[9] + oRs[0]) % 21
+            p_img = 1+(row[9] + row[0]) % 21
             if p_img < 10: p_img = "0" + str(p_img)
 
             item["index"] = i
 
             item["planet_img"] = p_img
 
-            item["planet_id"] = oRs[0]
-            item["planet_name"] = oRs[1]
-            item["g"] = oRs[2]
-            item["s"] = oRs[3]
-            item["p"] = oRs[4]
+            item["planet_id"] = row[0]
+            item["planet_name"] = row[1]
+            item["g"] = row[2]
+            item["s"] = row[3]
+            item["p"] = row[4]
 
-            item["planet_ore"] = oRs[5]
-            item["planet_hydrocarbon"] = oRs[6]
+            item["planet_ore"] = row[5]
+            item["planet_hydrocarbon"] = row[6]
 
-            item["planet_ore_capacity"] = oRs[7]
-            item["planet_hydrocarbon_capacity"] = oRs[8]
+            item["planet_ore_capacity"] = row[7]
+            item["planet_hydrocarbon_capacity"] = row[8]
 
-            item["planet_ore_production"] = oRs[10]
-            item["planet_hydrocarbon_production"] = oRs[11]
+            item["planet_ore_production"] = row[10]
+            item["planet_hydrocarbon_production"] = row[11]
 
-            item["ore_price"] = oRs[12]
-            item["hydrocarbon_price"] = oRs[13]
+            item["ore_price"] = row[12]
+            item["hydrocarbon_price"] = row[13]
 
-            item["ore_price2"] = str(oRs[12]).replace( ",", ".")
-            item["hydrocarbon_price2"] = str(oRs[13]).replace(",", ".")
+            item["ore_price2"] = str(row[12]).replace( ",", ".")
+            item["hydrocarbon_price2"] = str(row[13]).replace(",", ".")
 
             # if ore/hydrocarbon quantity reach their capacity in less than 4 hours
-            if oRs[5] > oRs[7]-4*oRs[10]: item["high_ore_capacity"] = True
-            if oRs[6] > oRs[8]-4*oRs[11]: item["high_hydrocarbon_capacity"] = True
+            if row[5] > row[7]-4*row[10]: item["high_ore_capacity"] = True
+            if row[6] > row[8]-4*row[11]: item["high_hydrocarbon_capacity"] = True
 
-            item["ore_max"] = min(10000, int(oRs[5]/1000))
-            item["hydrocarbon_max"] = min(10000, int(oRs[6]/1000))
+            item["ore_max"] = min(10000, int(row[5]/1000))
+            item["hydrocarbon_max"] = min(10000, int(row[6]/1000))
 
             item["selling_price"] = 0
 
             count = count + 1
 
-            if oRs[0] == self.currentPlanetId: item["highlight"] = True
+            if row[0] == self.currentPlanetId: item["highlight"] = True
 
             i = i + 1
 
         if planet_query != "":
             self.showHeader = True
-            self.selectedMenu = "market.sell"
+            self.selected_menu = "market.sell"
 
             content.Parse("planetid")
         else:
@@ -133,5 +134,5 @@ class View(BaseView):
             if ore > 0 or hydrocarbon > 0:
                 query = "SELECT user_planet_sell_resources(" + str(self.userId) + "," + str(planetid) + "," + str(ore*1000) + "," + str(hydrocarbon*1000) + ")"
                 self.request.session["details"] = query
-                oRs = dbRow(query)
+                row = dbRow(query)
                 self.request.session["details"] = "done:"+query

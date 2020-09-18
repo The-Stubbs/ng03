@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "gm_fleets.orbiting"
+        self.selected_menu = "gm_fleets.orbiting"
 
         return self.listFleetsOrbiting()
 
@@ -36,36 +37,36 @@ class View(BaseView):
             planets = []
             content.AssignValue("planets", planets)
             
-            for oRs in oRss:
+            for row in oRss:
                 
-                if oRs[0] != lastplanetid:
+                if row[0] != lastplanetid:
                     planet = { "gm_fleets":[] }
                     planets.append(planet)
                     
-                    planet["planetid"] = oRs[0]
-                    planet["planetname"] = oRs[1]
-                    planet["g"] = oRs[2]
-                    planet["s"] = oRs[3]
-                    planet["p"] = oRs[4]
+                    planet["planetid"] = row[0]
+                    planet["planetname"] = row[1]
+                    planet["g"] = row[2]
+                    planet["s"] = row[3]
+                    planet["p"] = row[4]
                     
-                    lastplanetid = oRs[0]
+                    lastplanetid = row[0]
 
                 item = {}
                 planet["gm_fleets"].append(item)
 
-                if (oRs[8]):
-                    item["tag"] = oRs[8]
+                if (row[8]):
+                    item["tag"] = row[8]
                     item["alliance"] = True
 
-                if oRs[9] == -1:
+                if row[9] == -1:
                     item["enemy"] = True
-                elif oRs[9] == 0:
+                elif row[9] == 0:
                     item["friend"] = True
-                elif oRs[9] == 1:
+                elif row[9] == 1:
                     item["ally"] = True
 
-                item["fleetname"] = oRs[6]
-                item["fleetowner"] = oRs[7]
-                item["fleetsignature"] = oRs[10]
+                item["fleetname"] = row[6]
+                item["fleetowner"] = row[7]
+                item["fleetsignature"] = row[10]
 
         return self.display(content)

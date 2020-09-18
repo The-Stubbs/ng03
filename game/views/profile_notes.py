@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "notes"
+        self.selected_menu = "notes"
 
         self.notes_status = ""
 
@@ -31,9 +32,9 @@ class View(BaseView):
 
         content.AssignValue("maxlength", 5000)
 
-        oRs = dbRow("SELECT notes FROM gm_profiles WHERE id = " + str(self.userId) + " LIMIT 1" )
+        row = dbRow("SELECT notes FROM gm_profiles WHERE id = " + str(self.userId) + " LIMIT 1" )
 
-        content.AssignValue("data_notes", oRs[0])
+        content.AssignValue("data_notes", row[0])
 
         if self.notes_status != "":
             content.Parse(self.notes_status)

@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "gm_fleets.standby"
+        self.selected_menu = "gm_fleets.standby"
 
         return self.ListStandby()
 
@@ -32,24 +33,24 @@ class View(BaseView):
 
             list = []
             content.AssignValue("planets", list)
-            for oRs in oRss:
+            for row in oRss:
                 
-                if oRs[0] != lastplanetid:
+                if row[0] != lastplanetid:
                     planet = { "ships":[] }
                     list.append(planet)
                     
-                    lastplanetid = oRs[0]
+                    lastplanetid = row[0]
 
-                    planet["planetid"] = oRs[0]
-                    planet["planetname"] = oRs[1]
-                    planet["g"] = oRs[2]
-                    planet["s"] = oRs[3]
-                    planet["p"] = oRs[4]
+                    planet["planetid"] = row[0]
+                    planet["planetname"] = row[1]
+                    planet["g"] = row[2]
+                    planet["s"] = row[3]
+                    planet["p"] = row[4]
                     
                 item = {}
                 planet["ships"].append(item)
                 
-                item["ship"] = getShipLabel(oRs[5])
-                item["quantity"] = oRs[6]
+                item["ship"] = getShipLabel(row[5])
+                item["quantity"] = row[6]
 
         return self.display(content)

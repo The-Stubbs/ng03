@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "help"
+        self.selected_menu = "help"
 
         cat = request.GET.get("cat", "")
 
@@ -35,9 +36,9 @@ class View(BaseView):
 
             list = []
             content.AssignValue("categories", list)
-            for oRs in oRss:
+            for row in oRss:
                 
-                category = oRs[1]
+                category = row[1]
 
                 if category != lastCategory:
                     categ = {'id': category, 'buildings':[]}
@@ -47,41 +48,41 @@ class View(BaseView):
                 item = {}
                 categ['buildings'].append(item)
                 
-                item["id"] = oRs[0]
-                item["category"] = oRs[1]
-                item["name"] = getBuildingLabel(oRs[0])
-                item["description"] = getBuildingDescription(oRs[0])
+                item["id"] = row[0]
+                item["category"] = row[1]
+                item["name"] = getBuildingLabel(row[0])
+                item["description"] = getBuildingDescription(row[0])
 
-                item["ore"] = oRs[2]
-                item["hydrocarbon"] = oRs[3]
-                item["workers"] = oRs[4]
+                item["ore"] = row[2]
+                item["hydrocarbon"] = row[3]
+                item["workers"] = row[4]
 
-                item["floor"] = oRs[5]
-                item["space"] = oRs[6]
+                item["floor"] = row[5]
+                item["space"] = row[6]
 
                 # production
-                item["ore_production"] = oRs[7]
-                if oRs[7] > 0: item["produce_ore"] = True
+                item["ore_production"] = row[7]
+                if row[7] > 0: item["produce_ore"] = True
 
-                item["hydrocarbon_production"] = oRs[8]
-                if oRs[8] > 0: item["produce_hydrocarbon"] = True
+                item["hydrocarbon_production"] = row[8]
+                if row[8] > 0: item["produce_hydrocarbon"] = True
 
-                item["energy_production"] = oRs[9]
-                if oRs[9] > 0: item["produce_energy"] = True
+                item["energy_production"] = row[9]
+                if row[9] > 0: item["produce_energy"] = True
 
                 # storage
-                item["ore_storage"] = oRs[13]
-                if oRs[13] > 0: item["storage_ore"] = True
+                item["ore_storage"] = row[13]
+                if row[13] > 0: item["storage_ore"] = True
 
-                item["hydrocarbon_storage"] = oRs[14]
-                if oRs[14] > 0: item["storage_hydrocarbon"] = True
+                item["hydrocarbon_storage"] = row[14]
+                if row[14] > 0: item["storage_hydrocarbon"] = True
 
-                item["energy_storage"] = oRs[15]
-                if oRs[15] > 0: item["storage_energy"] = True
+                item["energy_storage"] = row[15]
+                if row[15] > 0: item["storage_energy"] = True
 
-                item["upkeep_workers"] = int(oRs[10])
+                item["upkeep_workers"] = int(row[10])
                 item["upkeep_credits"] = 0
-                item["upkeep_energy"] = oRs[12]
+                item["upkeep_energy"] = row[12]
 
         elif cat == "research":# display help on gm_profile_researches
             query = "SELECT researchid, category, total_cost, level, levels" + \
@@ -95,9 +96,9 @@ class View(BaseView):
 
             list = []
             content.AssignValue("categories", list)
-            for oRs in oRss:
+            for row in oRss:
 
-                category = oRs[1]
+                category = row[1]
 
                 if category != lastCategory:
                     categ = {'id': category, 'gm_profile_researches':[]}
@@ -107,12 +108,12 @@ class View(BaseView):
                 item = {}
                 categ['gm_profile_researches'].append(item)
 
-                item["id"] = oRs[0]
-                item["name"] = getResearchLabel(oRs[0])
-                item["description"] = getResearchDescription(oRs[0])
+                item["id"] = row[0]
+                item["name"] = getResearchLabel(row[0])
+                item["description"] = getResearchDescription(row[0])
 
-                if oRs[3] < oRs[4]:
-                    item["cost_credits"] = oRs[2]
+                if row[3] < row[4]:
+                    item["cost_credits"] = row[2]
                 else:
                     item["cost_credits"] = ""
 
@@ -128,9 +129,9 @@ class View(BaseView):
 
             list = []
             content.AssignValue("categories", list)
-            for oRs in oRss:
+            for row in oRss:
 
-                category = oRs["category"]
+                category = row["category"]
 
                 if category != lastCategory:
                     categ = {'id': category, 'ships':[]}
@@ -140,52 +141,52 @@ class View(BaseView):
                 item = {}
                 categ['ships'].append(item)
 
-                item["id"] = oRs["id"]
-                item["category"] = oRs["category"]
-                item["name"] = getShipLabel(oRs["id"])
-                item["description"] = getShipDescription(oRs["id"])
+                item["id"] = row["id"]
+                item["category"] = row["category"]
+                item["name"] = getShipLabel(row["id"])
+                item["description"] = getShipDescription(row["id"])
 
-                item["ore"] = oRs["cost_ore"]
-                item["hydrocarbon"] = oRs["cost_hydrocarbon"]
-                item["crew"] = oRs["crew"]
-                item["energy"] = oRs["cost_energy"]
+                item["ore"] = row["cost_ore"]
+                item["hydrocarbon"] = row["cost_hydrocarbon"]
+                item["crew"] = row["crew"]
+                item["energy"] = row["cost_energy"]
 
-                item["ship_signature"] = oRs["signature"]
-                item["ship_cargo"] = oRs["capacity"]
-                item["ship_handling"] = oRs["handling"]
-                item["ship_speed"] = oRs["speed"]
+                item["ship_signature"] = row["signature"]
+                item["ship_cargo"] = row["capacity"]
+                item["ship_handling"] = row["handling"]
+                item["ship_speed"] = row["speed"]
 
-                item["ship_upkeep"] = oRs["upkeep"]
+                item["ship_upkeep"] = row["upkeep"]
 
-                if oRs["weapon_power"] > 0:
-                    item["ship_turrets"] = oRs["weapon_turrets"]
-                    item["ship_power"] = oRs["weapon_power"]
-                    item["ship_tracking_speed"] = oRs["weapon_tracking_speed"]
+                if row["weapon_power"] > 0:
+                    item["ship_turrets"] = row["weapon_turrets"]
+                    item["ship_power"] = row["weapon_power"]
+                    item["ship_tracking_speed"] = row["weapon_tracking_speed"]
                     item["attack"] = True
 
-                item["ship_hull"] = oRs["hull"]
+                item["ship_hull"] = row["hull"]
 
-                if oRs["shield"] > 0:
-                    item["ship_shield"] = oRs["shield"]
+                if row["shield"] > 0:
+                    item["ship_shield"] = row["shield"]
                     item["shield"] = True
 
-                if oRs["recycler_output"] > 0:
-                    item["ship_recycler_output"] = oRs["recycler_output"]
+                if row["recycler_output"] > 0:
+                    item["ship_recycler_output"] = row["recycler_output"]
                     item["recycler_output"] = True
 
-                if oRs["long_distance_capacity"] > 0:
-                    item["ship_long_distance_capacity"] = oRs["long_distance_capacity"]
+                if row["long_distance_capacity"] > 0:
+                    item["ship_long_distance_capacity"] = row["long_distance_capacity"]
                     item["long_distance_capacity"] = True
 
-                if oRs["droppods"] > 0:
-                    item["ship_droppods"] = oRs["droppods"]
+                if row["droppods"] > 0:
+                    item["ship_droppods"] = row["droppods"]
                     item["droppods"] = True
 
-                item["ship_required_vortex_strength"] = oRs["required_vortex_strength"]
-                item["ship_leadership"] = oRs["leadership"]
+                item["ship_required_vortex_strength"] = row["required_vortex_strength"]
+                item["ship_leadership"] = row["leadership"]
 
                 for i in dtShipBuildingReqs():
-                    if i[0] == oRs["id"]:
+                    if i[0] == row["id"]:
                         item["building"] = getBuildingLabel(i[1])
                         item["buildingsrequired"] = True
 

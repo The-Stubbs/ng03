@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "gm_fleets"
+        self.selected_menu = "gm_fleets"
 
         self.e_no_error = 0
         self.e_bad_destination = 1
@@ -40,27 +41,27 @@ class View(BaseView):
                 " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
                 " FROM vw_gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
 
-        oRs = dbRow(query)
+        row = dbRow(query)
 
         # if fleet doesn't exist, redirect to the list of gm_fleets
-        if oRs == None:
+        if row == None:
             return HttpResponseRedirect("/game/gm_fleets/")
 
         # if fleet is moving or engaged, go back to the gm_fleets
-        if oRs[7] or oRs[3]:
+        if row[7] or row[3]:
             return HttpResponseRedirect("/game/fleet/?id=" + str(fleetid))
 
         content.AssignValue("fleetid", fleetid)
-        content.AssignValue("fleetname", oRs[1])
-        content.AssignValue("size", oRs[4])
-        content.AssignValue("speed", oRs[6])
+        content.AssignValue("fleetname", row[1])
+        content.AssignValue("size", row[4])
+        content.AssignValue("speed", row[6])
 
-        content.AssignValue("fleet_capacity", oRs[18])
-        content.AssignValue("fleet_load", oRs[19] + oRs[20] + oRs[21] + oRs[22] + oRs[23])
+        content.AssignValue("fleet_capacity", row[18])
+        content.AssignValue("fleet_load", row[19] + row[20] + row[21] + row[22] + row[23])
 
         shipCount = 0
 
-        if oRs[17] == rSelf:
+        if row[17] == rSelf:
             # retrieve the list of ships in the fleet
             query = "SELECT dt_ships.id, dt_ships.capacity," + \
                     "COALESCE((SELECT quantity FROM gm_fleet_ships WHERE fleetid=" + str(fleetid) + " AND shipid = dt_ships.id), 0)," + \
@@ -72,18 +73,18 @@ class View(BaseView):
 
             list = []
             content.AssignValue("shiplist", list)
-            for oRs in oRss:
-                if oRs[2] > 0 or oRs[3] > 0:
+            for row in oRss:
+                if row[2] > 0 or row[3] > 0:
                     item = {}
                     list.append(item)
             
                     shipCount = shipCount + 1
 
-                    item["id"] = oRs[0]
-                    item["name"] = getShipLabel(oRs[0])
-                    item["cargo_capacity"] = oRs[1]
-                    item["quantity"] = oRs[2]
-                    item["available"] = oRs[3]
+                    item["id"] = row[0]
+                    item["name"] = getShipLabel(row[0])
+                    item["cargo_capacity"] = row[1]
+                    item["quantity"] = row[2]
+                    item["available"] = row[3]
 
             content.Parse("can_manage")
 
@@ -96,12 +97,12 @@ class View(BaseView):
 
         # if units are removed, the fleet may be destroyed so retrieve the planetid where the fleet is
         if self.fleet_planet == 0:
-            oRs = dbRow("SELECT planetid FROM gm_fleets WHERE id=" + str(fleetid))
+            row = dbRow("SELECT planetid FROM gm_fleets WHERE id=" + str(fleetid))
 
-            if oRs == None:
+            if row == None:
                 self.fleet_planet = -1
             else:
-                self.fleet_planet = oRs[0]
+                self.fleet_planet = row[0]
 
         # retrieve the list of all existing ships
         shipsArray = dbRow("SELECT id FROM dt_ships")
@@ -125,9 +126,9 @@ class View(BaseView):
                 dbRow("SELECT user_fleet_transfer_ships(" + str(self.userId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
 
         if ShipsRemoved > 0:
-            oRs = dbRow("SELECT id FROM gm_fleets WHERE id=" + str(fleetid))
+            row = dbRow("SELECT id FROM gm_fleets WHERE id=" + str(fleetid))
 
-            if oRs == None:
+            if row == None:
                 if self.fleet_planet > 0:
                     return HttpResponseRedirect("/game/orbit/?planet=" + str(self.fleet_planet))
                 else:

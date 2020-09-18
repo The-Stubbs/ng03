@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "planet"
+        self.selected_menu = "planet"
 
         self.showHeader = True
 
@@ -81,47 +82,47 @@ class View(BaseView):
                 "planet_floor, COALESCE(buy_ore, 0), COALESCE(buy_hydrocarbon, 0)" + \
                 " FROM vw_gm_planets WHERE id=" + str(self.currentPlanetId)
 
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs:
-            content.AssignValue("planet_id", oRs[0])
-            content.AssignValue("planet_name", oRs[1])
-            content.AssignValue("planet_img", self.getPlanetImg(oRs[0], oRs[18]))
+        if row:
+            content.AssignValue("planet_id", row[0])
+            content.AssignValue("planet_name", row[1])
+            content.AssignValue("planet_img", self.getPlanetImg(row[0], row[18]))
 
-            content.AssignValue("pla_g", oRs[2])
-            content.AssignValue("pla_s", oRs[3])
-            content.AssignValue("pla_p", oRs[4])
+            content.AssignValue("pla_g", row[2])
+            content.AssignValue("pla_s", row[3])
+            content.AssignValue("pla_p", row[4])
 
-            content.AssignValue("floor_occupied", oRs[5])
-            content.AssignValue("floor", oRs[6])
+            content.AssignValue("floor_occupied", row[5])
+            content.AssignValue("floor", row[6])
 
-            content.AssignValue("space_occupied", oRs[7])
-            content.AssignValue("space", oRs[8])
+            content.AssignValue("space_occupied", row[7])
+            content.AssignValue("space", row[8])
 
-            content.AssignValue("workers", oRs[9])
-            content.AssignValue("workers_capacity", oRs[10])
+            content.AssignValue("workers", row[9])
+            content.AssignValue("workers_capacity", row[10])
 
-            content.AssignValue("scientists", oRs[12])
-            content.AssignValue("scientists_capacity", oRs[13])
+            content.AssignValue("scientists", row[12])
+            content.AssignValue("scientists_capacity", row[13])
 
-            content.AssignValue("soldiers", oRs[14])
-            content.AssignValue("soldiers_capacity", oRs[15])
+            content.AssignValue("soldiers", row[14])
+            content.AssignValue("soldiers_capacity", row[15])
 
-            content.AssignValue("growth", oRs[11]/10)
+            content.AssignValue("growth", row[11]/10)
 
-            if oRs[17]:
+            if row[17]:
                 content.Parse("suspend")
             else:
                 content.Parse("resume")
 
-            content.AssignValue("buy_ore", oRs[19])
-            content.AssignValue("buy_hydrocarbon", oRs[20])
+            content.AssignValue("buy_ore", row[19])
+            content.AssignValue("buy_hydrocarbon", row[20])
 
             # retrieve commander assigned to this planet
-            if oRs[16]:
-                oCmdRs = dbRow("SELECT name FROM gm_commanders WHERE ownerid="+str(self.userId)+" AND id="+str(oRs[16]))
+            if row[16]:
+                oCmdRs = dbRow("SELECT name FROM gm_commanders WHERE ownerid="+str(self.userId)+" AND id="+str(row[16]))
                 content.AssignValue("commandername", oCmdRs[0])
-                CmdId = oRs[16]
+                CmdId = row[16]
                 content.Parse("commander")
             else:
                 content.Parse("nocommander")
@@ -151,29 +152,29 @@ class View(BaseView):
         cmd_fleets = {'typ':'fleet', 'cmds':[]}
         cmd_planets = {'typ':'planet', 'cmds':[]}
         
-        for oRs in oRss:
+        for row in oRss:
             item = {}
 
-            if oRs[2] == None and oRs[3] == None:
+            if row[2] == None and row[3] == None:
                 typ = "none"
                 cmd_nones['cmds'].append(item)
-            elif oRs[2] == None:
+            elif row[2] == None:
                 typ = "planet"
                 cmd_planets['cmds'].append(item)
             else:
                 typ = "fleet"
                 cmd_fleets['cmds'].append(item)
 
-            if CmdId == oRs[0]: item["selected"] = True
-            item["cmd_id"] = oRs[0]
-            item["cmd_name"] = oRs[1]
+            if CmdId == row[0]: item["selected"] = True
+            item["cmd_id"] = row[0]
+            item["cmd_name"] = row[1]
             if typ == "planet":
-                item["name"] = oRs[3]
+                item["name"] = row[3]
                 item["assigned"] = True
 
             if item == "fleet":
-                item["name"] = oRs[2]
-                activityRs = dbRow("SELECT dest_planetid, engaged, action FROM gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(oRs[4]))
+                item["name"] = row[2]
+                activityRs = dbRow("SELECT dest_planetid, engaged, action FROM gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(row[4]))
                 if activityRs[0] == None and (not activityRs[1]) and activityRs[2]==0:
                     item["assigned"] = True
                 else:
@@ -193,15 +194,15 @@ class View(BaseView):
         i = 0
         list = []
         content.AssignValue("buildings", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["buildingid"] = oRs[0]
-            item["building"] = getBuildingLabel(oRs[0])
-            item["time"] = oRs[1]
+            item["buildingid"] = row[0]
+            item["building"] = getBuildingLabel(row[0])
+            item["time"] = row[1]
 
-            if oRs[2]: item["destroy"] = True
+            if row[2]: item["destroy"] = True
 
             i = i + 1
 
@@ -219,15 +220,15 @@ class View(BaseView):
 
         list = []
         content.AssignValue("ships", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["shipid"] = oRs[0]
-            item["ship"] = getShipLabel(oRs[0])
-            item["time"] = oRs[1]
+            item["shipid"] = row[0]
+            item["ship"] = getShipLabel(row[0])
+            item["time"] = row[1]
 
-            if oRs[2]: item["recycle"] = True
+            if row[2]: item["recycle"] = True
 
             i = i + 1
 
@@ -246,40 +247,40 @@ class View(BaseView):
 
         list = []
         content.AssignValue("gm_fleets", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["id"] = oRs[0]
-            item["size"] = oRs[4]
-            item["signature"] = oRs[5]
+            item["id"] = row[0]
+            item["size"] = row[4]
+            item["signature"] = row[5]
 
-            if oRs[9] > rFriend:
-                item["name"] = oRs[1]
+            if row[9] > rFriend:
+                item["name"] = row[1]
             else:
-                item["name"] = oRs[10]
+                item["name"] = row[10]
 
-            if oRs[6]:
-                item["commanderid"] = oRs[6]
-                item["commandername"] = oRs[7]
+            if row[6]:
+                item["commanderid"] = row[6]
+                item["commandername"] = row[7]
                 item["commander"] = True
             else:
                 item["nocommander"] = True
 
-            if oRs[3]:
+            if row[3]:
                 item["fighting"] = True
-            elif oRs[8] == 2:
+            elif row[8] == 2:
                 item["recycling"] = True
             else:
                 item["patrolling"] = True
 
-            if oRs[9] in [rHostile, rWar]:
+            if row[9] in [rHostile, rWar]:
                 item["enemy"] = True
-            elif oRs[9] == rFriend:
+            elif row[9] == rFriend:
                 item["friend"] = True
-            elif oRs[9] == rAlliance:
+            elif row[9] == rAlliance:
                 item["ally"] = True
-            elif oRs[9] == rSelf:
+            elif row[9] == rSelf:
                 item["owner"] = True
 
             i = i + 1

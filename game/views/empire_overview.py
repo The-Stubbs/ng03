@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "overview"
+        self.selected_menu = "overview"
         
         content = GetTemplate(request, "overview")
         
@@ -35,32 +36,32 @@ class View(BaseView):
         if self.allianceRights: empire["rank_label"] = self.allianceRights["label"]
         
         query = "SELECT int4(count(1)) FROM vw_gm_profiles"
-        oRs = dbRow(query)
-        empire["players"] = oRs[0]
+        row = dbRow(query)
+        empire["players"] = row[0]
 
         query = "SELECT int4(count(1)) FROM vw_gm_profiles WHERE score >= " + str(self.userInfo["score"])
-        oRs = dbRow(query)
+        row = dbRow(query)
         empire["score_dev"] = self.userInfo["score"]
-        empire["score_dev_rank"] = oRs[0]
+        empire["score_dev_rank"] = row[0]
         empire["score_dev_delta"] = self.userInfo["score"] - self.userInfo["previous_score"]
         
         query = "SELECT (SELECT score_prestige FROM gm_profiles WHERE id=" + str(self.userId) + "), (SELECT int4(count(1)) FROM vw_gm_profiles WHERE score_prestige >= (SELECT score_prestige FROM gm_profiles WHERE id=" + str(self.userId) + "))"
-        oRs = dbRow(query)
-        empire["score_battle"] = oRs[0]
-        empire["score_battle_rank"] = oRs[1]
+        row = dbRow(query)
+        empire["score_battle"] = row[0]
+        empire["score_battle_rank"] = row[1]
         
         query = "SELECT count(1), sum(ore_production), sum(hydrocarbon_production), " + \
                 " int4(sum(workers)), int4(sum(scientists)), int4(sum(soldiers)), now()" + \
                 " FROM vw_gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.userId)
-        oRs = dbRow(query)
-        empire["cur_planets"] = oRs[0]
-        empire["prod_ore"] = oRs[1]
-        empire["prod_hydro"] = oRs[2]
+        row = dbRow(query)
+        empire["cur_planets"] = row[0]
+        empire["prod_ore"] = row[1]
+        empire["prod_hydro"] = row[2]
 
         oRs2 = dbRow("SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0) FROM gm_fleets WHERE ownerid=" + str(self.userId))
-        empire["workers"] = oRs[3] + oRs2[0]
-        empire["scientists"] = oRs[4] + oRs2[1]
-        empire["soldiers"] = oRs[5] + oRs2[2]
+        empire["workers"] = row[3] + oRs2[0]
+        empire["scientists"] = row[4] + oRs2[1]
+        empire["soldiers"] = row[5] + oRs2[2]
 
         # --- moving fleets
         
@@ -82,53 +83,53 @@ class View(BaseView):
         oRss = dbRows(query)
         
         if oRss:
-            for oRs in oRss:
+            for row in oRss:
                 
-                extRadarStrength = oRs[23]
-                incRadarStrength = oRs[24]
-                if oRs[6] and oRs[4] < rAlliance and (oRs[21] > sqrt(incRadarStrength) * 6 * 1000 / oRs[20] * 3600) and (extRadarStrength == 0 or incRadarStrength == 0):
+                extRadarStrength = row[23]
+                incRadarStrength = row[24]
+                if row[6] and row[4] < rAlliance and (row[21] > sqrt(incRadarStrength) * 6 * 1000 / row[20] * 3600) and (extRadarStrength == 0 or incRadarStrength == 0):
                     continue
                 
                 fleet = {}
     
-                fleet["time"] = oRs[21]
-                fleet["signature"] = oRs[2]
+                fleet["time"] = row[21]
+                fleet["signature"] = row[2]
                 
                 dest = {}
                 fleet["dest"] = dest
-                dest["id"] = oRs[12]
-                dest["name"] = self.getPlanetName(oRs[14], oRs[24], oRs[19], oRs[13])
-                dest["relation"] = oRs[14]
-                dest["g"] = oRs[15]
-                dest["s"] = oRs[16]
-                dest["p"] = oRs[17]
+                dest["id"] = row[12]
+                dest["name"] = self.getPlanetName(row[14], row[24], row[19], row[13])
+                dest["relation"] = row[14]
+                dest["g"] = row[15]
+                dest["s"] = row[16]
+                dest["p"] = row[17]
     
-                if oRs[6] and extRadarStrength > 0 or oRs[4] >= rAlliance or oRs[8] >= rFriend:
+                if row[6] and extRadarStrength > 0 or row[4] >= rAlliance or row[8] >= rFriend:
                     origin = {}
                     fleet["origin"] = origin
-                    origin["planetname"] = self.getPlanetName(oRs[8], oRs[23], oRs[18], oRs[7])
-                    origin["planetid"] = oRs[6]
-                    origin["g"] = oRs[9]
-                    origin["s"] = oRs[10]
-                    origin["p"] = oRs[11]
-                    origin["relation"] = oRs[8]
+                    origin["planetname"] = self.getPlanetName(row[8], row[23], row[18], row[7])
+                    origin["planetid"] = row[6]
+                    origin["g"] = row[9]
+                    origin["s"] = row[10]
+                    origin["p"] = row[11]
+                    origin["relation"] = row[8]
                 
-                if oRs[4] == rSelf:
-                    fleet["id"] = oRs[0]
-                    fleet["name"] = oRs[1]
-                    fleet["stance"] = oRs[25]
+                if row[4] == rSelf:
+                    fleet["id"] = row[0]
+                    fleet["name"] = row[1]
+                    fleet["stance"] = row[25]
                     fleet["owned"] = True
 
-                elif oRs[4] == rAlliance:
+                elif row[4] == rAlliance:
                     fleet["id"] = item[3]
                     fleet["name"] = item[5]
-                    fleet["stance"] = oRs[25]
+                    fleet["stance"] = row[25]
                     fleet["ally"] = True
                     
-                elif oRs[4] == rFriend:
+                elif row[4] == rFriend:
                     fleet["id"] = item[3]
                     fleet["name"] = item[5]
-                    fleet["stance"] = oRs[25]
+                    fleet["stance"] = row[25]
                     fleet["friend"] = True
                     
                 else:
@@ -144,16 +145,16 @@ class View(BaseView):
                 " FROM gm_profile_research_pendings" + \
                 "	 JOIN dt_researches ON dt_researches.id = researchid" + \
                 " WHERE userid=" + str(self.userId) + " LIMIT 1"
-        oRs = dbRow(query)
+        row = dbRow(query)
         
-        if oRs:
+        if row:
             
             research = {}
             content.AssignValue("research", research)
             
-            research["id"] = oRs[0]
-            research["label"] = oRs[2]
-            research["time"] = oRs[1]
+            research["id"] = row[0]
+            research["label"] = row[2]
+            research["time"] = row[1]
 
         # --- current building constructions
         
@@ -169,28 +170,28 @@ class View(BaseView):
         oRss = dbRows(query)
 
         lastplanet = -1
-        for oRs in oRss:
+        for row in oRss:
             
-            if oRs[0] != lastplanet:
-                lastplanet = oRs[0]
+            if row[0] != lastplanet:
+                lastplanet = row[0]
                 
                 planet = { "buildings":[] }
                 constructionyards.append(planet)
 
-                planet["id"] = oRs[0]
-                planet["name"] = oRs[1]
-                planet["g"] = oRs[2]
-                planet["s"] = oRs[3]
-                planet["p"] = oRs[4]
+                planet["id"] = row[0]
+                planet["name"] = row[1]
+                planet["g"] = row[2]
+                planet["s"] = row[3]
+                planet["p"] = row[4]
             
-            if oRs[5]:
+            if row[5]:
                 building = {}
                 planet["buildings"].append(building)
                 
-                building["id"] = oRs[5]
-                building["time"] = oRs[6]
-                building["label"] = oRs[8]
-                building["destroy"] = oRs[7]
+                building["id"] = row[5]
+                building["time"] = row[6]
+                building["label"] = row[8]
+                building["destroy"] = row[7]
 
         # --- current ship constructions
         
@@ -205,38 +206,38 @@ class View(BaseView):
                 " ORDER BY p.id, s.remaining_time DESC"
         oRss = dbRows(query)
         if oRss:
-            for oRs in oRss:
+            for row in oRss:
                 
                 planet = {}
                 shipyards.append(planet)
 
-                planet["id"] = oRs[0]
-                planet["name"] = oRs[1]
-                planet["g"] = oRs[2]
-                planet["s"] = oRs[3]
-                planet["p"] = oRs[4]
+                planet["id"] = row[0]
+                planet["name"] = row[1]
+                planet["g"] = row[2]
+                planet["s"] = row[3]
+                planet["p"] = row[4]
                 
-                if oRs[5]:
+                if row[5]:
                     planet["inprogress"] = True
                     
                     ship = {}
                     planet["ship"] = ship
                     
-                    ship["id"] = oRs[5]
-                    ship["label"] = getShipLabel(oRs[5])
-                    ship["time"] = oRs[6]
-                    ship["recycle"] = oRs[7]
+                    ship["id"] = row[5]
+                    ship["label"] = getShipLabel(row[5])
+                    ship["time"] = row[6]
+                    ship["recycle"] = row[7]
     
-                elif oRs[9]:
+                elif row[9]:
                     planet["suspended"] = True
 
-                elif oRs[8]:
+                elif row[8]:
                     planet["waiting"] = True
                     
                     ship = {}
                     planet["ship"] = ship
 
-                    ship["label"] = getShipLabel(oRs[10])
+                    ship["label"] = getShipLabel(row[10])
 
                 else:
                     planet["none"] = True

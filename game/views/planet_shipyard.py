@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "shipyard_all"
+        self.selected_menu = "shipyard_all"
 
         self.showHeader = True
 
@@ -46,7 +47,7 @@ class View(BaseView):
     def RetrieveData(self):
         
         # Retrieve recordset of current planet
-        query = "SELECT ore_capacity, hydrocarbon_capacity, energy_capacity, workers_capacity"+ \
+        query = "SELECT ore_capacity, hydrocarbon_capacity, energy_capacity, workers_capacity" + \
                 " FROM vw_gm_planets WHERE id="+str(self.currentPlanetId)
         self.oPlanet = dbRow(query)
 
@@ -67,46 +68,46 @@ class View(BaseView):
         underconstructions = []
 
         if oRss:
-            for oRs in oRss:
+            for row in oRss:
                 item = {}
             
-                item["queueid"] = oRs[0]
-                item["id"] = oRs[1]
-                item["name"] = getShipLabel(oRs[1])
+                item["queueid"] = row[0]
+                item["id"] = row[1]
+                item["name"] = getShipLabel(row[1])
     
-                if int(oRs[2]) > 0:
-                    item["remainingtime"] = oRs[2]
+                if int(row[2]) > 0:
+                    item["remainingtime"] = row[2]
                 else:
                     item["remainingtime"] = 0
     
-                item["quantity"] = oRs[3]
+                item["quantity"] = row[3]
     
-                if oRs[5]:
-                    item["ore"] = oRs[3]*oRs[7]
-                    item["hydrocarbon"] = oRs[3]*oRs[8]
+                if row[5]:
+                    item["ore"] = row[3]*row[7]
+                    item["hydrocarbon"] = row[3]*row[8]
                     item["energy"] = 0
                     item["crew"] = 0
                 else:
-                    item["ore"] = oRs[3]*oRs[9]
-                    item["hydrocarbon"] = oRs[3]*oRs[10]
-                    item["energy"] = oRs[3]*oRs[11]
-                    item["crew"] = oRs[3]*oRs[12]
+                    item["ore"] = row[3]*row[9]
+                    item["hydrocarbon"] = row[3]*row[10]
+                    item["energy"] = row[3]*row[11]
+                    item["crew"] = row[3]*row[12]
     
-                if oRs[6]: item["required_ship_name"] = getShipLabel(oRs[6])
+                if row[6]: item["required_ship_name"] = getShipLabel(row[6])
     
-                if oRs[4]:
-                    if oRs[5]:
+                if row[4]:
+                    if row[5]:
                         item["recycle"] = True
                     else:
                         item["cancel"] = True
     
-                    if oRs[6]: item["required_ship"] = True
+                    if row[6]: item["required_ship"] = True
     
                     item["ship"] = True
                     underconstructions.append(item)
                 else:
-                    if oRs[5]: item["recycle"] = True
-                    if oRs[6]: item["required_ship"] = True
+                    if row[5]: item["recycle"] = True
+                    if row[6]: item["required_ship"] = True
     
                     item["cancel"] = True
                     item["ship"] = True
@@ -126,13 +127,13 @@ class View(BaseView):
                 " FROM vw_gm_planet_ships WHERE planetid=" + str(self.currentPlanetId)
 
         if self.ShipFilter == 1:
-            self.selectedMenu = "shipyard_military"
+            self.selected_menu = "shipyard_military"
             query = query + " AND weapon_power > 0 AND required_shipid IS NULL" # military ships only
         elif self.ShipFilter == 2:
-            self.selectedMenu = "shipyard_unarmed"
+            self.selected_menu = "shipyard_unarmed"
             query = query + " AND weapon_power = 0 AND required_shipid IS NULL" # non-military ships
         elif self.ShipFilter == 3:
-            self.selectedMenu = "shipyard_upgrade"
+            self.selected_menu = "shipyard_upgrade"
             query = query + " AND required_shipid IS NOT NULL" # upgrade ships only
         query = query + " ORDER BY category, id"
         
@@ -154,9 +155,9 @@ class View(BaseView):
         categories = []
 
         count = 0
-        for oRs in oRss:
-            if (oRs["quantity"] > 0) or oRs["research_requirements_met"]:
-                CatId = oRs["category"]
+        for row in oRss:
+            if (row["quantity"] > 0) or row["research_requirements_met"]:
+                CatId = row["category"]
 
                 if CatId != lastCategory:
                     category = {'id':CatId, 'ships':[]}
@@ -168,79 +169,79 @@ class View(BaseView):
                 category['ships'].append(ship)
                 count += 1
 
-                ShipId = oRs["shipid"]
+                ShipId = row["shipid"]
 
-                ship["id"] = oRs["id"]
+                ship["id"] = row["id"]
                 ship["name"] = getShipLabel(ShipId)
 
-                if oRs["required_shipid"]:
-                    ship["required_ship_name"] = getShipLabel(oRs["required_shipid"])
-                    ship["required_ship_available"] = oRs["required_ship_count"]
-                    if oRs["required_ship_count"] == 0: ship["required_ship_none_available"] = True
+                if row["required_shipid"]:
+                    ship["required_ship_name"] = getShipLabel(row["required_shipid"])
+                    ship["required_ship_available"] = row["required_ship_count"]
+                    if row["required_ship_count"] == 0: ship["required_ship_none_available"] = True
                     ship["required_ship"] = True
 
-                if oRs["cost_prestige"] > 0:
-                    ship["required_pp"] = oRs["cost_prestige"]
+                if row["cost_prestige"] > 0:
+                    ship["required_pp"] = row["cost_prestige"]
                     ship["pp"] = self.userInfo["prestige_points"]
-                    if oRs["cost_prestige"] > self.userInfo["prestige_points"]: ship["required_pp_not_enough"] = True
+                    if row["cost_prestige"] > self.userInfo["prestige_points"]: ship["required_pp_not_enough"] = True
 
-                ship["ore"] = oRs["cost_ore"]
-                ship["hydrocarbon"] = oRs["cost_hydrocarbon"]
-                ship["energy"] = oRs["cost_energy"]
-                ship["workers"] = oRs["workers"]
-                ship["crew"] = oRs["crew"]
-                ship["upkeep"] = oRs["upkeep"]
+                ship["ore"] = row["cost_ore"]
+                ship["hydrocarbon"] = row["cost_hydrocarbon"]
+                ship["energy"] = row["cost_energy"]
+                ship["workers"] = row["workers"]
+                ship["crew"] = row["crew"]
+                ship["upkeep"] = row["upkeep"]
 
-                ship["quantity"] = oRs["quantity"]
+                ship["quantity"] = row["quantity"]
 
-                ship["time"] = oRs["construction_time"]
+                ship["time"] = row["construction_time"]
 
                 # assign ship description
-                ship["description"] = getShipDescription(oRs["shipid"])
+                ship["description"] = getShipDescription(row["shipid"])
 
-                ship["ship_signature"] = oRs["signature"]
-                ship["ship_cargo"] = oRs["capacity"]
-                ship["ship_handling"] = oRs["handling"]
-                ship["ship_speed"] = oRs["speed"]
+                ship["ship_signature"] = row["signature"]
+                ship["ship_cargo"] = row["capacity"]
+                ship["ship_handling"] = row["handling"]
+                ship["ship_speed"] = row["speed"]
 
-                ship["ship_turrets"] = oRs["weapon_turrets"]
-                ship["ship_power"] = oRs["weapon_power"]
-                ship["ship_tracking_speed"] = oRs["weapon_tracking_speed"]
+                ship["ship_turrets"] = row["weapon_turrets"]
+                ship["ship_power"] = row["weapon_power"]
+                ship["ship_tracking_speed"] = row["weapon_tracking_speed"]
 
-                ship["ship_hull"] = oRs["hull"]
-                ship["ship_shield"] = oRs["shield"]
+                ship["ship_hull"] = row["hull"]
+                ship["ship_shield"] = row["shield"]
 
-                ship["ship_recycler_output"] = oRs["recycler_output"]
-                ship["ship_long_distance_capacity"] = oRs["long_distance_capacity"]
-                ship["ship_droppods"] = oRs["droppods"]
-                ship["ship_required_vortex_strength"] = oRs["required_vortex_strength"]
+                ship["ship_recycler_output"] = row["recycler_output"]
+                ship["ship_long_distance_capacity"] = row["long_distance_capacity"]
+                ship["ship_droppods"] = row["droppods"]
+                ship["ship_required_vortex_strength"] = row["required_vortex_strength"]
 
-                ship["ship_leadership"] = oRs["mod_leadership"]
+                ship["ship_leadership"] = row["mod_leadership"]
 
-                if oRs["research_requirements_met"]:
+                if row["research_requirements_met"]:
                     ship["construction_time"] = True
 
                     notenoughresources = False
 
-                    if oRs["cost_ore"] > self.oPlanet[0]:
+                    if row["cost_ore"] > self.oPlanet[0]:
                         ship["not_enough_ore"] = True
                         notenoughresources = True
                     
-                    if oRs["cost_hydrocarbon"] > self.oPlanet[1]:
+                    if row["cost_hydrocarbon"] > self.oPlanet[1]:
                         ship["not_enough_hydrocarbon"] = True
                         notenoughresources = True
                     
-                    if oRs["cost_energy"] > self.oPlanet[2]:
+                    if row["cost_energy"] > self.oPlanet[2]:
                         ship["not_enough_energy"] = True
                         notenoughresources = True
                     
-                    if oRs["crew"] > self.oPlanet[3]:
+                    if row["crew"] > self.oPlanet[3]:
                         ship["not_enough_crew"] = True
                         notenoughresources = True
 
                     can_build = True
 
-                    if not oRs["buildings_requirements_met"]:
+                    if not row["buildings_requirements_met"]:
                         ship["buildings_required"] = True
                         can_build = False
 
@@ -276,7 +277,7 @@ class View(BaseView):
     # List all the available ships for recycling
     def ListRecycleShips(self):
 
-        self.selectedMenu = "shipyard_recycle"
+        self.selected_menu = "shipyard_recycle"
 
         # list ships that are on the planet
         query = "SELECT id, category, name, int4(cost_ore * internal_profile_get_ore_recycling_coeff(planet_ownerid)) AS cost_ore, int4(cost_hydrocarbon * internal_profile_get_hydro_recycling_coeff(planet_ownerid)) AS cost_hydrocarbon, cost_credits, workers, crew, capacity," + \
@@ -304,8 +305,8 @@ class View(BaseView):
         categories = []
 
         count = 0
-        for oRs in oRss:
-            CatId = oRs["category"]
+        for row in oRss:
+            CatId = row["category"]
 
             if CatId != lastCategory:
                 category = {'id':CatId, 'ships':[]}
@@ -318,37 +319,37 @@ class View(BaseView):
 
             itemCount = itemCount + 1
 
-            ship["id"] = oRs["id"]
-            ship["name"] = getShipLabel(oRs["shipid"])
+            ship["id"] = row["id"]
+            ship["name"] = getShipLabel(row["shipid"])
 
-            ship["ore"] = oRs["cost_ore"]
-            ship["hydrocarbon"] = oRs["cost_hydrocarbon"]
-            ship["credits"] = oRs["cost_credits"]
-            ship["workers"] = oRs["workers"]
-            ship["crew"] = oRs["crew"]
+            ship["ore"] = row["cost_ore"]
+            ship["hydrocarbon"] = row["cost_hydrocarbon"]
+            ship["credits"] = row["cost_credits"]
+            ship["workers"] = row["workers"]
+            ship["crew"] = row["crew"]
 
-            ship["quantity"] = oRs["quantity"]
+            ship["quantity"] = row["quantity"]
 
-            ship["time"] = oRs["construction_time"]
+            ship["time"] = row["construction_time"]
 
             # assign ship description
-            ship["description"] = getShipDescription(oRs["shipid"])
+            ship["description"] = getShipDescription(row["shipid"])
 
-            ship["ship_signature"] = oRs["signature"]
-            ship["ship_cargo"] = oRs["capacity"]
-            ship["ship_handling"] = oRs["handling"]
-            ship["ship_speed"] = oRs["speed"]
+            ship["ship_signature"] = row["signature"]
+            ship["ship_cargo"] = row["capacity"]
+            ship["ship_handling"] = row["handling"]
+            ship["ship_speed"] = row["speed"]
 
-            ship["ship_turrets"] = oRs["weapon_turrets"]
-            ship["ship_power"] = oRs["weapon_power"]
-            ship["ship_tracking_speed"] = oRs["weapon_tracking_speed"]
+            ship["ship_turrets"] = row["weapon_turrets"]
+            ship["ship_power"] = row["weapon_power"]
+            ship["ship_tracking_speed"] = row["weapon_tracking_speed"]
 
-            ship["ship_hull"] = oRs["hull"]
-            ship["ship_shield"] = oRs["shield"]
+            ship["ship_hull"] = row["hull"]
+            ship["ship_shield"] = row["shield"]
 
-            ship["ship_recycler_output"] = oRs["recycler_output"]
-            ship["ship_long_distance_capacity"] = oRs["long_distance_capacity"]
-            ship["ship_droppods"] = oRs["droppods"]
+            ship["ship_recycler_output"] = row["recycler_output"]
+            ship["ship_long_distance_capacity"] = row["long_distance_capacity"]
+            ship["ship_droppods"] = row["droppods"]
 
             ship["construction_time"] = True
 

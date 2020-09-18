@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
@@ -17,21 +18,21 @@ class View(BaseMixin, View):
             return HttpResponseRedirect("/")
 
         # check that the player has no more planets
-        oRs = dbRow("SELECT int4(count(1)) FROM gm_planets WHERE ownerid=" + str(self.userId))
-        if oRs == None:
+        row = dbRow("SELECT int4(count(1)) FROM gm_planets WHERE ownerid=" + str(self.userId))
+        if row == None:
             return HttpResponseRedirect("/")
 
-        planets = oRs[0]
+        planets = row[0]
 
         # retreive player username and number of resets
 
         query = "SELECT login, resets, credits_bankruptcy, int4(score_research) FROM gm_profiles WHERE id=" + str(self.userId)
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        username = oRs[0]
-        resets = oRs[1]
-        bankruptcy = oRs[2]
-        research_done = oRs[3]
+        username = row[0]
+        resets = row[1]
+        bankruptcy = row[2]
+        research_done = row[3]
 
         # still have planets
         if planets > 0 and bankruptcy > 0:
@@ -49,8 +50,8 @@ class View(BaseMixin, View):
             if request.POST.get("login") != username:
 
                 # check that the login is not banned
-                oRs = dbRow("SELECT 1 FROM dt_banned_usernames WHERE " + sqlStr(username) + " ~* login LIMIT 1;")
-                if oRs == None:
+                row = dbRow("SELECT 1 FROM dt_banned_usernames WHERE " + sqlStr(username) + " ~* login LIMIT 1;")
+                if row == None:
 
                     # check that the username is correct
                     if not isValidName(request.POST.get("login")):
@@ -68,12 +69,12 @@ class View(BaseMixin, View):
                             dbExecute("UPDATE gm_commanders SET name=" + sqlStr(request.POST.get("login")) + " WHERE name=" + sqlStr(username) + " AND ownerid=" + str(self.userId))
 
             if changeNameError == "":
-                oRs = dbRow("SELECT user_profile_reset(" + str(self.userId) + "," + str(ToInt(request.POST.get("galaxy"), 1)) + ")")
-                if oRs[0] == 0:
+                row = dbRow("SELECT user_profile_reset(" + str(self.userId) + "," + str(ToInt(request.POST.get("galaxy"), 1)) + ")")
+                if row[0] == 0:
                     return HttpResponseRedirect("/game/overview/")
 
                 else:
-                    reset_error = oRs[0]
+                    reset_error = row[0]
 
         elif action == "abandon":
             dbExecute("UPDATE gm_profiles SET deletion_date=now()/*+INTERVAL '2 days'*/ WHERE id=" + str(self.userId))
@@ -89,12 +90,12 @@ class View(BaseMixin, View):
             oRss = dbRows("SELECT id, recommended FROM internal_profile_get_galaxies_info(" + str(self.userId) + ")")
 
             list = []
-            for oRs in oRss:
+            for row in oRss:
                 item = {}
                 list.append(item)
                 
-                item["id"] = oRs[0]
-                item["recommendation"] = oRs[1]
+                item["id"] = row[0]
+                item["recommendation"] = row[1]
 
             content.AssignValue("galaxies", list)
 

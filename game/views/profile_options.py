@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "options"
+        self.selected_menu = "options"
 
         if request.GET.get("frame") == "1":
             dbExecute("UPDATE gm_profiles SET inframe=True WHERE id="+ str(self.userId))
@@ -85,9 +86,9 @@ class View(BaseView):
                 query = query + " WHERE id=" + str(self.userId)
             elif self.optionCat == 3:
                 if request.POST.get("holidays"):
-                    oRs = dbRow("SELECT COALESCE(int4(date_part('epoch', now()-last_holidays)), 10000000) AS holidays_cooldown, (SELECT 1 FROM gm_profile_holidays WHERE userid=gm_profiles.id) FROM gm_profiles WHERE id="+ str(self.userId))
+                    row = dbRow("SELECT COALESCE(int4(date_part('epoch', now()-last_holidays)), 10000000) AS holidays_cooldown, (SELECT 1 FROM gm_profile_holidays WHERE userid=gm_profiles.id) FROM gm_profiles WHERE id="+ str(self.userId))
 
-                    if oRs[0] > holidays_breaktime and oRs[1] == None:
+                    if row[0] > holidays_breaktime and row[1] == None:
                         query = "INSERT INTO gm_profile_holidays(userid, start_time, min_end_time, end_time) VALUES("+str(self.userId)+",now()+INTERVAL '24 hours', now()+INTERVAL '72 hours', now()+INTERVAL '22 days')"
                         dbExecute(query)
 
@@ -126,22 +127,22 @@ class View(BaseView):
                 " LEFT JOIN gm_alliances AS a ON (gm_profiles.alliance_id = a.id)" + \
                 " LEFT JOIN gm_alliance_ranks AS r ON (gm_profiles.alliance_id = r.allianceid AND gm_profiles.alliance_rank = r.rankid) " + \
                 " WHERE gm_profiles.id = "+str(self.userId)
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        content.AssignValue("regdate", oRs[1])
-        content.AssignValue("description", oRs[2])
+        content.AssignValue("regdate", row[1])
+        content.AssignValue("description", row[2])
         content.AssignValue("ip", self.request.META.get("remote_addr"))
 
-        if oRs[0] == None or oRs[0] == "":
+        if row[0] == None or row[0] == "":
             content.Parse("noavatar")
         else:
-            content.AssignValue("avatar_url", oRs[0])
+            content.AssignValue("avatar_url", row[0])
             content.Parse("avatar")
 
-        if oRs[4]:
-            content.AssignValue("alliancename", oRs[6])
-            content.AssignValue("alliancetag", oRs[5])
-            content.AssignValue("rank_label", oRs[7])
+        if row[4]:
+            content.AssignValue("alliancename", row[6])
+            content.AssignValue("alliancetag", row[5])
+            content.AssignValue("rank_label", row[7])
 
             content.Parse("alliance")
         else:
@@ -151,31 +152,31 @@ class View(BaseView):
 
     def display_options(self, content):
 
-        oRs = dbRow("SELECT int4(date_part('epoch', deletion_date-now())), timers_enabled, display_alliance_planet_name, email, score_visibility, skin FROM gm_profiles WHERE id="+str(self.userId))
+        row = dbRow("SELECT int4(date_part('epoch', deletion_date-now())), timers_enabled, display_alliance_planet_name, email, score_visibility, skin FROM gm_profiles WHERE id="+str(self.userId))
 
-        if oRs[0] == None:
+        if row[0] == None:
             content.Parse("delete_account")
         else:
-            content.AssignValue("remainingtime", oRs[0])
+            content.AssignValue("remainingtime", row[0])
             content.Parse("account_deleting")
 
-        if oRs[1]: content.Parse("timers_enabled")
-        if oRs[2]: content.Parse("display_alliance_planet_name")
-        content.Parse("score_visibility_" + str(oRs[4]))
+        if row[1]: content.Parse("timers_enabled")
+        if row[2]: content.Parse("display_alliance_planet_name")
+        content.Parse("score_visibility_" + str(row[4]))
 
-        content.Parse("skin_" + str(oRs[5]))
+        content.Parse("skin_" + str(row[5]))
 
-        content.AssignValue("email", str(oRs[3]))
+        content.AssignValue("email", str(row[3]))
 
         content.Parse("options")
 
     def display_holidays(self, content):
 
         # check if holidays will be activated soon
-        oRs = dbRow("SELECT int4(date_part('epoch', start_time-now())) FROM gm_profile_holidays WHERE userid="+str(self.userId))
+        row = dbRow("SELECT int4(date_part('epoch', start_time-now())) FROM gm_profile_holidays WHERE userid="+str(self.userId))
 
-        if oRs:
-            remainingtime = oRs[0]
+        if row:
+            remainingtime = row[0]
         else:
             remainingtime = 0
 
@@ -186,10 +187,10 @@ class View(BaseView):
         else:
 
             # holidays can be activated only if never took any holidays or it was at least 7 days ago
-            oRs = dbRow("SELECT int4(date_part('epoch', now()-last_holidays)) FROM gm_profiles WHERE id="+str(self.userId))
+            row = dbRow("SELECT int4(date_part('epoch', now()-last_holidays)) FROM gm_profiles WHERE id="+str(self.userId))
 
-            if (oRs[0]) and oRs[0] < holidays_breaktime:
-                content.AssignValue("remaining_time", holidays_breaktime-oRs[0])
+            if (row[0]) and row[0] < holidays_breaktime:
+                content.AssignValue("remaining_time", holidays_breaktime-row[0])
                 content.Parse("cant_enable")
                 self.showSubmit = False
             else:
@@ -200,16 +201,16 @@ class View(BaseView):
     def display_reports(self, content):
 
         oRss = dbRows("SELECT type*100+subtype FROM gm_profile_reports WHERE userid="+str(self.userId))
-        for oRs in oRss:
-            content.Parse("c"+str(oRs[0]))
+        for row in oRss:
+            content.Parse("c"+str(row[0]))
 
         content.Parse("gm_profile_reports")
 
     def display_mail(self, content):
 
-        oRs = dbRow("SELECT autosignature FROM gm_profiles WHERE id="+str(self.userId))
-        if oRs:
-            content.AssignValue("autosignature", oRs[0])
+        row = dbRow("SELECT autosignature FROM gm_profiles WHERE id="+str(self.userId))
+        if row:
+            content.AssignValue("autosignature", row[0])
         else:
             content.AssignValue("autosignature", "")
 

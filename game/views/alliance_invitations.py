@@ -2,113 +2,81 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = "/game/alliance/"
+    template_name = "alliance-invitations"
+    
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        if self.allianceId == None:
-            self.selectedMenu = "noalliance.invitations"
-        else:
-            self.selectedMenu = "alliance.invitations"
+        if self.allianceId == None: self.selected_menu = "noalliance.invitations"
+        else: self.selected_menu = "alliance.invitations"
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.sLeaveCost = "leavealliancecost"
-
-        self.leave_status = ""
-        self.invitation_status = ""
-        action = request.GET.get("a", "").strip()
-        alliance_tag = request.GET.get("tag", "").strip()
-
+    #---------------------------------------------------------------------------
+    def processAction(self, request, action):
+    
         if action == "accept":
-            oRs = dbRow("SELECT user_alliance_invitation_accept(" + str(self.userId) + "," + sqlStr(alliance_tag) + ")")
-
-            if oRs[0] == 0:
-                return HttpResponseRedirect("/game/alliance/")
-
-            elif oRs[0] == 4:
-                self.invitation_status = "max_members_reached"
-            elif oRs[0] == 6:
-                self.invitation_status = "cant_rejoin_previous_alliance"
+            
+            tag = request.POST.get("tag", "").strip()
+            
+            row = dbRow("SELECT user_alliance_invitation_accept(" + str(self.userId) + "," + sqlStr(tag) + ")")
+            return row[0]
 
         elif action == "decline":
-            dbRow("SELECT user_alliance_invitation_decline(" + str(self.userId) + "," + sqlStr(alliance_tag) + ")")
+            
+            self.success_url = "/game/alliance-invitations/"
+        
+            row = dbRow("SELECT user_alliance_invitation_decline(" + str(self.userId) + "," + sqlStr(tag) + ")")
+            return row[0]
+
         elif action == "leave":
-            if self.request.session.get(self.sLeaveCost) and request.POST.get("leave") == 1:
-                oRs = dbRow("SELECT user_alliance_leave(" + str(self.userId) + "," + self.request.session.get(self.sLeaveCost) + ")")
-                if oRs[0] == 0:
-                    return HttpResponseRedirect("/game/alliance/")
-
-            else:
-                self.leave_status = "not_enough_credits"
-
-        return self.DisplayInvitations()
-
-    def DisplayInvitations(self):
-        content = self.loadTemplate("alliance-invitations")
-
-        oRs = dbRow("SELECT date_part('epoch', static_alliance_joining_delay()) / 3600")
-        content.AssignValue("hours_before_rejoin", int(oRs[0]))
-
+        
+            row = dbRow("SELECT user_alliance_leave(" + str(self.userId) + ",0)")
+            return row[0]
+ 
+    #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
+        
+        # --- user rights
+        
+        if self.userInfo["can_join_alliance"]: data["can_join"] = True
+        
+        if self.allianceId: data["can_accept"] = True
+        
+        # --- leaving data
+        
+        if self.allianceId and self.userInfo["can_join_alliance"]:
+            
+            data["leave"] = True
+            
+            row = dbRow("SELECT date_part('epoch', static_alliance_joining_delay()) / 3600")
+            data["hours_before_rejoin"] = int(row[0])
+            
+        # --- invitations data
+        
+        data["invitations"] = []
+        
         query = "SELECT gm_alliances.tag, gm_alliances.name, gm_alliance_invitations.created, gm_profiles.login" + \
                 " FROM gm_alliance_invitations" + \
-                "        INNER JOIN gm_alliances ON gm_alliances.id = gm_alliance_invitations.allianceid"+ \
-                "        LEFT JOIN gm_profiles ON gm_profiles.id = gm_alliance_invitations.recruiterid"+ \
+                "   INNER JOIN gm_alliances ON gm_alliances.id = gm_alliance_invitations.allianceid" + \
+                "   LEFT JOIN gm_profiles ON gm_profiles.id = gm_alliance_invitations.recruiterid" + \
                 " WHERE userid=" + str(self.userId) + " AND NOT declined" + \
                 " ORDER BY created DESC"
-
-        oRss = dbRows(query)
-
-        i = 0
-        list = []
-        for oRs in oRss:
-            item = {}
-            item["tag"] = oRs[0]
-            item["name"] = oRs[1]
-
-            created = oRs[2]
-            item["date"] = created
-
-            item["recruiter"] = oRs[3]
-
-            if self.userInfo["can_join_alliance"]:
-                if self.allianceId:
-                    item["cant_accept"] = True
-                else:
-                    item["accept"] = True
-
-            else:
-                item["cant_join"] = True
-
-            list.append(item)
-
-            i = i + 1
-        content.AssignValue("invitations", list)
-
-        if self.invitation_status != "": content.Parse(self.invitation_status)
-
-        if i == 0: content.Parse("noinvitations")
-
-        # Parse "cant_join" section if the player can't create/join an alliance
-        if not self.userInfo["can_join_alliance"]: content.Parse("cant_join")
-
-        # Display the "leave" section if the player is in an alliance
-        if self.allianceId and self.userInfo["can_join_alliance"]:
-
-            oRs = dbRow("SELECT internal_profile_get_alliance_leaving_cost(" + str(self.userId) + ")")
-
-            self.request.session[self.sLeaveCost] = oRs[0]
-            if self.request.session.get(self.sLeaveCost) < 2000: self.request.session[self.sLeaveCost] = 0
-
-            content.AssignValue("credits", self.request.session.get(self.sLeaveCost))
-
-            if self.request.session.get(self.sLeaveCost) > 0: content.Parse("charges")
-
-            if self.leave_status != "": content.Parse(self.leave_status)
-
-            content.Parse("leave")
-
-        self.FillHeaderCredits(content)
-
-        return self.display(content)
+        rows = dbRows(query)
+        if rows:
+            for row in rows:
+            
+                invitation = {}
+                data["invitations"].append(invitation)
+                
+                invitation["tag"] = row[0]
+                invitation["name"] = row[1]
+                invitation["date"] = row[2]
+                invitation["recruiter"] = row[3]

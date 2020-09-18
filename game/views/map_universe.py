@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from math import sqrt
-
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
@@ -11,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "map"
+        self.selected_menu = "map"
 
         self.showHeader = True
 
@@ -55,8 +54,8 @@ class View(BaseView):
                 " from_radarstrength, to_radarstrength, gm_alliances.tag, radar_jamming, destplanet_radar_jamming" + \
                 " FROM vw_gm_moving_fleets v" + \
                 "    LEFT JOIN gm_alliances ON gm_alliances.id = owner_alliance_id" + \
-                " WHERE userid="+str(self.userId)+" AND ("+ \
-                "    (planetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND planetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")) OR"+ \
+                " WHERE userid="+str(self.userId)+" AND (" + \
+                "    (planetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND planetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")) OR" + \
                 "    (destplanetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND destplanetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")))" + \
                 " ORDER BY remaining_time"
         oRss = dbRows(query)
@@ -73,9 +72,9 @@ class View(BaseView):
         enterings = []
         leavings = []
         
-        for oRs in oRss:
-            relation = oRs[10]
-            remaining_time = oRs[7]
+        for row in oRss:
+            relation = row[10]
+            remaining_time = row[7]
             loosing_time = -1
 
             display_from = True
@@ -85,60 +84,60 @@ class View(BaseView):
             if relation <= rFriend:
                 # compute how far our radar can detect gm_fleets
                 # highest radar strength * width of a sector / speed * nbr of second in one hour
-                radarSpotting = sqrt(radarstrength)*6*1000/oRs[6]*3600
+                radarSpotting = sqrt(radarstrength)*6*1000/row[6]*3600
 
-                if oRs[28] == 0:
-                    if oRs[7] < radarSpotting:
+                if row[28] == 0:
+                    if row[7] < radarSpotting:
                         # incoming fleet is detected by our radar
                         display_from = False
                     else:
                         relation = -100
                     
-                elif oRs[29] == 0:
-                    if oRs[27]-oRs[7] < radarSpotting:
+                elif row[29] == 0:
+                    if row[27]-row[7] < radarSpotting:
                         #outgoing fleet is still detected by our radar
-                        loosing_time = int(radarSpotting-(oRs[27]-oRs[7]))
+                        loosing_time = int(radarSpotting-(row[27]-row[7]))
                         display_to = False
                     else:
                         relation = -100
                     
                 else:
-                    remaining_time = oRs[7]
+                    remaining_time = row[7]
 
             if relation > -100:
                 fleet = {}
 
-                fleet["id"] = oRs[8]
-                fleet["name"] = oRs[9]
+                fleet["id"] = row[8]
+                fleet["name"] = row[9]
 
-                fleet["fleetid"] = oRs[0]
-                fleet["fleetname"] = oRs[1]
-                fleet["signature"] = oRs[5]
+                fleet["fleetid"] = row[0]
+                fleet["fleetname"] = row[1]
+                fleet["signature"] = row[5]
 
                 #
                 # determine the type of movement : intrasector, intersector (entering, leaving)
                 # also don't show signature of enemy gm_fleets if we don't know or can't gm_spyings on the source AND target coords
                 #
-                if oRs[13] == galaxy and oRs[14] == sector:
-                    if oRs[21] == galaxy and oRs[22] == sector:
+                if row[13] == galaxy and row[14] == sector:
+                    if row[21] == galaxy and row[22] == sector:
                         movement_type = "radar.moving"
                         movingfleetcount = movingfleetcount + 1
                         movings.append(fleet)
 
-                        if ((oRs[31] >= oRs[28] and oRs[18] < rAlliance) or not display_from) and ((oRs[32] >= oRs[29] and oRs[26] < rAlliance) or not display_to) and oRs[10] < rAlliance: fleet["signature"] = 0
+                        if ((row[31] >= row[28] and row[18] < rAlliance) or not display_from) and ((row[32] >= row[29] and row[26] < rAlliance) or not display_to) and row[10] < rAlliance: fleet["signature"] = 0
                     else:
                         movement_type = "radar.leaving"
                         leavingfleetcount = leavingfleetcount + 1
                         leavings.append(fleet)
 
-                        if ((oRs[31] >= oRs[28] and oRs[18] < rAlliance) or not display_from) and ((oRs[32] >= oRs[29] and oRs[26] < rAlliance) or not display_to) and oRs[10] < rAlliance: fleet["signature"] = 0
+                        if ((row[31] >= row[28] and row[18] < rAlliance) or not display_from) and ((row[32] >= row[29] and row[26] < rAlliance) or not display_to) and row[10] < rAlliance: fleet["signature"] = 0
                     
                 else:
                     movement_type = "radar.entering"
                     enteringfleetcount = enteringfleetcount + 1
                     enterings.append(fleet)
 
-                    if ((oRs[31] >= oRs[28] and oRs[18] < rAlliance) or not display_from) and ((oRs[32] >= oRs[29] and oRs[26] < rAlliance) or not display_to) and oRs[10] < rAlliance: fleet["signature"] = 0
+                    if ((row[31] >= row[28] and row[18] < rAlliance) or not display_from) and ((row[32] >= row[29] and row[26] < rAlliance) or not display_to) and row[10] < rAlliance: fleet["signature"] = 0
 
                 #
                 # Assign remaining travel time
@@ -156,12 +155,12 @@ class View(BaseView):
 
                 if display_from:
                     # Assign the name of the owner if is not an ally planet
-                    fleet["f_planetname"] = self.getPlanetName(oRs[18], oRs[28], oRs[17], oRs[12])
-                    fleet["f_planetid"] = oRs[11]
-                    fleet["f_g"] = oRs[13]
-                    fleet["f_s"] = oRs[14]
-                    fleet["f_p"] = oRs[15]
-                    fleet["f_relation"] = oRs[18]
+                    fleet["f_planetname"] = self.getPlanetName(row[18], row[28], row[17], row[12])
+                    fleet["f_planetid"] = row[11]
+                    fleet["f_g"] = row[13]
+                    fleet["f_s"] = row[14]
+                    fleet["f_p"] = row[15]
+                    fleet["f_relation"] = row[18]
                 else:
                     fleet["f_planetname"] = ""
                     fleet["f_planetid"] = ""
@@ -172,12 +171,12 @@ class View(BaseView):
 
                 if display_to:
                     # Assign the planet name if possible otherwise the name of the owner
-                    fleet["t_planetname"] = self.getPlanetName(oRs[26], oRs[29], oRs[25], oRs[20])
-                    fleet["t_planetid"] = oRs[19]
-                    fleet["t_g"] = oRs[21]
-                    fleet["t_s"] = oRs[22]
-                    fleet["t_p"] = oRs[23]
-                    fleet["t_relation"] = oRs[26]
+                    fleet["t_planetname"] = self.getPlanetName(row[26], row[29], row[25], row[20])
+                    fleet["t_planetid"] = row[19]
+                    fleet["t_g"] = row[21]
+                    fleet["t_s"] = row[22]
+                    fleet["t_p"] = row[23]
+                    fleet["t_relation"] = row[26]
                 else:
                     fleet["t_planetname"] = ""
                     fleet["t_planetid"] = ""
@@ -187,7 +186,7 @@ class View(BaseView):
                     fleet["t_relation"] = "0"
 
                 fleet["relation"] = relation
-                fleet["alliancetag"] = oRs[30] if oRs[30] else ""
+                fleet["alliancetag"] = row[30] if row[30] else ""
 
         content.AssignValue("movings", movings)
         content.AssignValue("enterings", enterings)
@@ -224,28 +223,28 @@ class View(BaseView):
             #
             # Display map of galaxies with 8 galaxies per row
             #
-            query = "SELECT n.id, "+ \
-                    " n.colonies > 0,"+ \
-                    " False AND EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid IN (SELECT friend FROM vw_gm_friends WHERE vw_gm_friends.userid="+str(self.userId)+") LIMIT 1),"+ \
-                    " EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid IN (SELECT ally FROM vw_allies WHERE vw_allies.userid="+str(self.userId)+") LIMIT 1),"+ \
-                    " EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid = "+str(self.userId)+" LIMIT 1) AS hasplanets"+ \
-                    " FROM gm_galaxies AS n"+ \
+            query = "SELECT n.id, " + \
+                    " n.colonies > 0," + \
+                    " False AND EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid IN (SELECT friend FROM vw_gm_friends WHERE vw_gm_friends.userid="+str(self.userId)+") LIMIT 1)," + \
+                    " EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid IN (SELECT ally FROM vw_allies WHERE vw_allies.userid="+str(self.userId)+") LIMIT 1)," + \
+                    " EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid = "+str(self.userId)+" LIMIT 1) AS hasplanets" + \
+                    " FROM gm_galaxies AS n" + \
                     " ORDER BY n.id;"
             oRss = dbRows(query)
 
             galaxies = []
-            for oRs in oRss:
+            for row in oRss:
                 galaxy = {}
-                galaxy["galaxyid"] = oRs[0]
+                galaxy["galaxyid"] = row[0]
 
                 # check if enemy or friendly planets are in the galaxies
-                if oRs[4]:
+                if row[4]:
                     galaxy["hasplanet"] = True
-                elif oRs[3]:
+                elif row[3]:
                     galaxy["hasally"] = True
-                elif oRs[2]:
+                elif row[2]:
                     galaxy["hasfriend"] = True
-                elif oRs[1]:
+                elif row[1]:
                     galaxy["hasnothing"] = True
 
                 galaxies.append(galaxy)
@@ -260,10 +259,10 @@ class View(BaseView):
             # Display map of sectors for the given galaxy
             #
             query = "SELECT internal_profile_get_galaxy_planets(" + str(galaxy) + "," + str(self.userId) + ")"
-            oRs = dbRow(query)
+            row = dbRow(query)
 
-            content.AssignValue("map", oRs[0])
-            content.AssignValue("mapgalaxy", oRs[0])
+            content.AssignValue("map", row[0])
+            content.AssignValue("mapgalaxy", row[0])
 
             query = "SELECT gm_alliances.tag, round(100.0 * sum(n.score) / (SELECT sum(score) FROM gm_planets WHERE galaxy=n.galaxy))" + \
                     " FROM gm_planets AS n" + \
@@ -275,21 +274,21 @@ class View(BaseView):
             oRss = dbRows(query)
 
             nb = 1
-            for oRs in oRss:
-                content.AssignValue("sov_tag_" + str(nb), oRs[0])
-                content.AssignValue("sov_perc_" + str(nb), oRs[1])
+            for row in oRss:
+                content.AssignValue("sov_tag_" + str(nb), row[0])
+                content.AssignValue("sov_perc_" + str(nb), row[1])
 
                 nb = nb + 1
 
             query = "SELECT date_part('epoch', protected_until-now()) FROM gm_galaxies WHERE id=" + str(galaxy)
-            oRs = dbRow(query)
-            content.AssignValue("protected_until", int(oRs[0]))
+            row = dbRow(query)
+            content.AssignValue("protected_until", int(row[0]))
 
             query = "SELECT sell_ore, sell_hydrocarbon FROM internal_profile_get_resource_price(" + str(self.userId) + "," + str(galaxy) + ", false)"
-            oRs = dbRow(query)
+            row = dbRow(query)
 
-            content.AssignValue("price_ore", oRs[0])
-            content.AssignValue("price_hydrocarbon", oRs[1])
+            content.AssignValue("price_ore", row[0])
+            content.AssignValue("price_hydrocarbon", row[1])
 
             content.Parse("nav_galaxy")
             content.Parse("galaxy_link")
@@ -350,8 +349,8 @@ class View(BaseView):
         # Retrieve biggest radar strength in the sector that the player has access to
         #
         query = "SELECT * FROM internal_profile_get_sector_radar_strength("+str(self.userId)+","+str(galaxy)+","+str(sector)+")"
-        oRs = dbRow(query)
-        radarstrength = oRs[0]
+        row = dbRow(query)
+        radarstrength = row[0]
 
         if self.allianceId == None:
             aid = -1
@@ -361,7 +360,7 @@ class View(BaseView):
         #
         # Main query : retrieve planets info in the sector
         #
-        query = "SELECT gm_planets.id, gm_planets.planet, gm_planets.name, gm_planets.ownerid,"+ \
+        query = "SELECT gm_planets.id, gm_planets.planet, gm_planets.name, gm_planets.ownerid," + \
                 " gm_profiles.login, internal_profile_get_relation(gm_planets.ownerid," + str(self.userId) + "), floor, space, GREATEST(0, radar_strength), radar_jamming," + \
                 " orbit_ore, orbit_hydrocarbon, gm_alliances.tag," + \
                 " (SELECT SUM(quantity*signature) FROM gm_planet_ships LEFT JOIN dt_ships ON (gm_planet_ships.shipid = dt_ships.id) WHERE gm_planet_ships.planetid=gm_planets.id), " + \
@@ -369,8 +368,8 @@ class View(BaseView):
                 " planet_pct_ore, planet_pct_hydrocarbon, spawn_ore, spawn_hydrocarbon, vortex_strength," + \
                 " COALESCE(buy_ore, 0) AS buy_ore, COALESCE(buy_hydrocarbon, 0) as buy_hydrocarbon," + \
                 " internal_alliance_get_nap_location_sharing(COALESCE(" + str(aid) + ", -1), COALESCE(gm_profiles.alliance_id, -1)) AS locs_shared" + \
-                " FROM gm_planets"+ \
-                "    LEFT JOIN gm_profiles ON (gm_profiles.id = ownerid)"+ \
+                " FROM gm_planets" + \
+                "    LEFT JOIN gm_profiles ON (gm_profiles.id = ownerid)" + \
                 "    LEFT JOIN gm_alliances ON (gm_profiles.alliance_id=gm_alliances.id)" + \
                 " WHERE galaxy=" + str(galaxy) + " AND sector=" + str(sector) + \
                 " ORDER BY planet"
@@ -381,17 +380,17 @@ class View(BaseView):
             return HttpResponseRedirect("/game/map/")
         
         planets = []
-        for oRs in oRss:
+        for row in oRss:
             planet = {}
             
-            planetid = oRs[0]
+            planetid = row[0]
 
-            rel = oRs[5]
+            rel = row[5]
 
             if rel == rAlliance and not self.hasRight("can_use_alliance_radars"):
                 rel = rWar
 
-            if rel == rFriend and not oRs[25] and oRs[3] != 3:
+            if rel == rFriend and not row[25] and row[3] != 3:
                 rel = rWar
 
             displayElements = False # hasElements is True if the planet has some particularities like magnetic cloud or sun radiation ..
@@ -416,7 +415,7 @@ class View(BaseView):
                         #    alliance and own planets 
                         #    planets where we got a fleet or (a fleet of an alliance member and can_use_alliance_radars)
                         #    planets that our radar can detect
-                        if (self.hasRight("can_use_alliance_radars") and ( (rel >= rAlliance) or i[5] )) or radarstrength > oRs[9] or i[10]:
+                        if (self.hasRight("can_use_alliance_radars") and ( (rel >= rAlliance) or i[5] )) or radarstrength > row[9] or i[10]:
     
                             fleet = {}
                             fleetcount = fleetcount + 1
@@ -427,7 +426,7 @@ class View(BaseView):
                             fleet["relation"] = i[3]
                             fleet["fleetowner"] = i[8]
     
-                            if (oRs[5] > rFriend) or (i[3] > rFriend) or (radarstrength > oRs[9]) or (i[5] and oRs[9] == 0):
+                            if (row[5] > rFriend) or (i[3] > rFriend) or (radarstrength > row[9]) or (i[5] and row[9] == 0):
                                 fleet["signature"] = i[4]
                             else:
                                 fleet["signature"] = -1
@@ -460,25 +459,25 @@ class View(BaseView):
                             planet['gm_fleets'].append(fleet)
     
             planet["planetid"] = planetid
-            planet["planet"] = oRs[1]
-            planet["relation"] = oRs[5]
-            if oRs[12]: planet["alliancetag"] = oRs[12]
+            planet["planet"] = row[1]
+            planet["relation"] = row[5]
+            if row[12]: planet["alliancetag"] = row[12]
             else: planet["alliancetag"] = ""
 
-            planet["buy_ore"] = oRs[23]
-            planet["buy_hydrocarbon"] = oRs[24]
+            planet["buy_ore"] = row[23]
+            planet["buy_hydrocarbon"] = row[24]
 
             #
             # assign the planet representation
             #
-            if oRs[6] == 0 and oRs[7] == 0:
+            if row[6] == 0 and row[7] == 0:
                 # if floor and space are null: it is either an asteroid field, empty square or a vortex
                 planet["planet_img"] = ""
-                if oRs[17]:
+                if row[17]:
                     planet["vortex"] = True
-                elif oRs[20] > 0:
+                elif row[20] > 0:
                     planet["asteroids"] = True
-                elif oRs[21] > 0:
+                elif row[21] > 0:
                     planet["clouds"] = True
                 else:
                     planet["empty"] = True
@@ -487,7 +486,7 @@ class View(BaseView):
             else:
                 hasPlanetInfo = True
 
-                p_img = 1+(oRs[15] + oRs[0]) % 21
+                p_img = 1+(row[15] + row[0]) % 21
                 if p_img < 10: p_img = "0" + str(p_img)
                 else: p_img = str(p_img)
 
@@ -502,8 +501,8 @@ class View(BaseView):
 
             planet["parked"] = 0
             
-            if oRs[13] and ( radarstrength > oRs[9] or rel >= rAlliance or allyfleetcount > 0 ):
-                ground = int(oRs[13])
+            if row[13] and ( radarstrength > row[9] or rel >= rAlliance or allyfleetcount > 0 ):
+                ground = int(row[13])
                 if ground != 0:
                     ShowGround = True
 
@@ -512,7 +511,7 @@ class View(BaseView):
             if fleetcount > 0 or ShowGround:
                 planet["orbit"] = True
 
-            if oRs[3] == None:
+            if row[3] == None:
                 # if there is no owner
 
                 displayPlanetInfo = radarstrength > 0 or allyfleetcount > 0
@@ -526,19 +525,19 @@ class View(BaseView):
                 if hasPlanetInfo: planet["uninhabited"] = True
                 planet["noradar"] = True
             else:
-                planet["ownerid"] = oRs[3]
-                planet["ownername"] = oRs[4]
+                planet["ownerid"] = row[3]
+                planet["ownername"] = row[4]
 
                 # display planet info
                 if rel == rSelf:
-                    planet["planetname"] = oRs[2]
+                    planet["planetname"] = row[2]
 
                     displayElements = True
                     displayPlanetInfo = True
                     displayResources = True
                 elif rel == rAlliance:
                     if self.displayAlliancePlanetName:
-                        planet["planetname"] = oRs[2]
+                        planet["planetname"] = row[2]
                     else:
                         planet["planetname"] = ""
 
@@ -548,14 +547,14 @@ class View(BaseView):
                 elif rel == rFriend:
                     planet["planetname"] = ""
 
-                    displayElements = radarstrength > oRs[9] or allyfleetcount > 0
+                    displayElements = radarstrength > row[9] or allyfleetcount > 0
                     displayPlanetInfo = displayElements
                     displayResources = radarstrength > 0 or allyfleetcount > 0
                 else:
                     if radarstrength > 0 or allyfleetcount > 0:
-                        planet["planetname"] = oRs[4]
+                        planet["planetname"] = row[4]
 
-                        displayElements = radarstrength > oRs[9] or allyfleetcount > 0
+                        displayElements = radarstrength > row[9] or allyfleetcount > 0
                         displayPlanetInfo = displayElements
                         displayResources = radarstrength > 0 or allyfleetcount > 0
                     else:
@@ -570,43 +569,43 @@ class View(BaseView):
                         displayResources = False
 
             if rel >= rAlliance:
-                planet["radarstrength"] = oRs[8]
-                planet["radarjamming"] = oRs[9]
+                planet["radarstrength"] = row[8]
+                planet["radarjamming"] = row[9]
             else:
                 if radarstrength == 0:
                     planet["radarstrength"] = -1
                     planet["radarjamming"] = 0
-                elif oRs[9] > 0:
-                    if oRs[9] >= radarstrength:    # check if radar is jammed
+                elif row[9] > 0:
+                    if row[9] >= radarstrength:    # check if radar is jammed
                         planet["radarstrength"] = 1
                         planet["radarjamming"] = -1
-                    elif radarstrength > oRs[9]:
-                        planet["radarstrength"] = oRs[8]
-                        planet["radarjamming"] = oRs[9]
+                    elif radarstrength > row[9]:
+                        planet["radarstrength"] = row[8]
+                        planet["radarjamming"] = row[9]
                     
-                elif oRs[8] == 0:
+                elif row[8] == 0:
                     planet["radarstrength"] = 0
                     planet["radarjamming"] = 0
                 else:
-                    planet["radarstrength"] = oRs[8]
-                    planet["radarjamming"] = oRs[9]
+                    planet["radarstrength"] = row[8]
+                    planet["radarjamming"] = row[9]
 
             if hasPlanetInfo and displayPlanetInfo:
-                planet["floor"] = oRs[6]
-                planet["space"] = oRs[7]
-                planet["a_ore"] = oRs[18]
-                planet["a_hydrocarbon"] = oRs[19]
-                planet["vortex_strength"] = oRs[23]
+                planet["floor"] = row[6]
+                planet["space"] = row[7]
+                planet["a_ore"] = row[18]
+                planet["a_hydrocarbon"] = row[19]
+                planet["vortex_strength"] = row[23]
                 planet["info"] = True
             else:
                 planet["floor"] = ""
                 planet["space"] = ""
-                planet["vortex_strength"] = oRs[23]
+                planet["vortex_strength"] = row[23]
                 planet["noinfo"] = ""
 
-            if displayResources and (oRs[10] > 0 or oRs[11] > 0):
-                planet["ore"] = oRs[10]
-                planet["hydrocarbon"] = oRs[11]
+            if displayResources and (row[10] > 0 or row[11] > 0):
+                planet["ore"] = row[10]
+                planet["hydrocarbon"] = row[11]
                 planet["resources"] = True
             else:
                 planet["ore"] = 0
@@ -633,7 +632,7 @@ class View(BaseView):
             if not displayElements:
                 planet["noelements"] = True
 
-            if oRs[16]:
+            if row[16]:
                 planet["frozen"] = True
             else:
                 planet["active"] = True

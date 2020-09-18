@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
@@ -19,12 +20,12 @@ class View(BaseMixin, View):
         # retrieve remaining time
         query = "SELECT login, COALESCE(date_part('epoch', ban_expire-now()), 0) AS remaining_time FROM gm_profiles WHERE /*privilege=-3 AND*/ id=" + str(self.userId)
 
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs == None:
+        if row == None:
             return HttpResponseRedirect("/")
 
-        remainingTime = oRs[1]
+        remainingTime = row[1]
         
         # check to unlock holidays mode
         action = request.POST.get("unlock", "")
@@ -33,8 +34,8 @@ class View(BaseMixin, View):
             dbExecute("UPDATE gm_profiles SET privilege=0 WHERE ban_expire < now() AND id="+str(self.userId))
             return HttpResponseRedirect("/game/start/")
 
-        content.AssignValue("login", oRs[0])
-        content.AssignValue("remaining_time_before_unlock", int(oRs[1]))
+        content.AssignValue("login", row[0])
+        content.AssignValue("remaining_time_before_unlock", int(row[1]))
 
         if remainingTime < 0:
             content.Parse("unlock")

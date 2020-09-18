@@ -4,10 +4,11 @@ import re
 import time
 
 from math import sqrt
+from random import *
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import connection
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
 from django.views import View
@@ -211,7 +212,7 @@ class BaseView(BaseMixin, View):
     
     scrollY = 0
     showHeader = False
-    selectedMenu = ""
+    selected_menu = ""
     
     #---------------------------------------------------------------------------
     def pre_dispatch(self, request, *args, **kwargs):
@@ -260,12 +261,12 @@ class BaseView(BaseMixin, View):
         planetId = ToInt(request.GET.get("planet"), 0)
         if planetId != 0:
         
-            oRs = dbRow("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(planetId) + " and ownerid=" + str(self.userId))
-            if oRs:
+            row = dbRow("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(planetId) + " and ownerid=" + str(self.userId))
+            if row:
             
                 self.currentPlanetId = planetId
-                self.currentGalaxy = oRs[0]
-                self.currentSector = oRs[1]
+                self.currentGalaxy = row[0]
+                self.currentSector = row[1]
 
                 request.session[sPlanet] = planetId
     
@@ -277,20 +278,20 @@ class BaseView(BaseMixin, View):
         self.currentPlanetId = request.session.get(sPlanet, "")    
         if self.currentPlanetId != "":
         
-            oRs = dbRow("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(self.currentPlanetId) + " AND ownerid=" + str(self.userId))
-            if oRs:
+            row = dbRow("SELECT galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND id=" + str(self.currentPlanetId) + " AND ownerid=" + str(self.userId))
+            if row:
 
-                self.currentGalaxy = oRs[0]
-                self.currentSector = oRs[1]
+                self.currentGalaxy = row[0]
+                self.currentSector = row[1]
             
         if self.currentGalaxy == None or self.currentSector == None:
         
-            oRs = dbRow("SELECT id, galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.userId) + " LIMIT 1")
-            if oRs == None: return HttpResponseRedirect("/game/game-over/")
+            row = dbRow("SELECT id, galaxy, sector FROM gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.userId) + " LIMIT 1")
+            if row == None: return HttpResponseRedirect("/game/game-over/")
         
-            self.currentPlanetId = oRs[0]
-            self.currentGalaxy = oRs[1]
-            self.currentSector = oRs[2]
+            self.currentPlanetId = row[0]
+            self.currentGalaxy = row[1]
+            self.currentSector = row[2]
             
             self.request.session[sPlanet] = self.currentPlanetId
         
@@ -333,7 +334,7 @@ class BaseView(BaseMixin, View):
     #---------------------------------------------------------------------------
     def hasRight(self, right):
     
-        if self.allianceRights == None: return True
+        if self.allianceRights == None: return False
         else: return self.allianceRights["leader"] or self.allianceRights[right]
     
     #---------------------------------------------------------------------------
@@ -389,10 +390,10 @@ class BaseView(BaseMixin, View):
 
         query = "SELECT (SELECT int4(COUNT(*)) FROM gm_mails WHERE ownerid=" + str(self.userId) + " AND read_date is NULL)," + \
                 "(SELECT int4(COUNT(*)) FROM gm_profile_reports WHERE ownerid=" + str(self.userId) + " AND read_date is NULL AND datetime <= now());"
-        oRs = dbRow(query)
+        row = dbRow(query)
         
-        content["new_mail"] = oRs[0]
-        content["new_report"] = oRs[1]
+        content["new_mail"] = row[0]
+        content["new_report"] = row[1]
 
         if self.allianceRights:
             if self.allianceRights["leader"] or self.allianceRights["can_manage_description"] or self.allianceRights["can_manage_announce"]: content["show_management"] = True
@@ -404,8 +405,8 @@ class BaseView(BaseMixin, View):
         content["cur_s"] = self.currentSector
         content["cur_p"] = ((self.currentPlanetId - 1) % 25) + 1
     
-        if self.selectedMenu != "":
-            blockname = self.selectedMenu + "_selected"
+        if self.selected_menu != "":
+            blockname = self.selected_menu + "_selected"
     
             while blockname != "":
                 content[blockname] = True
@@ -414,17 +415,17 @@ class BaseView(BaseMixin, View):
                 if i > 0: i = i - 1
                 blockname = blockname[:i]
     
-        content["selectedmenu"] = self.selectedMenu.replace(".", "_")
+        content["selected_menu"] = self.selected_menu.replace(".", "_")
         
         if self.showHeader == True:
 
             # --- user info
             
             query = "SELECT credits, prestige_points FROM gm_profiles WHERE id=" + str(self.userId) + " LIMIT 1"
-            oRs = dbRow(query)
+            row = dbRow(query)
             
-            content["money"] = oRs[0]
-            content["pp"] = oRs[1]
+            content["money"] = row[0]
+            content["pp"] = row[1]
         
             # --- current planet info
             
@@ -436,46 +437,46 @@ class BaseView(BaseMixin, View):
                     "space_occupied, space, workers_for_maintenance," + \
                     "mod_production_ore, mod_production_hydrocarbon, energy, energy_capacity, soldiers, soldiers_capacity, scientists, scientists_capacity" + \
                     " FROM vw_gm_planets WHERE id=" + str(self.currentPlanetId)
-            oRs = dbRow(query)
+            row = dbRow(query)
         
-            content["ore"] = oRs[0]
-            content["ore_prod"] = oRs[1]
-            content["ore_stock"] = oRs[2]
-            content["ore_level"] = self.getpercent(oRs[0], oRs[2], 10)
+            content["ore"] = row[0]
+            content["ore_prod"] = row[1]
+            content["ore_stock"] = row[2]
+            content["ore_level"] = self.getpercent(row[0], row[2], 10)
             
-            if oRs[16] >= 0 and oRs[6] >= oRs[15]: content["ore_prod_normal"] = True
+            if row[16] >= 0 and row[6] >= row[15]: content["ore_prod_normal"] = True
             else: content["ore_prod_medium"] = True
         
-            content["hydro"] = oRs[3]
-            content["hydro_prod"] = oRs[4]
-            content["hydro_stock"] = oRs[5]
-            content["hydro_level"] = self.getpercent(oRs[3], oRs[5], 10)
+            content["hydro"] = row[3]
+            content["hydro_prod"] = row[4]
+            content["hydro_stock"] = row[5]
+            content["hydro_level"] = self.getpercent(row[3], row[5], 10)
             
-            if oRs[17] >= 0 and oRs[6] >= oRs[15]: content["hydro_prod_normal"] = True
+            if row[17] >= 0 and row[6] >= row[15]: content["hydro_prod_normal"] = True
             else: content["hydro_prod_medium"] = True
         
-            content["worker"] = oRs[6]
-            content["worker_stock"] = oRs[8]
-            content["worker_idle"] = oRs[6] - oRs[7]
-            content["worker_maintenance"] = oRs[15]
+            content["worker"] = row[6]
+            content["worker_stock"] = row[8]
+            content["worker_idle"] = row[6] - row[7]
+            content["worker_maintenance"] = row[15]
         
-            content["soldier"] = oRs[20]
-            content["soldier_capacity"] = oRs[21]
-            if oRs[20] * 250 < oRs[6] + oRs[22]: content["soldier_low"] = True
+            content["soldier"] = row[20]
+            content["soldier_capacity"] = row[21]
+            if row[20] * 250 < row[6] + row[22]: content["soldier_low"] = True
         
-            content["scientist"] = oRs[22]
-            content["scientist_stock"] = oRs[23]
+            content["scientist"] = row[22]
+            content["scientist_stock"] = row[23]
         
-            content["energy"] = oRs[18]
-            content["energy_capacity"] = oRs[19]
-            content["energy_production"] = oRs[10] - oRs[9]       
-            if oRs[9] > oRs[10]: content["energy_low"] = True
+            content["energy"] = row[18]
+            content["energy_capacity"] = row[19]
+            content["energy_production"] = row[10] - row[9]       
+            if row[9] > row[10]: content["energy_low"] = True
         
-            content["floor"] = oRs[12]
-            content["floor_occupied"] = oRs[11]
+            content["floor"] = row[12]
+            content["floor_occupied"] = row[11]
         
-            content["space"] = oRs[14]
-            content["space_occupied"] = oRs[13]
+            content["space"] = row[14]
+            content["space_occupied"] = row[13]
 
             # --- user planet list
 

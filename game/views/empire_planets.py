@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "planets"
+        self.selected_menu = "planets"
 
         return self.ListPlanets()
 
@@ -68,28 +69,28 @@ class View(BaseView):
         
         list = []
         content.AssignValue("page_planets", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
             mood_delta = 0
 
-            item["planet_img"] = self.getPlanetImg(oRs[0], oRs[29])
+            item["planet_img"] = self.getPlanetImg(row[0], row[29])
 
-            item["planet_id"] = oRs[0]
-            item["planet_name"] = oRs[1]
+            item["planet_id"] = row[0]
+            item["planet_name"] = row[1]
 
-            item["g"] = oRs[2]
-            item["s"] = oRs[3]
-            item["p"] = oRs[4]
+            item["g"] = row[2]
+            item["s"] = row[3]
+            item["p"] = row[4]
 
                 # ore
-            item["ore"] = oRs[5]
-            item["ore_production"] = oRs[6]
-            item["ore_capacity"] = oRs[7]
+            item["ore"] = row[5]
+            item["ore_production"] = row[6]
+            item["ore_capacity"] = row[7]
 
             # compute ore level : ore / capacity
-            ore_level = self.getpercent(oRs[5], oRs[7], 10)
+            ore_level = self.getpercent(row[5], row[7], 10)
 
             if ore_level >= 90:
                 item["high_ore"] = True
@@ -99,12 +100,12 @@ class View(BaseView):
                 item["normal_ore"] = True
 
             # hydrocarbon
-            item["hydrocarbon"] = oRs[8]
-            item["hydrocarbon_production"] = oRs[9]
-            item["hydrocarbon_capacity"] = oRs[10]
+            item["hydrocarbon"] = row[8]
+            item["hydrocarbon_production"] = row[9]
+            item["hydrocarbon_capacity"] = row[10]
 
             # compute hydrocarbon level : hydrocarbon / capacity
-            hydrocarbon_level = self.getpercent(oRs[8], oRs[10], 10)
+            hydrocarbon_level = self.getpercent(row[8], row[10], 10)
 
             if hydrocarbon_level >= 90:
                 item["high_hydrocarbon"] = True
@@ -114,16 +115,16 @@ class View(BaseView):
                 item["normal_hydrocarbon"] = True
 
             # energy
-            item["energy"] = oRs[31]
-            item["energy_production"] = oRs[13]
-            item["energy_capacity"] = oRs[14]
+            item["energy"] = row[31]
+            item["energy_production"] = row[13]
+            item["energy_capacity"] = row[14]
 
             # compute energy level : energy / capacity
-            energy_level = self.getpercent(oRs[31], oRs[14], 10)
+            energy_level = self.getpercent(row[31], row[14], 10)
 
             item["normal_energy"] = True
 
-            credits = oRs[37] + (oRs[38] / 2)
+            credits = row[37] + (row[38] / 2)
 
             item["credits"] = int(credits)
             if credits < 0:
@@ -131,48 +132,48 @@ class View(BaseView):
             else:
                 item["credits_plus"] = True
 
-            item["prestige"] = oRs[39]
+            item["prestige"] = row[39]
 
-            if oRs[13] < 0:
+            if row[13] < 0:
                 item["negative_energy_production"] = True
-            elif oRs[32] >= 0 and oRs[23] >= oRs[28]:
+            elif row[32] >= 0 and row[23] >= row[28]:
                 item["normal_energy_production"] = True
             else:
                 item["medium_energy_production"] = True
 
             # workers
-            item["workers"] = oRs[23]
-            item["workers_idle"] = oRs[11]
-            item["workers_capacity"] = oRs[12]
+            item["workers"] = row[23]
+            item["workers_idle"] = row[11]
+            item["workers_capacity"] = row[12]
 
             # soldiers
-            item["soldiers"] = oRs[24]
-            item["soldiers_capacity"] = oRs[25]
-            item["soldiers_training"] = oRs[36]
+            item["soldiers"] = row[24]
+            item["soldiers_capacity"] = row[25]
+            item["soldiers_training"] = row[36]
 
             # scientists
-            item["scientists"] = oRs[26]
-            item["scientists_capacity"] = oRs[27]
-            item["scientists_training"] = oRs[35]
+            item["scientists"] = row[26]
+            item["scientists_capacity"] = row[27]
+            item["scientists_training"] = row[35]
 
-            if oRs[23] < oRs[28]: item["workers_low"] = True
+            if row[23] < row[28]: item["workers_low"] = True
 
-            if oRs[24]*250 < oRs[23]+oRs[26]: item["soldiers_low"] = True
+            if row[24]*250 < row[23]+row[26]: item["soldiers_low"] = True
 
             # mood
-            if oRs[30] > 100:
+            if row[30] > 100:
                 item["mood"] = 100
             else:
-                item["mood"] = oRs[30]
+                item["mood"] = row[30]
 
-            moodlevel = round(oRs[30] / 10) * 10
+            moodlevel = round(row[30] / 10) * 10
             if moodlevel > 100: moodlevel = 100
 
             item["mood_level"] = moodlevel
 
-            if (oRs[19]): mood_delta = mood_delta + 1
+            if (row[19]): mood_delta = mood_delta + 1
 
-            if oRs[24]*250 >= oRs[23]+oRs[26]:
+            if row[24]*250 >= row[23]+row[26]:
                 mood_delta = mood_delta + 2
             else:
                 mood_delta = mood_delta - 1
@@ -184,33 +185,33 @@ class View(BaseView):
                 item["mood_minus"] = True
 
             # planet stats
-            item["floor_capacity"] = oRs[15]
-            item["floor_occupied"] = oRs[16]
+            item["floor_capacity"] = row[15]
+            item["floor_occupied"] = row[16]
 
-            item["space_capacity"] = oRs[17]
-            item["space_occupied"] = oRs[18]
+            item["space_capacity"] = row[17]
+            item["space_occupied"] = row[18]
 
-            if oRs[19]:
-                item["commander_id"] = oRs[19]
-                item["commander_name"] = oRs[20]
+            if row[19]:
+                item["commander_id"] = row[19]
+                item["commander_name"] = row[20]
                 item["commander"] = True
             else:
                 item["nocommander"] = True
 
-            if oRs[21] >= 0 and oRs[23] >= oRs[28]:
+            if row[21] >= 0 and row[23] >= row[28]:
                 item["normal_ore_production"] = True
             else:
                 item["medium_ore_production"] = True
 
-            if oRs[22] >= 0 and oRs[23] >= oRs[28]:
+            if row[22] >= 0 and row[23] >= row[28]:
                 item["normal_hydrocarbon_production"] = True
             else:
                 item["medium_hydrocarbon_production"] = True
 
-            item["upkeep_credits"] = oRs[33]
-            item["upkeep_workers"] = oRs[28]
-            item["upkeep_soldiers"] = int((oRs[23]+oRs[26]) / 250)
+            item["upkeep_credits"] = row[33]
+            item["upkeep_workers"] = row[28]
+            item["upkeep_soldiers"] = int((row[23]+row[26]) / 250)
 
-            if oRs[0] == self.currentPlanetId: item["highlight"] = True
+            if row[0] == self.currentPlanetId: item["highlight"] = True
 
         return self.display(content)

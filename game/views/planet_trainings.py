@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "training"
+        self.selected_menu = "training"
 
         self.showHeader = True
 
@@ -36,33 +37,33 @@ class View(BaseView):
         query = "SELECT scientist_ore, scientist_hydrocarbon, scientist_credits," + \
                 " soldier_ore, soldier_hydrocarbon, soldier_credits" + \
                 " FROM internal_profile_get_training_price(" + str(self.userId) + ")"
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs:
-            content.AssignValue("scientist_ore", oRs[0])
-            content.AssignValue("scientist_hydrocarbon", oRs[1])
-            content.AssignValue("scientist_credits", oRs[2])
-            content.AssignValue("soldier_ore", oRs[3])
-            content.AssignValue("soldier_hydrocarbon", oRs[4])
-            content.AssignValue("soldier_credits", oRs[5])
+        if row:
+            content.AssignValue("scientist_ore", row[0])
+            content.AssignValue("scientist_hydrocarbon", row[1])
+            content.AssignValue("scientist_credits", row[2])
+            content.AssignValue("soldier_ore", row[3])
+            content.AssignValue("soldier_hydrocarbon", row[4])
+            content.AssignValue("soldier_credits", row[5])
 
         query = "SELECT scientists, scientists_capacity, soldiers, soldiers_capacity, workers FROM vw_gm_planets WHERE id="+str(self.currentPlanetId)
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs:
-            content.AssignValue("scientists", oRs[0])
-            content.AssignValue("scientists_capacity", oRs[1])
+        if row:
+            content.AssignValue("scientists", row[0])
+            content.AssignValue("scientists_capacity", row[1])
 
-            content.AssignValue("soldiers", oRs[2])
-            content.AssignValue("soldiers_capacity", oRs[3])
-            if oRs[2]*250 < oRs[0]+oRs[4]: content.Parse("not_enough_soldiers")
+            content.AssignValue("soldiers", row[2])
+            content.AssignValue("soldiers_capacity", row[3])
+            if row[2]*250 < row[0]+row[4]: content.Parse("not_enough_soldiers")
 
-            if oRs[0] < oRs[1]:
+            if row[0] < row[1]:
                 content.Parse("input_scientists")
             else:
                 content.Parse("max_scientists")
 
-            if oRs[2] < oRs[3]:
+            if row[2] < row[3]:
                 content.Parse("input_soldiers")
             else:
                 content.Parse("max_soldiers")
@@ -82,19 +83,19 @@ class View(BaseView):
         i = 0
         list = []
         content.AssignValue("trainings", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["queueid"] = oRs[0]
-            item["remainingtime"] = oRs[3]
+            item["queueid"] = row[0]
+            item["remainingtime"] = row[3]
 
-            if oRs[1] > 0:
-                item["quantity"] = oRs[1]
+            if row[1] > 0:
+                item["quantity"] = row[1]
                 item["scientists"] = True
 
-            if oRs[2] > 0:
-                item["quantity"] = oRs[2]
+            if row[2] > 0:
+                item["quantity"] = row[2]
                 item["soldiers"] = True
 
             i = i + 1
@@ -112,20 +113,20 @@ class View(BaseView):
         i = 0
         list = []
         content.AssignValue("queues", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["queueid"] = oRs[0]
+            item["queueid"] = row[0]
 
-            if oRs[1] > 0:
-                item["quantity"] = oRs[1]
-                item["remainingtime"] = oRs[3]
+            if row[1] > 0:
+                item["quantity"] = row[1]
+                item["remainingtime"] = row[3]
                 item["scientists"] = True
 
-            if oRs[2] > 0:
-                item["quantity"] = oRs[2]
-                item["remainingtime"] = oRs[4]
+            if row[2] > 0:
+                item["quantity"] = row[2]
+                item["remainingtime"] = row[4]
                 item["soldiers"] = True
 
             i = i + 1
@@ -134,10 +135,10 @@ class View(BaseView):
 
     def Train(self, Scientists, Soldiers):
 
-        oRs = dbRowRetry("SELECT * FROM user_planet_training_start(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + str(Scientists) + "," + str(Soldiers) + ")")
+        row = dbRowRetry("SELECT * FROM user_planet_training_start(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + str(Scientists) + "," + str(Soldiers) + ")")
 
-        if oRs:
-            self.train_error = oRs[0]
+        if row:
+            self.train_error = row[0]
         else:
             self.train_error = 1
 

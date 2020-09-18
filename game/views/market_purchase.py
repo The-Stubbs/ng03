@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "merchants.buy"
+        self.selected_menu = "merchants.buy"
 
         self.ExecuteOrder()
 
@@ -48,47 +49,47 @@ class View(BaseView):
         i = 1
         list = []
         content.AssignValue("m_planets", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            p_img = 1+(oRs[9] + oRs[0]) % 21
+            p_img = 1+(row[9] + row[0]) % 21
             if p_img < 10: p_img = "0" + str(p_img)
 
             item["index"] = i
 
             item["planet_img"] = p_img
 
-            item["planet_id"] = oRs[0]
-            item["planet_name"] =  oRs[1]
-            item["g"] = oRs[2]
-            item["s"] = oRs[3]
-            item["p"] = oRs[4]
+            item["planet_id"] = row[0]
+            item["planet_name"] =  row[1]
+            item["g"] = row[2]
+            item["s"] = row[3]
+            item["p"] = row[4]
 
-            item["planet_ore"] = oRs[5]
-            item["planet_hydrocarbon"] = oRs[6]
+            item["planet_ore"] = row[5]
+            item["planet_hydrocarbon"] = row[6]
 
-            item["planet_ore_capacity"] = oRs[7]
-            item["planet_hydrocarbon_capacity"] = oRs[8]
+            item["planet_ore_capacity"] = row[7]
+            item["planet_hydrocarbon_capacity"] = row[8]
 
-            item["planet_ore_production"] = oRs[10]
-            item["planet_hydrocarbon_production"] = oRs[11]
+            item["planet_ore_production"] = row[10]
+            item["planet_hydrocarbon_production"] = row[11]
 
             # if ore/hydrocarbon quantity reach their capacity in less than 4 hours
-            if oRs[5] > oRs[7]-4*oRs[10]: item["high_ore_capacity"] = True
-            if oRs[6] > oRs[8]-4*oRs[11]: item["high_hydrocarbon_capacity"] = True
+            if row[5] > row[7]-4*row[10]: item["high_ore_capacity"] = True
+            if row[6] > row[8]-4*row[11]: item["high_hydrocarbon_capacity"] = True
 
-            item["ore_max"] = int((oRs[7]-oRs[5])/1000)
-            item["hydrocarbon_max"] = int((oRs[8]-oRs[6])/1000)
+            item["ore_max"] = int((row[7]-row[5])/1000)
+            item["hydrocarbon_max"] = int((row[8]-row[6])/1000)
 
-            item["price_ore"] = str(oRs[21]).replace(",", ".")
-            item["price_hydrocarbon"] = str(oRs[22]).replace(",", ".")
+            item["price_ore"] = str(row[21]).replace(",", ".")
+            item["price_hydrocarbon"] = str(row[22]).replace(",", ".")
 
-            if oRs[12] or oRs[13]:
-                item["buying_ore"] = oRs[12]
-                item["buying_hydrocarbon"] = oRs[13]
+            if row[12] or row[13]:
+                item["buying_ore"] = row[12]
+                item["buying_hydrocarbon"] = row[13]
 
-                subtotal = oRs[12]/1000*oRs[14] + oRs[13]/1000*oRs[15]
+                subtotal = row[12]/1000*row[14] + row[13]/1000*row[15]
                 total = total + subtotal
 
                 item["buying_price"] = int(subtotal)
@@ -96,16 +97,16 @@ class View(BaseView):
                 item["buying"] = True
                 item["can_buy"] = True
             else:
-                item["ore"] = self.request.POST.get("o" + str(oRs[0]))
-                item["hydrocarbon"] = self.request.POST.get("h" + str(oRs[0]))
+                item["ore"] = self.request.POST.get("o" + str(row[0]))
+                item["hydrocarbon"] = self.request.POST.get("h" + str(row[0]))
 
                 item["buying_price"] = 0
 
-                if not oRs[20]:
+                if not row[20]:
                     item["cant_buy_merchants"] = True
-                elif oRs[18] < oRs[19] / 2:
+                elif row[18] < row[19] / 2:
                     item["cant_buy_workers"] = True
-                elif oRs[17]:
+                elif row[17]:
                     item["cant_buy_enemy"] = True
                 else:
                     item["buy"] = True
@@ -113,13 +114,13 @@ class View(BaseView):
 
                     count = count + 1
 
-            if oRs[0] == self.currentPlanetId: item["highlight"] = True
+            if row[0] == self.currentPlanetId: item["highlight"] = True
 
             i = i + 1
 
         if get_planet != "":
             self.showHeader = True
-            self.selectedMenu = "market.buy"
+            self.selected_menu = "market.buy"
 
             content.AssignValue("get_planet", self.request.GET.get("planet", ""))
         else:

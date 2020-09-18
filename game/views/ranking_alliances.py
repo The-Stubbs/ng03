@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "ranking"
+        self.selected_menu = "ranking"
 
         return self.DisplayRankingAlliances(request.GET.get("tag"), request.GET.get("name"))
 
@@ -67,8 +68,8 @@ class View(BaseView):
 
         # retrieve number of gm_alliances
         query = "SELECT count(DISTINCT alliance_id) FROM gm_profiles INNER JOIN gm_alliances ON gm_alliances.id=alliance_id WHERE gm_alliances.visible"+searchby
-        oRs = dbRow(query)
-        size = int(oRs[0])
+        row = dbRow(query)
+        size = int(row[0])
 
         nb_pages = int(size/displayed)
         if nb_pages*displayed < size: nb_pages = nb_pages + 1
@@ -86,7 +87,7 @@ class View(BaseView):
                 " OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
         oRss = dbRows(query)
 
-        if oRs == None: content.Parse("noresult")
+        if row == None: content.Parse("noresult")
 
         content.AssignValue("page_displayed", offset+1)
         content.AssignValue("page_first", offset*displayed+1)
@@ -122,28 +123,28 @@ class View(BaseView):
         i = 1
         list = []
         content.AssignValue("gm_alliances", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
             item["place"] = offset*displayed+i
-            item["tag"] = oRs[1]
-            item["name"] = oRs[2]
-            item["score"] = oRs[3]
-            item["score_average"] = oRs[6]
-            item["score_delta"] = oRs[7]
-            item["members"] = oRs[4]
-            item["stat_colonies"] = oRs[5]
-            item["created"] = oRs[8]
-            item["max_members"] = oRs[10]
+            item["tag"] = row[1]
+            item["name"] = row[2]
+            item["score"] = row[3]
+            item["score_average"] = row[6]
+            item["score_delta"] = row[7]
+            item["members"] = row[4]
+            item["stat_colonies"] = row[5]
+            item["created"] = row[8]
+            item["max_members"] = row[10]
 
-            if oRs[6] > 0: item["plus"] = True
-            if oRs[6] < 0: item["minus"] = True
+            if row[6] > 0: item["plus"] = True
+            if row[6] < 0: item["minus"] = True
 
-            if self.allianceId and oRs[0] == self.allianceId: item["playeralliance"] = True
-            if oRs[9]:
+            if self.allianceId and row[0] == self.allianceId: item["playeralliance"] = True
+            if row[9]:
                 item["nap"] = True
-            elif oRs[11]:
+            elif row[11]:
                 item["war"] = True
 
             i = i + 1

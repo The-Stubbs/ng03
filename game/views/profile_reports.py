@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "gm_profile_reports"
+        self.selected_menu = "gm_profile_reports"
 
         cat = ToInt(request.GET.get("cat", ""), 0)
 
@@ -50,68 +51,68 @@ class View(BaseView):
             # List the gm_profile_reports returned by the query
             #
             gm_profile_reports = []
-            for oRs in oRss:
+            for row in oRss:
 
-                reportType = oRs[0]*100+oRs[1]
+                reportType = row[0]*100+row[1]
 
                 if reportType != 140 and reportType != 141 and reportType != 142 and reportType != 133:
                     report = {}
 
                     report["type"] = reportType
-                    report["date"] = oRs[2]
+                    report["date"] = row[2]
 
-                    report["battleid"] = oRs[3]
-                    report["fleetid"] = oRs[4]
-                    report["fleetname"] = oRs[5]
-                    report["planetid"] = oRs[6]
+                    report["battleid"] = row[3]
+                    report["fleetid"] = row[4]
+                    report["fleetname"] = row[5]
+                    report["planetid"] = row[6]
 
-                    if oRs[14] in [rHostile, rWar, rFriend]:
-                        report["planetname"] = oRs[15]
-                    elif oRs[14] in [rAlliance, rSelf]:
-                        report["planetname"] = oRs[7]
+                    if row[14] in [rHostile, rWar, rFriend]:
+                        report["planetname"] = row[15]
+                    elif row[14] in [rAlliance, rSelf]:
+                        report["planetname"] = row[7]
                     else:
                         report["planetname"] = ""
 
                     # assign planet coordinates
-                    if oRs[8]:
-                        report["g"] = oRs[8]
-                        report["s"] = oRs[9]
-                        report["p"] = oRs[10]
+                    if row[8]:
+                        report["g"] = row[8]
+                        report["s"] = row[9]
+                        report["p"] = row[10]
 
-                    report["researchid"] = oRs[11]
+                    report["researchid"] = row[11]
 
-                    if oRs[11]: report["researchname"] = getResearchLabel(oRs[11])
+                    if row[11]: report["researchname"] = getResearchLabel(row[11])
 
-                    if oRs[13] == None: report["new"] = True
+                    if row[13] == None: report["new"] = True
 
-                    report["ore"] = oRs[16]
-                    report["hydrocarbon"] = oRs[17]
-                    report["credits"] = oRs[18]
+                    report["ore"] = row[16]
+                    report["hydrocarbon"] = row[17]
+                    report["credits"] = row[18]
 
-                    report["scientists"] = oRs[19]
-                    report["soldiers"] = oRs[20]
-                    report["workers"] = oRs[21]
+                    report["scientists"] = row[19]
+                    report["soldiers"] = row[20]
+                    report["workers"] = row[21]
 
-                    report["username"] = oRs[22]
-                    report["alliancetag"] = oRs[23]
-                    report["alliancename"] = oRs[24]
-                    report["invasionid"] = oRs[25]
-                    report["spyid"] = oRs[26]
-                    report["spykey"] = oRs[27]
+                    report["username"] = row[22]
+                    report["alliancetag"] = row[23]
+                    report["alliancename"] = row[24]
+                    report["invasionid"] = row[25]
+                    report["spyid"] = row[26]
+                    report["spykey"] = row[27]
 
-                    report["description"] = oRs[28]
+                    report["description"] = row[28]
 
-                    if oRs[29]: report["building"] = getBuildingLabel(oRs[29])
+                    if row[29]: report["building"] = getBuildingLabel(row[29])
 
-                    report["upkeep_commanders"] = oRs[30]
-                    report["upkeep_planets"] = oRs[31]
-                    report["upkeep_scientists"] = oRs[32]
-                    report["upkeep_ships"] = oRs[33]
-                    report["upkeep_ships_in_position"] = oRs[34]
-                    report["upkeep_ships_parked"] = oRs[35]
-                    report["upkeep_soldiers"] = oRs[36]
+                    report["upkeep_commanders"] = row[30]
+                    report["upkeep_planets"] = row[31]
+                    report["upkeep_scientists"] = row[32]
+                    report["upkeep_ships"] = row[33]
+                    report["upkeep_ships_in_position"] = row[34]
+                    report["upkeep_ships_parked"] = row[35]
+                    report["upkeep_soldiers"] = row[36]
 
-                    report["commandername"] = oRs[37]
+                    report["commandername"] = row[37]
 
                     gm_profile_reports.append(report)
                     
@@ -128,11 +129,11 @@ class View(BaseView):
             oRss = dbRows(query)
             
             total_newreports = 0
-            for oRs in oRss:
-                content.AssignValue("tabnav_"+str(oRs[0])+"00_newreports", oRs[1])
-                content.Parse("tabnav_"+str(oRs[0])+"00_new")
+            for row in oRss:
+                content.AssignValue("tabnav_"+str(row[0])+"00_newreports", row[1])
+                content.Parse("tabnav_"+str(row[0])+"00_new")
 
-                total_newreports = total_newreports + oRs[1]
+                total_newreports = total_newreports + row[1]
 
             if total_newreports != 0:
                 content.AssignValue("total_newreports", total_newreports)

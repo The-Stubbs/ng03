@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "gm_fleets"
+        self.selected_menu = "gm_fleets"
 
         self.fleet_split_error = 0
         self.e_no_error = 0
@@ -45,29 +46,29 @@ class View(BaseView):
                 " FROM vw_gm_fleets" + \
                 " WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
 
-        oRs = dbRow(query)
+        row = dbRow(query)
 
         # if fleet doesn't exist, redirect to the list of gm_fleets
-        if oRs == None:
+        if row == None:
             return HttpResponseRedirect("/game/gm_fleets/")
 
         # if fleet is moving or engaged, go back to the gm_fleets
-        if oRs[24] != 0:
+        if row[24] != 0:
             return HttpResponseRedirect("/game/fleet/?id=" + str(fleetid))
 
         content.AssignValue("fleetid", fleetid)
-        content.AssignValue("fleetname", oRs[1])
-        content.AssignValue("size", oRs[4])
-        content.AssignValue("speed", oRs[6])
+        content.AssignValue("fleetname", row[1])
+        content.AssignValue("size", row[4])
+        content.AssignValue("speed", row[6])
 
-        content.AssignValue("fleet_capacity", oRs[18])
-        content.AssignValue("available_ore", oRs[19])
-        content.AssignValue("available_hydrocarbon", oRs[20])
-        content.AssignValue("available_scientists", oRs[21])
-        content.AssignValue("available_soldiers", oRs[22])
-        content.AssignValue("available_workers", oRs[23])
+        content.AssignValue("fleet_capacity", row[18])
+        content.AssignValue("available_ore", row[19])
+        content.AssignValue("available_hydrocarbon", row[20])
+        content.AssignValue("available_scientists", row[21])
+        content.AssignValue("available_soldiers", row[22])
+        content.AssignValue("available_workers", row[23])
 
-        content.AssignValue("fleet_load", oRs[19] + oRs[20] + oRs[21] + oRs[22] + oRs[23])
+        content.AssignValue("fleet_load", row[19] + row[20] + row[21] + row[22] + row[23])
 
         shipCount = 0
         # retrieve the list of ships in the fleet
@@ -82,19 +83,19 @@ class View(BaseView):
 
         list = []
         content.AssignValue("ships", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
             shipCount = shipCount + 1
-            item["id"] = oRs[0]
-            item["name"] = oRs[1]
-            item["cargo_capacity"] = oRs[2]
-            item["signature"] = oRs[3]
-            item["quantity"] = oRs[4]
+            item["id"] = row[0]
+            item["name"] = row[1]
+            item["cargo_capacity"] = row[2]
+            item["signature"] = row[3]
+            item["quantity"] = row[4]
 
             if self.fleet_split_error != self.e_no_error:
-                item["transfer"] = self.request.POST.get("transfership"+str(oRs[0]))
+                item["transfer"] = self.request.POST.get("transfership"+str(row[0]))
 
         if self.fleet_split_error != self.e_no_error:
             content.Parse("error"+str(self.fleet_split_error))
@@ -119,10 +120,10 @@ class View(BaseView):
         # retrieve the planet where the current fleet is patrolling
         #
         query = "SELECT planetid FROM vw_gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
-        oRs = dbRow(query)
-        if oRs == None: return
+        row = dbRow(query)
+        if row == None: return
 
-        fleetplanetid = int(oRs[0])
+        fleetplanetid = int(row[0])
 
         #
         # retrieve 'source' fleet cargo and action
@@ -131,17 +132,17 @@ class View(BaseView):
                 " cargo_scientists, cargo_soldiers, cargo_workers" + \
                 " FROM vw_gm_fleets" + \
                 " WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
-        oRs = dbRow(query)
+        row = dbRow(query)
 
-        if oRs == None or (oRs[1] != 0):
+        if row == None or (row[1] != 0):
             self.fleet_split_error = self.e_occupied
             return
 
-        ore = min( ToInt(self.request.POST.get("load_ore"), 0), oRs[2] )
-        hydrocarbon = min( ToInt(self.request.POST.get("load_hydrocarbon"), 0), oRs[3] )
-        scientists = min( ToInt(self.request.POST.get("load_scientists"), 0), oRs[4] )
-        soldiers = min( ToInt(self.request.POST.get("load_soldiers"), 0), oRs[5] )
-        workers = min( ToInt(self.request.POST.get("load_workers"), 0), oRs[6] )
+        ore = min( ToInt(self.request.POST.get("load_ore"), 0), row[2] )
+        hydrocarbon = min( ToInt(self.request.POST.get("load_hydrocarbon"), 0), row[3] )
+        scientists = min( ToInt(self.request.POST.get("load_scientists"), 0), row[4] )
+        soldiers = min( ToInt(self.request.POST.get("load_soldiers"), 0), row[5] )
+        workers = min( ToInt(self.request.POST.get("load_workers"), 0), row[6] )
 
         #
         # begin transaction
@@ -149,11 +150,11 @@ class View(BaseView):
         #
         # 1/ create a new fleet at the current fleet planet with the given name
         #
-        oRs = dbRow("SELECT user_fleet_create(" + str(self.userId) + "," + str(fleetplanetid) + "," + sqlStr(newfleetname) + ")")
-        if oRs == None:
+        row = dbRow("SELECT user_fleet_create(" + str(self.userId) + "," + str(fleetplanetid) + "," + sqlStr(newfleetname) + ")")
+        if row == None:
             return
 
-        newfleetid = int(oRs[0])
+        newfleetid = int(row[0])
 
         if newfleetid < 0:
             if newfleetid == -1:
@@ -201,11 +202,11 @@ class View(BaseView):
         #
 
         # retrieve new fleet's cargo capacity
-        oRs = dbRow("SELECT cargo_capacity FROM vw_gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(newfleetid))
-        if oRs == None:
+        row = dbRow("SELECT cargo_capacity FROM vw_gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(newfleetid))
+        if row == None:
                 return
 
-        newload = oRs[0]
+        newload = row[0]
 
         ore = min( ore, newload)
         newload = newload - ore

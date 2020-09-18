@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "research"
+        self.selected_menu = "research"
 
         dbRow("SELECT internal_profile_update_modifiers(" + str(self.userId) + ")")
 
@@ -36,8 +37,8 @@ class View(BaseView):
     def ListResearches(self):
 
         # count number of gm_profile_researches pending
-        oRs = dbRow("SELECT int4(count(1)) FROM gm_profile_research_pendings WHERE userid=" + str(self.userId) + " LIMIT 1")
-        underResearchCount = oRs[0]
+        row = dbRow("SELECT int4(count(1)) FROM gm_profile_research_pendings WHERE userid=" + str(self.userId) + " LIMIT 1")
+        underResearchCount = row[0]
 
         # list things that can be researched
         query = "SELECT researchid, category, total_cost, total_time, level, levels, researchable, buildings_requirements_met, status," + \
@@ -57,8 +58,8 @@ class View(BaseView):
         lastCategory = -1
         
         categories = []
-        for oRs in oRss:
-            CatId = oRs[1]
+        for row in oRss:
+            CatId = row[1]
 
             if CatId != lastCategory:
                 category = {'id':CatId, 'gm_profile_researches':[]}
@@ -71,15 +72,15 @@ class View(BaseView):
             
             itemCount = itemCount + 1
 
-            research["id"] = oRs[0]
-            research["name"] = getResearchLabel(oRs[0])
-            research["credits"] = oRs[2]
-            research["nextlevel"] = oRs[4]+1
-            research["level"] = oRs[4]
-            research["levels"] = oRs[5]
-            research["description"] = getResearchDescription(oRs[0])
+            research["id"] = row[0]
+            research["name"] = getResearchLabel(row[0])
+            research["credits"] = row[2]
+            research["nextlevel"] = row[4]+1
+            research["level"] = row[4]
+            research["levels"] = row[5]
+            research["description"] = getResearchDescription(row[0])
 
-            status = oRs[8]
+            status = row[8]
 
             # if status is not None: this research is under way
             if status:
@@ -89,7 +90,7 @@ class View(BaseView):
 
                 research["remainingtime"] = status
 
-                if oRs[9]:
+                if row[9]:
                     research["auto"] = True
                 else:
                     research["manual"] = True
@@ -99,15 +100,15 @@ class View(BaseView):
                 research["researching"] = True
             else:
 
-                if (oRs[4] < oRs[5] or oRs[10]):
-                    research["time"] = oRs[3]
+                if (row[4] < row[5] or row[10]):
+                    research["time"] = row[3]
                     research["researchtime"] = True
 
-                    if not oRs[6] or not oRs[7]:
+                    if not row[6] or not row[7]:
                         research["notresearchable"] = True
                     elif underResearchCount > 0:
                         research["busy"] = True
-                    elif not self.HasEnoughFunds(oRs[2]):
+                    elif not self.HasEnoughFunds(row[2]):
                         research["notenoughmoney"] = True
                     else:
                         research["research"] = True

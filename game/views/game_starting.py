@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseMixin, View):
 
     def dispatch(self, request, *args, **kwargs):

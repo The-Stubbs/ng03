@@ -2,27 +2,40 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
+    template_name = "alliance-reports"
+    selected_menu = "alliance.reports"
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "alliance.gm_profile_reports"
-
-        cat = ToInt(request.GET.get("cat"), 0)
-
         if self.allianceId == None: return HttpResponseRedirect("/game/alliance/")
-        if not self.allianceRights["can_see_reports"]: return HttpResponseRedirect("/game/alliance/")
+        if not self.hasRight("can_see_reports"): return HttpResponseRedirect("/game/alliance/")
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        return self.display_reports(cat)
+    #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
 
-    # display list of gm_mails
-    def display_reports(self, cat):
+        # --- navigation data
+        
+        cat = ToInt(request.GET.get("cat"), 0)
+        data["cat"] = cat
+    
+        data["tabnav_000"] = True
+        data["tabnav_100"] = True
+        data["tabnav_200"] = True
+        data["tabnav_800"] = True
 
-        content = self.loadTemplate("gm_profile_reports")
-
+        # --- reports data
+        
+        data["reports"] = []
+        
         query = "SELECT type, subtype, datetime, battleid, fleetid, fleet_name," + \
                 " planetid, planet_name, galaxy, sector, planet," + \
                 " researchid, 0, read_date," + \
@@ -32,82 +45,49 @@ class View(BaseView):
                 " invasionid, spyid, spy_key, description, ownerid, invited_username, login, buildingid" + \
                 " FROM vw_gm_alliance_reports" + \
                 " WHERE ownerallianceid = " + str(self.allianceId)
-
-        #
-        # Limit the list to the current category or only display 100 gm_profile_reports if no categories specified
-        #
-        if cat == 0:
-            query = query + " ORDER BY datetime DESC LIMIT 200"
-        else:
-            query = query + " AND type = "+ str(cat) + " ORDER BY datetime DESC LIMIT 200"
-
-        oRss = dbRows(query)
-        content.Parse("tabnav_"+str(cat)+"00_selected")
-        if oRss == None: content.Parse("noreports")
-        else:
-            #
-            # List the gm_profile_reports returned by the query
-            #
-            list = []
-            content.AssignValue('gm_mails', list)
-            for oRs in oRss:
-                reportType = oRs[0]*100+oRs[1]
-                if reportType != 133:
+        if cat == 0: query = query + " ORDER BY datetime DESC LIMIT 200"
+        else: query = query + " AND type = " + str(cat) + " ORDER BY datetime DESC LIMIT 200"
+        rows = dbRows(query)
+        if rows:
+            for row in rows:
+            
+                type = row[0] * 100 + row[1]
+                if type != 133:
                     
-                    item = {}
-                    list.append(item)
+                    report = {}
+                    data["reports"].append(report)
                     
-                    item["ownerid"] = oRs[29]
-                    item["invitedusername"] = oRs[30]
-                    item["nation"] = oRs[31]
+                    report["ownerid"] = row[29]
+                    report["invitedusername"] = row[30]
+                    report["nation"] = row[31]
+                    report["type"] = type
+                    report["date"] = row[2]
+                    report["battleid"] = row[3]
+                    report["fleetid"] = row[4]
+                    report["fleetname"] = row[5]
+                    report["planetid"] = row[6]
+                    report["g"] = row[8]
+                    report["s"] = row[9]
+                    report["p"] = row[10]
+                    report["researchid"] = row[11]
+                    report["ore"] = row[16]
+                    report["hydrocarbon"] = row[17]
+                    report["credits"] = row[18]
+                    report["scientists"] = row[19]
+                    report["soldiers"] = row[20]
+                    report["workers"] = row[21]
+                    report["username"] = row[22]
+                    report["alliancetag"] = row[23]
+                    report["alliancename"] = row[24]
+                    report["invasionid"] = row[25]
+                    report["spyid"] = row[26]
+                    report["spykey"] = row[27]
+                    report["description"] = row[28]
         
-                    item["type"] = oRs[0]*100+oRs[1]
-                    item["date"] = oRs[2]
+                    if row[14] in [rHostile, rWar]: report["planetname"] = row[15]
+                    elif row[14] in [rFriend, rAlliance, rSelf]: report["planetname"] = row[7]
+                    else: report["planetname"] = ""
         
-                    item["battleid"] = oRs[3]
-                    item["fleetid"] = oRs[4]
-                    item["fleetname"] = oRs[5]
-                    item["planetid"] = oRs[6]
-        
-                    if oRs[14] in [rHostile, rWar]:
-                        item["planetname"] = oRs[15]
-                    elif oRs[14] in [rFriend, rAlliance, rSelf]:
-                        item["planetname"] = oRs[7]
-                    else:
-                        item["planetname"] = ""
-        
-                        # assign planet coordinates
-                    if oRs[8]:
-                        item["g"] = oRs[8]
-                        item["s"] = oRs[9]
-                        item["p"] = oRs[10]
-        
-                    item["researchid"] = oRs[11]
-                    if (oRs[11]): item["researchname"] = getResearchLabel(oRs[11])
-        
-                    item["ore"] = oRs[16]
-                    item["hydrocarbon"] = oRs[17]
-                    item["credits"] = oRs[18]
-        
-                    item["scientists"] = oRs[19]
-                    item["soldiers"] = oRs[20]
-                    item["workers"] = oRs[21]
-        
-                    item["username"] = oRs[22]
-                    item["alliancetag"] = oRs[23]
-                    item["alliancename"] = oRs[24]
-                    item["invasionid"] = oRs[25]
-                    item["spyid"] = oRs[26]
-                    item["spykey"] = oRs[27]
-        
-                    item["description"] = oRs[28]
-        
-                    if (oRs[32]): item["building"] = getBuildingLabel(oRs[32])
-    
-        content.Parse("tabnav_000")
-        content.Parse("tabnav_100")
-        content.Parse("tabnav_200")
-        content.Parse("tabnav_800")
-        content.Parse("tabnav")
-
-        return self.display(content)
+                    if row[11]: item["researchname"] = getResearchLabel(row[11])
+                
+                    if row[32]: item["building"] = getBuildingLabel(row[32])

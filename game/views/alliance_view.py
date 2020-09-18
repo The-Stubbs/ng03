@@ -2,21 +2,29 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
+    template_name = "alliance-view"
+    selected_menu = "alliance.view"
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        tag = request.GET.get("tag", "")
-        if tag == "" and self.allianceId == None:
+        self.tag = request.GET.get("tag", "")
+        if self.tag == "" and self.allianceId == None:
             return HttpResponseRedirect("/game/alliance-invitations/")
-        elif tag == "" and self.allianceId:
-            tag == None
+        elif self.tag == "" and self.allianceId:
+            self.tag == None
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        content = self.loadTemplate("alliance")
-
+    #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
+    
         # --- alliance data
 
         alliance = {}
@@ -27,45 +35,43 @@ class View(BaseView):
                 " FROM gm_alliances"
         if tag == None:
             query = query + " WHERE id=" + str(self.allianceId) + " LIMIT 1"
-            self.selectedMenu = "alliance.overview"
+            self.selected_menu = "alliance.overview"
         else:
-            query = query + " WHERE tag=upper(" + sqlStr(tag) + ") LIMIT 1"
-            self.selectedMenu = "ranking"
-        oRs = dbRow(query)
+            query = query + " WHERE tag=upper(" + sqlStr(self.tag) + ") LIMIT 1"
+            self.selected_menu = "ranking"
+        row = dbRow(query)
 
-        alliance_id = oRs[0]
+        alliance_id = row[0]
         
-        alliance["tag"] = oRs[2]
-        alliance["name"] = oRs[1]
-        alliance["logo"] = oRs[6]
-        alliance["created"] = oRs[4]
-        alliance["description"] = oRs[3]
-        alliance["cur_members"] = oRs[5]
-        alliance["max_members"] = oRs[8]
+        alliance["tag"] = row[2]
+        alliance["name"] = row[1]
+        alliance["logo"] = row[6]
+        alliance["created"] = row[4]
+        alliance["description"] = row[3]
+        alliance["cur_members"] = row[5]
+        alliance["max_members"] = row[8]
 
         # --- alliance displayed ranks and members
 
-        ranks = []
-        content.AssignValue("ranks", ranks)
+        data["ranks"] = []
         
         query = "SELECT rankid, label" + \
                 " FROM gm_alliance_ranks" + \
                 " WHERE members_displayed AND allianceid=" + str(alliance_id) + \
                 " ORDER BY rankid"
         oRss = dbRows(query)
-        
         if oRss:
-            for oRs in oRss:
+            for row in oRss:
 
                 query = "SELECT login" + \
                         " FROM gm_profiles" + \
-                        " WHERE alliance_id=" + str(alliance_id) + " AND alliance_rank = " + str(oRs[0]) + \
+                        " WHERE alliance_id=" + str(alliance_id) + " AND alliance_rank = " + str(row[0]) + \
                         " ORDER BY upper(login)"
                 oRss2 = dbRows(query)
                 if oRss2:
 
-                    rank = { "name":oRs[1], "members":[] }
-                    ranks.append(rank)
+                    rank = { "name":row[1], "members":[] }
+                    data["ranks"].append(rank)
                     
                     for oRs2 in oRss2:
                         
@@ -74,46 +80,40 @@ class View(BaseView):
 
         # --- alliance naps
 
-        naps = []
-        content.AssignValue("naps", naps)
+        data["naps"] = []
 
         query = "SELECT allianceid1, tag, name" + \
                 " FROM gm_alliance_naps INNER JOIN gm_alliances ON (gm_alliance_naps.allianceid1=gm_alliances.id)" + \
                 " WHERE allianceid2=" + str(alliance_id)
         oRss = dbRows(query)
-        
         if oRss:
-            for oRs in oRss:
+            for row in oRss:
 
                 nap = {}
-                naps.append(nap)
+                data["naps"].append(nap)
                 
-                nap["tag"] = oRs[1]
-                nap["name"] = oRs[2]
+                nap["tag"] = row[1]
+                nap["name"] = row[2]
 
         # --- alliance wars
 
-        wars = []
-        content.AssignValue("wars", wars)
+        data["wars"] = []
 
-        query = "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name"+ \
-            " FROM gm_alliance_wars w" + \
-            "    INNER JOIN gm_alliances ON (allianceid2 = gm_alliances.id)" + \
-            " WHERE allianceid1=" + str(alliance_id) + \
-            " UNION " + \
-            "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name"+ \
-            " FROM gm_alliance_wars w" + \
-            "    INNER JOIN gm_alliances ON (allianceid1 = gm_alliances.id)" + \
-            " WHERE allianceid2=" + str(alliance_id)
+        query = "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name" + \
+                " FROM gm_alliance_wars w" + \
+                "    INNER JOIN gm_alliances ON (allianceid2 = gm_alliances.id)" + \
+                " WHERE allianceid1=" + str(alliance_id) + \
+                " UNION " + \
+                "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name" + \
+                " FROM gm_alliance_wars w" + \
+                "    INNER JOIN gm_alliances ON (allianceid1 = gm_alliances.id)" + \
+                " WHERE allianceid2=" + str(alliance_id)
         oRss = dbRows(query)
-
         if oRss:
-            for oRs in oRss:
+            for row in oRss:
 
                 war = {}
-                wars.append(war)
+                data["wars"].append(war)
                 
-                war["tag"] = oRs[2]
-                war["name"] = oRs[3]
-
-        return self.display(content)
+                war["tag"] = row[2]
+                war["name"] = row[3]

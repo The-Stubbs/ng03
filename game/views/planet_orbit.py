@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
     
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selectedMenu = "orbit"
+        self.selected_menu = "orbit"
 
         self.showHeader = True
 
@@ -46,49 +47,49 @@ class View(BaseView):
             gm_fleets = []
             content.AssignValue("gm_fleets", gm_fleets)
             
-            for oRs in oRss:
+            for row in oRss:
                 manage = False
                 trade = False
                 
                 fleet = {}
 
-                fleet["id"] = oRs[0]
-                fleet["name"] = oRs[1]
-                fleet["size"] = oRs[4]
-                fleet["signature"] = oRs[5]
+                fleet["id"] = row[0]
+                fleet["name"] = row[1]
+                fleet["size"] = row[4]
+                fleet["signature"] = row[5]
 
-                fleet["ownerid"] = oRs[20]
-                fleet["ownername"] = oRs[21]
+                fleet["ownerid"] = row[20]
+                fleet["ownername"] = row[21]
 
-                fleet["cargo"] = oRs[27]+oRs[28]+oRs[29]+oRs[30]+oRs[31]
-                fleet["cargo_ore"] = oRs[27]
-                fleet["cargo_hydrocarbon"] = oRs[28]
-                fleet["cargo_scientists"] = oRs[29]
-                fleet["cargo_soldiers"] = oRs[30]
-                fleet["cargo_workers"] = oRs[31]
+                fleet["cargo"] = row[27]+row[28]+row[29]+row[30]+row[31]
+                fleet["cargo_ore"] = row[27]
+                fleet["cargo_hydrocarbon"] = row[28]
+                fleet["cargo_scientists"] = row[29]
+                fleet["cargo_soldiers"] = row[30]
+                fleet["cargo_workers"] = row[31]
 
-                if oRs[8]:
-                    fleet["commanderid"] = oRs[8]
-                    fleet["commandername"] = oRs[9]
+                if row[8]:
+                    fleet["commanderid"] = row[8]
+                    fleet["commandername"] = row[9]
                     fleet["commander"] = True
                 else:
                     fleet["nocommander"] = True
 
-                if oRs[26] == 2:
+                if row[26] == 2:
                     fleet["recycling"] = True
-                elif oRs[3]:
+                elif row[3]:
                     fleet["fighting"] = True
                 else:
                     fleet["patrolling"] = True
 
-                if oRs[17] == rHostile or oRs[17] == rWar:
+                if row[17] == rHostile or row[17] == rWar:
                     fleet["enemy"] = True
-                elif oRs[17] == rAlliance:
+                elif row[17] == rAlliance:
                     fleet["ally"] = True
-                elif oRs[17] == rFriend:
+                elif row[17] == rFriend:
                     fleet["friend"] = True
-                elif oRs[17] == rSelf:
-                    if oRs[26] == 0:
+                elif row[17] == rSelf:
+                    if row[26] == 0:
                         fleet["owner"] = True
 
                 if manage:
@@ -117,46 +118,46 @@ class View(BaseView):
             ships = []
             content.AssignValue("ships", ships)
             
-            for oRs in oRss:
+            for row in oRss:
                 ship = {}
                 
-                ship["id"] = oRs["shipid"]
-                ship["quantity"] = oRs["quantity"]
+                ship["id"] = row["shipid"]
+                ship["quantity"] = row["quantity"]
 
-                ship["name"] = getShipLabel(oRs["shipid"])
+                ship["name"] = getShipLabel(row["shipid"])
 
-                if self.fleet_creation_error != "": ship["ship_quantity"] = ToInt(self.request.POST.get("s" + str(oRs["shipid"]), 0), 0)
+                if self.fleet_creation_error != "": ship["ship_quantity"] = ToInt(self.request.POST.get("s" + str(row["shipid"]), 0), 0)
 
                 # assign ship description
-                ship["description"] = getShipDescription(oRs["shipid"])
+                ship["description"] = getShipDescription(row["shipid"])
 
-                ship["ship_signature"] = oRs["signature"]
-                ship["ship_cargo"] = oRs["capacity"]
-                ship["ship_handling"] = oRs["handling"]
-                ship["ship_speed"] = oRs["speed"]
+                ship["ship_signature"] = row["signature"]
+                ship["ship_cargo"] = row["capacity"]
+                ship["ship_handling"] = row["handling"]
+                ship["ship_speed"] = row["speed"]
 
-                if oRs["weapon_power"] > 0:
-                    ship["ship_turrets"] = oRs["weapon_turrets"]
-                    ship["ship_power"] = oRs["weapon_power"]
-                    ship["ship_tracking_speed"] = oRs["weapon_tracking_speed"]
+                if row["weapon_power"] > 0:
+                    ship["ship_turrets"] = row["weapon_turrets"]
+                    ship["ship_power"] = row["weapon_power"]
+                    ship["ship_tracking_speed"] = row["weapon_tracking_speed"]
                     ship["attack"] = True
 
-                ship["ship_hull"] = oRs["hull"]
+                ship["ship_hull"] = row["hull"]
 
-                if oRs["shield"] > 0:
-                    ship["ship_shield"] = oRs["shield"]
+                if row["shield"] > 0:
+                    ship["ship_shield"] = row["shield"]
                     ship["shield"] = True
 
-                if oRs["recycler_output"] > 0:
-                    ship["ship_recycler_output"] = oRs["recycler_output"]
+                if row["recycler_output"] > 0:
+                    ship["ship_recycler_output"] = row["recycler_output"]
                     ship["recycler_output"] = True
 
-                if oRs["long_distance_capacity"] > 0:
-                    ship["ship_long_distance_capacity"] = oRs["long_distance_capacity"]
+                if row["long_distance_capacity"] > 0:
+                    ship["ship_long_distance_capacity"] = row["long_distance_capacity"]
                     ship["long_distance_capacity"] = True
 
-                if oRs["droppods"] > 0:
-                    ship["ship_droppods"] = oRs["droppods"]
+                if row["droppods"] > 0:
+                    ship["ship_droppods"] = row["droppods"]
                     ship["droppods"] = True
                 
                 ships.append(ship)
@@ -190,11 +191,11 @@ class View(BaseView):
 
         # create a new fleet at the current planet with the given name
         
-        oRs = dbRow("SELECT user_fleet_create(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + sqlStr(fleetname) + ")")
-        if not oRs:
+        row = dbRow("SELECT user_fleet_create(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + sqlStr(fleetname) + ")")
+        if not row:
             return
         
-        fleetid = oRs[0]
+        fleetid = row[0]
 
         if fleetid < 0:
             if fleetid == -3:
@@ -212,8 +213,8 @@ class View(BaseView):
 
             # add the ships type by type
             if quantity > 0:
-                oRs = dbRow("SELECT * FROM user_planet_transfer_ships(" + str(self.userId) + ", " + str(fleetid) + ", " + str(shipid) + ", " + str(quantity) + ")")
-                cant_use_ship = cant_use_ship or oRs[0] == 3
+                row = dbRow("SELECT * FROM user_planet_transfer_ships(" + str(self.userId) + ", " + str(fleetid) + ", " + str(shipid) + ", " + str(quantity) + ")")
+                cant_use_ship = cant_use_ship or row[0] == 3
 
         # delete the fleet if there is no ships in it
         dbExecute("DELETE FROM gm_fleets WHERE size=0 AND id=" + str(fleetid) + " AND ownerid=" + str(self.userId))

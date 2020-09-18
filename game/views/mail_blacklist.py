@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "mails"
+        self.selected_menu = "mails"
 
         self.compose = False
         self.mailto = ""
@@ -40,20 +41,20 @@ class View(BaseView):
 
             query = "SELECT sender, subject, body FROM gm_mails WHERE ownerid=" + str(self.userId) + " AND id=" + str(Id) + " LIMIT 1"
             self.request.session["details"] = query
-            oRs = dbRow(query)
+            row = dbRow(query)
 
-            if oRs:
+            if row:
 
-                self.mailto = oRs[0]
+                self.mailto = row[0]
 
                 # adds 'Re: # to new reply
 
-                if "Re:" in oRs[1]:
-                    self.mailsubject = oRs[1]
+                if "Re:" in row[1]:
+                    self.mailsubject = row[1]
                 else:
-                    self.mailsubject = "Re: " + oRs[1]
+                    self.mailsubject = "Re: " + row[1]
 
-                self.mailbody = self.quote_mail("> " + oRs[2] + "\n")
+                self.mailbody = self.quote_mail("> " + row[2] + "\n")
 
                 self.compose = True
 
@@ -87,18 +88,18 @@ class View(BaseView):
                 if self.mailto == "":
                     self.sendmail_status = "mail_missing_to"
                 else:
-                    oRs = dbRow("SELECT user_mail_send("+ str(self.userId) + "," + sqlStr(self.mailto) + "," + sqlStr(self.mailsubject) + "," + sqlStr(self.mailbody) + "," + str(self.moneyamount) + "," + str(self.bbcode) + ")")
+                    row = dbRow("SELECT user_mail_send("+ str(self.userId) + "," + sqlStr(self.mailto) + "," + sqlStr(self.mailsubject) + "," + sqlStr(self.mailbody) + "," + str(self.moneyamount) + "," + str(self.bbcode) + ")")
 
-                    if oRs[0] != 0:
-                        if oRs[0] == 1:
+                    if row[0] != 0:
+                        if row[0] == 1:
                             self.sendmail_status = "mail_unknown_from" # from not found
-                        elif oRs[0] == 2:
+                        elif row[0] == 2:
                             self.sendmail_status = "mail_unknown_to" # to not found
-                        elif oRs[0] == 3:
+                        elif row[0] == 3:
                             self.sendmail_status = "mail_same" # send to same person
-                        elif oRs[0] == 4:
+                        elif row[0] == 4:
                             self.sendmail_status = "not_enough_credits" # not enough credits
-                        elif oRs[0] == 9:
+                        elif row[0] == 9:
                             self.sendmail_status = "blocked" # gm_mails are blocked
 
                     else:
@@ -148,7 +149,7 @@ class View(BaseView):
     #
     def display_mails(self):
 
-        self.selectedMenu = "mails.inbox"
+        self.selected_menu = "mails.inbox"
 
         content = self.loadTemplate("mail-list")
 
@@ -165,8 +166,8 @@ class View(BaseView):
 
         # get total number of mails that could be displayed
         query = "SELECT count(1) FROM gm_mails WHERE "+search_cond+" ownerid = " + str(self.userId)
-        oRs = dbRow(query)
-        size = int(oRs[0])
+        row = dbRow(query)
+        size = int(row[0])
         nb_pages = int(size/displayed)
         if nb_pages*displayed < size: nb_pages = nb_pages + 1
         if offset >= nb_pages: offset = nb_pages-1
@@ -204,7 +205,7 @@ class View(BaseView):
         if nb_pages > 1: content.Parse("nav")
 
         query = "SELECT sender, subject, body, datetime, gm_mails.id, read_date, avatar_url, gm_profiles.id, gm_mails.credits," + \
-                " gm_profiles.privilege, bbcode, owner, gm_mail_ignorees.added, gm_alliances.tag"+ \
+                " gm_profiles.privilege, bbcode, owner, gm_mail_ignorees.added, gm_alliances.tag" + \
                 " FROM gm_mails" + \
                 "    LEFT JOIN gm_profiles ON (upper(gm_profiles.login) = upper(gm_mails.sender) AND gm_mails.datetime >= gm_profiles.game_started)" + \
                 "    LEFT JOIN gm_alliances ON (gm_profiles.alliance_id = gm_alliances.id)" + \
@@ -217,53 +218,53 @@ class View(BaseView):
         i = 0
         list = []
         content.AssignValue("mails", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
             item["index"] = i
-            item["from"] = oRs[0]
-            item["subject"] = oRs[1]
-            item["date"] = oRs[3]
+            item["from"] = row[0]
+            item["subject"] = row[1]
+            item["date"] = row[3]
 
-            if oRs[10]:
-                item["bodybb"] = oRs[2]
+            if row[10]:
+                item["bodybb"] = row[2]
                 item["bbcode"] = True
             else:
-                item["body"] = oRs[2].replace("\n", "<br/>")
+                item["body"] = row[2].replace("\n", "<br/>")
                 item["html"] = True
 
-            item["mailid"] = oRs[4]
-            item["moneyamount"] = oRs[8]
+            item["mailid"] = row[4]
+            item["moneyamount"] = row[8]
 
-            if oRs[8] > 0: item["money"] = True # sender has given money
+            if row[8] > 0: item["money"] = True # sender has given money
 
-            if oRs[9] and oRs[9] >= 500: item["from_admin"] = True
+            if row[9] and row[9] >= 500: item["from_admin"] = True
 
-            if oRs[6] == None or oRs[6] == "":
+            if row[6] == None or row[6] == "":
                 item["noavatar"] = True
             else:
-                item["avatar_url"] = oRs[6]
+                item["avatar_url"] = row[6]
                 item["avatar"] = True
 
-            if oRs[5] == None: item["new_mail"] = True # if there is no value for read_date: it is a new mail
+            if row[5] == None: item["new_mail"] = True # if there is no value for read_date: it is a new mail
 
-            if oRs[7]:
+            if row[7]:
                 # allow the player to block/ignore another player
-                if oRs[12]:
+                if row[12]:
                     item["ignored"] = True
                 else:
                     item["ignore"] = True
 
-                if oRs[13]:
-                    item["alliancetag"] = oRs[13]
+                if row[13]:
+                    item["alliancetag"] = row[13]
                     item["alliance"] = True
 
                 item["reply"] = True
 
-            if oRs[11] == ":admins":
+            if row[11] == ":admins":
                 item["to_admins"] = True
-            elif oRs[11] == ":alliance":
+            elif row[11] == ":alliance":
                 item["to_alliance"] = True
 
             if self.request.session.get(sPrivilege) > 100: item["admin"] = True
@@ -273,7 +274,7 @@ class View(BaseView):
         if i == 0: content.Parse("nomails")
 
         if not self.IsImpersonating():
-            oRs = dbExecute("UPDATE gm_mails SET read_date = now() WHERE ownerid = " + str(self.userId) + " AND read_date IS NULL" )
+            row = dbExecute("UPDATE gm_mails SET read_date = now() WHERE ownerid = " + str(self.userId) + " AND read_date IS NULL" )
 
         return self.display(content)
 
@@ -282,7 +283,7 @@ class View(BaseView):
     #
     def display_mails_sent(self):
 
-        self.selectedMenu = "mails.sent"
+        self.selected_menu = "mails.sent"
 
         content = self.loadTemplate("mail-sent")
 
@@ -298,8 +299,8 @@ class View(BaseView):
 
         # get total number of mails that could be displayed
         query = "SELECT count(1) FROM gm_mails WHERE "+messages_filter+"senderid = " + str(self.userId)
-        oRs = dbRow(query)
-        size = int(oRs[0])
+        row = dbRow(query)
+        size = int(row[0])
         nb_pages = int(size/displayed)
         if nb_pages*displayed < size: nb_pages = nb_pages + 1
 
@@ -333,7 +334,7 @@ class View(BaseView):
         #display only if there are more than 1 page
         if nb_pages > 1: content.Parse("nav")
 
-        query = "SELECT gm_mails.id, owner, avatar_url, datetime, subject, body, gm_mails.credits, gm_profiles.id, bbcode, gm_alliances.tag"+ \
+        query = "SELECT gm_mails.id, owner, avatar_url, datetime, subject, body, gm_mails.credits, gm_profiles.id, bbcode, gm_alliances.tag" + \
                 " FROM gm_mails" + \
                 "    LEFT JOIN gm_profiles ON (/*upper(gm_profiles.login) = upper(gm_mails.owner)*/ gm_profiles.id = gm_mails.ownerid AND gm_mails.datetime >= gm_profiles.game_started)" + \
                 "    LEFT JOIN gm_alliances ON (gm_profiles.alliance_id = gm_alliances.id)" + \
@@ -347,45 +348,45 @@ class View(BaseView):
         i = 0
         list = []
         content.AssignValue("mails", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
             item["index"] = i
-            item["sent_to"] = oRs[1]
+            item["sent_to"] = row[1]
 
-            if oRs[1] == ":admins":
+            if row[1] == ":admins":
                 item["admins"] = True
-            elif oRs[1] == ":alliance":
+            elif row[1] == ":alliance":
                 item["to_alliance"] = True
             else:
                 item["nation"] = True
 
-            item["date"] = oRs[3]
-            item["subject"] = oRs[4]
+            item["date"] = row[3]
+            item["subject"] = row[4]
 
-            if oRs[8]:
-                item["bodybb"] = oRs[5]
+            if row[8]:
+                item["bodybb"] = row[5]
                 item["bbcode"] = True
             else:
-                item["body"] = oRs[5].replace("\n", "<br/>")
+                item["body"] = row[5].replace("\n", "<br/>")
                 item["html"] = True
 
-            item["mailid"] = oRs[0]
-            item["moneyamount"] = oRs[6]
+            item["mailid"] = row[0]
+            item["moneyamount"] = row[6]
 
-            if oRs[6] > 0: # sender has given money
+            if row[6] > 0: # sender has given money
                 item["money"] = True
 
-            if oRs[2] == None or oRs[2] == "":
+            if row[2] == None or row[2] == "":
                 item["noavatar"] = True
             else:
-                item["avatar_url"] = oRs[2]
+                item["avatar_url"] = row[2]
                 item["avatar"] = True
 
-            if oRs[7]:
-                if oRs[9]:
-                    item["alliancetag"] = oRs[9]
+            if row[7]:
+                if row[9]:
+                    item["alliancetag"] = row[9]
                     item["alliance"] = True
 
                 item["reply"] = True
@@ -397,7 +398,7 @@ class View(BaseView):
         return self.display(content)
 
     def display_ignore_list(self):
-        self.selectedMenu = "mails.ignorelist"
+        self.selected_menu = "mails.ignorelist"
 
         content = self.loadTemplate("mail-ignorelist")
 
@@ -406,15 +407,15 @@ class View(BaseView):
         i = 0
         list = []
         content.AssignValue("ignorednations", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
             item["index"] = i
-            item["userid"] = oRs[0]
-            item["name"] = oRs[1]
-            item["added"] = oRs[2]
-            item["blocked"] = oRs[3]
+            item["userid"] = row[0]
+            item["name"] = row[1]
+            item["added"] = row[2]
+            item["blocked"] = row[3]
 
             i = i + 1
 
@@ -428,11 +429,11 @@ class View(BaseView):
 
         oRss = dbRows("SELECT internal_profile_get_name(ignored_userid) FROM gm_mail_ignorees WHERE userid=" + userid)
         list = []
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["user"] = oRs[0]
+            item["user"] = row[0]
             content.Parse("ignored_user")
 
         response.write(content.Output)
@@ -446,7 +447,7 @@ class View(BaseView):
     # fill combobox with previously sent to
     def display_compose_form(self, mailto, subject, body, credits):
 
-        self.selectedMenu = "mails.compose"
+        self.selected_menu = "mails.compose"
 
         content = self.loadTemplate("mail-compose")
 
@@ -456,11 +457,11 @@ class View(BaseView):
 
         list = []
         content.AssignValue("tos", list)
-        for oRs in oRss:
+        for row in oRss:
             item = {}
             list.append(item)
             
-            item["to_user"] = oRs[0]
+            item["to_user"] = row[0]
 
         if self.mailto == ":admins":
             content.Parse("sendadmins_selected")
@@ -482,9 +483,9 @@ class View(BaseView):
 
         # if is a payed account, append the autosignature text to message body
         if self.userInfo["paid"]:
-            oRs = dbRow("SELECT autosignature FROM gm_profiles WHERE id="+userid)
-            if oRs:
-                body = body  + oRs[0]
+            row = dbRow("SELECT autosignature FROM gm_profiles WHERE id="+userid)
+            if row:
+                body = body  + row[0]
 
         # re-assign previous values
         content.AssignValue("mailto", mailto)
@@ -493,9 +494,9 @@ class View(BaseView):
         content.AssignValue("mail_credits", credits)
 
         #retrieve player's credits
-        oRs = dbRow("SELECT credits, now()-game_started > INTERVAL '2 weeks' AND security_level >= 3 FROM gm_profiles WHERE id="+str(self.userId))
-        content.AssignValue("player_credits", oRs[0])
-        if oRs[1]: content.Parse("send_credits")
+        row = dbRow("SELECT credits, now()-game_started > INTERVAL '2 weeks' AND security_level >= 3 FROM gm_profiles WHERE id="+str(self.userId))
+        content.AssignValue("player_credits", row[0])
+        if row[1]: content.Parse("send_credits")
 
         if self.sendmail_status != "":
             content.Parse(self.sendmail_status)

@@ -2,6 +2,7 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
     def dispatch(self, request, *args, **kwargs):
@@ -9,7 +10,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "fleets_ships_stats"
+        self.selected_menu = "fleets_ships_stats"
 
         return self.ListShips()
 
@@ -34,25 +35,25 @@ class View(BaseView):
         content.AssignValue("cats", cats)
         
         lastCategory = -1
-        for oRs in oRss:
+        for row in oRss:
             
-            if oRs[0] != lastCategory:
+            if row[0] != lastCategory:
                 
-                cat = { "id":oRs[0], "ships":[], "kills":0, "losses":0 }
+                cat = { "id":row[0], "ships":[], "kills":0, "losses":0 }
                 cats.append(cat)
                 
-                lastCategory = oRs[0]
+                lastCategory = row[0]
 
             item = {}
             cat["ships"].append(item)
             
-            item["id"] = oRs[1]
-            item["name"] = getShipLabel(oRs[1])
-            item["killed"] = oRs[2]
-            item["lost"] = oRs[3]
+            item["id"] = row[1]
+            item["name"] = getShipLabel(row[1])
+            item["killed"] = row[2]
+            item["lost"] = row[3]
 
-            kills += oRs[2]
-            losses += oRs[3]
+            kills += row[2]
+            losses += row[3]
             
             count = count + 1
 

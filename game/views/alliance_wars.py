@@ -2,80 +2,59 @@
 
 from game.views._base import *
 
+#-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = "/game/alliance-wars/"
+    template_name = "alliance-wars"
+    selected_menu = "alliance.wars"
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selectedMenu = "alliance.wars"
+        if self.allianceId == None: return HttpResponseRedirect("/game/alliance/")
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.result = ""
-        self.cease_success = ""
+    #---------------------------------------------------------------------------
+    def processAction(self, request, action):
 
-        cat = ToInt(request.GET.get("cat"), 0)
-        if cat < 1 or cat > 2: cat = 1
-
-        if not (self.allianceRights["can_create_nap"] or self.allianceRights["can_break_nap"]) and cat != 1: cat = 1
-
-        #
-        # Process actions
-        #
-
-        # redirect the player to the alliance page if he is not part of an alliance
-        if self.allianceId == None:
-            return HttpResponseRedirect("/game/alliance/")
-
-        action = request.GET.get("a", "")
-        self.tag = ""
-
+        if not self.hasRight("can_create_nap") and not self.hasRight("can_break_nap"): return -1
+        
         if action == "pay":
-            tag = request.GET.get("tag", "").strip()
-            oRs = dbRow("SELECT user_alliance_war_extend(" + str(self.userId) + "," + sqlStr(self.tag) + ")")
-
-            if oRs[0] == 0:
-                self.cease_success = "ok"
-            elif oRs[0] == 1:
-                self.cease_success = "norights"
-            elif oRs[0] == 2:
-                self.cease_success = "unknown"
-            elif oRs[0] == 3:
-                self.cease_success = "war_not_found"
+        
+            tag = request.POST.get("tag", "").strip()
+            
+            row = dbRow("SELECT user_alliance_war_extend(" + str(self.userId) + "," + sqlStr(tag) + ")")
+            return row[0]
 
         elif action == "stop":
-            self.tag = request.GET.get("tag", "").strip()
-            oRs = dbRow("SELECT user_alliance_war_stop(" + str(self.userId) + "," + sqlStr(self.tag) + ")")
+        
+            tag = request.POST.get("tag", "").strip()
+            
+            row = dbRow("SELECT user_alliance_war_stop(" + str(self.userId) + "," + sqlStr(tag) + ")")
+            return row[0]
 
-            if oRs[0] == 0:
-                self.cease_success = "ok"
-            elif oRs[0] == 1:
-                self.cease_success = "norights"
-            elif oRs[0] == 2:
-                self.cease_success = "unknown"
-            elif oRs[0] == 3:
-                self.cease_success = "war_not_found"
+        elif action == "create":
+        
+            tag = request.POST.get("tag", "").strip()
 
-        elif action == "new2":
-            self.tag = request.POST.get("tag", "").strip()
+            row = dbRow("SELECT user_alliance_war_create(" + str(self.userId) + "," + sqlStr(tag) + ")")                
+            return row[0]
+    
+    #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
+    
+        # --- user right
+        
+        if self.hasRight("can_create_nap") or self.hasRight("can_break_nap"): data["can_manage"] = True
 
-            oRs = dbRow("SELECT user_alliance_war_create(" + str(self.userId) + "," + sqlStr(self.tag) + ")")
-            if oRs[0] == 0:
-                self.result = "ok"
-                self.tag = ""
-            elif oRs[0] == 1:
-                self.result = "norights"
-            elif oRs[0] == 2:
-                self.result = "unknown"
-            elif oRs[0] == 3:
-                self.result = "already_at_war"
-            elif oRs[0] == 9:
-                self.result = "not_enough_credits"
+        # --- column sorting
 
-        return self.displayPage(cat)
-
-    def displayWars(self, content):
-        col = ToInt(self.request.GET.get("col"), 0)
+        col = ToInt(request.GET.get("col"), 1)
         if col < 1 or col > 2: col = 1
 
         reversed = False
@@ -85,114 +64,81 @@ class View(BaseView):
             orderby = "created"
             reversed = True
 
-        if self.request.GET.get("r", "") != "":
+        if request.GET.get("r", "") != "":
             reversed = not reversed
-        else:
-            content.Parse("r" + str(col))
 
         if reversed: orderby = orderby + " DESC"
         orderby = orderby + ", tag"
+        
+        data["col"] = col
+        data["reversed"] = reversed
 
-        # List wars
-        query = "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name, cease_fire_requested, date_part('epoch', cease_fire_expire-now())::integer, w.can_fight < now() AS can_fight, True AS attacker, next_bill < now() + INTERVAL '1 week', internal_alliance_get_war_cost(allianceid2), next_bill"+ \
+        # --- wars data
+        
+        data["wars"] = []
+        
+        query = "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name, cease_fire_requested, date_part('epoch', cease_fire_expire-now())::integer, w.can_fight < now() AS can_fight, True AS attacker, next_bill < now() + INTERVAL '1 week', internal_alliance_get_war_cost(allianceid2), next_bill" + \
                 " FROM gm_alliance_wars w" + \
                 "    INNER JOIN gm_alliances ON (allianceid2 = gm_alliances.id)" + \
                 " WHERE allianceid1=" + str(self.allianceId) + \
                 " UNION " + \
-                "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name, cease_fire_requested, date_part('epoch', cease_fire_expire-now())::integer, w.can_fight < now() AS can_fight, False AS attacker, False, 0, next_bill"+ \
+                "SELECT w.created, gm_alliances.id, gm_alliances.tag, gm_alliances.name, cease_fire_requested, date_part('epoch', cease_fire_expire-now())::integer, w.can_fight < now() AS can_fight, False AS attacker, False, 0, next_bill" + \
                 " FROM gm_alliance_wars w" + \
                 "    INNER JOIN gm_alliances ON (allianceid1 = gm_alliances.id)" + \
                 " WHERE allianceid2=" + str(self.allianceId) + \
                 " ORDER BY " + orderby
-        oRss = dbRows(query)
-
-        i = 0
-        list = []
-        content.AssignValue("wars", list)
-        for oRs in oRss:
-            item = {}
-            list.append(item)
+        rows = dbRows(query)
+        if rows:
+            for row in rows:
             
-            item["place"] = i+1
-            item["created"] = oRs[0]
-            item["tag"] = oRs[2]
-            item["name"] = oRs[3]
+                war = {}
+                data["wars"].append(war)
+                
+                war["created"] = row[0]
+                war["tag"] = row[2]
+                war["name"] = row[3]
+                
+                if self.hasRight["can_break_nap"]:
+                
+                    if row[4] == None:
+                        if row[7]:
+                            if row[8]:
+                                war["cost"] = row[9]
+                                war["extend"] = True
+                            war["stop"] = True
 
-            if self.allianceRights["can_break_nap"]:
-                if oRs[4] == None:
-                    if oRs[7]:
-                        if oRs[8]:
-                            item["cost"] = oRs[9]
-                            item["extend"] = True
+                    elif row[4] == self.allianceId:
+                        war["time"] = row[5]
+                        war["ceasing"] = True
+                        
+                    else:
+                        war["time"] = row[5]
+                        war["cease_requested"] = True
 
-                        item["stop"] = True
+                if row[6]:
+                    war["next_bill"] = row[10]
+                    if row[10]: war["can_fight"] = True
 
-                elif oRs[4] == self.allianceId:
-                    item["time"] = oRs[5]
-                    item["ceasing"] = True
-                else:
-                    item["time"] = oRs[5]
-                    item["cease_requested"] = True
+        # --- war declaration data
+        
+        if request.GET.get("a", "") == "new":
 
-            if oRs[6]:
-                item["next_bill"] = oRs[10]
-                if oRs[10]:
-                    item["can_fight"] = True
+            tag = request.GET.get("tag", "").strip()
 
+            row = dbRow("SELECT id, tag, name, internal_alliance_get_war_cost(id) + (static_alliance_war_cost_coeff()*internal_alliance_get_value(" + str(self.allianceId) + "))::integer FROM gm_alliances WHERE lower(tag)=lower(" + sqlStr(self.tag) + ")")
+            if row == None:
+                data["tag"] = tag
+                data["newwar"] = True
+                data["unknown"] = True
+                
             else:
-                item["cant_fight"] = True
+                data["tag"] = row[1]
+                data["name"] = row[2]
+                data["cost"] = row[3]
+                data["confirmwar"] = True
 
-            i = i + 1
+        else: data["newwar"] = True
 
-        if self.allianceRights["can_break_nap"] and (i > 0): content.Parse("cease")
-
-        if i == 0: content.Parse("nowars")
-
-        if self.cease_success != "":
-            content.Parse("cease_success")
-            content.Parse("message")
-
-    def displayDeclaration(self, content):
-        if self.request.GET.get("a", "") == "new":
-
-            self.tag = self.request.POST.get("tag").strip()
-
-            oRs = dbRow("SELECT id, tag, name, internal_alliance_get_war_cost(id) + (static_alliance_war_cost_coeff()*internal_alliance_get_value(" + str(self.allianceId) + "))::integer FROM gm_alliances WHERE lower(tag)=lower(" + sqlStr(self.tag) + ")")
-            if oRs == None:
-                content.AssignValue("tag", self.tag)
-
-                content.Parse("unknown")
-                content.Parse("message")
-                content.Parse("newwar")
-            else:
-                content.AssignValue("tag", oRs[1])
-                content.AssignValue("name", oRs[2])
-                content.AssignValue("cost", oRs[3])
-
-                content.Parse("newwar_confirm")
-
-        else:
-            if self.result != "":
-                content.Parse(self.result)
-                content.Parse("message")
-
-            content.AssignValue("tag", self.tag)
-
-            content.Parse("newwar")
-
-    def displayPage(self, cat):
-        content = self.loadTemplate("alliance-wars")
-        content.AssignValue("cat", cat)
-
-        if cat == 1:
-            self.displayWars(content)
-        elif cat == 2:
-            self.displayDeclaration(content)
-
-        content.Parse("cat" + str(cat) + "_selected")
-
-        content.Parse("cat1")
-        if self.allianceRights["can_create_nap"]: content.Parse("cat2")
-        content.Parse("nav")
-
-        return self.display(content)
+        # --- form data
+        
+        if not data["tag"]: data["tag"] = request.POST.get("tag", "").strip()
