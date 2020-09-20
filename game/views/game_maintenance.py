@@ -25,6 +25,6 @@ class View(View):
     def DisplayPage(self):
 
         content = self.loadTemplate("maintenance")
-        content.AssignValue("skin", "s_transparent")
+        content.AssignValue("skin","s_transparent")
 
         return render(self.request, content.template, content.data)

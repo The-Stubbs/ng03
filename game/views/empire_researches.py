@@ -14,7 +14,7 @@ class View(BaseView):
 
         dbRow("SELECT internal_profile_update_modifiers(" + str(self.userId) + ")")
 
-        Action = request.GET.get("a", "").lower()
+        Action = request.GET.get("a","").lower()
         ResearchId = ToInt(request.GET.get("r"), 0)
 
         if ResearchId != 0:
@@ -58,7 +58,7 @@ class View(BaseView):
         lastCategory = -1
         
         categories = []
-        for row in oRss:
+        for row in rows:
             CatId = row[1]
 
             if CatId != lastCategory:
@@ -126,7 +126,7 @@ class View(BaseView):
         return self.display(content)
 
     def StartResearch(self, ResearchId):
-        dbRow("SELECT * FROM user_research_start(" + str(self.userId) + ", " + str(ResearchId) + ", false)")
+        dbRow("SELECT * FROM user_research_start(" + str(self.userId) + "," + str(ResearchId) + ", false)")
 
     def CancelResearch(self, ResearchId):
-        dbRow("SELECT * FROM user_research_cancel(" + str(self.userId) + ", " + str(ResearchId) + ")")
+        dbRow("SELECT * FROM user_research_cancel(" + str(self.userId) + "," + str(ResearchId) + ")")

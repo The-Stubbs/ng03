@@ -15,11 +15,11 @@ class View(BaseView):
         self.showHeader = True
 
         # Retrieve galaxy/sector to display
-        galaxy = request.GET.get("g", "")
-        sector = request.GET.get("s", "")
+        galaxy = request.GET.get("g","")
+        sector = request.GET.get("s","")
 
         # If the player is on the map and change the current planet, find the galaxy/sector
-        planet = request.GET.get("planet", "")
+        planet = request.GET.get("planet","")
         if planet != "":
             galaxy = self.currentGalaxy
             sector = self.currentSector
@@ -58,7 +58,7 @@ class View(BaseView):
                 "    (planetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND planetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")) OR" + \
                 "    (destplanetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND destplanetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")))" + \
                 " ORDER BY remaining_time"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         relation = -100 # -100 = do not display the fleet
         loosing_time = 0 # seconds before our radar loses the fleet
@@ -72,7 +72,7 @@ class View(BaseView):
         enterings = []
         leavings = []
         
-        for row in oRss:
+        for row in rows:
             relation = row[10]
             remaining_time = row[7]
             loosing_time = -1
@@ -230,10 +230,10 @@ class View(BaseView):
                     " EXISTS(SELECT 1 FROM gm_planets WHERE galaxy=n.id AND ownerid = "+str(self.userId)+" LIMIT 1) AS hasplanets" + \
                     " FROM gm_galaxies AS n" + \
                     " ORDER BY n.id;"
-            oRss = dbRows(query)
+            rows = dbRows(query)
 
             galaxies = []
-            for row in oRss:
+            for row in rows:
                 galaxy = {}
                 galaxy["galaxyid"] = row[0]
 
@@ -271,10 +271,10 @@ class View(BaseView):
                     " WHERE galaxy=" + str(galaxy) + \
                     " GROUP BY galaxy, gm_alliances.tag" + \
                     " ORDER BY sum(n.score) DESC LIMIT 3"
-            oRss = dbRows(query)
+            rows = dbRows(query)
 
             nb = 1
-            for row in oRss:
+            for row in rows:
                 content.AssignValue("sov_tag_" + str(nb), row[0])
                 content.AssignValue("sov_perc_" + str(nb), row[1])
 
@@ -284,11 +284,11 @@ class View(BaseView):
             row = dbRow(query)
             content.AssignValue("protected_until", int(row[0]))
 
-            query = "SELECT sell_ore, sell_hydrocarbon FROM internal_profile_get_resource_price(" + str(self.userId) + "," + str(galaxy) + ", false)"
+            query = "SELECT sell_ore, sell_hydro FROM internal_profile_get_resource_price(" + str(self.userId) + "," + str(galaxy) + ", false)"
             row = dbRow(query)
 
             content.AssignValue("price_ore", row[0])
-            content.AssignValue("price_hydrocarbon", row[1])
+            content.AssignValue("price_hydro", row[1])
 
             content.Parse("nav_galaxy")
             content.Parse("galaxy_link")
@@ -324,10 +324,10 @@ class View(BaseView):
                 " WHERE ((action != 1 AND action != -1) OR engaged) AND" + \
                 "    planetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND planetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+")" + \
                 " ORDER BY f.planetid, upper(f.name)"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         fleetsArray = None
-        if oRss:
+        if rows:
             fleetsArray = oRss.copy()
 
         #
@@ -339,10 +339,10 @@ class View(BaseView):
                 "    INNER JOIN dt_buildings ON dt_buildings.id=buildingid" + \
                 " WHERE planetid >= tool_get_first_sector_planet("+str(galaxy)+","+str(sector)+") AND planetid <= tool_get_last_sector_planet("+str(galaxy)+","+str(sector)+") AND is_planet_element" + \
                 " ORDER BY planetid, upper(label)"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         elementsArray = None
-        if oRss:
+        if rows:
             elementsArray = oRss.copy()
 
         #
@@ -362,25 +362,25 @@ class View(BaseView):
         #
         query = "SELECT gm_planets.id, gm_planets.planet, gm_planets.name, gm_planets.ownerid," + \
                 " gm_profiles.login, internal_profile_get_relation(gm_planets.ownerid," + str(self.userId) + "), floor, space, GREATEST(0, radar_strength), radar_jamming," + \
-                " orbit_ore, orbit_hydrocarbon, gm_alliances.tag," + \
+                " orbit_ore, orbit_hydro, gm_alliances.tag," + \
                 " (SELECT SUM(quantity*signature) FROM gm_planet_ships LEFT JOIN dt_ships ON (gm_planet_ships.shipid = dt_ships.id) WHERE gm_planet_ships.planetid=gm_planets.id), " + \
                 " floor_occupied, planet_floor, production_frozen, warp_to IS NOT NULL OR vortex_strength > 0," + \
-                " planet_pct_ore, planet_pct_hydrocarbon, spawn_ore, spawn_hydrocarbon, vortex_strength," + \
-                " COALESCE(buy_ore, 0) AS buy_ore, COALESCE(buy_hydrocarbon, 0) as buy_hydrocarbon," + \
+                " planet_pct_ore, planet_pct_hydro, spawn_ore, spawn_hydro, vortex_strength," + \
+                " COALESCE(buy_ore, 0) AS buy_ore, COALESCE(buy_hydro, 0) as buy_hydro," + \
                 " internal_alliance_get_nap_location_sharing(COALESCE(" + str(aid) + ", -1), COALESCE(gm_profiles.alliance_id, -1)) AS locs_shared" + \
                 " FROM gm_planets" + \
                 "    LEFT JOIN gm_profiles ON (gm_profiles.id = ownerid)" + \
                 "    LEFT JOIN gm_alliances ON (gm_profiles.alliance_id=gm_alliances.id)" + \
                 " WHERE galaxy=" + str(galaxy) + " AND sector=" + str(sector) + \
                 " ORDER BY planet"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         # in then there is no planets, redirect player to the map of the galaxies
         if oRss == None:
             return HttpResponseRedirect("/game/map/")
         
         planets = []
-        for row in oRss:
+        for row in rows:
             planet = {}
             
             planetid = row[0]
@@ -395,7 +395,7 @@ class View(BaseView):
 
             displayElements = False # hasElements is True if the planet has some particularities like magnetic cloud or sun radiation ..
             displayPlanetInfo = False
-            displayResources = False # displayResources is True if there is some ore/hydrocarbon on planet orbit
+            displayResources = False # displayResources is True if there is some ore/hydro on planet orbit
             hasPlanetInfo = True
 
             #
@@ -465,7 +465,7 @@ class View(BaseView):
             else: planet["alliancetag"] = ""
 
             planet["buy_ore"] = row[23]
-            planet["buy_hydrocarbon"] = row[24]
+            planet["buy_hydro"] = row[24]
 
             #
             # assign the planet representation
@@ -594,7 +594,7 @@ class View(BaseView):
                 planet["floor"] = row[6]
                 planet["space"] = row[7]
                 planet["a_ore"] = row[18]
-                planet["a_hydrocarbon"] = row[19]
+                planet["a_hydro"] = row[19]
                 planet["vortex_strength"] = row[23]
                 planet["info"] = True
             else:
@@ -605,11 +605,11 @@ class View(BaseView):
 
             if displayResources and (row[10] > 0 or row[11] > 0):
                 planet["ore"] = row[10]
-                planet["hydrocarbon"] = row[11]
+                planet["hydro"] = row[11]
                 planet["resources"] = True
             else:
                 planet["ore"] = 0
-                planet["hydrocarbon"] = 0
+                planet["hydro"] = 0
                 planet["noresources"] = True
 
             #

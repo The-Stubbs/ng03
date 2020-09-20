@@ -57,7 +57,7 @@ class View(BaseView):
         elif request.POST.get("action") == "resources_price":
             query = "UPDATE gm_planets SET" + \
                     " buy_ore = GREATEST(0, LEAST(1000, " + str(ToInt(request.POST.get("buy_ore"), 0)) + "))" + \
-                    " ,buy_hydrocarbon = GREATEST(0, LEAST(1000, " + str(ToInt(request.POST.get("buy_hydrocarbon"), 0)) + "))" + \
+                    " ,buy_hydro = GREATEST(0, LEAST(1000, " + str(ToInt(request.POST.get("buy_hydro"), 0)) + "))" + \
                     " WHERE ownerid=" + str(self.userId) + " AND id=" + str(self.currentPlanetId)
             dbExecute(query)
 
@@ -79,7 +79,7 @@ class View(BaseView):
         query = "SELECT id, name, galaxy, sector, planet, " + \
                 "floor_occupied, floor, space_occupied, space, workers, workers_capacity, mod_production_workers," + \
                 "scientists, scientists_capacity, soldiers, soldiers_capacity, commanderid, recruit_workers," + \
-                "planet_floor, COALESCE(buy_ore, 0), COALESCE(buy_hydrocarbon, 0)" + \
+                "planet_floor, COALESCE(buy_ore, 0), COALESCE(buy_hydro, 0)" + \
                 " FROM vw_gm_planets WHERE id=" + str(self.currentPlanetId)
 
         row = dbRow(query)
@@ -116,7 +116,7 @@ class View(BaseView):
                 content.Parse("resume")
 
             content.AssignValue("buy_ore", row[19])
-            content.AssignValue("buy_hydrocarbon", row[20])
+            content.AssignValue("buy_hydro", row[20])
 
             # retrieve commander assigned to this planet
             if row[16]:
@@ -139,7 +139,7 @@ class View(BaseView):
                 " FROM vw_gm_profile_commanders" + \
                 " WHERE ownerid="+str(self.userId) + \
                 " ORDER BY fleetid IS NOT NULL, planetid IS NOT NULL, fleetid, planetid "
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         lastItem = ""
         item = ""
@@ -152,7 +152,7 @@ class View(BaseView):
         cmd_fleets = {'typ':'fleet', 'cmds':[]}
         cmd_planets = {'typ':'planet', 'cmds':[]}
         
-        for row in oRss:
+        for row in rows:
             item = {}
 
             if row[2] == None and row[3] == None:
@@ -189,12 +189,12 @@ class View(BaseView):
                 " FROM vw_gm_planet_building_pendings WHERE planetid="+str(self.currentPlanetId) + \
                 " ORDER BY remaining_time DESC"
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         i = 0
         list = []
         content.AssignValue("buildings", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -214,13 +214,13 @@ class View(BaseView):
                 " ORDER BY remaining_time DESC"
 
         # view current ships constructions
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         i = 0
 
         list = []
         content.AssignValue("ships", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -241,13 +241,13 @@ class View(BaseView):
                 " WHERE action != -1 AND action != 1 AND planetid=" + str(self.currentPlanetId) + \
                 " ORDER BY upper(name)"
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         i = 0
 
         list = []
         content.AssignValue("gm_fleets", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             

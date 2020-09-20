@@ -23,7 +23,7 @@ class View(BaseView):
                 "    INNER JOIN dt_ships ON (dt_ships.id = gm_profile_kills.shipid)" + \
                 " WHERE userid=" + str(self.userId) + \
                 " ORDER BY shipid"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         content = self.loadTemplate("gm_fleets-ships-stats")
 
@@ -35,7 +35,7 @@ class View(BaseView):
         content.AssignValue("cats", cats)
         
         lastCategory = -1
-        for row in oRss:
+        for row in rows:
             
             if row[0] != lastCategory:
                 

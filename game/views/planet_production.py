@@ -18,7 +18,7 @@ class View(BaseView):
 
     # Display bonus given by a commander (typ=0), building (typ=1) or a research (typ=2)
     def DisplayBonus(self, oRss, typ):
-        for row in oRss:
+        for row in rows:
             item = {}
             self.bonuses.append(item)
             
@@ -32,12 +32,12 @@ class View(BaseView):
             elif row[2] < 0:
                 item["ore_negative"] = True
 
-            item["mod_production_hydrocarbon"] = round(row[3]*100)
+            item["mod_production_hydro"] = round(row[3]*100)
             if row[3] > 0:
-                item["mod_production_hydrocarbon"] = "+" + str(round(row[3]*100))
-                item["hydrocarbon_positive"] = True
+                item["mod_production_hydro"] = "+" + str(round(row[3]*100))
+                item["hydro_positive"] = True
             elif row[3] < 0:
-                item["hydrocarbon_negative"] = True
+                item["hydro_negative"] = True
 
             item["mod_production_energy"] = round(row[4]*100)
             if row[4] > 0:
@@ -66,7 +66,7 @@ class View(BaseView):
         # Assign total production variables
         query = "SELECT workers, workers_for_maintenance, int4(workers/GREATEST(1.0, workers_for_maintenance)*100), int4(previous_buildings_dilapidation / 100.0)," + \
                 " int4(production_percent*100)," + \
-                " pct_ore, pct_hydrocarbon" + \
+                " pct_ore, pct_hydro" + \
                 " FROM vw_gm_planets WHERE id=" + str(self.currentPlanetId)
         row = dbRow(query)
 
@@ -97,22 +97,22 @@ class View(BaseView):
             return self.displayPage(False)
 
         self.content.AssignValue("a_ore", row[5])
-        self.content.AssignValue("a_hydrocarbon", row[6])
+        self.content.AssignValue("a_hydro", row[6])
 
-        # List buildings that produce a resource : ore, hydrocarbon or energy
-        query = "SELECT id, production_ore*working_quantity, production_hydrocarbon*working_quantity, energy_production*working_quantity, working_quantity" + \
+        # List buildings that produce a resource : ore, hydro or energy
+        query = "SELECT id, production_ore*working_quantity, production_hydro*working_quantity, energy_production*working_quantity, working_quantity" + \
                 " FROM vw_gm_planet_buildings" + \
-                " WHERE planetid="+str(self.currentPlanetId)+" AND (production_ore > 0 OR production_hydrocarbon > 0 OR energy_production > 0) AND working_quantity > 0;"
-        oRss = dbRows(query)
+                " WHERE planetid="+str(self.currentPlanetId)+" AND (production_ore > 0 OR production_hydro > 0 OR energy_production > 0) AND working_quantity > 0;"
+        rows = dbRows(query)
 
         totalOre = 0
-        totalHydrocarbon = 0
+        totalhydro = 0
         totalEnergy = 0
         buildingCount = 0
 
         list = []
         self.content.AssignValue("buildings", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -120,12 +120,12 @@ class View(BaseView):
             item["name"] = getBuildingLabel(row[0])
             item["description"] = getBuildingDescription(row[0])
             item["production_ore"] = int(row[1])
-            item["production_hydrocarbon"] = int(row[2])
+            item["production_hydro"] = int(row[2])
             item["production_energy"] = int(row[3])
             item["quantity"] = row[4]
 
             totalOre = totalOre + row[1]
-            totalHydrocarbon = totalHydrocarbon + row[2]
+            totalhydro = totalhydro + row[2]
             totalEnergy = totalEnergy + row[3]
 
             buildingCount = buildingCount + 1
@@ -135,7 +135,7 @@ class View(BaseView):
 
         # Retrieve commander assigned to the planet if any
         query = "SELECT gm_commanders.id, gm_commanders.name," + \
-                "gm_commanders.mod_production_ore-1, gm_commanders.mod_production_hydrocarbon-1, gm_commanders.mod_production_energy-1" + \
+                "gm_commanders.mod_production_ore-1, gm_commanders.mod_production_hydro-1, gm_commanders.mod_production_energy-1" + \
                 " FROM gm_commanders INNER JOIN gm_planets ON (gm_commanders.id = gm_planets.commanderid)" + \
                 " WHERE gm_planets.id=" + str(self.currentPlanetId)
 
@@ -144,19 +144,19 @@ class View(BaseView):
         self.DisplayBonus(row, 0)
 
         # List production bonus given by buildings
-        query = "SELECT buildingid, '', mod_production_ore*quantity, mod_production_hydrocarbon*quantity, mod_production_energy*quantity" + \
+        query = "SELECT buildingid, '', mod_production_ore*quantity, mod_production_hydro*quantity, mod_production_energy*quantity" + \
                 " FROM gm_planet_buildings" + \
                 "    INNER JOIN dt_buildings ON (dt_buildings.id = gm_planet_buildings.buildingid)" + \
-                " WHERE planetid="+str(self.currentPlanetId)+" AND (mod_production_ore != 0 OR mod_production_hydrocarbon != 0 OR mod_production_energy != 0)"
+                " WHERE planetid="+str(self.currentPlanetId)+" AND (mod_production_ore != 0 OR mod_production_hydro != 0 OR mod_production_energy != 0)"
 
         row = dbRows(query)
 
         self.DisplayBonus(row, 1)
 
         # List gm_profile_researches that gives production bonus
-        query = "SELECT researchid, '', level*mod_production_ore, level*mod_production_hydrocarbon, level*mod_production_energy, level" + \
+        query = "SELECT researchid, '', level*mod_production_ore, level*mod_production_hydro, level*mod_production_energy, level" + \
                 " FROM gm_profile_researches INNER JOIN dt_researches ON gm_profile_researches.researchid=dt_researches.id" + \
-                " WHERE userid=" + str(self.userId) +" AND ((mod_production_ore > 0) OR (mod_production_hydrocarbon > 0) OR (mod_production_energy > 0)) AND (level > 0);"
+                " WHERE userid=" + str(self.userId) +" AND ((mod_production_ore > 0) OR (mod_production_hydro > 0) OR (mod_production_energy > 0)) AND (level > 0);"
 
         row = dbRows(query)
 
@@ -165,7 +165,7 @@ class View(BaseView):
         # Display buildings def total if there are bonus and more than 1 building that produces resources
         if (self.BonusCount > 0) and (buildingCount > 1):
                 self.content.AssignValue("production_ore", int(totalOre))
-                self.content.AssignValue("production_hydrocarbon", int(totalHydrocarbon))
+                self.content.AssignValue("production_hydro", int(totalhydro))
                 self.content.AssignValue("production_energy", int(totalEnergy))
                 self.content.Parse("subtotal")
 
@@ -175,24 +175,24 @@ class View(BaseView):
         EnergyReceived = row[0]
 
         # Assign total production variables
-        query = "SELECT ore_production, hydrocarbon_production, energy_production-"+str(EnergyReceived)+" FROM gm_planets WHERE id=" + str(self.currentPlanetId)
+        query = "SELECT ore_production, hydro_production, energy_production-"+str(EnergyReceived)+" FROM gm_planets WHERE id=" + str(self.currentPlanetId)
         row = dbRow(query)
 
         if row:
             # display bonus sub-total
             if self.BonusCount > 0:
 
-                if RecomputeIfNeeded and (row[0]-totalOre < 0 or row[1]-totalHydrocarbon < 0 or row[2]-totalEnergy < 0):
+                if RecomputeIfNeeded and (row[0]-totalOre < 0 or row[1]-totalhydro < 0 or row[2]-totalEnergy < 0):
                     dbRow("SELECT internal_planet_update_data(" + str(self.currentPlanetId) + ")")
                     return self.displayPage(False)
 
                 self.content.AssignValue("bonus_production_ore", int(row[0]-totalOre))
-                self.content.AssignValue("bonus_production_hydrocarbon", int(row[1]-totalHydrocarbon))
+                self.content.AssignValue("bonus_production_hydro", int(row[1]-totalhydro))
                 self.content.AssignValue("bonus_production_energy", int(row[2]-totalEnergy))
                 self.content.Parse("bonus")
 
             self.content.AssignValue("total_production_ore", int(row[0]))
-            self.content.AssignValue("total_production_hydrocarbon", int(row[1]))
+            self.content.AssignValue("total_production_hydro", int(row[1]))
             self.content.AssignValue("total_production_energy", int(row[2]))
 
         self.content.Parse("overview")

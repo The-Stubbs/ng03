@@ -26,14 +26,14 @@ class View(BaseView):
 
         if action == "cancel":
         
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_tribute_cancel(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
 
         elif action == "new":
 
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             credits = ToInt(request.POST.get("credits"), 0)
 
             row = dbRow("SELECT user_alliance_tribute_create(" + str(self.userId) + "," + sqlStr(tag) + "," + str(credits) + ")")
@@ -54,7 +54,7 @@ class View(BaseView):
             orderby = "created"
             reversed = True
 
-        if request.GET.get("r", "") != "":
+        if request.GET.get("r","") != "":
             reversed = not reversed
 
         if reversed: orderby = orderby + " DESC"
@@ -115,7 +115,7 @@ class View(BaseView):
         
         if self.hasRight("can_create_nap"):
 
-            data["tag"] = request.POST.get("tag", "").strip()
+            data["tag"] = request.POST.get("tag","").strip()
             data["credits"] = ToInt(request.POST.get("credits"), 0)
             
             data["new"] = True

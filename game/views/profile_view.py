@@ -22,11 +22,11 @@ class View(BaseView):
                 " FROM gm_profiles" + \
                 " WHERE upper(login) ILIKE upper(" + str( "\'%" + nation + "%\'") + ")" + \
                 " ORDER BY upper(login)"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         list = []
         content.AssignValue("nations", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -36,7 +36,7 @@ class View(BaseView):
 
     def display_nation(self):
 
-        nation = self.request.GET.get("name", "").strip()
+        nation = self.request.GET.get("name","").strip()
 
         # if no nation is given: display info on the current player
         if nation == "": nation = self.userInfo["login"]
@@ -48,8 +48,8 @@ class View(BaseView):
                 " COALESCE(u.alliance_joined, u.regdate), u.alliance_taxes_paid, u.alliance_credits_given, u.alliance_credits_taken," + \
                 " u.id" + \
                 " FROM gm_profiles AS u" + \
-                " LEFT JOIN gm_alliances AS a ON (u.alliance_id = a.id) " + \
-                " LEFT JOIN gm_alliance_ranks AS r ON (u.alliance_id = r.allianceid AND u.alliance_rank = r.rankid) " + \
+                " LEFT JOIN gm_alliances AS a ON (u.alliance_id = a.id)" + \
+                " LEFT JOIN gm_alliance_ranks AS r ON (u.alliance_id = r.allianceid AND u.alliance_rank = r.rankid)" + \
                 " WHERE upper(u.login) = upper(" + sqlStr(nation) + ") LIMIT 1"
         row = dbRow(query)
 
@@ -198,11 +198,11 @@ class View(BaseView):
                 " FROM gm_log_profile_alliances" + \
                 " WHERE userid = " + str(nationId) + " AND joined > (SELECT GREATEST(regdate, game_started) FROM gm_profiles WHERE privilege < 100 AND id=" + str(nationId) + ")" + \
                 " ORDER BY joined DESC"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         list = []
         content.AssignValue("gm_alliances", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             

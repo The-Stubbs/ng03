@@ -24,7 +24,7 @@ class View(BaseView):
                 "    INNER JOIN gm_planets ON (gm_planet_ships.planetid = gm_planets.id)" + \
                 " WHERE gm_planets.ownerid =" + str(self.userId) + \
                 " ORDER BY gm_planets.id, shipid"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         if oRss == None:
             content.Parse("noships")
@@ -33,7 +33,7 @@ class View(BaseView):
 
             list = []
             content.AssignValue("planets", list)
-            for row in oRss:
+            for row in rows:
                 
                 if row[0] != lastplanetid:
                     planet = { "ships":[] }

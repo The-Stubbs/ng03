@@ -23,8 +23,8 @@ class View(BaseView):
                     " FROM gm_planet_buildings" + \
                     "    INNER JOIN dt_buildings ON (gm_planet_buildings.buildingid=dt_buildings.id)" + \
                     " WHERE can_be_disabled AND planetid=" + str(self.currentPlanetId)
-            oRss = dbRows(query)
-            for row in oRss:
+            rows = dbRows(query)
+            for row in rows:
 
                 quantity = row[1] - ToInt(self.request.POST.get("enabled" + str(row[0])), 0)
 
@@ -40,11 +40,11 @@ class View(BaseView):
                 "    INNER JOIN dt_buildings ON (gm_planet_buildings.buildingid=dt_buildings.id)" + \
                 " WHERE can_be_disabled AND planetid=" + str(self.currentPlanetId) + \
                 " ORDER BY buildingid"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         list = []
         self.content.AssignValue("buildings", list)
-        for row in oRss:
+        for row in rows:
             if row[1] > 0:
                 item = {}
                 list.append(item)

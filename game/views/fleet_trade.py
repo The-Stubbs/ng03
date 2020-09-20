@@ -52,7 +52,7 @@ class View(BaseView):
         # retrieve fleet name, size, position, destination
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
-                " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
+                " cargo_capacity, cargo_ore, cargo_hydro, cargo_scientists, cargo_soldiers, cargo_workers" + \
                 " FROM vw_gm_fleets" + \
                 " WHERE ownerid=" + str(self.fleet_owner_id) + " AND id="+str(self.fleetid)
         row = dbRow(query)
@@ -80,7 +80,7 @@ class View(BaseView):
     
         content.AssignValue("fleet_capacity", row[18])
         content.AssignValue("fleet_ore", row[19])
-        content.AssignValue("fleet_hydrocarbon", row[20])
+        content.AssignValue("fleet_hydro", row[20])
         content.AssignValue("fleet_scientists", row[21])
         content.AssignValue("fleet_soldiers", row[22])
         content.AssignValue("fleet_workers", row[23])
@@ -88,22 +88,22 @@ class View(BaseView):
         content.AssignValue("fleet_load", row[19] + row[20] + row[21] + row[22] + row[23])
     
         if relation == rSelf:
-            # retrieve planet ore, hydrocarbon, workers, relation
-            query = "SELECT ore, hydrocarbon, scientists, soldiers," + \
+            # retrieve planet ore, hydro, workers, relation
+            query = "SELECT ore, hydro, scientists, soldiers," + \
                     " GREATEST(0, workers-GREATEST(workers_busy,workers_for_maintenance-workers_for_maintenance/2+1,500))," + \
                     " workers > workers_for_maintenance/2" + \
                     " FROM vw_gm_planets WHERE id="+str(row[10])
             row = dbRow(query)
 
             content.AssignValue("planet_ore", row[0])
-            content.AssignValue("planet_hydrocarbon", row[1])
+            content.AssignValue("planet_hydro", row[1])
             content.AssignValue("planet_scientists", row[2])
             content.AssignValue("planet_soldiers", row[3])
             content.AssignValue("planet_workers", row[4])
 
             if not row[5]:
                 content.AssignValue("planet_ore", 0)
-                content.AssignValue("planet_hydrocarbon", 0)
+                content.AssignValue("planet_hydro", 0)
                 content.Parse("not_enough_workers_to_load")
 
             content.Parse("load")
@@ -118,22 +118,22 @@ class View(BaseView):
     def TransferResources(self, fleetid):
     
         ore = ToInt(self.request.GET.get("load_ore"), 0) - ToInt(self.request.GET.get("unload_ore"), 0)
-        hydrocarbon = ToInt(self.request.GET.get("load_hydrocarbon"), 0) - ToInt(self.request.GET.get("unload_hydrocarbon"), 0)
+        hydro = ToInt(self.request.GET.get("load_hydro"), 0) - ToInt(self.request.GET.get("unload_hydro"), 0)
         scientists = ToInt(self.request.GET.get("load_scientists"), 0) - ToInt(self.request.GET.get("unload_scientists"), 0)
         soldiers = ToInt(self.request.GET.get("load_soldiers"), 0) - ToInt(self.request.GET.get("unload_soldiers"), 0)
         workers = ToInt(self.request.GET.get("load_workers"), 0) - ToInt(self.request.GET.get("unload_workers"), 0)
     
-        if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
-            row = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
+        if ore != 0 or hydro != 0 or scientists != 0 or soldiers != 0 or workers != 0:
+            row = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydro) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
     
     def TransferResourcesViaPost(self, fleetid):
     
         ore = ToInt(self.request.POST.get("load_ore"), 0) - ToInt(self.request.POST.get("unload_ore"), 0)
-        hydrocarbon = ToInt(self.request.POST.get("load_hydrocarbon"), 0) - ToInt(self.request.POST.get("unload_hydrocarbon"), 0)
+        hydro = ToInt(self.request.POST.get("load_hydro"), 0) - ToInt(self.request.POST.get("unload_hydro"), 0)
         scientists = ToInt(self.request.POST.get("load_scientists"), 0) - ToInt(self.request.POST.get("unload_scientists"), 0)
         soldiers = ToInt(self.request.POST.get("load_soldiers"), 0) - ToInt(self.request.POST.get("unload_soldiers"), 0)
         workers = ToInt(self.request.POST.get("load_workers"), 0) - ToInt(self.request.POST.get("unload_workers"), 0)
     
-        if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
-            row = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydrocarbon) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
+        if ore != 0 or hydro != 0 or scientists != 0 or soldiers != 0 or workers != 0:
+            row = dbRow("SELECT user_fleet_transfer_resources(" + str(self.fleet_owner_id) + "," + str(self.fleetid) + "," + str(ore) + "," + str(hydro) + "," + str(scientists) + "," + str(soldiers) + "," + str(workers) + ")")
             return HttpResponseRedirect("/game/fleet/?id=" + str(self.fleetid) + "+trade=" + str(row[0]))

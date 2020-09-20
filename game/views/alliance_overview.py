@@ -25,12 +25,12 @@ class View(BaseView):
 
         if action == "save":
         
-            logo = request.POST.get("logo", "").strip()
+            logo = request.POST.get("logo","").strip()
             if not isValidURL(logo): return -1
             
             defcon = ToInt(request.POST.get("defcon"), 5)
-            announce = request.POST.get("announce", "").strip()
-            description = request.POST.get("description", "").strip()
+            announce = request.POST.get("announce","").strip()
+            description = request.POST.get("description","").strip()
 
             dbExecute("UPDATE gm_alliances SET logo_url=" + sqlStr(logo) + ", description=" + sqlStr(description) + " defcon=" + str(defcon) + ", announce=" + sqlStr(announce) + "WHERE id=" + str(self.allianceId))        
             return 0

@@ -18,7 +18,7 @@ class View(BaseView):
         self.fleet_error = self.e_no_error
         self.fleet_planet = 0
 
-        fleetid = request.GET.get("id", "")
+        fleetid = request.GET.get("id","")
 
         if fleetid == None or fleetid == "":
             return HttpResponseRedirect("/game/gm_fleets/")
@@ -38,7 +38,7 @@ class View(BaseView):
         # retrieve fleet name, size, position, destination
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
-                " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
+                " cargo_capacity, cargo_ore, cargo_hydro, cargo_scientists, cargo_soldiers, cargo_workers" + \
                 " FROM vw_gm_fleets WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
 
         row = dbRow(query)
@@ -69,11 +69,11 @@ class View(BaseView):
                     " FROM dt_ships" + \
                     " ORDER BY dt_ships.category, dt_ships.label"
 
-            oRss = dbRows(query)
+            rows = dbRows(query)
 
             list = []
             content.AssignValue("shiplist", list)
-            for row in oRss:
+            for row in rows:
                 if row[2] > 0 or row[3] > 0:
                     item = {}
                     list.append(item)

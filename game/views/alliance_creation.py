@@ -26,13 +26,13 @@ class View(BaseView):
             
             if not self.userInfo["can_join_alliance"]: return -1
             
-            name = request.POST.get("name", "").strip()
+            name = request.POST.get("name","").strip()
             if not isValidAlliancename(name): return -2
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             if not isValidAlliancetag(tag): return -3
             
-            description = request.POST.get("description", "").strip()
+            description = request.POST.get("description","").strip()
             if not isValiddescription(description): return -4
 
             row = dbRow("SELECT user_alliance_create(" + str(self.userId) + "," + sqlStr(self.name) + "," + sqlStr(self.tag) + "," + sqlStr(self.description) + ")")
@@ -48,6 +48,6 @@ class View(BaseView):
         
         # --- form data
         
-        data["tag"] = request.POST.get("tag", "")
-        data["name"] = request.POST.get("name", "")
-        data["description"] = request.POST.get("description", "")
+        data["tag"] = request.POST.get("tag","")
+        data["name"] = request.POST.get("name","")
+        data["description"] = request.POST.get("description","")

@@ -90,7 +90,7 @@ class View(BaseMixin, View):
             oRss = dbRows("SELECT id, recommended FROM internal_profile_get_galaxies_info(" + str(self.userId) + ")")
 
             list = []
-            for row in oRss:
+            for row in rows:
                 item = {}
                 list.append(item)
                 

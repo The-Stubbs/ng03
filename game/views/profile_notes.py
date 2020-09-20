@@ -14,9 +14,9 @@ class View(BaseView):
 
         self.notes_status = ""
 
-        notes = request.POST.get("notes", "").strip()
+        notes = request.POST.get("notes","").strip()
 
-        if request.POST.get("submit", "") != "":
+        if request.POST.get("submit","") != "":
 
             if len(notes) <= 5100: # ok save info
                 dbExecute("UPDATE gm_profiles SET notes=" + sqlStr(notes) + " WHERE id = " + str(self.userId))

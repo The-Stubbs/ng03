@@ -28,7 +28,7 @@ class View(BaseView):
         query = "SELECT i.id, i.time, i.planet_id, i.planet_name, i.attacker_name, i.defender_name, " + \
                 "i.attacker_succeeded, i.soldiers_total, i.soldiers_lost, i.def_soldiers_total, " + \
                 "i.def_soldiers_lost, i.def_scientists_total, i.def_scientists_lost, i.def_workers_total, " + \
-                "i.def_workers_lost, galaxy, sector, planet, internal_profile_get_name("+str(readerid)+") " + \
+                "i.def_workers_lost, galaxy, sector, planet, internal_profile_get_name("+str(readerid)+")" + \
                 "FROM gm_invasions AS i INNER JOIN gm_planets ON gm_planets.id = i.planet_id WHERE i.id = "+str(invasionid)
         row = dbRow(query)
 

@@ -16,7 +16,7 @@ class View(BaseView):
 
         self.train_error = 0
 
-        Action = request.GET.get("a", "").lower()
+        Action = request.GET.get("a","").lower()
         trainScientists = ToInt(request.POST.get("scientists"),0)
         trainSoldiers = ToInt(request.POST.get("soldiers"),0)
         queueId = ToInt(request.GET.get("q"),0)
@@ -34,17 +34,17 @@ class View(BaseView):
 
         content.AssignValue("planetid", str(self.currentPlanetId))
 
-        query = "SELECT scientist_ore, scientist_hydrocarbon, scientist_credits," + \
-                " soldier_ore, soldier_hydrocarbon, soldier_credits" + \
+        query = "SELECT scientist_ore, scientist_hydro, scientist_credits," + \
+                " soldier_ore, soldier_hydro, soldier_credits" + \
                 " FROM internal_profile_get_training_price(" + str(self.userId) + ")"
         row = dbRow(query)
 
         if row:
             content.AssignValue("scientist_ore", row[0])
-            content.AssignValue("scientist_hydrocarbon", row[1])
+            content.AssignValue("scientist_hydro", row[1])
             content.AssignValue("scientist_credits", row[2])
             content.AssignValue("soldier_ore", row[3])
-            content.AssignValue("soldier_hydrocarbon", row[4])
+            content.AssignValue("soldier_hydro", row[4])
             content.AssignValue("soldier_credits", row[5])
 
         query = "SELECT scientists, scientists_capacity, soldiers, soldiers_capacity, workers FROM vw_gm_planets WHERE id="+str(self.currentPlanetId)
@@ -78,12 +78,12 @@ class View(BaseView):
         query = "SELECT id, scientists, soldiers, int4(date_part('epoch', end_time-now()))" + \
                 " FROM gm_planet_trainings WHERE planetid="+str(self.currentPlanetId)+" AND end_time IS NOT NULL" + \
                 " ORDER BY start_time"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         i = 0
         list = []
         content.AssignValue("trainings", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -108,12 +108,12 @@ class View(BaseView):
                 "    JOIN gm_planets ON (gm_planets.id=gm_planet_trainings.planetid)" + \
                 " WHERE planetid="+str(self.currentPlanetId)+" AND end_time IS NULL" + \
                 " ORDER BY start_time"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         i = 0
         list = []
         content.AssignValue("queues", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -143,6 +143,6 @@ class View(BaseView):
             self.train_error = 1
 
     def CancelTraining(self, queueId):
-        dbExecuteRetryNoRow("SELECT * FROM user_planet_training_cancel(" + str(self.currentPlanetId) + ", " + str(queueId) + ")")
+        dbExecuteRetryNoRow("SELECT * FROM user_planet_training_cancel(" + str(self.currentPlanetId) + "," + str(queueId) + ")")
         return HttpResponseRedirect("?")
 

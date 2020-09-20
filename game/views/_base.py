@@ -172,7 +172,7 @@ def isValiddescription(self, description):
 
 #-------------------------------------------------------------------------------
 def dtBuildings():
-    query = "SELECT id, storage_workers, energy_production, storage_ore, storage_hydrocarbon, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep FROM dt_buildings"
+    query = "SELECT id, storage_workers, energy_production, storage_ore, storage_hydro, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep FROM dt_buildings"
     return dbRow(query)
 
 #-------------------------------------------------------------------------------
@@ -314,7 +314,7 @@ class BaseView(BaseMixin, View):
     #---------------------------------------------------------------------------
     def post(self, request, *args, **kwargs):
         
-        action = request.POST.get("action", "")
+        action = request.POST.get("action","")
         if action != "":
             error = self.processAction(request, action)
             if error == 0:
@@ -415,7 +415,7 @@ class BaseView(BaseMixin, View):
                 if i > 0: i = i - 1
                 blockname = blockname[:i]
     
-        content["selected_menu"] = self.selected_menu.replace(".", "_")
+        content["selected_menu"] = self.selected_menu.replace(".","_")
         
         if self.showHeader == True:
 
@@ -430,12 +430,12 @@ class BaseView(BaseMixin, View):
             # --- current planet info
             
             query = "SELECT ore, ore_production, ore_capacity," + \
-                    "hydrocarbon, hydrocarbon_production, hydrocarbon_capacity," + \
+                    "hydro, hydro_production, hydro_capacity," + \
                     "workers, workers_busy, workers_capacity," + \
                     "energy_consumption, energy_production," + \
                     "floor_occupied, floor," + \
                     "space_occupied, space, workers_for_maintenance," + \
-                    "mod_production_ore, mod_production_hydrocarbon, energy, energy_capacity, soldiers, soldiers_capacity, scientists, scientists_capacity" + \
+                    "mod_production_ore, mod_production_hydro, energy, energy_capacity, soldiers, soldiers_capacity, scientists, scientists_capacity" + \
                     " FROM vw_gm_planets WHERE id=" + str(self.currentPlanetId)
             row = dbRow(query)
         
@@ -527,6 +527,24 @@ class BaseView(BaseMixin, View):
             content["context"] = True
 
         return render(self.request, self.template, content)
+
+#-------------------------------------------------------------------------------
+class RestView(BaseView):
+
+    #---------------------------------------------------------------------------
+    def dispatch(self, request, *args, **kwargs):
+
+        response = super().pre_dispatch(request, *args, **kwargs)
+        if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
+
+    #---------------------------------------------------------------------------
+    def post(self, request, *args, **kwargs):
+        
+        action = request.POST.get("action","")
+        if action != "":
+            return self.processAction(request, action)
     
 #-------------------------------------------------------------------------------
 def formatBattle(view, battleid, creator, pointofview, ispubliclink):

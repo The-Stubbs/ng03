@@ -46,7 +46,7 @@ class View(BaseView):
             orderby = "v.score_prestige"
             reversed = True
 
-        if self.request.GET.get("r", "") != "":
+        if self.request.GET.get("r","") != "":
             reversed = not reversed
         else:
             content.Parse("r" + str(col))
@@ -82,11 +82,11 @@ class View(BaseView):
                     " FROM vw_gm_profiles v LEFT JOIN gm_alliances ON gm_alliances.id=v.alliance_id" + \
                     " WHERE True "+searchby + \
                     " ORDER BY "+orderby
-            oRss = dbRows(query)
+            rows = dbRows(query)
 
             index = 0
             found = False
-            for row in oRss:
+            for row in rows:
                 if row[0] == self.userId:
                     found = True
                     break
@@ -128,7 +128,7 @@ class View(BaseView):
     
                 if i-1 != offset:
                     if searchby != "": item["search_params"] = True
-                    if self.request.GET.get("r", "") != "": item["reversed"] = True
+                    if self.request.GET.get("r","") != "": item["reversed"] = True
     
                     item["link"] = True
                 else:
@@ -145,14 +145,14 @@ class View(BaseView):
                 "    LEFT JOIN gm_alliances ON ((v.score >= " + str(TenthUserScore) + " OR score_visibility = 2 OR v.id="+str(self.userId)+" OR (score_visibility = 1 AND alliance_id IS NOT NULL AND alliance_id="+str(sqlValue(self.allianceId))+")) AND gm_alliances.id=v.alliance_id)" + \
                 " WHERE True "+searchby + \
                 " ORDER BY "+orderby+" OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         if row == None: content.Parse("noresult")
 
         i = 1
         list = []
         content.AssignValue("players", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             

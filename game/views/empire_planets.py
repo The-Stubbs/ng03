@@ -33,13 +33,13 @@ class View(BaseView):
         elif col == 2:
             orderby = "ore_production"
         elif col == 3:
-            orderby = "hydrocarbon_production"
+            orderby = "hydro_production"
         elif col == 4:
             orderby = "energy_consumption/(1.0+energy_production)"
         elif col == 5:
             orderby = "mood"
 
-        if self.request.GET.get("r", "") != "":
+        if self.request.GET.get("r","") != "":
             reversed = not reversed
         else:
             content.Parse("r" + str(col))
@@ -49,13 +49,13 @@ class View(BaseView):
 
         query = "SELECT t.id, name, galaxy, sector, planet," + \
                 "ore, ore_production, ore_capacity," + \
-                "hydrocarbon, hydrocarbon_production, hydrocarbon_capacity," + \
+                "hydro, hydro_production, hydro_capacity," + \
                 "workers-workers_busy, workers_capacity," + \
                 "energy_production - energy_consumption, energy_capacity," + \
                 "floor, floor_occupied," + \
                 "space, space_occupied," + \
                 "commanderid, (SELECT name FROM gm_commanders WHERE id = t.commanderid) AS commandername," + \
-                "mod_production_ore, mod_production_hydrocarbon, workers, t.soldiers, soldiers_capacity," + \
+                "mod_production_ore, mod_production_hydro, workers, t.soldiers, soldiers_capacity," + \
                 "t.scientists, scientists_capacity, workers_for_maintenance, planet_floor, mood," + \
                 "energy, mod_production_energy, upkeep, energy_consumption," + \
                 " (SELECT int4(COALESCE(sum(scientists), 0)) FROM gm_planet_trainings WHERE planetid=t.id) AS scientists_training," + \
@@ -65,11 +65,11 @@ class View(BaseView):
                 " WHERE planet_floor > 0 AND planet_space > 0 AND ownerid="+str(self.userId)+ \
                 " ORDER BY "+orderby
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
         
         list = []
         content.AssignValue("page_planets", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -99,20 +99,20 @@ class View(BaseView):
             else:
                 item["normal_ore"] = True
 
-            # hydrocarbon
-            item["hydrocarbon"] = row[8]
-            item["hydrocarbon_production"] = row[9]
-            item["hydrocarbon_capacity"] = row[10]
+            # hydro
+            item["hydro"] = row[8]
+            item["hydro_production"] = row[9]
+            item["hydro_capacity"] = row[10]
 
-            # compute hydrocarbon level : hydrocarbon / capacity
-            hydrocarbon_level = self.getpercent(row[8], row[10], 10)
+            # compute hydro level : hydro / capacity
+            hydro_level = self.getpercent(row[8], row[10], 10)
 
-            if hydrocarbon_level >= 90:
-                item["high_hydrocarbon"] = True
-            elif hydrocarbon_level >= 70:
-                item["medium_hydrocarbon"] = True
+            if hydro_level >= 90:
+                item["high_hydro"] = True
+            elif hydro_level >= 70:
+                item["medium_hydro"] = True
             else:
-                item["normal_hydrocarbon"] = True
+                item["normal_hydro"] = True
 
             # energy
             item["energy"] = row[31]
@@ -204,9 +204,9 @@ class View(BaseView):
                 item["medium_ore_production"] = True
 
             if row[22] >= 0 and row[23] >= row[28]:
-                item["normal_hydrocarbon_production"] = True
+                item["normal_hydro_production"] = True
             else:
-                item["medium_hydrocarbon_production"] = True
+                item["medium_hydro_production"] = True
 
             item["upkeep_credits"] = row[33]
             item["upkeep_workers"] = row[28]

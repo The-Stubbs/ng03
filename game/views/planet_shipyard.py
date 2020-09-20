@@ -14,7 +14,7 @@ class View(BaseView):
 
         self.showHeader = True
 
-        Action = request.GET.get("a", "").lower()
+        Action = request.GET.get("a","").lower()
 
         # retrieve which page to display
         self.ShipFilter = ToInt(request.GET.get("f", -1), -1)
@@ -38,7 +38,7 @@ class View(BaseView):
 
         self.RetrieveData()
 
-        if request.GET.get("recycle", "") != "":
+        if request.GET.get("recycle","") != "":
             return self.ListRecycleShips()
         else:
             return self.ListShips()
@@ -47,19 +47,19 @@ class View(BaseView):
     def RetrieveData(self):
         
         # Retrieve recordset of current planet
-        query = "SELECT ore_capacity, hydrocarbon_capacity, energy_capacity, workers_capacity" + \
+        query = "SELECT ore_capacity, hydro_capacity, energy_capacity, workers_capacity" + \
                 " FROM vw_gm_planets WHERE id="+str(self.currentPlanetId)
         self.oPlanet = dbRow(query)
 
     def displayQueue(self, content, planetid):
         # list queued ships and ships under construction
 
-        query = "SELECT id, shipid, remaining_time, quantity, end_time, recycle, required_shipid, int4(cost_ore*internal_profile_get_ore_recycling_coeff(ownerid)), int4(cost_hydrocarbon*internal_profile_get_hydro_recycling_coeff(ownerid)), cost_ore, cost_hydrocarbon, cost_energy, crew" + \
+        query = "SELECT id, shipid, remaining_time, quantity, end_time, recycle, required_shipid, int4(cost_ore*internal_profile_get_ore_recycling_coeff(ownerid)), int4(cost_hydro*internal_profile_get_hydro_recycling_coeff(ownerid)), cost_ore, cost_hydro, cost_energy, crew" + \
                 " FROM vw_gm_planet_ship_pendings" + \
                 " WHERE planetid=" + str(planetid) + \
                 " ORDER BY start_time, shipid"
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         buildingcount = 0
         queuecount = 0
@@ -67,8 +67,8 @@ class View(BaseView):
         queues = []
         underconstructions = []
 
-        if oRss:
-            for row in oRss:
+        if rows:
+            for row in rows:
                 item = {}
             
                 item["queueid"] = row[0]
@@ -84,12 +84,12 @@ class View(BaseView):
     
                 if row[5]:
                     item["ore"] = row[3]*row[7]
-                    item["hydrocarbon"] = row[3]*row[8]
+                    item["hydro"] = row[3]*row[8]
                     item["energy"] = 0
                     item["crew"] = 0
                 else:
                     item["ore"] = row[3]*row[9]
-                    item["hydrocarbon"] = row[3]*row[10]
+                    item["hydro"] = row[3]*row[10]
                     item["energy"] = row[3]*row[11]
                     item["crew"] = row[3]*row[12]
     
@@ -120,7 +120,7 @@ class View(BaseView):
     def ListShips(self):
 
         # list ships that can be built on the planet
-        query = "SELECT id, category, name, cost_ore, cost_hydrocarbon, cost_energy, workers, crew, capacity," + \
+        query = "SELECT id, category, name, cost_ore, cost_hydro, cost_energy, workers, crew, capacity," + \
                 " construction_time, hull, shield, weapon_power, weapon_ammo, weapon_tracking_speed, weapon_turrets, signature, speed," + \
                 " handling, buildingid, recycler_output, droppods, long_distance_capacity, quantity, buildings_requirements_met, research_requirements_met," + \
                 " required_shipid, required_ship_count, COALESCE(new_shipid, id) AS shipid, cost_prestige, upkeep, required_vortex_strength, mod_leadership" + \
@@ -155,7 +155,7 @@ class View(BaseView):
         categories = []
 
         count = 0
-        for row in oRss:
+        for row in rows:
             if (row["quantity"] > 0) or row["research_requirements_met"]:
                 CatId = row["category"]
 
@@ -186,7 +186,7 @@ class View(BaseView):
                     if row["cost_prestige"] > self.userInfo["prestige_points"]: ship["required_pp_not_enough"] = True
 
                 ship["ore"] = row["cost_ore"]
-                ship["hydrocarbon"] = row["cost_hydrocarbon"]
+                ship["hydro"] = row["cost_hydro"]
                 ship["energy"] = row["cost_energy"]
                 ship["workers"] = row["workers"]
                 ship["crew"] = row["crew"]
@@ -227,8 +227,8 @@ class View(BaseView):
                         ship["not_enough_ore"] = True
                         notenoughresources = True
                     
-                    if row["cost_hydrocarbon"] > self.oPlanet[1]:
-                        ship["not_enough_hydrocarbon"] = True
+                    if row["cost_hydro"] > self.oPlanet[1]:
+                        ship["not_enough_hydro"] = True
                         notenoughresources = True
                     
                     if row["cost_energy"] > self.oPlanet[2]:
@@ -280,7 +280,7 @@ class View(BaseView):
         self.selected_menu = "shipyard_recycle"
 
         # list ships that are on the planet
-        query = "SELECT id, category, name, int4(cost_ore * internal_profile_get_ore_recycling_coeff(planet_ownerid)) AS cost_ore, int4(cost_hydrocarbon * internal_profile_get_hydro_recycling_coeff(planet_ownerid)) AS cost_hydrocarbon, cost_credits, workers, crew, capacity," + \
+        query = "SELECT id, category, name, int4(cost_ore * internal_profile_get_ore_recycling_coeff(planet_ownerid)) AS cost_ore, int4(cost_hydro * internal_profile_get_hydro_recycling_coeff(planet_ownerid)) AS cost_hydro, cost_credits, workers, crew, capacity," + \
                 " int4(static_planet_ship_recycling_coeff() * construction_time) as construction_time, hull, shield, weapon_power, weapon_ammo, weapon_tracking_speed, weapon_turrets, signature, speed," + \
                 " handling, buildingid, recycler_output, droppods, long_distance_capacity, quantity, true, true," + \
                 " NULL, 0, COALESCE(new_shipid, id) AS shipid" + \
@@ -305,7 +305,7 @@ class View(BaseView):
         categories = []
 
         count = 0
-        for row in oRss:
+        for row in rows:
             CatId = row["category"]
 
             if CatId != lastCategory:
@@ -323,7 +323,7 @@ class View(BaseView):
             ship["name"] = getShipLabel(row["shipid"])
 
             ship["ore"] = row["cost_ore"]
-            ship["hydrocarbon"] = row["cost_hydrocarbon"]
+            ship["hydro"] = row["cost_hydro"]
             ship["credits"] = row["cost_credits"]
             ship["workers"] = row["workers"]
             ship["crew"] = row["crew"]
@@ -403,9 +403,9 @@ class View(BaseView):
         return HttpResponseRedirect("/game/shipyard/?recycle=1")
 
     def CancelQueue(self, QueueId):
-        dbExecuteRetryNoRow("SELECT user_planet_ship_cancel(" + str(self.currentPlanetId) + ", " + str(QueueId) + ")")
+        dbExecuteRetryNoRow("SELECT user_planet_ship_cancel(" + str(self.currentPlanetId) + "," + str(QueueId) + ")")
         
-        if self.request.GET.get("recycle", "") != "":
+        if self.request.GET.get("recycle","") != "":
             return HttpResponseRedirect("/game/shipyard/?recycle=1")
         else:
             return HttpResponseRedirect("/game/shipyard/?f="+str(self.ShipFilter))

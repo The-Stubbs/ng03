@@ -27,7 +27,7 @@ class View(BaseView):
             if not self.canGiveMoney(): return -1
         
             credits = ToInt(request.POST.get("credits"), 0)
-            description = self.request.POST.get("description", "").strip()
+            description = self.request.POST.get("description","").strip()
         
             if credits > 0:
 

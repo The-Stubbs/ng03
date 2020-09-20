@@ -41,7 +41,7 @@ class View(BaseView):
         # retrieve fleet name, size, position, destination
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
-                " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers," + \
+                " cargo_capacity, cargo_ore, cargo_hydro, cargo_scientists, cargo_soldiers, cargo_workers," + \
                 " action " + \
                 " FROM vw_gm_fleets" + \
                 " WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
@@ -63,7 +63,7 @@ class View(BaseView):
 
         content.AssignValue("fleet_capacity", row[18])
         content.AssignValue("available_ore", row[19])
-        content.AssignValue("available_hydrocarbon", row[20])
+        content.AssignValue("available_hydro", row[20])
         content.AssignValue("available_scientists", row[21])
         content.AssignValue("available_soldiers", row[22])
         content.AssignValue("available_workers", row[23])
@@ -79,11 +79,11 @@ class View(BaseView):
                 " WHERE fleetid=" + str(fleetid) + \
                 " ORDER BY dt_ships.category, dt_ships.label"
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         list = []
         content.AssignValue("ships", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -100,7 +100,7 @@ class View(BaseView):
         if self.fleet_split_error != self.e_no_error:
             content.Parse("error"+str(self.fleet_split_error))
             item["t_ore"] = self.request.POST.get("load_ore")
-            item["t_hydrocarbon"] = self.request.POST.get("load_hydrocarbon")
+            item["t_hydro"] = self.request.POST.get("load_hydro")
             item["t_scientists"] = self.request.POST.get("load_scientists")
             item["t_workers"] = self.request.POST.get("load_workers")
             item["t_soldiers"] = self.request.POST.get("load_soldiers")
@@ -128,7 +128,7 @@ class View(BaseView):
         #
         # retrieve 'source' fleet cargo and action
         #
-        query = " SELECT id, action, cargo_ore, cargo_hydrocarbon, " + \
+        query = " SELECT id, action, cargo_ore, cargo_hydro, " + \
                 " cargo_scientists, cargo_soldiers, cargo_workers" + \
                 " FROM vw_gm_fleets" + \
                 " WHERE ownerid="+str(self.userId)+" AND id="+str(fleetid)
@@ -139,7 +139,7 @@ class View(BaseView):
             return
 
         ore = min( ToInt(self.request.POST.get("load_ore"), 0), row[2] )
-        hydrocarbon = min( ToInt(self.request.POST.get("load_hydrocarbon"), 0), row[3] )
+        hydro = min( ToInt(self.request.POST.get("load_hydro"), 0), row[3] )
         scientists = min( ToInt(self.request.POST.get("load_scientists"), 0), row[4] )
         soldiers = min( ToInt(self.request.POST.get("load_soldiers"), 0), row[5] )
         workers = min( ToInt(self.request.POST.get("load_workers"), 0), row[6] )
@@ -211,8 +211,8 @@ class View(BaseView):
         ore = min( ore, newload)
         newload = newload - ore
 
-        hydrocarbon = min( hydrocarbon, newload)
-        newload = newload - hydrocarbon
+        hydro = min( hydro, newload)
+        newload = newload - hydro
 
         scientists = min( scientists, newload)
         newload = newload - scientists
@@ -223,19 +223,19 @@ class View(BaseView):
         workers = min( workers, newload)
         newload = newload - workers
 
-        if ore != 0 or hydrocarbon != 0 or scientists != 0 or soldiers != 0 or workers != 0:
+        if ore != 0 or hydro != 0 or scientists != 0 or soldiers != 0 or workers != 0:
             # a/ put the resources to the new fleet
             dbExecute("UPDATE gm_fleets SET" + \
-                        " cargo_ore="+str(ore)+", cargo_hydrocarbon="+str(hydrocarbon)+", " + \
-                        " cargo_scientists="+str(scientists)+", cargo_soldiers="+str(soldiers)+", " + \
+                        " cargo_ore="+str(ore)+", cargo_hydro="+str(hydro)+"," + \
+                        " cargo_scientists="+str(scientists)+", cargo_soldiers="+str(soldiers)+"," + \
                         " cargo_workers="+str(workers) + \
                         " WHERE id =" + str(newfleetid) + " AND ownerid =" + str(self.userId))
 
             # b/ remove the resources from the 'source# fleet
             dbExecute("UPDATE gm_fleets SET" + \
-                        " cargo_ore=cargo_ore-"+str(ore)+", cargo_hydrocarbon=cargo_hydrocarbon-"+str(hydrocarbon)+", " + \
-                        " cargo_scientists=cargo_scientists-"+str(scientists)+", " + \
-                        " cargo_soldiers=cargo_soldiers-"+str(soldiers)+", " + \
+                        " cargo_ore=cargo_ore-"+str(ore)+", cargo_hydro=cargo_hydro-"+str(hydro)+"," + \
+                        " cargo_scientists=cargo_scientists-"+str(scientists)+"," + \
+                        " cargo_soldiers=cargo_soldiers-"+str(soldiers)+"," + \
                         " cargo_workers=cargo_workers-"+str(workers) + \
                         " WHERE id =" + str(fleetid) + " AND ownerid =" + str(self.userId))
 

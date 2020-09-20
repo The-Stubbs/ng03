@@ -5,26 +5,31 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    template_name = "empire-overview"
+    selected_menu = "overview"
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "overview"
-        
-        content = GetTemplate(request, "overview")
+        return super().dispatch(request, *args, **kwargs)
+
+    #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
         
         # --- alliance data
         
         if self.allianceId:
             query = "SELECT announce, tag, name, defcon FROM gm_alliances WHERE id=" + str(self.allianceId)
             alliance = dbDictRow(query)
-            content.AssignValue("alliance", alliance)
+            data["alliance"] = alliance
 
         # --- empire data
         
         empire = {}
-        content.AssignValue("empire", empire)
+        data["empire"] = empire
         
         empire["date"] = timezone.now()
         empire["name"] = self.userInfo["login"]
@@ -50,7 +55,7 @@ class View(BaseView):
         empire["score_battle"] = row[0]
         empire["score_battle_rank"] = row[1]
         
-        query = "SELECT count(1), sum(ore_production), sum(hydrocarbon_production), " + \
+        query = "SELECT count(1), sum(ore_production), sum(hydro_production), " + \
                 " int4(sum(workers)), int4(sum(scientists)), int4(sum(soldiers)), now()" + \
                 " FROM vw_gm_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.userId)
         row = dbRow(query)
@@ -58,15 +63,15 @@ class View(BaseView):
         empire["prod_ore"] = row[1]
         empire["prod_hydro"] = row[2]
 
-        oRs2 = dbRow("SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0) FROM gm_fleets WHERE ownerid=" + str(self.userId))
-        empire["workers"] = row[3] + oRs2[0]
-        empire["scientists"] = row[4] + oRs2[1]
-        empire["soldiers"] = row[5] + oRs2[2]
+        row2 = dbRow("SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0) FROM gm_fleets WHERE ownerid=" + str(self.userId))
+        empire["workers"] = row[3] + row2[0]
+        empire["scientists"] = row[4] + row2[1]
+        empire["soldiers"] = row[5] + row2[2]
 
         # --- moving fleets
         
         fleets = []
-        content.AssignValue("fleets", fleets)
+        data["fleets"] = fleets
         
         query =	"SELECT f.id, f.name, f.signature, f.ownerid, " + \
                 "COALESCE((( SELECT vw_gm_profile_relations.relation FROM vw_gm_profile_relations WHERE vw_gm_profile_relations.user1 = gm_profiles.id AND vw_gm_profile_relations.user2 = f.ownerid)), -3) AS owner_relation, f.owner_name," + \
@@ -80,10 +85,9 @@ class View(BaseView):
                 " FROM gm_profiles, vw_gm_fleets f " + \
                 " WHERE gm_profiles.id=" + str(self.userId) + " AND (""action"" = 1 OR ""action"" = -1) AND (ownerid=" + str(self.userId) + " OR (destplanetid IS NOT NULL AND destplanetid IN (SELECT id FROM gm_planets WHERE ownerid=" + str(self.userId) + ")))" + \
                 " ORDER BY ownerid, COALESCE(remaining_time, 0)"
-        oRss = dbRows(query)
-        
-        if oRss:
-            for row in oRss:
+        rows = dbRows(query)
+        if rows:
+            for row in rows:
                 
                 extRadarStrength = row[23]
                 incRadarStrength = row[24]
@@ -146,11 +150,10 @@ class View(BaseView):
                 "	 JOIN dt_researches ON dt_researches.id = researchid" + \
                 " WHERE userid=" + str(self.userId) + " LIMIT 1"
         row = dbRow(query)
-        
         if row:
             
             research = {}
-            content.AssignValue("research", research)
+            data["research"] = research
             
             research["id"] = row[0]
             research["label"] = row[2]
@@ -159,7 +162,7 @@ class View(BaseView):
         # --- current building constructions
         
         constructionyards = []
-        content.AssignValue("constructionyards", constructionyards)
+        data["constructionyards"] = constructionyards
         
         query = "SELECT p.id, p.name, p.galaxy, p.sector, p.planet, b.buildingid, b.remaining_time, destroying, dt_buildings.label" + \
                 " FROM gm_planets AS p" + \
@@ -167,10 +170,10 @@ class View(BaseView):
                 "	 LEFT JOIN dt_buildings ON dt_buildings.id = b.buildingid" + \
                 " WHERE p.ownerid=" + str(self.userId) + \
                 " ORDER BY p.id, destroying, remaining_time DESC"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         lastplanet = -1
-        for row in oRss:
+        for row in rows:
             
             if row[0] != lastplanet:
                 lastplanet = row[0]
@@ -196,7 +199,7 @@ class View(BaseView):
         # --- current ship constructions
         
         shipyards = []
-        content.AssignValue("shipyards", shipyards)
+        data["shipyards"] = shipyards
         
         query = "SELECT p.id, p.name, p.galaxy, p.sector, p.planet, s.shipid, s.remaining_time, s.recycle, p.shipyard_next_continue IS NOT NULL, p.shipyard_suspended," + \
                 " (SELECT shipid FROM gm_planet_ship_pendings WHERE planetid=p.id ORDER BY start_time LIMIT 1)" + \
@@ -204,9 +207,9 @@ class View(BaseView):
                 "	 LEFT JOIN vw_gm_planet_ship_pendings AS s ON (p.id=s.planetid AND p.ownerid=s.ownerid AND s.end_time IS NOT NULL)" + \
                 " WHERE (s.recycle OR EXISTS(SELECT 1 FROM gm_planet_buildings WHERE (buildingid = 105 OR buildingid = 205) AND planetid=p.id)) AND p.ownerid=" + str(self.userId) + \
                 " ORDER BY p.id, s.remaining_time DESC"
-        oRss = dbRows(query)
-        if oRss:
-            for row in oRss:
+        rows = dbRows(query)
+        if rows:
+            for row in rows:
                 
                 planet = {}
                 shipyards.append(planet)
@@ -239,7 +242,4 @@ class View(BaseView):
 
                     ship["label"] = getShipLabel(row[10])
 
-                else:
-                    planet["none"] = True
-
-        return self.display(content)
+                else: planet["none"] = True

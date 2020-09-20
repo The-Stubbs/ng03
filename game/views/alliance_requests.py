@@ -24,14 +24,14 @@ class View(BaseView):
     
         if action == "accept":
         
-            id = request.GET.get("id", "")
+            id = request.GET.get("id","")
 
             row = dbRow("SELECT user_alliance_money_request_accept(" + str(self.userId) + "," + sqlStr(id) + ")")
             return row[0]
             
         elif action == "deny":
         
-            id = request.GET.get("id", "")
+            id = request.GET.get("id","")
             
             row = dbRow("SELECT user_alliance_money_request_decline(" + str(self.userId) + "," + sqlStr(id) + ")")
             return row[0]
@@ -44,7 +44,7 @@ class View(BaseView):
         elif action == "request":
         
             credits = ToInt(request.POST.get("credits"), 0)
-            description = request.POST.get("description", "").strip()
+            description = request.POST.get("description","").strip()
             
             row = dbRow("SELECT user_alliance_money_request_create(" + str(self.userId) + "," + str(credits) + "," + sqlStr(description) + ")")
             return row[0]

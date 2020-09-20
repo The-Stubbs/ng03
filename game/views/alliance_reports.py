@@ -40,7 +40,7 @@ class View(BaseView):
                 " planetid, planet_name, galaxy, sector, planet," + \
                 " researchid, 0, read_date," + \
                 " planet_relation, planet_ownername," + \
-                " ore, hydrocarbon, credits, scientists, soldiers, workers, username," + \
+                " ore, hydro, credits, scientists, soldiers, workers, username," + \
                 " alliance_tag, alliance_name," + \
                 " invasionid, spyid, spy_key, description, ownerid, invited_username, login, buildingid" + \
                 " FROM vw_gm_alliance_reports" + \
@@ -71,7 +71,7 @@ class View(BaseView):
                     report["p"] = row[10]
                     report["researchid"] = row[11]
                     report["ore"] = row[16]
-                    report["hydrocarbon"] = row[17]
+                    report["hydro"] = row[17]
                     report["credits"] = row[18]
                     report["scientists"] = row[19]
                     report["soldiers"] = row[20]

@@ -25,7 +25,7 @@ class View(BaseView):
 
         if action == "save":
         
-            name = request.POST.get("name", "").strip()
+            name = request.POST.get("name","").strip()
 
             row = dbRow("SELECT user_alliance_invitation_create(" + str(self.userId) + "," + sqlStr(self.username) + ")")
             return row[0]

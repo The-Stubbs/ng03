@@ -29,7 +29,7 @@ class View(BaseMixin, View):
             return HttpResponseRedirect("/")
 
         # check to unlock holidays mode
-        action = request.POST.get("unlock", "")
+        action = request.POST.get("unlock","")
 
         if action != "" and row[1] < 0:
             dbRow("SELECT user_profile_stop_holidays("+str(self.userId)+")")

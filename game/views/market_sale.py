@@ -25,7 +25,7 @@ class View(BaseView):
 
         content = self.loadTemplate("market-sell")
 
-        planet = ToInt(self.request.GET.get("planet", "").strip(), 0)
+        planet = ToInt(self.request.GET.get("planet","").strip(), 0)
         if planet != 0:
             planet_query = " AND v.id=" + str(planet)
             content.AssignValue("get_planet", planet)
@@ -33,23 +33,23 @@ class View(BaseView):
 
         self.request.session["details"] = "list planets"
 
-        # retrieve ore, hydrocarbon, sales quantities on the planet
+        # retrieve ore, hydro, sales quantities on the planet
 
-        query = "SELECT id, name, galaxy, sector, planet, ore, hydrocarbon, ore_capacity, hydrocarbon_capacity, planet_floor," + \
-                " ore_production, hydrocarbon_production," + \
+        query = "SELECT id, name, galaxy, sector, planet, ore, hydro, ore_capacity, hydro_capacity, planet_floor," + \
+                " ore_production, hydro_production," + \
                 " (tool_compute_market_price((internal_profile_get_resource_price(0, galaxy)).sell_ore, planet_stock_ore))," + \
-                " (tool_compute_market_price((internal_profile_get_resource_price(0, galaxy)).sell_hydrocarbon, planet_stock_hydrocarbon))" + \
+                " (tool_compute_market_price((internal_profile_get_resource_price(0, galaxy)).sell_hydro, planet_stock_hydro))" + \
                 " FROM vw_gm_planets AS v" + \
                 " WHERE floor > 0 AND v.ownerid="+str(self.userId) + planet_query + \
                 " ORDER BY v.id"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         total = 0
         count = 0
         i = 1
         list = []
         content.AssignValue("m_planets", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -67,26 +67,26 @@ class View(BaseView):
             item["p"] = row[4]
 
             item["planet_ore"] = row[5]
-            item["planet_hydrocarbon"] = row[6]
+            item["planet_hydro"] = row[6]
 
             item["planet_ore_capacity"] = row[7]
-            item["planet_hydrocarbon_capacity"] = row[8]
+            item["planet_hydro_capacity"] = row[8]
 
             item["planet_ore_production"] = row[10]
-            item["planet_hydrocarbon_production"] = row[11]
+            item["planet_hydro_production"] = row[11]
 
             item["ore_price"] = row[12]
-            item["hydrocarbon_price"] = row[13]
+            item["hydro_price"] = row[13]
 
-            item["ore_price2"] = str(row[12]).replace( ",", ".")
-            item["hydrocarbon_price2"] = str(row[13]).replace(",", ".")
+            item["ore_price2"] = str(row[12]).replace( ",",".")
+            item["hydro_price2"] = str(row[13]).replace(",",".")
 
-            # if ore/hydrocarbon quantity reach their capacity in less than 4 hours
+            # if ore/hydro quantity reach their capacity in less than 4 hours
             if row[5] > row[7]-4*row[10]: item["high_ore_capacity"] = True
-            if row[6] > row[8]-4*row[11]: item["high_hydrocarbon_capacity"] = True
+            if row[6] > row[8]-4*row[11]: item["high_hydro_capacity"] = True
 
             item["ore_max"] = min(10000, int(row[5]/1000))
-            item["hydrocarbon_max"] = min(10000, int(row[6]/1000))
+            item["hydro_max"] = min(10000, int(row[6]/1000))
 
             item["selling_price"] = 0
 
@@ -127,12 +127,12 @@ class View(BaseView):
         for i in planetsArray:
             planetid = i[0]
 
-            # retrieve ore + hydrocarbon quantities
+            # retrieve ore + hydro quantities
             ore = ToInt(self.request.POST.get("o" + str(planetid)), 0)
-            hydrocarbon = ToInt(self.request.POST.get("h" + str(planetid)), 0)
+            hydro = ToInt(self.request.POST.get("h" + str(planetid)), 0)
 
-            if ore > 0 or hydrocarbon > 0:
-                query = "SELECT user_planet_sell_resources(" + str(self.userId) + "," + str(planetid) + "," + str(ore*1000) + "," + str(hydrocarbon*1000) + ")"
+            if ore > 0 or hydro > 0:
+                query = "SELECT user_planet_sell_resources(" + str(self.userId) + "," + str(planetid) + "," + str(ore*1000) + "," + str(hydro*1000) + ")"
                 self.request.session["details"] = query
                 row = dbRow(query)
                 self.request.session["details"] = "done:"+query

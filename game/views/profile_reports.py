@@ -12,7 +12,7 @@ class View(BaseView):
         
         self.selected_menu = "gm_profile_reports"
 
-        cat = ToInt(request.GET.get("cat", ""), 0)
+        cat = ToInt(request.GET.get("cat",""), 0)
 
         return self.display_mails(cat)
 
@@ -25,7 +25,7 @@ class View(BaseView):
                 " planetid, planet_name, galaxy, sector, planet," + \
                 " researchid, 0, read_date," + \
                 " planet_relation, planet_ownername," + \
-                " ore, hydrocarbon, credits, scientists, soldiers, workers, username," + \
+                " ore, hydro, credits, scientists, soldiers, workers, username," + \
                 " alliance_tag, alliance_name," + \
                 " invasionid, spyid, spy_key, description, buildingid," + \
                 " upkeep_commanders, upkeep_planets, upkeep_scientists, upkeep_ships, upkeep_ships_in_position, upkeep_ships_parked, upkeep_soldiers," + \
@@ -43,7 +43,7 @@ class View(BaseView):
 
         content.AssignValue("ownerid", self.userId)
         
-        oRss = dbRows(query)
+        rows = dbRows(query)
         content.Parse("tabnav_"+str(cat)+"00_selected")
         if oRss == None: content.Parse("noreports")
         else:
@@ -51,7 +51,7 @@ class View(BaseView):
             # List the gm_profile_reports returned by the query
             #
             gm_profile_reports = []
-            for row in oRss:
+            for row in rows:
 
                 reportType = row[0]*100+row[1]
 
@@ -86,7 +86,7 @@ class View(BaseView):
                     if row[13] == None: report["new"] = True
 
                     report["ore"] = row[16]
-                    report["hydrocarbon"] = row[17]
+                    report["hydro"] = row[17]
                     report["credits"] = row[18]
 
                     report["scientists"] = row[19]
@@ -121,15 +121,15 @@ class View(BaseView):
             #
             # List how many new gm_profile_reports there are for each category
             #
-            query = "SELECT r.type, int4(COUNT(1)) " + \
+            query = "SELECT r.type, int4(COUNT(1))" + \
                     " FROM gm_profile_reports AS r" + \
                     " WHERE datetime <= now()" + \
                     " GROUP BY r.type, r.ownerid, r.read_date" + \
                     " HAVING r.ownerid = " + str(self.userId) + " AND read_date is null"
-            oRss = dbRows(query)
+            rows = dbRows(query)
             
             total_newreports = 0
-            for row in oRss:
+            for row in rows:
                 content.AssignValue("tabnav_"+str(row[0])+"00_newreports", row[1])
                 content.Parse("tabnav_"+str(row[0])+"00_new")
 
@@ -145,7 +145,7 @@ class View(BaseView):
                     dbExecute("UPDATE gm_profile_reports SET read_date = now() WHERE ownerid = " + str(self.userId) + " AND type = "+str(cat)+ " AND read_date is null AND datetime <= now()")
 
                 # flag all gm_profile_reports as read
-                if self.request.GET.get("cat", "") == "0":
+                if self.request.GET.get("cat","") == "0":
                     dbExecute("UPDATE gm_profile_reports SET read_date = now() WHERE ownerid = " + str(self.userId) + " AND read_date is null AND datetime <= now()")
             
         content.Parse("tabnav_000")

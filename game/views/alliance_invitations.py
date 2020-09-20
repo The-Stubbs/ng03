@@ -24,7 +24,7 @@ class View(BaseView):
     
         if action == "accept":
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_invitation_accept(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]

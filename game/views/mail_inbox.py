@@ -21,21 +21,21 @@ class View(BaseView):
         self.sendmail_status = ""
 
         # new email
-        if request.POST.get("compose", "") != "":
+        if request.POST.get("compose","") != "":
             self.compose = True
-        elif request.GET.get("to", "") != "":
-            self.mailto = request.GET.get("to", "")
-            self.mailsubject = request.GET.get("subject", "")
+        elif request.GET.get("to","") != "":
+            self.mailto = request.GET.get("to","")
+            self.mailsubject = request.GET.get("subject","")
             self.compose = True
-        elif request.GET.get("a", "") == "new":
+        elif request.GET.get("a","") == "new":
 
-            self.mailto = request.GET.get("b", "")
-            if self.mailto == "": self.mailto = request.GET.get("to", "")
-            self.mailsubject = request.GET.get("subject", "")
+            self.mailto = request.GET.get("b","")
+            if self.mailto == "": self.mailto = request.GET.get("to","")
+            self.mailsubject = request.GET.get("subject","")
             self.compose = True
 
         # reply
-        elif request.GET.get("a", "") == "reply":
+        elif request.GET.get("a","") == "reply":
 
             Id = ToInt(request.GET.get("mailid"), 0)
 
@@ -59,13 +59,13 @@ class View(BaseView):
                 self.compose = True
 
         # send email
-        elif request.POST.get("sendmail", "") != "" and not self.IsImpersonating():
+        elif request.POST.get("sendmail","") != "" and not self.IsImpersonating():
 
             self.compose = True
 
-            self.mailto = request.POST.get("to", "").strip()
-            self.mailsubject = request.POST.get("subject", "").strip()
-            self.mailbody = request.POST.get("message", "").strip()
+            self.mailto = request.POST.get("to","").strip()
+            self.mailsubject = request.POST.get("subject","").strip()
+            self.mailbody = request.POST.get("message","").strip()
 
             if ToInt(request.POST.get("sendcredits"), 0) == 1:
                 self.moneyamount = ToInt(request.POST.get("amount"), 0)
@@ -110,7 +110,7 @@ class View(BaseView):
                         self.moneyamount = 0
 
         # delete selected emails
-        elif request.POST.get("delete", "") != "":
+        elif request.POST.get("delete","") != "":
 
             # build the query of which mails to delete
             query = "False"
@@ -121,12 +121,12 @@ class View(BaseView):
             if query != "False":
                 dbExecute("UPDATE gm_mails SET deleted=True WHERE (" + query + ") AND ownerid = " + str(self.userId))
 
-        if request.GET.get("a", "") == "ignore":
+        if request.GET.get("a","") == "ignore":
             dbRow("SELECT user_mail_ignore(" + str(self.userId) + "," + sqlStr(request.GET.get("user")) + ")")
 
             return self.return_ignored_users
 
-        if request.GET.get("a", "") == "unignore":
+        if request.GET.get("a","") == "unignore":
             dbExecute("DELETE FROM gm_mail_ignorees WHERE userid=" + str(self.userId) + " AND ignored_userid=(SELECT id FROM gm_profiles WHERE lower(login)=lower(" + sqlStr(request.GET.get("user")) + "))")
 
             return self.return_ignored_users()
@@ -213,12 +213,12 @@ class View(BaseView):
                 " WHERE " + search_cond + " ownerid = " + str(self.userId) + \
                 " ORDER BY datetime DESC, gm_mails.id DESC" + \
                 " OFFSET " + str(offset*displayed) + " LIMIT "+str(displayed)
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         i = 0
         list = []
         content.AssignValue("mails", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -231,7 +231,7 @@ class View(BaseView):
                 item["bodybb"] = row[2]
                 item["bbcode"] = True
             else:
-                item["body"] = row[2].replace("\n", "<br/>")
+                item["body"] = row[2].replace("\n","<br/>")
                 item["html"] = True
 
             item["mailid"] = row[4]
@@ -343,12 +343,12 @@ class View(BaseView):
 
         query = query + " OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         i = 0
         list = []
         content.AssignValue("mails", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -369,7 +369,7 @@ class View(BaseView):
                 item["bodybb"] = row[5]
                 item["bbcode"] = True
             else:
-                item["body"] = row[5].replace("\n", "<br/>")
+                item["body"] = row[5].replace("\n","<br/>")
                 item["html"] = True
 
             item["mailid"] = row[0]
@@ -407,7 +407,7 @@ class View(BaseView):
         i = 0
         list = []
         content.AssignValue("ignorednations", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -429,7 +429,7 @@ class View(BaseView):
 
         oRss = dbRows("SELECT internal_profile_get_name(ignored_userid) FROM gm_mail_ignorees WHERE userid=" + userid)
         list = []
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -442,7 +442,7 @@ class View(BaseView):
     def quote_mail(self, body):
 
         self.sendmail_status=""
-        return body.replace("\n", "\n" + "> ") + "\n\n"
+        return body.replace("\n","\n" + "> ") + "\n\n"
 
     # fill combobox with previously sent to
     def display_compose_form(self, mailto, subject, body, credits):
@@ -457,7 +457,7 @@ class View(BaseView):
 
         list = []
         content.AssignValue("tos", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             

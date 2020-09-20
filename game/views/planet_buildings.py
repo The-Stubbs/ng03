@@ -17,7 +17,7 @@ class View(BaseView):
         dtBuildings()
         dtBuildingBuildingReqs()
         
-        Action = request.GET.get("a", "").lower()
+        Action = request.GET.get("a","").lower()
         BuildingId = ToInt(request.GET.get("b"), "")
         
         if BuildingId != "":
@@ -53,10 +53,10 @@ class View(BaseView):
 
     def RetrievePlanetInfo(self):
         # Retrieve recordset of current planet
-        query = "SELECT ore, hydrocarbon, workers-workers_busy, workers_capacity - workers, energy, " + \
+        query = "SELECT ore, hydro, workers-workers_busy, workers_capacity - workers, energy, " + \
                 " floor - floor_occupied, space - space_occupied," + \
-                " mod_production_ore, mod_production_hydrocarbon, mod_production_energy," + \
-                " ore_capacity, hydrocarbon_capacity," + \
+                " mod_production_ore, mod_production_hydro, mod_production_energy," + \
+                " ore_capacity, hydro_capacity," + \
                 " scientists, scientists_capacity, soldiers, soldiers_capacity, energy_production-energy_consumption" + \
                 " FROM vw_gm_planets" + \
                 " WHERE id="+str(self.currentPlanetId)
@@ -68,7 +68,7 @@ class View(BaseView):
         self.HydroBonus = row[8]
         self.EnergyBonus = row[9]
         self.pOre = row[0]
-        self.pHydrocarbon = row[1]
+        self.phydro = row[1]
         self.pWorkers = row[2]
         self.pVacantWorkers = row[3]
         self.pEnergy = row[4]
@@ -76,7 +76,7 @@ class View(BaseView):
         self.pSpace = row[6]
         self.pBonusEnergy = row[9]
         self.pOreCapacity = row[10]
-        self.pHydrocarbonCapacity = row[11]
+        self.phydroCapacity = row[11]
     
         self.pScientists = row[12]
         self.pScientistsCapacity = row[13]
@@ -137,8 +137,8 @@ class View(BaseView):
         # the population is less than the limit after the building destruction
         # 2/ if the building produces energy, check that there will be enough energy after
         # the building destruction
-        # 3/ if the building increases the capacity of ore or hydrocarbon, check that there is not
-        # too much ore/hydrocarbon
+        # 3/ if the building increases the capacity of ore or hydro, check that there is not
+        # too much ore/hydro
         for i in dtBuildings():
             if BuildingId == i[0]:
                 if (i[1] > 0) and (self.pVacantWorkers < i[1]):
@@ -159,7 +159,7 @@ class View(BaseView):
                     ret = True
                     break
     
-                if self.pHydrocarbon > self.pHydrocarbonCapacity-i[4]:
+                if self.phydro > self.phydroCapacity-i[4]:
                     ret = True
                     break
                     
@@ -183,8 +183,8 @@ class View(BaseView):
         underConstructionCount = row[0]
     
         # list buildings that can be built on the planet
-        query = "SELECT id, category, cost_prestige, cost_ore, cost_hydrocarbon, cost_energy, cost_credits, workers, floor, space," + \
-                "construction_maximum, quantity, build_status, construction_time, destroyable, '', production_ore, production_hydrocarbon, energy_production, buildings_requirements_met, destruction_time," + \
+        query = "SELECT id, category, cost_prestige, cost_ore, cost_hydro, cost_energy, cost_credits, workers, floor, space," + \
+                "construction_maximum, quantity, build_status, construction_time, destroyable, '', production_ore, production_hydro, energy_production, buildings_requirements_met, destruction_time," + \
                 "upkeep, energy_consumption, buildable" + \
                 " FROM vw_gm_planet_buildings" + \
                 " WHERE planetid=" + str(self.currentPlanetId) + " AND ((buildable AND research_requirements_met) or quantity > 0)"
@@ -199,7 +199,7 @@ class View(BaseView):
             
         categories = []
         index = 1
-        for row in oRss:
+        for row in rows:
             # if can be built or has some already built, display it
             if row[19] or row[11] > 0:
         
@@ -217,7 +217,7 @@ class View(BaseView):
                 building["name"] = getBuildingLabel(row[0])
         
                 building["ore"] = row[3]
-                building["hydrocarbon"] = row[4]
+                building["hydro"] = row[4]
                 building["energy"] = row[5]
                 building["credits"] = row[6]
                 building["workers"] = row[7]
@@ -311,8 +311,8 @@ class View(BaseView):
                         building["not_enough_ore"] = True
                         notenoughresources = True
                         
-                    if row[4] > 0 and row[4] > self.pHydrocarbon:
-                        building["not_enough_hydrocarbon"] = True
+                    if row[4] > 0 and row[4] > self.phydro:
+                        building["not_enough_hydro"] = True
                         notenoughresources = True
                     
                     if row[5] > 0 and row[5] > self.pEnergy:
@@ -366,10 +366,10 @@ class View(BaseView):
         return self.display(content)
     
     def StartBuilding(self, BuildingId):
-        row = dbRowRetry("SELECT user_planet_building_start(" + str(self.userId) + "," + str(self.currentPlanetId) + ", " + str(BuildingId) + ", false)")
+        row = dbRowRetry("SELECT user_planet_building_start(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + str(BuildingId) + ", false)")
         
     def CancelBuilding(self, BuildingId):
-        dbExecuteRetryNoRow("SELECT user_planet_building_cancel(" + str(self.userId) + "," + str(self.currentPlanetId) + ", " + str(BuildingId) + ")")
+        dbExecuteRetryNoRow("SELECT user_planet_building_cancel(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + str(BuildingId) + ")")
     
     def DestroyBuilding(self, BuildingId):
         dbExecuteRetryNoRow("SELECT user_planet_building_destroy(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + str(BuildingId) + ")")

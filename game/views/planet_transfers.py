@@ -46,9 +46,9 @@ class View(BaseView):
             query = "SELECT target_planetid, energy, enabled" + \
                     " FROM gm_planet_energy_transfers" + \
                     " WHERE planetid=" + str(self.currentPlanetId)
-            oRss = dbRows(query)
+            rows = dbRows(query)
             list = []
-            for row in oRss:
+            for row in rows:
                 item = {}
                 list.append(item)
                 
@@ -99,7 +99,7 @@ class View(BaseView):
                 "    INNER JOIN gm_planets n2 ON (t.target_planetid=n2.id)" + \
                 " WHERE planetid=" + str(self.currentPlanetId) + " OR target_planetid=" + str(self.currentPlanetId) + \
                 " ORDER BY not enabled, planetid, target_planetid"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         receiving = 0
         sending = 0
@@ -109,7 +109,7 @@ class View(BaseView):
         self.content.AssignValue("sents", sents)
         receiveds = []
         self.content.AssignValue("receiveds", receiveds)
-        for row in oRss:
+        for row in rows:
             item = {}
             
             item["energy"] = row[12]
@@ -137,12 +137,12 @@ class View(BaseView):
                 item["p"] = row[5]
                 receiveds.append(item)
 
-        self.content.AssignValue("planetid", "")
-        self.content.AssignValue("name", "")
-        self.content.AssignValue("rel", "")
-        self.content.AssignValue("g", "")
-        self.content.AssignValue("s", "")
-        self.content.AssignValue("p", "")
+        self.content.AssignValue("planetid","")
+        self.content.AssignValue("name","")
+        self.content.AssignValue("rel","")
+        self.content.AssignValue("g","")
+        self.content.AssignValue("s","")
+        self.content.AssignValue("p","")
         self.content.AssignValue("energy", 0)
         self.content.AssignValue("effective_energy", 0)
         self.content.AssignValue("loss", 0)

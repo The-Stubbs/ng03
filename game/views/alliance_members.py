@@ -81,7 +81,7 @@ class View(BaseView):
             orderby = "alliance_rank"
             reversed = False
 
-        if request.GET.get("r", "") != "":
+        if request.GET.get("r","") != "":
             reversed = not reversed
 
         if reversed: orderby = orderby + " DESC"

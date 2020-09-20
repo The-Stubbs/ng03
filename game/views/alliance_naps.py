@@ -26,7 +26,7 @@ class View(BaseView):
         
             if not self.hasRight("can_create_nap"): return -1
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_nap_offer_accept(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
@@ -35,7 +35,7 @@ class View(BaseView):
         
             if not self.hasRight("can_create_nap"): return -1
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_nap_offer_decline(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
@@ -44,7 +44,7 @@ class View(BaseView):
             
             if not self.hasRight("can_create_nap"): return -1
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_nap_offer_cancel(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
@@ -53,7 +53,7 @@ class View(BaseView):
             
             if not self.hasRight("can_create_nap") and not self.hasRight("can_break_nap"): return -1
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_nap_toggle_loc_sharing(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
@@ -62,7 +62,7 @@ class View(BaseView):
             
             if not self.hasRight("can_create_nap") and not self.hasRight("can_break_nap"): return -1
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_nap_toggle_radar_sharing(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
@@ -71,7 +71,7 @@ class View(BaseView):
             
             if not self.hasRight("can_break_nap"): return -1
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_nap_break(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
@@ -80,7 +80,7 @@ class View(BaseView):
             
             if not self.hasRight("can_create_nap"): return -1
             
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             hours = ToInt(request.POST.get("hours"), 24)
 
             row = dbRow("SELECT user_alliance_nap_offer_create(" + str(self.userId) + "," + sqlStr(tag) + "," + str(hours) + ")")
@@ -101,7 +101,7 @@ class View(BaseView):
             orderby = "created"
             reversed = True
 
-        if request.GET.get("r", "") != "":
+        if request.GET.get("r","") != "":
             reversed = not reversed
 
         if reversed: orderby = orderby + " DESC"
@@ -202,5 +202,5 @@ class View(BaseView):
 
         # --- request form data
         
-        data["tag"] = request.POST.get("tag", "").strip()
+        data["tag"] = request.POST.get("tag","").strip()
         data["hours"] = ToInt(request.POST.get("hours"), 24)

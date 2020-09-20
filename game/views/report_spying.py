@@ -12,13 +12,13 @@ class View(BaseView):
 
         self.selected_menu = "intelligence"
 
-        self.id = request.GET.get("id", "")
+        self.id = request.GET.get("id","")
         if self.id == "":
             return HttpResponseRedirect("/game/gm_profile_reports/")
 
         self.id = int(self.id)
 
-        key = request.GET.get("key", "")
+        key = request.GET.get("key","")
         if key == "":
             return HttpResponseRedirect("/game/gm_profile_reports/")
 
@@ -64,19 +64,19 @@ class View(BaseView):
         #
         # list spied planets
         #
-        query = " SELECT spy_id, planet_id, planet_name, gm_spying_planets.floor, gm_spying_planets.space, ground, galaxy, sector, planet, gm_spying_planets.pct_ore, gm_spying_planets.pct_hydrocarbon " + \
+        query = " SELECT spy_id, planet_id, planet_name, gm_spying_planets.floor, gm_spying_planets.space, ground, galaxy, sector, planet, gm_spying_planets.pct_ore, gm_spying_planets.pct_hydro " + \
                 " FROM gm_spying_planets " + \
                 " LEFT JOIN gm_planets " + \
-                    " ON ( gm_spying_planets.planet_id=gm_planets.id) " + \
+                    " ON ( gm_spying_planets.planet_id=gm_planets.id)" + \
                 " WHERE spy_id=" + str(self.id)
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         nbplanet = 0
 
         list = []
         content.AssignValue("planets", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             
@@ -94,7 +94,7 @@ class View(BaseView):
             item["ground"] = row[5]
 
             item["pct_ore"] = row[9]
-            item["pct_hydrocarbon"] = row[10]
+            item["pct_hydro"] = row[10]
 
             nbplanet = nbplanet + 1
 
@@ -104,18 +104,18 @@ class View(BaseView):
         query = " SELECT category, dt_researches.id, research_level, levels " + \
                 " FROM gm_spying_researches " + \
                 " LEFT JOIN dt_researches " + \
-                    " ON ( gm_spying_researches.research_id=dt_researches.id) " + \
+                    " ON ( gm_spying_researches.research_id=dt_researches.id)" + \
                 " WHERE spy_id=" + str(self.id)  + \
                 " ORDER BY category, dt_researches.id "
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         nbresearch = 0
 
         lastCategory = -1
 
         cats = []
-        for row in oRss:
+        for row in rows:
 
             category = row[0]
 
@@ -160,13 +160,13 @@ class View(BaseView):
     def DisplayPlanet(self):
         content = self.loadTemplate("gm_spyings-report")
 
-        query = " SELECT spy_id,  planet_id,  planet_name,  s.owner_name,  s.floor,  s.space,  s.ground,  s.ore,  s.hydrocarbon,  s.ore_capacity, " + \
-                " s.hydrocarbon_capacity,  s.ore_production,  s.hydrocarbon_production,  s.energy_consumption,  s.energy_production,  s.workers,  s.workers_capacity,  s.scientists, " + \
+        query = " SELECT spy_id,  planet_id,  planet_name,  s.owner_name,  s.floor,  s.space,  s.ground,  s.ore,  s.hydro,  s.ore_capacity, " + \
+                " s.hydro_capacity,  s.ore_production,  s.hydro_production,  s.energy_consumption,  s.energy_production,  s.workers,  s.workers_capacity,  s.scientists, " + \
                 " s.scientists_capacity,  s.soldiers,  s.soldiers_capacity,  s.radar_strength,  s.radar_jamming,  s.orbit_ore,  " + \
-                " s.orbit_hydrocarbon, galaxy, sector, planet, s.pct_ore, s.pct_hydrocarbon " + \
+                " s.orbit_hydro, galaxy, sector, planet, s.pct_ore, s.pct_hydro " + \
                 " FROM gm_spying_planets AS s" + \
                 " LEFT JOIN gm_planets " + \
-                    " ON ( s.planet_id=gm_planets.id) " + \
+                    " ON ( s.planet_id=gm_planets.id)" + \
                 " WHERE spy_id=" + str(self.id)
 
         row = dbRow(query)
@@ -184,7 +184,7 @@ class View(BaseView):
         content.AssignValue("ground", row[6])
 
         content.AssignValue("pct_ore", row[28])
-        content.AssignValue("pct_hydrocarbon", row[29])
+        content.AssignValue("pct_hydro", row[29])
 
         if row[3]:
             content.AssignValue("owner", row[3])
@@ -193,11 +193,11 @@ class View(BaseView):
 
         if row[7]: # display common info
             content.AssignValue("ore", row[7])
-            content.AssignValue("hydrocarbon", row[8])
+            content.AssignValue("hydro", row[8])
             content.AssignValue("ore_capacity", row[9])
-            content.AssignValue("hydrocarbon_capacity", row[10])
+            content.AssignValue("hydro_capacity", row[10])
             content.AssignValue("ore_prod", row[11])
-            content.AssignValue("hydrocarbon_prod", row[12])
+            content.AssignValue("hydro_prod", row[12])
             content.AssignValue("energy_consumption", row[13])
             content.AssignValue("energy_prod", row[14])
             content.Parse("common")
@@ -215,23 +215,23 @@ class View(BaseView):
             content.AssignValue("radar_strength", row[21])
             content.AssignValue("radar_jamming", row[22])
             content.AssignValue("orbit_ore", row[23])
-            content.AssignValue("orbit_hydrocarbon", row[24])
+            content.AssignValue("orbit_hydro", row[24])
             content.Parse("uncommon")
 
         # display pending buildings
         query = " SELECT s.building_id, s.quantity, label, s.endtime, category " + \
                 " FROM gm_spying_buildings AS s " + \
                 " LEFT JOIN dt_buildings " + \
-                    " ON (s.building_id=id) " + \
+                    " ON (s.building_id=id)" + \
                 " WHERE spy_id=" + str(self.id) + " AND planet_id=" + str(planet) + " AND s.endtime IS NOT NULL " + \
                 " ORDER BY category, label "
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
-        if oRss:
+        if rows:
             list = []
             content.AssignValue("buildings_pendings", list)
-            for row in oRss:
+            for row in rows:
                 item = {}
                 list.append(item)
                 
@@ -243,16 +243,16 @@ class View(BaseView):
         query = " SELECT s.building_id, s.quantity, label, s.endtime, category " + \
                 " FROM gm_spying_buildings AS s " + \
                 " LEFT JOIN dt_buildings " + \
-                    " ON (s.building_id=id) " + \
+                    " ON (s.building_id=id)" + \
                 " WHERE spy_id=" + str(self.id) + " AND planet_id=" + str(planet) + " AND s.endtime IS NULL " + \
                 " ORDER BY category, label "
 
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
-        if oRss:
+        if rows:
             list = []
             content.AssignValue("buildings", list)
-            for row in oRss:
+            for row in rows:
                 item = {}
                 list.append(item)
                 

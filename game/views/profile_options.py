@@ -20,8 +20,8 @@ class View(BaseView):
         self.changes_status = ""
         self.showSubmit = True
 
-        avatar = request.POST.get("avatar", "").strip()
-        description = request.POST.get("description", "").strip()
+        avatar = request.POST.get("avatar","").strip()
+        description = request.POST.get("description","").strip()
 
         timers_enabled = ToInt(request.POST.get("timers_enabled"), 0)
         if timers_enabled == 1: timers_enabled = True
@@ -48,7 +48,7 @@ class View(BaseView):
         if self.optionCat < 1 or self.optionCat > 6:
             self.optionCat = 1
 
-        if request.POST.get("submit", "") != "":
+        if request.POST.get("submit","") != "":
 
             self.changes_status = "done"
             query = ""
@@ -125,7 +125,7 @@ class View(BaseView):
                 " alliance_id, a.tag, a.name, r.label" + \
                 " FROM gm_profiles" + \
                 " LEFT JOIN gm_alliances AS a ON (gm_profiles.alliance_id = a.id)" + \
-                " LEFT JOIN gm_alliance_ranks AS r ON (gm_profiles.alliance_id = r.allianceid AND gm_profiles.alliance_rank = r.rankid) " + \
+                " LEFT JOIN gm_alliance_ranks AS r ON (gm_profiles.alliance_id = r.allianceid AND gm_profiles.alliance_rank = r.rankid)" + \
                 " WHERE gm_profiles.id = "+str(self.userId)
         row = dbRow(query)
 
@@ -201,7 +201,7 @@ class View(BaseView):
     def display_reports(self, content):
 
         oRss = dbRows("SELECT type*100+subtype FROM gm_profile_reports WHERE userid="+str(self.userId))
-        for row in oRss:
+        for row in rows:
             content.Parse("c"+str(row[0]))
 
         content.Parse("gm_profile_reports")
@@ -212,7 +212,7 @@ class View(BaseView):
         if row:
             content.AssignValue("autosignature", row[0])
         else:
-            content.AssignValue("autosignature", "")
+            content.AssignValue("autosignature","")
 
         content.Parse("mail")
 

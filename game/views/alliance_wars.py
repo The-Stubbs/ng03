@@ -26,21 +26,21 @@ class View(BaseView):
         
         if action == "pay":
         
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_war_extend(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
 
         elif action == "stop":
         
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
             
             row = dbRow("SELECT user_alliance_war_stop(" + str(self.userId) + "," + sqlStr(tag) + ")")
             return row[0]
 
         elif action == "create":
         
-            tag = request.POST.get("tag", "").strip()
+            tag = request.POST.get("tag","").strip()
 
             row = dbRow("SELECT user_alliance_war_create(" + str(self.userId) + "," + sqlStr(tag) + ")")                
             return row[0]
@@ -64,7 +64,7 @@ class View(BaseView):
             orderby = "created"
             reversed = True
 
-        if request.GET.get("r", "") != "":
+        if request.GET.get("r","") != "":
             reversed = not reversed
 
         if reversed: orderby = orderby + " DESC"
@@ -121,9 +121,9 @@ class View(BaseView):
 
         # --- war declaration data
         
-        if request.GET.get("a", "") == "new":
+        if request.GET.get("a","") == "new":
 
-            tag = request.GET.get("tag", "").strip()
+            tag = request.GET.get("tag","").strip()
 
             row = dbRow("SELECT id, tag, name, internal_alliance_get_war_cost(id) + (static_alliance_war_cost_coeff()*internal_alliance_get_value(" + str(self.allianceId) + "))::integer FROM gm_alliances WHERE lower(tag)=lower(" + sqlStr(self.tag) + ")")
             if row == None:
@@ -141,4 +141,4 @@ class View(BaseView):
 
         # --- form data
         
-        if not data["tag"]: data["tag"] = request.POST.get("tag", "").strip()
+        if not data["tag"]: data["tag"] = request.POST.get("tag","").strip()

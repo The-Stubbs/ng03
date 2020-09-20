@@ -17,7 +17,7 @@ class View(BaseView):
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
-    def processAction(self, request, action):
+    def fillContent(self, request, data):
     
         # --- user data
         
@@ -59,13 +59,23 @@ class View(BaseView):
         rows = dbRows(query)
         if rows:
             for row in rows:
-                if self.addChat(row[0]):
+            
+                self.addChat(row[0])
                     
-                    chat = {}
-                    data["chats"].append(chat)
-                    
-                    item["id"] = row[0]
-                    item["name"] = row[1]
-                    item["topic"] = row[2]
-                    
-                    request.session["lastchatmsg_" + str(row[0])] = ""
+                chat = {}
+                data["chats"].append(chat)
+                
+                item["id"] = row[0]
+                item["name"] = row[1]
+                item["topic"] = row[2]
+                
+                request.session["lastchatmsg_" + str(row[0])] = ""
+
+    #---------------------------------------------------------------------------
+    def addChat(self, chatid):
+    
+        if self.request.session.get("chat_joined_" + str(chatid)) != "1":
+        
+            self.request.session["chat_joined_count"] = ToInt(self.request.session.get("chat_joined_count"), 0) + 1
+            self.request.session["chat_joined_" + str(chatid)] = "1"
+

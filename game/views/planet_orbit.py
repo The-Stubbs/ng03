@@ -20,7 +20,7 @@ class View(BaseView):
 
         self.fleet_creation_error = ""
 
-        if request.GET.get("a", "") == "new":
+        if request.GET.get("a","") == "new":
             self.NewFleet()
 
         return self.DisplayFleets()
@@ -35,11 +35,11 @@ class View(BaseView):
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," + \
-                " action, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" + \
+                " action, cargo_ore, cargo_hydro, cargo_scientists, cargo_soldiers, cargo_workers" + \
                 " FROM vw_gm_fleets " + \
                 " WHERE planetid="+ str(self.currentPlanetId) +" AND action != 1 AND action != -1" + \
                 " ORDER BY upper(name)"
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         if not oRss:
             content.Parse("nofleets")
@@ -47,7 +47,7 @@ class View(BaseView):
             gm_fleets = []
             content.AssignValue("gm_fleets", gm_fleets)
             
-            for row in oRss:
+            for row in rows:
                 manage = False
                 trade = False
                 
@@ -63,7 +63,7 @@ class View(BaseView):
 
                 fleet["cargo"] = row[27]+row[28]+row[29]+row[30]+row[31]
                 fleet["cargo_ore"] = row[27]
-                fleet["cargo_hydrocarbon"] = row[28]
+                fleet["cargo_hydro"] = row[28]
                 fleet["cargo_scientists"] = row[29]
                 fleet["cargo_soldiers"] = row[30]
                 fleet["cargo_workers"] = row[31]
@@ -118,7 +118,7 @@ class View(BaseView):
             ships = []
             content.AssignValue("ships", ships)
             
-            for row in oRss:
+            for row in rows:
                 ship = {}
                 
                 ship["id"] = row["shipid"]
@@ -177,7 +177,7 @@ class View(BaseView):
     # Create the new fleet
     #
     def NewFleet(self):
-        fleetname = self.request.POST.get("name", "").strip()
+        fleetname = self.request.POST.get("name","").strip()
 
         if not isValidObjectName(fleetname):
             self.fleet_creation_error = "fleet_name_invalid"
@@ -213,7 +213,7 @@ class View(BaseView):
 
             # add the ships type by type
             if quantity > 0:
-                row = dbRow("SELECT * FROM user_planet_transfer_ships(" + str(self.userId) + ", " + str(fleetid) + ", " + str(shipid) + ", " + str(quantity) + ")")
+                row = dbRow("SELECT * FROM user_planet_transfer_ships(" + str(self.userId) + "," + str(fleetid) + "," + str(shipid) + "," + str(quantity) + ")")
                 cant_use_ship = cant_use_ship or row[0] == 3
 
         # delete the fleet if there is no ships in it

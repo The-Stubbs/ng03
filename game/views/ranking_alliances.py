@@ -45,7 +45,7 @@ class View(BaseView):
         elif col == 7:
             orderby = "upper(gm_alliances.tag)"
 
-        if self.request.GET.get("r", "") != "":
+        if self.request.GET.get("r","") != "":
             reversed = not reversed
         else:
             content.Parse("r" + str(col))
@@ -85,7 +85,7 @@ class View(BaseView):
                 " GROUP BY gm_alliances.id, gm_alliances.name, gm_alliances.tag, gm_alliances.score, gm_alliances.previous_score, gm_alliances.created, gm_alliances.max_members" + \
                 " ORDER BY "+orderby+ \
                 " OFFSET "+str(offset*displayed)+" LIMIT "+str(displayed)
-        oRss = dbRows(query)
+        rows = dbRows(query)
 
         if row == None: content.Parse("noresult")
 
@@ -123,7 +123,7 @@ class View(BaseView):
         i = 1
         list = []
         content.AssignValue("gm_alliances", list)
-        for row in oRss:
+        for row in rows:
             item = {}
             list.append(item)
             

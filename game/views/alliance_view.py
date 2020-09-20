@@ -14,7 +14,7 @@ class View(BaseView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.tag = request.GET.get("tag", "")
+        self.tag = request.GET.get("tag","")
         if self.tag == "" and self.allianceId == None:
             return HttpResponseRedirect("/game/alliance-invitations/")
         elif self.tag == "" and self.allianceId:
@@ -59,9 +59,9 @@ class View(BaseView):
                 " FROM gm_alliance_ranks" + \
                 " WHERE members_displayed AND allianceid=" + str(alliance_id) + \
                 " ORDER BY rankid"
-        oRss = dbRows(query)
-        if oRss:
-            for row in oRss:
+        rows = dbRows(query)
+        if rows:
+            for row in rows:
 
                 query = "SELECT login" + \
                         " FROM gm_profiles" + \
@@ -85,9 +85,9 @@ class View(BaseView):
         query = "SELECT allianceid1, tag, name" + \
                 " FROM gm_alliance_naps INNER JOIN gm_alliances ON (gm_alliance_naps.allianceid1=gm_alliances.id)" + \
                 " WHERE allianceid2=" + str(alliance_id)
-        oRss = dbRows(query)
-        if oRss:
-            for row in oRss:
+        rows = dbRows(query)
+        if rows:
+            for row in rows:
 
                 nap = {}
                 data["naps"].append(nap)
@@ -108,9 +108,9 @@ class View(BaseView):
                 " FROM gm_alliance_wars w" + \
                 "    INNER JOIN gm_alliances ON (allianceid1 = gm_alliances.id)" + \
                 " WHERE allianceid2=" + str(alliance_id)
-        oRss = dbRows(query)
-        if oRss:
-            for row in oRss:
+        rows = dbRows(query)
+        if rows:
+            for row in rows:
 
                 war = {}
                 data["wars"].append(war)

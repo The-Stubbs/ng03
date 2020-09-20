@@ -28,7 +28,7 @@ class View(BaseMixin, View):
         remainingTime = row[1]
         
         # check to unlock holidays mode
-        action = request.POST.get("unlock", "")
+        action = request.POST.get("unlock","")
 
         if action != "" and remainingTime < 0:
             dbExecute("UPDATE gm_profiles SET privilege=0 WHERE ban_expire < now() AND id="+str(self.userId))

@@ -42,7 +42,7 @@ class View(BaseView):
 
             if not self.hasRight["can_change_tax_rate"]: return -1
             
-            taxrates = request.POST.get("taxrates", "")
+            taxrates = request.POST.get("taxrates","")
             
             row = dbRow("SELECT user_alliance_set_tax(" + str(self.userId) + "," + sqlStr(taxrates) + ")")
             return row[0]
@@ -90,7 +90,7 @@ class View(BaseView):
             orderby = "upper(destination)"
             reversed = True
 
-        if request.GET.get("r", "") != "":
+        if request.GET.get("r","") != "":
             reversed = not reversed
 
         if reversed: orderby = orderby + " DESC"

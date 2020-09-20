@@ -24,7 +24,7 @@ class View(BaseView):
 
         fleetid = ToInt(self.request.GET.get("id"), 0)
 
-        if ToInt(self.request.GET.get("trade", ""), 0) == 9:
+        if ToInt(self.request.GET.get("trade",""), 0) == 9:
             self.action_result = "error_trade"
 
         if fleetid == 0:
@@ -56,12 +56,12 @@ class View(BaseView):
         query = "SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," + \
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," + \
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," + \
-                " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers," + \
-                " recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action, total_time, idle_time, date_part('epoch', static_planet_invasion_delay())," + \
+                " cargo_capacity, cargo_ore, cargo_hydro, cargo_scientists, cargo_soldiers, cargo_workers," + \
+                " recycler_output, orbit_ore > 0 OR orbit_hydro > 0, action, total_time, idle_time, date_part('epoch', static_planet_invasion_delay())," + \
                 " long_distance_capacity, droppods, warp_to," + \
                 "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.planet_galaxy AND gm_planets.sector = f.planet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = "+str(self.userId)+")) AS from_radarstrength, " + \
                 "( SELECT int4(COALESCE(max(gm_planets.radar_strength), 0)) FROM gm_planets WHERE gm_planets.galaxy = f.destplanet_galaxy AND gm_planets.sector = f.destplanet_sector AND gm_planets.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_gm_friend_radars WHERE vw_gm_friend_radars.friend = gm_planets.ownerid AND vw_gm_friend_radars.userid = "+str(self.userId)+")) AS to_radarstrength," + \
-                "firepower > 0, next_waypointid, (SELECT routeid FROM gm_fleet_route_waypoints WHERE id=f.next_waypointid), now(), spawn_ore + spawn_hydrocarbon," + \
+                "firepower > 0, next_waypointid, (SELECT routeid FROM gm_fleet_route_waypoints WHERE id=f.next_waypointid), now(), spawn_ore + spawn_hydro," + \
                 "radar_jamming, planet_floor, real_signature, required_vortex_strength, upkeep, CASE WHEN planet_owner_relation IN (-1,-2) THEN static_orbitting_fleet_ship_upkeep() ELSE static_fleet_ship_upkeep() END AS upkeep_multiplicator," + \
                 " ((internal_commander_get_fleet_bonus_efficiency(size::bigint - leadership, 2.0)-1.0)*100)::integer AS commander_efficiency, leadership, ownerid, shared," + \
                 " (SELECT prestige_points >= tool_compute_prestige_cost_for_new_planet(planets) FROM gm_profiles WHERE id=ownerid) AS can_take_planet," + \
@@ -85,7 +85,7 @@ class View(BaseView):
         if row[45]:
 
             query = "SELECT gm_fleet_route_waypoints.id, ""action"", p.id, p.galaxy, p.sector, p.planet, p.name, internal_profile_get_name(p.ownerid), internal_profile_get_relation(p.ownerid,"+str(self.userId)+")," + \
-                    " gm_fleet_route_waypoints.ore, gm_fleet_route_waypoints.hydrocarbon" + \
+                    " gm_fleet_route_waypoints.ore, gm_fleet_route_waypoints.hydro" + \
                     " FROM gm_fleet_route_waypoints" + \
                     "    LEFT JOIN gm_planets AS p ON (gm_fleet_route_waypoints.planetid=p.id)" + \
                     " WHERE routeid=" + str(row[45]) + " AND gm_fleet_route_waypoints.id >= " + str(row[44]) + \
@@ -220,7 +220,7 @@ class View(BaseView):
 
         # display resources in cargo and its capacity
         content.AssignValue("fleet_ore", row[27])
-        content.AssignValue("fleet_hydrocarbon", row[28])
+        content.AssignValue("fleet_hydro", row[28])
         content.AssignValue("fleet_scientists", row[29])
         content.AssignValue("fleet_soldiers", row[30])
         content.AssignValue("fleet_workers", row[31])
@@ -461,7 +461,7 @@ class View(BaseView):
                         " WHERE f.ownerid="+ str(self.userId)+" AND p.ownerid IS DISTINCT FROM "+ str(self.userId) + \
                         " ORDER BY f.planetid" + \
                         " LIMIT 200"
-                list_oRss = dbRows(query)
+                list_rows = dbRows(query)
 
                 showGroup = False
                 fleetgroup = []
@@ -493,7 +493,7 @@ class View(BaseView):
 
                 query = query + " ORDER BY id"
 
-                list_oRss = dbRows(query)
+                list_rows = dbRows(query)
 
                 showGroup = False
                 merchantplanetsgroup = []
@@ -522,7 +522,7 @@ class View(BaseView):
                     query = " SELECT id, name, repeat" + \
                             " FROM gm_fleet_routes" + \
                             " WHERE ownerid="+ str(self.userId)
-                    list_oRss = dbRows(query)
+                    list_rows = dbRows(query)
 
                     if list_oRss == None: content.Parse("noroute")
                     else:
@@ -573,7 +573,7 @@ class View(BaseView):
         shipCount = 0
 
         ships = []
-        for row in oRss:
+        for row in rows:
             ship = {}
             shipCount = shipCount + 1
 
