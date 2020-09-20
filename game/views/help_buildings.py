@@ -5,20 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "help"
+        return super().dispatch(request, *args, **kwargs)
 
-        cat = request.GET.get("cat","")
-
-        if cat == "" or cat != "buildings" and cat != "research" and cat != "ships" and cat != "tags":
-            cat = "general"
-
-        return self.display_help(cat)
-
+    #---------------------------------------------------------------------------
     def display_help(self, cat):
 
         content = self.loadTemplate("help")

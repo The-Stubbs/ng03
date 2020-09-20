@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
     
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "buildings"
+        return super().dispatch(request, *args, **kwargs)
+
+    #---------------------------------------------------------------------------
         
         self.showHeader = True
         
@@ -362,8 +369,6 @@ class View(BaseView):
     
         if self.request.session.get(sPrivilege) > 100: content.Parse("dev")
         if self.userId==1009: content.Parse("dev")
-        
-        return self.display(content)
     
     def StartBuilding(self, BuildingId):
         row = dbRowRetry("SELECT user_planet_building_start(" + str(self.userId) + "," + str(self.currentPlanetId) + "," + str(BuildingId) + ", false)")

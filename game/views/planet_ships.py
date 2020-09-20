@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
     
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "shipyard_all"
+        return super().dispatch(request, *args, **kwargs)
+
+    #---------------------------------------------------------------------------
 
         self.showHeader = True
 
@@ -272,8 +279,6 @@ class View(BaseView):
 
         self.displayQueue(content, str(self.currentPlanetId))
 
-        return self.display(content)
-
     # List all the available ships for recycling
     def ListRecycleShips(self):
 
@@ -369,8 +374,6 @@ class View(BaseView):
         else: content.Parse("nobuild")
 
         self.displayQueue(content, str(self.currentPlanetId))
-
-        return self.display(content)
 
     # build ships
 

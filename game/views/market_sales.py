@@ -5,18 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "merchants.sell"
-
-        self.ExecuteOrder()
-
-        return self.DisplayMarket()
-
-    # display market for current player's planets
+    #---------------------------------------------------------------------------
     def DisplayMarket(self):
 
         self.request.session["details"] = "Display market : retrieve prices"
@@ -107,8 +108,6 @@ class View(BaseView):
             content.Parse("totalprice")
 
         if count > 0: content.Parse("sell")
-
-        return self.display(content)
 
     # execute sell orders
     def ExecuteOrder(self):

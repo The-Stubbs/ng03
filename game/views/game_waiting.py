@@ -5,6 +5,11 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseMixin, View):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
@@ -14,8 +19,10 @@ class View(BaseMixin, View):
 
         if self.userId == "":
             return HttpResponseRedirect("/")
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        content = self.loadTemplate("wait")
+    #---------------------------------------------------------------------------
 
         # retrieve remaining time
         query = "SELECT login, COALESCE(date_part('epoch', ban_expire-now()), 0) AS remaining_time FROM gm_profiles WHERE /*privilege=-3 AND*/ id=" + str(self.userId)

@@ -5,14 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "fleets_ships_stats"
-
-        return self.ListShips()
+    #---------------------------------------------------------------------------
 
     # List all the available ships for construction
     def ListShips(self):

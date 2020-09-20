@@ -5,15 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "ranking"
-
-        return self.DisplayRankingAlliances(request.GET.get("tag"), request.GET.get("name"))
-
+    #---------------------------------------------------------------------------
     def DisplayRankingAlliances(self, search_tag, search_name):
         content = self.loadTemplate("ranking-gm_alliances")
 
@@ -148,5 +152,3 @@ class View(BaseView):
                 item["war"] = True
 
             i = i + 1
-
-        return self.display(content)

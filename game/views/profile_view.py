@@ -5,15 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "nation"
-
-        return self.display_nation()
-
+    #---------------------------------------------------------------------------
     def display_nation_search(self, nation):
 
         content = self.loadTemplate("nation-search")
@@ -31,8 +35,6 @@ class View(BaseView):
             list.append(item)
             
             item["nation"] = row[0]
-
-        return self.display(content)
 
     def display_nation(self):
 
@@ -210,5 +212,3 @@ class View(BaseView):
             item["history_name"] = row[1]
             item["joined"] = row[2]
             item["left"] = row[3]
-
-        return self.display(content)

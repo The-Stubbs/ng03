@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
     
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "orbit"
+        return super().dispatch(request, *args, **kwargs)
+
+    #---------------------------------------------------------------------------
 
         self.showHeader = True
 
@@ -170,8 +177,6 @@ class View(BaseView):
 
             content.Parse(self.fleet_creation_error)
             content.Parse("error")
-
-        return self.display(content)
 
     #
     # Create the new fleet

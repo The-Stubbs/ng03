@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
     
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "gm_fleets.gm_fleets"
+        return super().dispatch(request, *args, **kwargs)
+
+    #---------------------------------------------------------------------------
 
         self.action_result = ""
         self.move_fleet_result = ""

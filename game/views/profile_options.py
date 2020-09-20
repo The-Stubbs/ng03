@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "options"
+    #---------------------------------------------------------------------------
 
         if request.GET.get("frame") == "1":
             dbExecute("UPDATE gm_profiles SET inframe=True WHERE id="+ str(self.userId))
@@ -254,5 +261,3 @@ class View(BaseView):
         content.Parse("nav")
 
         if self.showSubmit: content.Parse("submit")
-
-        return self.display(content)

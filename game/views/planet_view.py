@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "planet"
+    #---------------------------------------------------------------------------
 
         self.showHeader = True
 
@@ -291,5 +298,3 @@ class View(BaseView):
                 content.Parse("rename_bad_name")
 
         content.Parse("ondev")
-
-        return self.display(content)

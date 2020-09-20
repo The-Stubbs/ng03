@@ -5,18 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
     
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
-        self.selected_menu = "gm_profile_reports"
+        return super().dispatch(request, *args, **kwargs)
 
-        cat = ToInt(request.GET.get("cat",""), 0)
-
-        return self.display_mails(cat)
-
-    # display list of gm_mails
+    #---------------------------------------------------------------------------
     def display_mails(self, cat):
         
         content = self.loadTemplate("gm_profile_reports")
@@ -158,5 +159,3 @@ class View(BaseView):
         content.Parse("tabnav_700")
         content.Parse("tabnav_800")
         content.Parse("tabnav")
-        
-        return self.display(content)

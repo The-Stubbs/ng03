@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "gm_battles"
+    #---------------------------------------------------------------------------
 
         id = ToInt(request.GET.get("id"), 0)
         if id == 0:
@@ -37,6 +44,6 @@ class View(BaseView):
         if display_battle:
 
             content = formatBattle(self, id, creator, fromview, False)
-            return self.display(content)
+
         else:
             return HttpResponseRedirect("/game/gm_profile_reports/")

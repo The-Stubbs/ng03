@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "invasion"
+    #---------------------------------------------------------------------------
 
         invasionid = ToInt(request.GET.get("id"), 0)
 
@@ -136,5 +143,3 @@ class View(BaseView):
 
         content.Parse("report")
         content.Parse("invasion_report")
-
-        return self.display(content)

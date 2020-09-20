@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "training"
+    #---------------------------------------------------------------------------
 
         self.showHeader = True
 
@@ -128,10 +135,6 @@ class View(BaseView):
                 item["quantity"] = row[2]
                 item["remainingtime"] = row[4]
                 item["soldiers"] = True
-
-            i = i + 1
-
-        return self.display(content)
 
     def Train(self, Scientists, Soldiers):
 

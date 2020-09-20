@@ -5,12 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "intelligence"
+    #---------------------------------------------------------------------------
 
         self.id = request.GET.get("id","")
         if self.id == "":
@@ -155,8 +162,6 @@ class View(BaseView):
 
         content.Parse("spynation")
 
-        return self.display(content)
-
     def DisplayPlanet(self):
         content = self.loadTemplate("gm_spyings-report")
 
@@ -268,5 +273,3 @@ class View(BaseView):
         if self.spotted: content.Parse("spotted")
 
         content.Parse("spyplanet")
-
-        return self.display(content)

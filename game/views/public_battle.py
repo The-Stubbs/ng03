@@ -5,6 +5,11 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseMixin, View):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)

@@ -5,18 +5,19 @@ from game.views._base import *
 #-------------------------------------------------------------------------------
 class View(BaseView):
 
+    success_url = ""
+    template_name = ""
+    selected_menu = ""
+
+    #---------------------------------------------------------------------------
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.selected_menu = "production"
-
-        self.showHeader = True
-
-        return self.displayPage(True)
-
-    # Display bonus given by a commander (typ=0), building (typ=1) or a research (typ=2)
+    #---------------------------------------------------------------------------
     def DisplayBonus(self, oRss, typ):
         for row in rows:
             item = {}
