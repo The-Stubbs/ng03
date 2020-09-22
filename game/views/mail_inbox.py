@@ -18,7 +18,8 @@ class View(BaseView):
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
-
+    def fillContent(self, request, data):
+    
         self.compose = False
         self.mailto = ""
         self.mailsubject = ""

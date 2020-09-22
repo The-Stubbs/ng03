@@ -18,6 +18,7 @@ class View(BaseView):
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
 
         if request.GET.get("frame") == "1":
             dbExecute("UPDATE gm_profiles SET inframe=True WHERE id="+ str(self.userId))

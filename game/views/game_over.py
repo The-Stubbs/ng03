@@ -14,48 +14,14 @@ class View(BaseMixin, View):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
-
-        reset_error = 0
-
-        self.userId = ToInt(self.request.session.get("user"), "")
-
-        if self.userId == "":
-            return HttpResponseRedirect("/")
-        
+       
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
-
-        # check that the player has no more planets
-        row = dbRow("SELECT int4(count(1)) FROM gm_planets WHERE ownerid=" + str(self.userId))
-        if row == None:
-            return HttpResponseRedirect("/")
-
-        planets = row[0]
-
-        # retreive player username and number of resets
-
-        query = "SELECT login, resets, credits_bankruptcy, int4(score_research) FROM gm_profiles WHERE id=" + str(self.userId)
-        row = dbRow(query)
-
-        username = row[0]
-        resets = row[1]
-        bankruptcy = row[2]
-        research_done = row[3]
-
-        # still have planets
-        if planets > 0 and bankruptcy > 0:
-            return HttpResponseRedirect("/")
-
-        if resets == 0:
-            return HttpResponseRedirect("/game/start/")
-
-        changeNameError = ""
-
-        action = request.POST.get("action")
+    def processAction(self, request, action):
 
         if action == "retry":
-            # check if user wants to change name
+            
             if request.POST.get("login") != username:
 
                 # check that the login is not banned
@@ -84,10 +50,40 @@ class View(BaseMixin, View):
 
                 else:
                     reset_error = row[0]
-
+                    
         elif action == "abandon":
             dbExecute("UPDATE gm_profiles SET deletion_date=now()/*+INTERVAL '2 days'*/ WHERE id=" + str(self.userId))
             return HttpResponseRedirect("/")
+
+        
+        # check that the player has no more planets
+        row = dbRow("SELECT int4(count(1)) FROM gm_planets WHERE ownerid=" + str(self.userId))
+        if row == None:
+            return HttpResponseRedirect("/")
+
+        planets = row[0]
+
+        # retreive player username and number of resets
+
+        query = "SELECT login, resets, credits_bankruptcy, int4(score_research) FROM gm_profiles WHERE id=" + str(self.userId)
+        row = dbRow(query)
+
+        username = row[0]
+        resets = row[1]
+        bankruptcy = row[2]
+        research_done = row[3]
+
+        # still have planets
+        if planets > 0 and bankruptcy > 0:
+            return HttpResponseRedirect("/")
+
+        if resets == 0:
+            return HttpResponseRedirect("/game/start/")
+
+        changeNameError = ""
+
+        action = request.POST.get("action")
+
 
         # display Game Over page
         content = self.loadTemplate("game-over")

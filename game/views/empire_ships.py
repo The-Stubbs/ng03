@@ -18,44 +18,36 @@ class View(BaseView):
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
 
-    # List the gm_fleets owned by the player
-    def ListStandby(self):
-        content = self.loadTemplate("gm_fleets-standby")
-
-        # list the ships
+        # --- planets data
+        
+        data["planets"] = []
+        
         query = "SELECT gm_planets.id, gm_planets.name, gm_planets.galaxy, gm_planets.sector, gm_planets.planet, shipid, quantity" + \
                 " FROM gm_planet_ships" + \
-                "    INNER JOIN gm_planets ON (gm_planet_ships.planetid = gm_planets.id)" + \
+                "   INNER JOIN gm_planets ON (gm_planet_ships.planetid = gm_planets.id)" + \
                 " WHERE gm_planets.ownerid =" + str(self.userId) + \
                 " ORDER BY gm_planets.id, shipid"
         rows = dbRows(query)
-
-        if oRss == None:
-            content.Parse("noships")
-        else:
+        if rows:
             lastplanetid = -1
-
-            list = []
-            content.AssignValue("planets", list)
             for row in rows:
                 
                 if row[0] != lastplanetid:
-                    planet = { "ships":[] }
-                    list.append(planet)
-                    
                     lastplanetid = row[0]
+                
+                    planet = { "ships":[] }
+                    data["planets"].append(planet)                    
 
-                    planet["planetid"] = row[0]
-                    planet["planetname"] = row[1]
+                    planet["id"] = row[0]
+                    planet["name"] = row[1]
                     planet["g"] = row[2]
                     planet["s"] = row[3]
                     planet["p"] = row[4]
                     
-                item = {}
-                planet["ships"].append(item)
+                ship = {}
+                planet["ships"].append(ship)
                 
-                item["ship"] = getShipLabel(row[5])
-                item["quantity"] = row[6]
-
-        return self.display(content)
+                ship["ship"] = getShipLabel(row[5])
+                ship["quantity"] = row[6]

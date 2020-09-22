@@ -22,7 +22,8 @@ class View(BaseMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
-
+    def fillContent(self, request, data):
+    
         result = 0
 
         self.userId = int(request.session.get("user"))
@@ -81,11 +82,6 @@ class View(BaseMixin, View):
                     elif orientation == 3:    # scientist
                         dbExecute("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.userId) + ",30,1)")
                         dbExecute("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.userId) + ",31,1)")
-                        dbExecute("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.userId) + ",32,1)")
-    
-                    elif orientation == 4:    # war lord
-                        dbExecute("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.userId) + ",40,1)")
-                        dbExecute("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.userId) + ",12,1)")
                         dbExecute("INSERT INTO gm_profile_researches(userid, researchid, level) VALUES(" + str(self.userId) + ",32,1)")
     
                     dbRow("SELECT internal_profile_update_modifiers(" + str(self.userId) + ")")

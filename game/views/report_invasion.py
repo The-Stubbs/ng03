@@ -18,6 +18,7 @@ class View(BaseView):
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
 
         invasionid = ToInt(request.GET.get("id"), 0)
 

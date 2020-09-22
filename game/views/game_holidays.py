@@ -14,46 +14,31 @@ class View(BaseMixin, View):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
-
-        self.userId = ToInt(self.request.session.get("user"), "")
-
-        if self.userId == "":
-            return HttpResponseRedirect("/")
         
-        return super().dispatch(request, *args, **kwargs)
-
-    #---------------------------------------------------------------------------
-
-        # retrieve remaining time
         query = "SELECT login," + \
                 " (SELECT int4(date_part('epoch', min_end_time-now())) FROM gm_profile_holidays WHERE userid=id)," + \
                 " (SELECT int4(date_part('epoch', end_time-now())) FROM gm_profile_holidays WHERE userid=id)" + \
                 " FROM gm_profiles WHERE privilege=-2 AND id=" + str(self.userId)
+        self.row = dbRow(query)
+        if self.row == None: return HttpResponseRedirect("/")
+        if self.row[2] <= 0: return HttpResponseRedirect("/game/overview/")
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        row = dbRow(query)
+    #---------------------------------------------------------------------------
+    def processAction(self, request, action):
 
-        if row == None:
-            return HttpResponseRedirect("/")
+        if action == "unlock":
+        
+            dbRow("SELECT user_profile_stop_holidays(" + str(self.userId) + ")")
+            self.successUrl = "/game/overview/"
+            return 0
 
-        # check to unlock holidays mode
-        action = request.POST.get("unlock","")
-
-        if action != "" and row[1] < 0:
-            dbRow("SELECT user_profile_stop_holidays("+str(self.userId)+")")
-            return HttpResponseRedirect("/game/overview/")
-
-        # if remaining time is negative, return to overview page
-        if row[2] <= 0:
-            return HttpResponseRedirect("/game/overview/")
-
-        content.AssignValue("login", row[0])
-        content.AssignValue("remaining_time", row[2])
-
-        # only allow to unlock the account after 2 days of holidays
-        if row[1] < 0:
-            content.Parse("unlock")
-        else:
-            content.AssignValue("remaining_time_before_unlock", row[1])
-            content.Parse("cant_unlock")
-
-        return render(self.request, content.template, content.data)
+    #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
+        
+        # --- user data
+        
+        data["login"] = self.row[0]
+        data["remaining_time"] = self.row[2]
+        data["remaining_time_before_unlock"] = self.row[1]

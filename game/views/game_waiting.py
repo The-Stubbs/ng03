@@ -23,6 +23,7 @@ class View(BaseMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     #---------------------------------------------------------------------------
+    def fillContent(self, request, data):
 
         # retrieve remaining time
         query = "SELECT login, COALESCE(date_part('epoch', ban_expire-now()), 0) AS remaining_time FROM gm_profiles WHERE /*privilege=-3 AND*/ id=" + str(self.userId)
