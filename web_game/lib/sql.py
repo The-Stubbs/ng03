@@ -3,7 +3,7 @@
 from django.db import connection
 
 # retrieve universe
-universe = "s03"
+universe = "ng03"
 
 '''
 function openDB(connStr)

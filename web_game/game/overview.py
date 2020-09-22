@@ -6,182 +6,109 @@ from web_game.game._global import *
 from web_game.lib.accounts import *
 
 class View(GlobalView):
-    
-    '''
-    sub displayTcgCredits(tpl)
-        dim connTcg, oRs, query, credits
-        set connTcg = openDB(connectionStrings.tcg)
-
-        query = "SELECT COALESCE(sum(accumulated_credits), 0)::integer FROM profiles WHERE lower(username)=lower(" & dosql(oPlayerInfo("username")) & ")"
-
-        set oRs = connTcg.Execute(query)
-
-        credits = oRs[0).value
-
-        ' redeem credits
-        if request.QueryString("redeem") = "1" then
-            query = "UPDATE users SET credits = credits + " & dosql(credits) & " WHERE id=" & UserId
-            oConn.Execute query, , 128
-            credits = 0
-
-            query = "UPDATE profiles SET accumulated_credits=0 WHERE lower(username)=lower(" & dosql(oPlayerInfo("username")) & ")"
-            connTcg.Execute query, , 128
-        end if
-
-        tpl.AssignValue "redeemable_credits", credits
-
-        if credits > 0 then
-            tpl.Parse "redeem_credits"
-        end if
-    end sub
-    '''
-    
+        
     def dispatch(self, request, *args, **kwargs):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
         
+        return super().dispatch(request, *args, **kwargs)
+        
+    def get(self, request, *args, **kwargs):
+    
         self.selected_menu = "overview"
         
         content = GetTemplate(request, "overview")
+        data = content.data
 
-        cookieTest = request.COOKIES.get("display_fleets", "") + request.COOKIES.get("display_research", "")
-
-        if cookieTest != "":
-            query = "UPDATE users SET password=" + dosql("cheat-") + " || now() WHERE id=" + UserId
-            oConnDoQuery(query)
-
-        content.Parse("orientation" + str(self.oPlayerInfo["orientation"]))
-        content.Parse("nation")
-
-        # display Alliance Message of the Day (MotD)
+        # ---
         if self.AllianceId:
-            query = "SELECT announce, tag, name, defcon FROM alliances WHERE id=" + str(self.AllianceId)
-            oRs = oConnExecute(query)
-            if oRs == None: oRs = None
-        else:
-            oRs = None
 
-        if oRs:
-            content.Parse("defcon_" + str(oRs[3]))
-            content.Parse("defcon")
+            query = " SELECT announce, tag, name, defcon" + \
+                    " FROM alliances" + \
+                    " WHERE id=" + str(self.AllianceId)
+            row = oConnExecute(query)
+            if row:
+                data["alliance"] = {}
+                data["alliance"]["announce"] = row[0]
+                data["alliance"]["tag"] = row[1]
+                data["alliance"]["name"] = row[2]
+                data["alliance"]["defcon"] = row[3]
 
-            content.AssignValue("motd", oRs[0])
-            content.Parse("announce")
+        # ---
+        data["orientation"] = self.oPlayerInfo["orientation"]
+        data["username"] = self.oPlayerInfo["login"]
+        data["rank_label"] = self.oAllianceRights["label"] if self.AllianceId else None
+        data["credit_count"] = self.oPlayerInfo["credits"]
+        data["dev_score"] = self.oPlayerInfo["score"]
+        data["dev_score_delta"] = self.oPlayerInfo["score"] - self.oPlayerInfo["previous_score"]                
+        data["prestige_count"] = self.oPlayerInfo["prestige_points"]
+        data["planet_max"] = int(self.oPlayerInfo["mod_planets"])
 
-            content.AssignValue("alliance_rank_label", self.oAllianceRights["label"])
-            content.AssignValue("alliance_tag", oRs[1])
-            content.AssignValue("alliance_name", oRs[2])
-            content.Parse("alliance")
-        else:
-            content.Parse("no_alliance")
-
-        #
-        # display player name, credits, score, rank
-        #
-        content.AssignValue("nation", self.oPlayerInfo["login"])
-        content.AssignValue("stat_score", self.oPlayerInfo["score"])
-        content.AssignValue("stat_score_delta", self.oPlayerInfo["score"]-self.oPlayerInfo["previous_score"])
-
-        if self.oPlayerInfo["score"] >= self.oPlayerInfo["previous_score"]:
-            content.Parse("plus")
-        else:
-            content.Parse("minus")
-
-        content.AssignValue("stat_credits", self.oPlayerInfo["credits"])
-
-        if request.session.get("stat_rank") or request.session.get("stat_score") != self.oPlayerInfo["score"]:
-
-            query = "SELECT int4(count(1)), (SELECT int4(count(1)) FROM vw_players WHERE score >= "+str(self.oPlayerInfo["score"])+") FROM vw_players"
-            oRs = oConnExecute(query)
-
-            if oRs:
-                request.session["stat_score"] = self.oPlayerInfo["score"]
-                request.session["stat_players"] = oRs[0]
-                request.session["stat_rank"] = oRs[1]
-                
-        content.AssignValue("stat_victory_marks", self.oPlayerInfo["prestige_points"])
-        content.AssignValue("stat_rank", request.session.get("stat_rank"))
-        content.AssignValue("stat_players", request.session.get("stat_players"))
-        content.AssignValue("stat_maxcolonies", int(self.oPlayerInfo["mod_planets"]))
+        query = " SELECT int4(count(1))," + \
+                " (SELECT int4(count(1)) FROM vw_players WHERE score >= "+str(self.oPlayerInfo["score"])+")" + \
+                " FROM vw_players"
+        row = oConnExecute(query)
+        if row:
+            data["player_count"] = row[0]
+            data["dev_rank"] = row[1]
 
         query = "SELECT (SELECT score_prestige FROM users WHERE id="+str(self.UserId)+"), (SELECT int4(count(1)) FROM vw_players WHERE score_prestige >= (SELECT score_prestige FROM users WHERE id=" + str(self.UserId) + "))"
         oRs = oConnExecute(query)
-
         if oRs:
-            content.AssignValue("stat_score_battle", oRs[0])
+            data["battle_score"] = oRs[0]
+            data["battle_rank"] = oRs[1]
 
-            if oRs[1] > request.session.get("stat_players"):
-                content.AssignValue("stat_rank_battle", request.session.get("stat_players"))
-            else:
-                content.AssignValue("stat_rank_battle", oRs[1])
-
-        #
-        # display empire statistics : planets, workers, scientists, soldiers
-        #
         query = "SELECT count(1), sum(ore_production), sum(hydrocarbon_production), " + \
                 " int4(sum(workers)), int4(sum(scientists)), int4(sum(soldiers)), now()" + \
                 " FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId)
         oRs = oConnExecute(query)
-
         if oRs:
-            content.AssignValue("date", oRs[6])
-
-            content.AssignValue("stat_colonies", oRs[0])
-            content.AssignValue("stat_prod_ore", oRs[1])
-            content.AssignValue("stat_prod_hydrocarbon", oRs[2])
+            data["date"] = oRs[6]
+            data["planet_count"] = oRs[0]
+            data["prod_ore"] = oRs[1]
+            data["prod_hydro"] = oRs[2]
 
             oRs2 = oConnExecute("SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0) FROM fleets WHERE ownerid=" + str(self.UserId))
 
-            content.AssignValue("stat_workers", oRs[3] + oRs2[0])
-            content.AssignValue("stat_scientists", oRs[4] + oRs2[1])
-            content.AssignValue("stat_soldiers", oRs[5] + oRs2[2])
+            data["worker_count"] = oRs[3] + oRs2[0]
+            data["scientist_count"] = oRs[4] + oRs2[1]
+            data["soldier_count"] = oRs[5] + oRs2[2]
 
-        #
-        # view current buildings constructions
-        #
+        # ---
+        constructionyards = []
+        content.AssignValue("constructionyards", constructionyards)
+        
         query = "SELECT p.id, p.name, p.galaxy, p.sector, p.planet, b.buildingid, b.remaining_time, destroying" +\
                 " FROM nav_planet AS p" +\
                 "	 LEFT JOIN vw_buildings_under_construction2 AS b ON (p.id=b.planetid)"+\
                 " WHERE p.ownerid="+str(self.UserId)+\
                 " ORDER BY p.id, destroying, remaining_time DESC"
         oRs = oConnExecuteAll(query)
-
         lastplanet = -1
-
-        constructionyards = []
-        items = 0
         for item in oRs:
             if item[0] != lastplanet:
-                planet = {"buildings":[]}
                 lastplanet = item[0]
-                items = 0
-
-                planet["planetid"] = item[0]
-                planet["planetname"] = item[1]
-                planet["galaxy"] = item[2]
-                planet["sector"] = item[3]
-                planet["planet"] = item[4]
+                
+                planet = {"buildings":[]}
                 constructionyards.append(planet)
+
+                planet["id"] = item[0]
+                planet["name"] = item[1]
+                planet["g"] = item[2]
+                planet["s"] = item[3]
+                planet["p"] = item[4]
 
             if item[5]:
                 building = {}
-                building["buildingid"] = item[5]
-                building["building"] = getBuildingLabel(item[5])
-                building["time"] = item[6]
-
-                if item[7]:
-                    building["destroy"] = True
-                    
                 planet["buildings"].append(building)
+                
+                building["id"] = item[5]
+                building["name"] = getBuildingLabel(item[5])
+                building["time"] = item[6]
+                if item[7]: building["destroying"] = True
 
-                items = items + 1
-
-        content.AssignValue("constructionyards", constructionyards)
-
-        #
-        # view current ships constructions
-        #
+        # ---
         query = "SELECT p.id, p.name, p.galaxy, p.sector, p.planet, s.shipid, s.remaining_time, s.recycle, p.shipyard_next_continue IS NOT NULL, p.shipyard_suspended," +\
                 " (SELECT shipid FROM planet_ships_pending WHERE planetid=p.id ORDER BY start_time LIMIT 1)" +\
                 " FROM nav_planet AS p" +\
@@ -189,63 +116,45 @@ class View(GlobalView):
                 " WHERE (s.recycle OR EXISTS(SELECT 1 FROM planet_buildings WHERE (buildingid = 105 OR buildingid = 205) AND planetid=p.id)) AND p.ownerid=" + str(self.UserId) +\
                 " ORDER BY p.id, s.remaining_time DESC"
         oRs = oConnExecuteAll(query)
-
         if oRs:
-            lastplanet=0
-
-            shipyards = []
-            items = 0
+            constructionyards = []
+            content.AssignValue("shipyards", shipyards)
             for item in oRs:
-                if item[0] != lastplanet:
-                    planet = {}
-                    shipyards.append(planet)
-                    lastplanet = item[0]
+                planet = {}
+                shipyards.append(planet)
 
-                planet["planetid"] = item[0]
-                planet["planetname"] = item[1]
-                planet["galaxy"] = item[2]
-                planet["sector"] = item[3]
-                planet["planet"] = item[4]
-                planet["shipid"] = item[5]
-                planet["shiplabel"] = getShipLabel(item[5])
-                planet["time"] = item[6]
+                planet["id"] = item[0]
+                planet["name"] = item[1]
+                planet["g"] = item[2]
+                planet["s"] = item[3]
+                planet["p"] = item[4]
     
-                if item[10]:
-                    planet["waiting_ship"] = getShipLabel(item[10])
-
                 if item[5]:
-                    if item[7]: planet["recycle"] = True
-                    planet["ship"] = True
-                    items = items + 1
+                    planet["ship"] = {}
+                    planet["ship"]["id"] = item[5]
+                    planet["ship"]["name"] = getShipLabel(item[5])
+                    planet["ship"]["time"] = item[6]
+                    planet["ship"]["recycling"] = item[7]
+                    
                 elif item[9]:
                     planet["suspended"] = True
-                    items = items + 1
+                    
                 elif item[8]:
                     planet["waiting_resources"] = True
-                    items = items + 1
-                else:
-                    planet["none"] = True
+                    planet["waiting_ship"] = getShipLabel(item[10])
 
-            content.AssignValue("shipyards", shipyards)
-
-        #
-        # view current research
-        #
+        # ---
         query = "SELECT researchid, int4(date_part('epoch', end_time-now()))" +\
                 " FROM researches_pending" +\
                 " WHERE userid=" + str(self.UserId)
-        oRs = oConnExecuteAll(query)
-
-        i = 0
+        oRs = oConnExecute(query)
         if oRs:
-            for item in oRs:
-                content.AssignValue("researchid", item[0])
-                content.AssignValue("researchlabel", getResearchLabel(item[0]))
-                content.AssignValue("researchtime", item[1])
-                content.Parse("research")
-                i = i + 1
-
-        if i==0: content.Parse("noresearch")
+            research = {}
+            content.AssignValue("research", research)
+            
+            research["id"] = item[0]
+            research["name"] = getResearchLabel(item[0])
+            research["time"] = item[1]
 
         query =	"SELECT f.id, f.name, f.signature, f.ownerid, " +\
                 "COALESCE((( SELECT vw_relations.relation FROM vw_relations WHERE vw_relations.user1 = users.id AND vw_relations.user2 = f.ownerid)), -3) AS owner_relation, f.owner_name," +\

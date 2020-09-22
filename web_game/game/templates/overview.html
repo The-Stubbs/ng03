@@ -44,19 +44,19 @@ function sig(signature){
 }
 </script>
 
-{% if announce %}
+{% if alliance %}
 <div id="motd">
 <table class="default" width="100%">
-<tr class="category"><td onclick="toggle_elt('motd_content')">Annonce de l'alliance{% if defcon %} - 
-{% if defcon_5 %}<b>DEFCON 5</b> : Préparation normale en temps de paix{% endif %}
-{% if defcon_4 %}<b>DEFCON 4</b> : Préparation normale, mais renseignement accru et mesures de sécurité renforcées{% endif %}
-{% if defcon_3 %}<b>DEFCON 3</b> : Accroissement de la préparation des forces au-dessus de la préparation normale{% endif %}
-{% if defcon_2 %}<b>DEFCON 2</b> : Accroissement supplémentaire dans la préparation des forces{% endif %}
-{% if defcon_1 %}<b>DEFCON 1</b> : Préparation maximale des forces (état de guerre){% endif %}
-{% endif %}</td></tr>
+<tr class="category"><td onclick="toggle_elt('motd_content')">Annonce de l'alliance - 
+{% if alliance.defcon == 5 %}<b>DEFCON 5</b> : Préparation normale en temps de paix
+{% elif alliance.defcon == 4 %}<b>DEFCON 4</b> : Préparation normale, mais renseignement accru et mesures de sécurité renforcées
+{% elif alliance.defcon == 3 %}<b>DEFCON 3</b> : Accroissement de la préparation des forces au-dessus de la préparation normale
+{% elif alliance.defcon == 2 %}<b>DEFCON 2</b> : Accroissement supplémentaire dans la préparation des forces
+{% elif alliance.defcon == 1 %}<b>DEFCON 1</b> : Préparation maximale des forces (état de guerre){% endif %}
+</td></tr>
 <tr id="motd_content" class="item">
 <td>
-	{{motd|bbcode}}
+	{{alliance.announce|bbcode}}
 </td>
 </tr>
 </table>
@@ -64,25 +64,25 @@ function sig(signature){
 {% endif %}
 <div id="stats">
 <table class="default" width="100%">
-<tr class="category"><td onclick="toggle_elt('stats_content')">Statistiques de votre empire - {{date|timezone:"Europe/Paris"|date:"d M Y H:i:s"}}</td></tr>
+<tr class="category"><td onclick="toggle_elt('stats_content')">Statistiques de votre empire - {{stats.date|timezone:"Europe/Paris"|date:"d M Y H:i:s"}}</td></tr>
 <tr id="stats_content" class="item" valign="top">
 <td>
 	<table class="clear" width="100%">
 	<tr><td nowrap>
-	<div><span class="label">Nation: </span><span class="value">{% if orientation1 %}Marchand {% endif %}{% if orientation2 %}Militaire {% endif %}{% if orientation3 %}Scientifique {% endif %}{{nation}}</span></div>
-	<div><span class="label">Grade: </span><span class="value">{% if alliance %}{{alliance_rank_label}} de <a href="/game/alliance/?tag={{alliance_tag}}">[{{alliance_tag}}] {{alliance_name}}</a>{% endif %}{% if no_alliance %}Indépendant{% endif %}</span></div>
-	<div><span class="label">Trésorerie: </span><span class="value"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="res" width=16 height=16>{{stat_credits|intcomma}}</span></div>
-	<div><span class="label">Score de développement: </span><span class="value">{{stat_score|intcomma}}&nbsp;<span{% if plus %} class="plus"{% endif %}{% if minus %} class="minus"{% endif %}>{% if plus %}+{% endif %}{{stat_score_delta|intcomma}}</span>&nbsp;(<a href="/game/ranking-players/">rang: {{stat_rank}}/{{stat_players}}</a>)</span></div>
+	<div><span class="label">Nation: </span><span class="value">{% if stats.orientation == 1 %}Marchand {% elif stats.orientation == 2 %}Militaire {% elif stats.orientation == 3 %}Scientifique {% endif %}{{stats.username}}</span></div>
+	<div><span class="label">Grade: </span><span class="value">{% if alliance %}{{stats.rank_label}} de <a href="/game/alliance/?tag={{alliance.tag}}">[{{alliance.tag}}] {{alliance.name}}</a>{% else %}Indépendant{% endif %}</span></div>
+	<div><span class="label">Trésorerie: </span><span class="value"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="res" width=16 height=16>{{stats.credit_count|intcomma}}</span></div>
+	<div><span class="label">Score de développement: </span><span class="value">{{stats.dev_score|intcomma}}&nbsp;<span{% if stats.dev_score_delta > 0 %} class="plus"{% else %} class="minus"{% endif %}>{% if stats.dev_score_delta > 0 %}+{% endif %}{{stats.dev_score_delta|intcomma}}</span>&nbsp;(<a href="/game/ranking-players/">rang: {{stats.dev_rank}}/{{stats.player_count}}</a>)</span></div>
 	</td><td>
-	<div><span class="label">Nombre de colonies: </span><span class="value">{{stat_colonies|intcomma}} / {{stat_maxcolonies|intcomma}}</span></div>
-	<div><span class="label">Minerai par heure: </span><span class="value">{{stat_prod_ore|intcomma}}</span></div>
-	<div><span class="label">Hydrocarbure par heure: </span><span class="value">{{stat_prod_hydrocarbon|intcomma}}</span></div>
-	<div><span class="label">Score de prestige: </span><span class="value">{{stat_score_battle|intcomma}} (<a href="/game/ranking-players/?col=4">rang: {{stat_rank_battle}}/{{stat_players}}</a>)</span></div>
+	<div><span class="label">Nombre de colonies: </span><span class="value">{{stats.planet_count|intcomma}} / {{stats.planet_max|intcomma}}</span></div>
+	<div><span class="label">Minerai par heure: </span><span class="value">{{stats.prod_ore|intcomma}}</span></div>
+	<div><span class="label">Hydrocarbure par heure: </span><span class="value">{{stats.prod_hydro|intcomma}}</span></div>
+	<div><span class="label">Score de prestige: </span><span class="value">{{stats.battle_score|intcomma}} (<a href="/game/ranking-players/?col=4">rang: {{stats.battle_rank}}/{{stats.player_count}}</a>)</span></div>
 	</td><td>
-	<div><span class="label">Travailleurs: </span><span class="value">{{stat_workers|intcomma}}</span></div>
-	<div><span class="label">Scientifiques: </span><span class="value">{{stat_scientists|intcomma}}</span></div>
-	<div><span class="label">Soldats: </span><span class="value">{{stat_soldiers|intcomma}}</span></div>
-	<div><span class="label">Points de prestige: </span><span class="value">{{stat_victory_marks|intcomma}}</span></div>
+	<div><span class="label">Travailleurs: </span><span class="value">{{stats.worker_count|intcomma}}</span></div>
+	<div><span class="label">Scientifiques: </span><span class="value">{{stats.scientist_count|intcomma}}</span></div>
+	<div><span class="label">Soldats: </span><span class="value">{{stats.soldier_count|intcomma}}</span></div>
+	<div><span class="label">Points de prestige: </span><span class="value">{{stats.prestige_count|intcomma}}</span></div>
 	</td></tr>
 	</table>
 </td>
@@ -117,8 +117,8 @@ function sig(signature){
 <tr class="category"><td>Recherche en cours</td></tr>
 <tr class="item">
 <td>
-	{% if research %}<div><a href="/game/research/#{{researchid}}">{{researchlabel}}</a> (<script>putcountdown1({{researchtime}}, "Terminé", "/game/research/");</script>)</div>{% endif %}
-	{% if noresearch %}<div><a href="/game/research/" title="Voir le laboratoire de recherches">Aucune recherche en cours</a></div>{% endif %}
+	{% if research %}<div><a href="/game/research/#{{research.id}}">{{research.label}}</a> (<script>putcountdown1({{research.time}}, "Terminé", "/game/research/");</script>)</div>
+	{% else %}<div><a href="/game/research/" title="Voir le laboratoire de recherches">Aucune recherche en cours</a></div>{% endif %}
 </td>
 </tr>
 </table>
@@ -131,11 +131,11 @@ function sig(signature){
 <td width="50%">
 	{% for item in constructionyards %}
 		<table class="clear" cellpadding="0" cellspacing="0">
-		<tr valign="top"><td><a href="/game/buildings/?planet={{item.planetid}}">{{item.planetname}} ({{item.galaxy}}.{{item.sector}}.{{item.planet}}) : </a></td><td>
+		<tr valign="top"><td><a href="/game/buildings/?planet={{item.id}}">{{item.name}} ({{item.g}}.{{item.s}}.{{item.p}}) : </a></td><td>
 			{% for building in item.buildings %}
-			<div>{% if building.destroy %}<span class="destroy">Destruction de {% endif %}{{building.building}} (<script>putcountdown1({{building.time}}, "Terminé", "/game/buildings/?planet={{item.planetid}}#{{building.buildingid}}");</script>){% if building.destroy %}</span>{% endif %}</div>
+			<div>{% if building.destroying %}<span class="destroy">Destruction de {% endif %}{{building.name}} (<script>putcountdown1({{building.time}}, "Terminé", "/game/buildings/?planet={{item.id}}#{{building.id}}");</script>){% if building.destroying %}</span>{% endif %}</div>
 			{% empty %}
-			<div><a href="/game/buildings/?planet={{item.planetid}}" title="Voir les infrastructures">Aucune construction en cours</a></div>
+			<div><a href="/game/buildings/?planet={{item.id}}" title="Voir les infrastructures">Aucune construction en cours</a></div>
 			{% endfor %}
 		</td></tr>
 		</table>
@@ -145,18 +145,15 @@ function sig(signature){
 <td width="50%">
 	{% for planet in shipyards %}
 		<table class="clear" cellpadding="0" cellspacing="0">
-		<tr valign="top"><td><a href="/game/shipyard/?planet={{planet.planetid}}">{{planet.planetname}} ({{planet.galaxy}}.{{planet.sector}}.{{planet.planet}}) : </a></td><td>
+		<tr valign="top"><td><a href="/game/shipyard/?planet={{planet.id}}">{{planet.name}} ({{planet.g}}.{{planet.s}}.{{planet.p}}) : </a></td><td>
 			{% if planet.ship %}
-			<div>{% if planet.recycle %}Recyclage de {% endif %}{{planet.shiplabel}} (<script>putcountdown1({{planet.time}}, "Terminé", "/game/shipyard/?planet={{planet.planetid}}&f=0#{{planet.shipid}}");</script>)</div>
-			{% endif %}
-			{% if planet.suspended %}
-			<div><a href="/game/shipyard/?planet={{planet.planetid}}" title="Voir le chantier spatial">En pause</a></div>
-			{% endif %}
-			{% if planet.waiting_resources %}
+			<div>{% if planet.ship.recycling %}Recyclage de {% endif %}{{planet.ship.name}} (<script>putcountdown1({{planet.ship.time}}, "Terminé", "/game/shipyard/?planet={{planet.id}}&f=0#{{planet.ship.id}}");</script>)</div>
+			{% elif planet.suspended %}
+			<div><a href="/game/shipyard/?planet={{planet.id}}" title="Voir le chantier spatial">En pause</a></div>
+			{% elif planet.waiting_resources %}
 			<div>{{planet.waiting_ship}} (<span class="error">en attente de ressources</span>)</a></div>
-			{% endif %}
-			{% if planet.none %}
-			<div><a href="/game/shipyard/?planet={{planet.planetid}}" title="Voir le chantier spatial">Aucune construction en cours</a></div>
+			{% else %}
+			<div><a href="/game/shipyard/?planet={{planet.id}}" title="Voir le chantier spatial">Aucune construction en cours</a></div>
 			{% endif %}
 		</td></tr>
 		</table>
