@@ -13,10 +13,10 @@ urlpatterns = [
 	path('',                RedirectView.as_view(url='/game/')),
     #---------------------------------------------------------------------------
     path('impersonate/',    include('impersonate.urls')),
-    path('game/',           include('game.urls')),
+    path('game/',           include('web_game.urls')),
     #---------------------------------------------------------------------------
 ] \
 + static('/favicon.ico', document_root=settings.STATIC_ROOT + '/favicon.ico') \
-+ static('/assets/', document_root=settings.STATIC_ROOT + '/') \
++ static('/assets/', document_root=settings.STATIC_ROOT + '/assets') \
 + static('/scripts/', document_root=settings.STATIC_ROOT + '/scripts')
 ################################################################################

@@ -12,9 +12,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 from .confidential import *
 #-------------------------------------------------------------------------------
-DEBUG = True
+DEBUG = False
 #-------------------------------------------------------------------------------
-ALLOWED_HOSTS = ['ng03.exileng.com']
+ALLOWED_HOSTS = ['s03.exileng.com']
 #-------------------------------------------------------------------------------
 ADMINS = [('Freddec', 'freddec.exileng@gmail.com')]
 MANAGERS = [('Freddec', 'freddec.exileng@gmail.com')]
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'impersonate',
     #---------------------------------------------------------------------------
     'jobs',
-    'game',
+    'web_game',
     #---------------------------------------------------------------------------
 ]
 ################################################################################
@@ -79,7 +79,7 @@ ROOT_URLCONF = 'server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'game/templates'), ],
+        'DIRS': [os.path.join(BASE_DIR, 'web_game/game/templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -110,7 +110,7 @@ DATABASES = {
         'PORT': '',
         'ATOMIC_REQUESTS': True,
         'OPTIONS': {
-            'options': '-c search_path=ng03,public'
+            'options': '-c search_path=exile_s03,static,public'
         },
     }
 }
@@ -139,6 +139,5 @@ USE_I10N = True
 
 
 ################################################################################
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'game/static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'web_game')
 ################################################################################
