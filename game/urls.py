@@ -7,11 +7,13 @@ from django.views.generic.base import RedirectView
 '''
 from game.views import error_500
 
-from game.views import connect
+'''
+from game.views import game_connection
+'''
 
 from game.views import alliance
 '''
-from game.views import alliance_creation
+from game.views import alliance_new
 '''
 from game.views import alliance_invitations
 from game.views import alliance_manage
@@ -71,9 +73,9 @@ handler500 = 'error_500.View'
 #-------------------------------------------------------------------------------
 urlpatterns = [
 	#---------------------------------------------------------------------------
-	path('', RedirectView.as_view(url='/game/connect/')),
-    #path('connect/', connect.View.as_view()),
+	path('', RedirectView.as_view(url='/game/connection/')),
+    path('connection/', game_connection.View.as_view()),
 	#---------------------------------------------------------------------------
-    path('alliance-creation/', alliance_creation.View.as_view()),
+    path('alliance-new/', alliance_new.View.as_view()),
 ]
 ################################################################################
