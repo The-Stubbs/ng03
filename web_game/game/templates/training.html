@@ -1,7 +1,6 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
-{% include '_tabs_planet.html' %}
 <script>
 function updateNeeds() {
 	var sc=getval('scientists');
@@ -18,71 +17,71 @@ function updateNeeds() {
 </script>
 <div id="training">
 <form action="/game/training/?a=train" method="post">{% csrf_token %}
-<div class="box">
-<div class="box-body header"><div class="col"> Unité</div"><div width=100>Minerai</div"><div width=100>Hydrocarbure</div"><div width=80>Crédits</div"><div width=100>Quantité</div"><div width='1%'>Entraînement</div></div>
+<table class="default" width=600>
+<tr class="header"><td>Unité</td><td width=100>Minerai</td><td width=100>Hydrocarbure</td><td width=80>Crédits</td><td width=100>Quantité</td><td width='1%'>Entraînement</td></tr>
 
-<div class="box-body item">
-	<div nowrap><img src="{{PATH_IMAGES}}/interface/scientists.gif" class=res title="Scientifiques" width="16" height="16"> Scientifique</div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/ore.gif" class=res title="Minerai" width=16 height=16> {{scientist_ore}}</div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" class=res title="Hydrocarbure" width=16 height=16> {{scientist_hydrocarbon}}</div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{scientist_credits}}</div>
-	<div align=center>{{scientists}} / {{scientists_capacity}}</div>
-	<div align=center>{% if input_scientists %}<input type=text name=scientists id=scientists size=5 maxlength=5 onkeyup="updateNeeds()" >{% endif %}{% if max_scientists %}<p class="error">Maximum atteint</p>{% endif %}</div>
-</div>
-<div class="box-body item">
-	<div nowrap><img src="{{PATH_IMAGES}}/interface/soldiers.gif" class=res title="Soldats" width="16" height="16"> Soldat</div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/ore.gif" class=res title="Minerai" width=16 height=16> {{soldier_ore}}</div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" class=res title="Hydrocarbure" width=16 height=16> {{soldier_hydrocarbon}}</div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{soldier_credits}}</div>
-	<div align=center{% if not_enough_soldiers %} class="low"{% endif %}>{{soldiers}} / {{soldiers_capacity}}</div>
-	<div align=center>{% if input_soldiers %}<input type=text name=soldiers id=soldiers size=5 maxlength=5 onkeyup="updateNeeds()" >{% endif %}{% if max_soldiers %}<p class="error">Maximum atteint</p>{% endif %}</div>
-</div>
-<div class="box-body item">
-	<div class="col"> &nbsp;</div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/ore.gif" class=res title="Minerai" width=16 height=16> <span id=totalore>0</span></div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" class=res title="Hydrocarbure" width=16 height=16> <span id=totalhydrocarbon>0</span></div>
-	<div align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> <span id=totalcredits>0</span></div>
-	<div class="col"> &nbsp;</div>
-	<div align=center><input type="submit" value="Entraîner"></div>
-</div>
+<tr class="item">
+	<td nowrap><img src="{{PATH_IMAGES}}/interface/scientists.gif" class=res title="Scientifiques" width="16" height="16"> Scientifique</td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/ore.gif" class=res title="Minerai" width=16 height=16> {{scientist_ore}}</td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" class=res title="Hydrocarbure" width=16 height=16> {{scientist_hydrocarbon}}</td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{scientist_credits}}</td>
+	<td align=center>{{scientists}} / {{scientists_capacity}}</td>
+	<td align=center>{% if input_scientists %}<input type=text name=scientists id=scientists size=5 maxlength=5 onkeyup="updateNeeds()" >{% endif %}{% if max_scientists %}<p class="error">Maximum atteint</p>{% endif %}</td>
+</tr>
+<tr class="item">
+	<td nowrap><img src="{{PATH_IMAGES}}/interface/soldiers.gif" class=res title="Soldats" width="16" height="16"> Soldat</td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/ore.gif" class=res title="Minerai" width=16 height=16> {{soldier_ore}}</td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" class=res title="Hydrocarbure" width=16 height=16> {{soldier_hydrocarbon}}</td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> {{soldier_credits}}</td>
+	<td align=center{% if not_enough_soldiers %} class="low"{% endif %}>{{soldiers}} / {{soldiers_capacity}}</td>
+	<td align=center>{% if input_soldiers %}<input type=text name=soldiers id=soldiers size=5 maxlength=5 onkeyup="updateNeeds()" >{% endif %}{% if max_soldiers %}<p class="error">Maximum atteint</p>{% endif %}</td>
+</tr>
+<tr class="item">
+	<td>&nbsp;</td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/ore.gif" class=res title="Minerai" width=16 height=16> <span id=totalore>0</span></td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" class=res title="Hydrocarbure" width=16 height=16> <span id=totalhydrocarbon>0</span></td>
+	<td align=right><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16> <span id=totalcredits>0</span></td>
+	<td>&nbsp;</td>
+	<td align=center><input type="submit" value="Entraîner"></td>
+</tr>
 
 {% if error %}
-<div class="box-body item"><div colspan=6 align=center>
+<tr class="item"><td colspan=6 align=center>
 {% if not_enough_workers %}<span class="error">Ressources ou nombre de travailleurs insuffisant.</span>{% endif %}
 {% if cant_train_now %}<span class="error">Vous ne disposez pas des bâtiments nécessaires pour la formation des scientifiques ou des soldats demandés.</span>{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
 
 {% if trainings %}
-<div class="box-body clear"><div colspan=6>&nbsp;</div></div>
-<div class="box-body category">
-	<div colspan=6>Entraînement en cours</div>
-</div>
+<tr class="clear"><td colspan=6>&nbsp;</td></tr>
+<tr class="category">
+	<td colspan=6>Entraînement en cours</td>
+</tr>
 	{% for item in trainings %}
-	<div align=right>
-		<div align=left colspan=3>{% if item.scientists %}<a href="/game/help/#scientists" title="Aide sur les scientifiques"><b>Scientifiques</a>{% endif %}{% if item.soldiers %}<a href="/game/help/#soldiers" title="Aide sur les soldats"><b>Soldats</a>{% endif %}</div>
-		<div class="col"> x{{item.quantity}}</div>
-		<div align=center><script>putcountdown1({{item.remainingtime}},"&nbsp;");</script></div>
-		<div align=center><script>putcountdown2({{item.remainingtime}}, "<a href='?planet={{planetid}}&a=cancel&q={{item.queueid}}'>annuler</a>", "<a href='/game/training/'>terminé</a>");</script></div>
-	</div>
+	<tr align=right>
+		<td align=left colspan=3>{% if item.scientists %}<a href="/game/help/#scientists" title="Aide sur les scientifiques"><b>Scientifiques</a>{% endif %}{% if item.soldiers %}<a href="/game/help/#soldiers" title="Aide sur les soldats"><b>Soldats</a>{% endif %}</td>
+		<td>x{{item.quantity}}</td>
+		<td align=center><script>putcountdown1({{item.remainingtime}},"&nbsp;");</script></td>
+		<td align=center><script>putcountdown2({{item.remainingtime}}, "<a href='?planet={{planetid}}&a=cancel&q={{item.queueid}}'>annuler</a>", "<a href='/game/training/'>terminé</a>");</script></td>
+	</tr>
 	{% endfor %}
 {% endif %}
 {% if queues %}
-<div class="box-body clear"><div colspan=9>&nbsp;</div></div>
-<div class="box-body category">
-	<div colspan=6>En attente</div>
-</div>
+<tr class="clear"><td colspan=9>&nbsp;</td></tr>
+<tr class="category">
+	<td colspan=6>En attente</td>
+</tr>
 	{% for item in queues %}
-	<div align=right>
-		<div align=left colspan=3>{% if item.scientists %}<a href="/game/help/#scientists" title="Aide sur les scientifiques"><b>Scientifiques</a>{% endif %}{% if item.soldiers %}<a href="/game/help/#soldiers" title="Aide sur les soldats"><b>Soldats</a>{% endif %}</div>
-		<div class="col"> x{{item.quantity}}</div>
-		<div align=center><script language="javascript">document.write(formattime({{item.remainingtime}}));</script></div>
-		<div align=center><a href="?planet={{planetid}}&a=cancel&q={{item.queueid}}">annuler</a></div>
-	</div>
+	<tr align=right>
+		<td align=left colspan=3>{% if item.scientists %}<a href="/game/help/#scientists" title="Aide sur les scientifiques"><b>Scientifiques</a>{% endif %}{% if item.soldiers %}<a href="/game/help/#soldiers" title="Aide sur les soldats"><b>Soldats</a>{% endif %}</td>
+		<td>x{{item.quantity}}</td>
+		<td align=center><script language="javascript">document.write(formattime({{item.remainingtime}}));</script></td>
+		<td align=center><a href="?planet={{planetid}}&a=cancel&q={{item.queueid}}">annuler</a></td>
+	</tr>
 	{% endfor %}
 {% endif %}
 
-</div>
+</table>
 </form>
 </div>
 {% endblock %}

@@ -1,25 +1,24 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
-{% include '_tabs_empire.html' %}
 <div id="fleets">
-<div class="box">
-<div class="box-body header">
-	<div class="col"> Planète</div><div class="col"> Vaisseaux</div>
-</div>
+<table class="default" width="450">
+<tr class="header">
+	<td>Planète</td><td>Vaisseaux</td>
+</tr>
 
 {% for planet in planets %}
-<div class="box-body smallitem">
-	<div class="col"> <b><a href="/game/orbit/?planet={{planet.planetid}}">{{planet.planetname}}</a>&nbsp;<a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planetp}}">({{planet.g}}.{{planet.s}}.{{planet.p}})</a></b></div>
-	<div align=left>{% for ship in planet.ships %}<div>{{ship.ship}} x{{ship.quantity|intcomma}}
+<tr class="smallitem">
+	<td><b><a href="/game/orbit/?planet={{planet.planetid}}">{{planet.planetname}}</a>&nbsp;<a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planetp}}">({{planet.g}}.{{planet.s}}.{{planet.p}})</a></b></td>
+	<td align=left>{% for ship in planet.ships %}<div>{{ship.ship}} x{{ship.quantity|intcomma}}
 	</div>{% endfor %}
-	</div>
-</div>
+	</td>
+</tr>
 {% empty %}
-<div class="box-body smallitem">
-	<div colspan="3" align="center">Aucun vaisseau en attente</div>
-</div>
+<tr class="smallitem">
+	<td colspan="3" align="center">Aucun vaisseau en attente</td>
+</tr>
 {% endfor %}
-</div>
+</table>
 </div>
 {% endblock %}

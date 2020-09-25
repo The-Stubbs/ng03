@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
-<div width=750 cellpadding=0 cellspacing=0>
-<div>
-<div align=center>
+<table width=750 cellpadding=0 cellspacing=0>
+<tr>
+<td align=center>
 	{% if nav %}
 	<div>
 	<ul class="htabs">
@@ -16,79 +16,79 @@
 	<div>
 
 {% if cat1_selected %}
-<div class="box">
-<div class="box-body title"><div colspan="4">Nos tributs</div></div>
-<div class="box-body header">
-<div class="col"> <a href="?cat={{cat}}&col=1{% if r1 %}&r=1{% endif %}">Alliance</a></div>
-<div class="col"> <a href="?cat={{cat}}&col=2{% if r2 %}&r=1{% endif %}">Créé le</a></div>
-<div class="col"> <a href="?cat={{cat}}&col=3{% if r3 %}&r=1{% endif %}">Somme</a></div>
-{% if cancel %}<div class="col"> Annuler</div>{% endif %}
-</div>
+<table class="default" width="100%">
+<tr class="title"><td colspan="4">Nos tributs</td></tr>
+<tr class="header">
+<td><a href="?cat={{cat}}&col=1{% if r1 %}&r=1{% endif %}">Alliance</a></td>
+<td><a href="?cat={{cat}}&col=2{% if r2 %}&r=1{% endif %}">Créé le</a></td>
+<td><a href="?cat={{cat}}&col=3{% if r3 %}&r=1{% endif %}">Somme</a></td>
+{% if cancel %}<td>Annuler</td>{% endif %}
+</tr>
 {% for item in items %}
-<div><div class="col"> {{item.place}}. <a href="/game/alliance/?tag={{item.tag}}">[{{item.tag}}] {{item.name}}</a></div>
-<div class="col"> {{item.created}}</div>
-<div align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{item.credits|intcomma}}</div>
-{% if cancel %}<div class="col"> <a href="?cat={{cat}}&a=cancel&tag={{item.tag}}">Annuler</a></div>{% endif %}
-</div>
+<tr><td>{{item.place}}. <a href="/game/alliance/?tag={{item.tag}}">[{{item.tag}}] {{item.name}}</a></td>
+<td>{{item.created}}</td>
+<td align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{item.credits|intcomma}}</td>
+{% if cancel %}<td><a href="?cat={{cat}}&a=cancel&tag={{item.tag}}">Annuler</a></td>{% endif %}
+</tr>
 {% endfor %}
 {% if none %}
-<div><div colspan=4 align=center>Aucun</div></div>
+<tr><td colspan=4 align=center>Aucun</td></tr>
 {% endif %}
-{% if message %}<div><div colspan=5 class="error">
+{% if message %}<tr><td colspan=5 class="error">
 {% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
 {% if unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
-</div>
+</table>
 {% endif %}
 
 {% if cat2_selected %}
-<div class="box">
-<div class="box-body title"><div colspan="4">Nos tributs perçus</div></div>
-<div class="box-body header">
-<div class="col"> <a href="?cat={{cat}}&col=1{% if r1 %}&r=1{% endif %}">Alliance</a></div>
-<div class="col"> <a href="?cat={{cat}}&col=2{% if r2 %}&r=1{% endif %}">Créé le</a></div>
-<div class="col"> <a href="?cat={{cat}}&col=3{% if r3 %}&r=1{% endif %}">Somme</a></div>
-<div class="col"> Prochain versement</div>
-</div>
+<table class="default" width="100%">
+<tr class="title"><td colspan="4">Nos tributs perçus</td></tr>
+<tr class="header">
+<td><a href="?cat={{cat}}&col=1{% if r1 %}&r=1{% endif %}">Alliance</a></td>
+<td><a href="?cat={{cat}}&col=2{% if r2 %}&r=1{% endif %}">Créé le</a></td>
+<td><a href="?cat={{cat}}&col=3{% if r3 %}&r=1{% endif %}">Somme</a></td>
+<td>Prochain versement</td>
+</tr>
 {% for item in items %}
-<div><div class="col"> {{item.place}}. <a href="/game/alliance/?tag={{item.tag}}">[{{item.tag}}] {{item.name}}</a></div>
-<div class="col"> {{item.created}}</div>
-<div align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{item.credits|intcomma}}</div>
-<div class="col"> {{item.next_transfer}}</div>
-</div>
+<tr><td>{{item.place}}. <a href="/game/alliance/?tag={{item.tag}}">[{{item.tag}}] {{item.name}}</a></td>
+<td>{{item.created}}</td>
+<td align="right"><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{item.credits|intcomma}}</td>
+<td>{{item.next_transfer}}</td>
+</tr>
 {% endfor %}
 {% if none %}
-<div><div colspan=4 align=center>Aucun</div></div>
+<tr><td colspan=4 align=center>Aucun</td></tr>
 {% endif %}
-</div>
+</table>
 {% endif %}
 
 {% if new %}
 <form action="?cat={{cat}}&a=new" method="post">{% csrf_token %}
-<div class="box">
-<div class="box-body title"><div colspan=2>Créer un virement automatique</div></div>
-<div><div colspan=2>Veuillez indiquer le tag de l'alliance à laquelle envoyer les crédits chaque jour.</div></div>
-<div><div class="col"> Alliance (tag)</div><div class="col"> <input type="text" name="tag" value="{{tag}}" maxlength=4></div></div>
-<div><div class="col"> Crédits</div><div class="col"> <input type="text" name="credits" value="{{credits}}" maxlength=10> crédits</div></div>
-<div><div colspan=2 align=center><input type="submit" name="submit" value="Envoyer"></div></div>
-{% if message %}<div><div colspan=2 class="error">
+<table class="default" width="100%">
+<tr class="title"><td colspan=2>Créer un virement automatique</td></tr>
+<tr><td colspan=2>Veuillez indiquer le tag de l'alliance à laquelle envoyer les crédits chaque jour.</td></tr>
+<tr><td>Alliance (tag)</td><td><input type="text" name="tag" value="{{tag}}" maxlength=4></td></tr>
+<tr><td>Crédits</td><td><input type="text" name="credits" value="{{credits}}" maxlength=10> crédits</td></tr>
+<tr><td colspan=2 align=center><input type="submit" name="submit" value="Envoyer"></td></tr>
+{% if message %}<tr><td colspan=2 class="error">
 {% if ok %}Tribut automatique créé{% endif %}
 {% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
 {% if unknown %}Aucune alliance avec un tel tag n'a été trouvée{% endif %}
 {% if already_exists %}Nous avons déjà un versement automatique avec cette alliance, annuler celui existant et recommencez.{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
-</div>
+</table>
 </form>
 
-</div>
-</div>
+</td>
+</table>
 {% endif %}
 
 </div>
 
-</div>
-</div>
-</div>
+</td>
+</tr>
+</table>
 {% endblock %}

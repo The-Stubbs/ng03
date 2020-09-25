@@ -8,9 +8,9 @@ function confirmBreakPact(tag,name) {
 }
 </script>
 
-<div width=750 cellpadding=0 cellspacing=0>
-<div>
-<div align="center">
+<table width=750 cellpadding=0 cellspacing=0>
+<tr>
+<td align="center">
 	{% if nav %}
 	<div>
 	<ul class="htabs">
@@ -23,117 +23,117 @@ function confirmBreakPact(tag,name) {
 	<div>
 
 {% if cat1_selected %}
-<div class="box">
-<div class="box-body title"><div colspan="5">Pacte(s) de non-agression</div></div>
-<div class="box-body header">
-<div class="col"> <a href="?col=1{% if r1 %}&r=1{% endif %}">Alliance</a></div>
-{% if score %}<div class="col"> <a href="?col=2{% if r2 %}&r=1{% endif %}">Score</a></div>{% endif %}
-<div class="col"> <a href="?col=3{% if r3 %}&r=1{% endif %}">Date de l'accord</a></div>
-<div class="col"> <a href="?col=4{% if r4 %}&r=1{% endif %}">Délai d'éxecution</a></div>
-<div class="col"> <a href="?col=5{% if r5 %}&r=1{% endif %}">Vision planètes</a></div>
-<div class="col"> <a href="?col=6{% if r6 %}&r=1{% endif %}">Partage radars</a></div>
-{% if break %}<div class="col"> Pacte</div>{% endif %}
-</div>
+<table class="default" width="100%">
+<tr class="title"><td colspan="5">Pacte(s) de non-agression</td></tr>
+<tr class="header">
+<td><a href="?col=1{% if r1 %}&r=1{% endif %}">Alliance</a></td>
+{% if score %}<td><a href="?col=2{% if r2 %}&r=1{% endif %}">Score</a></td>{% endif %}
+<td><a href="?col=3{% if r3 %}&r=1{% endif %}">Date de l'accord</a></td>
+<td><a href="?col=4{% if r4 %}&r=1{% endif %}">Délai d'éxecution</a></td>
+<td><a href="?col=5{% if r5 %}&r=1{% endif %}">Vision planètes</a></td>
+<td><a href="?col=6{% if r6 %}&r=1{% endif %}">Partage radars</a></td>
+{% if break %}<td>Pacte</td>{% endif %}
+</tr>
 {% for nap in naps %}
-<div><div class="col"> {{nap.place}}. <a href="/game/alliance/?tag={{nap.tag}}">[{{nap.tag}}] {{nap.name}}</a></div>
-{% if score %}<div align=right>{{nap.score|intcomma}}</div>{% endif %}
-<div class="col"> {{nap.created}}</div>
-<div align=right><script>
+<tr><td>{{nap.place}}. <a href="/game/alliance/?tag={{nap.tag}}">[{{nap.tag}}] {{nap.name}}</a></td>
+{% if score %}<td align=right>{{nap.score|intcomma}}</td>{% endif %}
+<td>{{nap.created}}</td>
+<td align=right><script>
 {% if nap.countdown %}putcountdown1({{nap.break_interval}}, "Rompu", "?"){% endif %}
 {% if nap.time %}document.write(formattime({{nap.break_interval}})){% endif %}
-</script></div>
-<div class="col"> 
+</script></td>
+<td>
 {% if nap.toggle_share_locs %}<a href="?cat={{cat}}&a=sharelocs&tag={{nap.tag}}">{% endif %}{% if nap.locs_shared %}Oui{% endif %}{% if nap.locs_not_shared %}Non{% endif %}{% if nap.toggle_share_locs %}</a>{% endif %}
-</div>
-<div class="col"> 
+</td>
+<td>
 {% if nap.toggle_share_radars %}<a href="?cat={{cat}}&a=shareradars&tag={{nap.tag}}">{% endif %}{% if nap.radars_shared %}Oui{% endif %}{% if nap.radars_not_shared %}Non{% endif %}{% if nap.toggle_share_radars %}</a>{% endif %}
-</div>
-{% if nap.break %}<div class="col"> <a href="?cat={{cat}}&a=break&tag={{nap.tag}}" onclick="return confirmBreakPact('{{nap.tag}}','{{nap.name}}')">Rompre</a></div>{% endif %}
-{% if nap.broken %}<div class="col"> Rompu</div>{% endif %}
-</div>
+</td>
+{% if nap.break %}<td><a href="?cat={{cat}}&a=break&tag={{nap.tag}}" onclick="return confirmBreakPact('{{nap.tag}}','{{nap.name}}')">Rompre</a></td>{% endif %}
+{% if nap.broken %}<td>Rompu</td>{% endif %}
+</tr>
 {% endfor %}
 {% if nonaps %}
-<div><div colspan=6 align=center>Aucun</div></div>
+<tr><td colspan=6 align=center>Aucun</td></tr>
 {% endif %}
-{% if message %}<div><div colspan=5 class="error">
+{% if message %}<tr><td colspan=5 class="error">
 {% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
 {% if unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
 {% if nap_not_found %}Nous n'avons aucun pacte avec cette alliance{% endif %}
 {% if not_enough_credits %}L'alliance ne dispose pas d'assez de crédits pour rompre le pacte{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
-</div>
+</table>
 {% endif %}
 
 {% if cat2_selected %}
-<div class="box">
-<div class="box-body title"><div colspan="6">Propositions de pactes de non-agression</div></div>
-<div class="box-body header">
-<div class="col"> Alliance</div><div class="col"> Date de demande</div><div class="col"> Demandé par</div><div class="col"> Délai d'exécution</div><div class="col"> Réponse</div>
+<table class="default" width="100%">
+<tr class="title"><td colspan="6">Propositions de pactes de non-agression</td></tr>
+<tr class="header">
+<td>Alliance</td><td>Date de demande</td><td>Demandé par</td><td>Délai d'exécution</td><td>Réponse</td>
 {% for proposition in propositions %}
-<div class="box-body smallitem"><div nowrap><a href="/game/alliance/?tag={{proposition.tag}}">[{{proposition.tag}}] {{proposition.name}}</a></div>
-<div nowrap>{{proposition.date}}</div><div class="col"> <a href="/game/mails/?to={{proposition.recruiter}}" title="Envoyer un message à {{proposition.recruiter}}">{{proposition.recruiter}}</a>&nbsp;</div>
-<div nowrap><script>document.write(formattime({{proposition.break_interval}}))</script></div>
-<div nowrap><a href="?cat={{cat}}&a=accept&tag={{proposition.tag}}">Accepter</a> - <a href="?cat={{cat}}&a=decline&tag={{proposition.tag}}">Refuser</a></div></div>
+<tr class="smallitem"><td nowrap><a href="/game/alliance/?tag={{proposition.tag}}">[{{proposition.tag}}] {{proposition.name}}</a></td>
+<td nowrap>{{proposition.date}}</td><td><a href="/game/mails/?to={{proposition.recruiter}}" title="Envoyer un message à {{proposition.recruiter}}">{{proposition.recruiter}}</a>&nbsp;</td>
+<td nowrap><script>document.write(formattime({{proposition.break_interval}}))</script></td>
+<td nowrap><a href="?cat={{cat}}&a=accept&tag={{proposition.tag}}">Accepter</a> - <a href="?cat={{cat}}&a=decline&tag={{proposition.tag}}">Refuser</a></td></tr>
 {% endfor %}
 {% if nopropositions %}
-<div><div colspan=6 align=center>Aucune proposition</div></div>
+<tr><td colspan=6 align=center>Aucune proposition</td></tr>
 {% endif %}
-</div>
-{% if message %}<div><div colspan=2 class="error">
+</td>
+{% if message %}<tr><td colspan=2 class="error">
 {% if ok %}PNA créé{% endif %}
 {% if too_many %}Trop de PNA sont déjà en cours par une des alliances concernées{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
-</div>
+</table>
 {% endif %}
 
 {% if cat3_selected %}
 <form action="?cat={{cat}}&a=new" method="post">{% csrf_token %}
-<div class="box">
-<div class="box-body title"><div colspan=2>Établir un pacte de non-agression</div></div>
-<div><div colspan=2>Veuillez indiquer le tag de l'alliance avec laquelle créer un PNA.<br/>
-Vous pouvez spécifier un délai d'exécution lorsqu'une alliance décidera de rompre le pacte. Maximum 72 heures : 3 jours.</div></div>
-<div><div class="col"> Alliance (tag)</div><div class="col"> <input type="text" name="tag" value="{{tag}}" maxlength=4></div></div>
-<div><div class="col"> Délai d'exécution</div><div class="col"> <input type="text" name="hours" value="{{hours}}" maxlength="2"> heures</div></div>
-<div><div colspan=2 align=center><input type="submit" name="submit" value="Envoyer"></div></div>
-{% if message %}<div><div colspan=2 class="error">
+<table class="default">
+<tr class="title"><td colspan=2>Établir un pacte de non-agression</td></tr>
+<tr><td colspan=2>Veuillez indiquer le tag de l'alliance avec laquelle créer un PNA.<br/>
+Vous pouvez spécifier un délai d'exécution lorsqu'une alliance décidera de rompre le pacte. Maximum 72 heures : 3 jours.</td></tr>
+<tr><td>Alliance (tag)</td><td><input type="text" name="tag" value="{{tag}}" maxlength=4></td></tr>
+<tr><td>Délai d'exécution</td><td><input type="text" name="hours" value="{{hours}}" maxlength="2"> heures</td></tr>
+<tr><td colspan=2 align=center><input type="submit" name="submit" value="Envoyer"></td></tr>
+{% if message %}<tr><td colspan=2 class="error">
 {% if ok %}Demande envoyée{% endif %}
 {% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
 {% if unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
 {% if already_naped %}Cette alliance a déjà un pacte avec notre alliance !{% endif %}
 {% if request_waiting %}Cette alliance nous a déjà offert un pacte, acceptons leur pacte{% endif %}
 {% if already_requested %}Nous avons déjà essayé d'établir un pacte avec cette alliance récemment{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
-</div>
+</table>
 </form>
 
 <br/>
 
-<div class="box">
-<div class="box-body title"><div colspan="7">Nos demandes de pacte aux autres alliances</div></div>
-<div class="box-body header">
-<div class="col"> Alliance</div><div class="col"> Date de demande</div><div class="col"> Demandé par</div><div class="col"> Délai d'exécution</div><div class="col"> Réponse</div><div class="col"> </div>
+<table class="default" width="100%">
+<tr class="title"><td colspan="7">Nos demandes de pacte aux autres alliances</td></tr>
+<tr class="header">
+<td>Alliance</td><td>Date de demande</td><td>Demandé par</td><td>Délai d'exécution</td><td>Réponse</td><td></td>
 {% for request in newnaps %}
-<div class="box-body smallitem"><div class="col"> <a href="/game/alliance/?tag={{request.tag}}">[{{request.tag}}] {{request.name}}</a></div>
-<div class="col"> {{request.date}}</div>
-<div class="col"> {{request.recruiter}}</div>
-<div nowrap><script>document.write(formattime({{request.break_interval}}))</script></div>
-<div nowrap>{% if request.waiting %}En attente{% endif %}{% if request.declined %}Refusée{% endif %}</div>
-<div class="col"> <a href="?cat={{cat}}&a=cancel&tag={{request.tag}}">Annuler</a></div>
-</div>
+<tr class="smallitem"><td><a href="/game/alliance/?tag={{request.tag}}">[{{request.tag}}] {{request.name}}</a></td>
+<td>{{request.date}}</td>
+<td>{{request.recruiter}}</td>
+<td nowrap><script>document.write(formattime({{request.break_interval}}))</script></td>
+<td nowrap>{% if request.waiting %}En attente{% endif %}{% if request.declined %}Refusée{% endif %}</td>
+<td><a href="?cat={{cat}}&a=cancel&tag={{request.tag}}">Annuler</a></td>
+</tr>
 {% endfor %}
 {% if norequests %}
-<div><div colspan=6 align=center>Aucune demande</div></div>
+<tr><td colspan=6 align=center>Aucune demande</td></tr>
 {% endif %}
-</div>
-</div>
+</td>
+</table>
 {% endif %}
 
 </div>
 
-</div>
-</div>
-</div>
+</td>
+</tr>
+</table>
 {% endblock %}

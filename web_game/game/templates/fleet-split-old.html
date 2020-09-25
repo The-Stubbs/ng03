@@ -163,109 +163,109 @@ function submitchanges() {
 <form method="post" action="?id={{fleetid}}" name="transfer" onsubmit="return submitchanges()">{% csrf_token %}
 <input type="hidden" name="split" value="1">
 
-<div class="box">
-	<div class="box-body title"><div colspan=4>Diviser la flotte {{fleetname}}</div></div>
-	<div class="box-body clear"><div class="col"> &nbsp;</div></div>
+<table class="default">
+	<tr class="title"><td colspan=4>Diviser la flotte {{fleetname}}</td></tr>
+	<tr class="clear"><td>&nbsp;</td></tr>
 	{% if error3 %}
-	<div><div colspan=4 align=center><span class="error">La flotte est occupée. Vous ne pouvez diviser une flotte qui combat, ni récolte ou voyage.</span></div></div>
+	<tr><td colspan=4 align=center><span class="error">La flotte est occupée. Vous ne pouvez diviser une flotte qui combat, ni récolte ou voyage.</span></td></tr>
 	{% endif %}
 	{% if error2 %}
-	<div><div colspan=4 align=center><span class="error">Le nom de la flotte est déjà utilisé, veuillez en choisir un autre.</span></div></div>
+	<tr><td colspan=4 align=center><span class="error">Le nom de la flotte est déjà utilisé, veuillez en choisir un autre.</span></td></tr>
 	{% endif %}
 	{% if error1 %}
-	<div><div colspan=4 align=center><span class="error">Le nom de la flotte est invalide, il ne peut contenir que des lettres (a-z) et des chiffres (0-9).</span></div></div>
+	<tr><td colspan=4 align=center><span class="error">Le nom de la flotte est invalide, il ne peut contenir que des lettres (a-z) et des chiffres (0-9).</span></td></tr>
 	{% endif %}
-	<div class="box-body category">
-	<div colspan=4 align="center">Nom de flotte <span style="margin:0px 10px;"><input type="text" name="newname" value="" maxlength="16"></span></div>
-	</div>
-	<div class="box-body clear"><div class="col"> &nbsp;</div></div>
-	<div class="box-body title"><div colspan=4>Transfert de vaisseaux</div></div>
-	<div class="box-body header"><div class="col"> Vaisseau</div><div class="col"> Cargo</div><div class="col"> Quantité</div><div class="col"> Transférer</div></div>
+	<tr class="category">
+	<td colspan=4 align="center">Nom de flotte <span style="margin:0px 10px;"><input type="text" name="newname" value="" maxlength="16"></span></td>
+	</tr>
+	<tr class="clear"><td>&nbsp;</td></tr>
+	<tr class="title"><td colspan=4>Transfert de vaisseaux</td></tr>
+	<tr class="header"><td>Vaisseau</td><td>Cargo</td><td>Quantité</td><td>Transférer</td></tr>
 	{% for ship in ships %}
-	<div>
-		<div class="col"> {{ship.name}}</div>
-		<div align="right">{{ship.cargo_capacity|intcomma}}</div>
-		<div align="right" name="origship{{ship.id}}">{{ship.quantity|intcomma}}</div>
-		<div class="col"> <input type="text" name="transfership{{ship.id}}" value="{{ship.transfer}}" size=8> <a href="javascript:setval('transfership{{ship.id}}', {{ship.quantity}})">max</a></div>
+	<tr>
+		<td>{{ship.name}}</td>
+		<td align="right">{{ship.cargo_capacity|intcomma}}</td>
+		<td align="right" name="origship{{ship.id}}">{{ship.quantity|intcomma}}</td>
+		<td><input type="text" name="transfership{{ship.id}}" value="{{ship.transfer}}" size=8> <a href="javascript:setval('transfership{{ship.id}}', {{ship.quantity}})">max</a></td>
 		<script>ships.push(new Array({{ship.id}},{{ship.cargo_capacity}},{{ship.quantity}}));</script>
-	</div>
+	</tr>
 	{% endfor %}
 
-	<div>
-	<div colspan>Nouvelle capacité {{fleetname}}</div>
-	<div colspan=3>
+	<tr>
+	<td colspan>Nouvelle capacité {{fleetname}}</td>
+	<td colspan=3>
 	<span id="capacityOrig">{{fleet_capacity}}</span> unités
-	</div>
-	</div>
-	<div>
-	<div colspan>Capacité nouvelle flotte</div>
-	<div colspan=3>
+	</td>
+	</tr>
+	<tr>
+	<td colspan>Capacité nouvelle flotte</td>
+	<td colspan=3>
 	<span id="capacityNew">0</span> unités
-	</div>
-	</div>
+	</td>
+	</tr>
 	
-	<div class="box-body clear"><div class="col"> &nbsp;</div></div>
+	<tr class="clear"><td>&nbsp;</td></tr>
 	
-	<div class="box-body title"><div colspan=4>Transfert de ressources</div></div>
+	<tr class="title"><td colspan=4>Transfert de ressources</td></tr>
 
-	<div class="box-body header"><div class="col"> Ressource</div"><div colspan=2>En soute</div><div class="col"> Transférer</div></div>
-	<div>
-		<div class="col"> Minerai</div>
-		<div colspan=2 align=right name="orig_ore">{{available_ore|intcomma}}</div>
-		<div class="col"> <input type="text" name="load_ore" value="{{t_ore}}" size=8> <a href="javascript:setmaximum('ore', {{available_ore}})">max</a></div>
-	</div>
-	<div>
-		<div class="col"> Hydrocarbures</div>
-		<div colspan=2 align=right name="orig_hydrocarbon">{{available_hydrocarbon|intcomma}}</div>
-		<div class="col"> <input type="text" name="load_hydrocarbon"  value="{{t_hydrocarbon}}"size=8> <a href="javascript:setmaximum('hydrocarbon', {{available_hydrocarbon}})">max</a></div>
-	</div>
-	<div>
-		<div class="col"> Scientifiques</div>
-		<div colspan=2 align=right name="orig_scientists">{{available_scientists|intcomma}}</div>
-		<div class="col"> <input type="text" name="load_scientists" value="{{t_scientists}}" size=8> <a href="javascript:setmaximum('scientists', {{available_scientists}})">max</a></div>
-	</div>
-	<div>
-		<div class="col"> Soldats</div>
-		<div colspan=2 align=right name="orig_soldiers">{{available_soldiers|intcomma}}</div>
-		<div class="col"> <input type="text" name="load_soldiers" value="{{t_soldiers}}" size=8> <a href="javascript:setmaximum('soldiers', {{available_soldiers}})">max</a></div>
-	</div>
-	<div>
-		<div class="col"> Travailleurs</div>
-		<div colspan=2 align=right name="orig_workers">{{available_workers|intcomma}}</div>
-		<div class="col"> <input type="text" name="load_workers" value="{{t_workers}}" size=8> <a href="javascript:setmaximum('workers', {{available_workers}})">max</a></div>
-	</div>
-	<div>
-		<div class="col"> &nbsp;</div>
-		<div colspan=3 align=center><a href="javascript:transfer_all()">Tout transférer</a></div>
-	</div>
+	<tr class="header"><td>Ressource</td><td colspan=2>En soute</td><td>Transférer</td></tr>
+	<tr>
+		<td>Minerai</td>
+		<td colspan=2 align=right name="orig_ore">{{available_ore|intcomma}}</td>
+		<td><input type="text" name="load_ore" value="{{t_ore}}" size=8> <a href="javascript:setmaximum('ore', {{available_ore}})">max</a></td>
+	</tr>
+	<tr>
+		<td>Hydrocarbures</td>
+		<td colspan=2 align=right name="orig_hydrocarbon">{{available_hydrocarbon|intcomma}}</td>
+		<td><input type="text" name="load_hydrocarbon"  value="{{t_hydrocarbon}}"size=8> <a href="javascript:setmaximum('hydrocarbon', {{available_hydrocarbon}})">max</a></td>
+	</tr>
+	<tr>
+		<td>Scientifiques</td>
+		<td colspan=2 align=right name="orig_scientists">{{available_scientists|intcomma}}</td>
+		<td><input type="text" name="load_scientists" value="{{t_scientists}}" size=8> <a href="javascript:setmaximum('scientists', {{available_scientists}})">max</a></td>
+	</tr>
+	<tr>
+		<td>Soldats</td>
+		<td colspan=2 align=right name="orig_soldiers">{{available_soldiers|intcomma}}</td>
+		<td><input type="text" name="load_soldiers" value="{{t_soldiers}}" size=8> <a href="javascript:setmaximum('soldiers', {{available_soldiers}})">max</a></td>
+	</tr>
+	<tr>
+		<td>Travailleurs</td>
+		<td colspan=2 align=right name="orig_workers">{{available_workers|intcomma}}</td>
+		<td><input type="text" name="load_workers" value="{{t_workers}}" size=8> <a href="javascript:setmaximum('workers', {{available_workers}})">max</a></td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td colspan=3 align=center><a href="javascript:transfer_all()">Tout transférer</a></td>
+	</tr>
 
-	<div>
-	<div class="col"> Utilisation cargo {{fleetname}}</div>
-	<div colspan=3>
+	<tr>
+	<td>Utilisation cargo {{fleetname}}</td>
+	<td colspan=3>
 	<span id="loadOrig">{{fleet_load}}</span> / <span id="capacityOrig2">{{fleet_capacity}}</span> unités
-	</div>
-	</div>
-	<div>
-	<div class="col"> Utilisation cargo nouvelle flotte</div>
-	<div colspan=3>
+	</td>
+	</tr>
+	<tr>
+	<td>Utilisation cargo nouvelle flotte</td>
+	<td colspan=3>
 	<span id="loadNew">0</span> / <span id="capacityNew2">0</span> unités
-	</div>
-	</div>
-	<div><div colspan=4 align="center">
+	</td>
+	</tr>
+	<tr><td colspan=4 align="center">
 	<input type="button" value="< Retour" onclick="window.location.href='/game/fleet/?id={{fleetid}}'">&nbsp;<input type="submit" value="Diviser">
-	</div></div>
+	</td></tr>
 
 	{% if error3 %}
-	<div><div colspan=4 align=center><span class="error">La flotte est occupée. Vous ne pouvez diviser une flotte qui combat, ni récolte ou voyage.</span></div></div>
+	<tr><td colspan=4 align=center><span class="error">La flotte est occupée. Vous ne pouvez diviser une flotte qui combat, ni récolte ou voyage.</span></td></tr>
 	{% endif %}
 	{% if error2 %}
-	<div><div colspan=4 align=center><span class="error">Le nom de la flotte est déjà utilisé, veuillez en choisir un autre.</span></div></div>
+	<tr><td colspan=4 align=center><span class="error">Le nom de la flotte est déjà utilisé, veuillez en choisir un autre.</span></td></tr>
 	{% endif %}
 	{% if error1 %}
-	<div><div colspan=4 align=center><span class="error">Le nom de la flotte est invalide, il ne peut contenir que des lettres (a-z) et des chiffres (0-9).</span></div></div>
+	<tr><td colspan=4 align=center><span class="error">Le nom de la flotte est invalide, il ne peut contenir que des lettres (a-z) et des chiffres (0-9).</span></td></tr>
 	{% endif %}
 
-</div>
+</table>
 </form>
 <script>window.setTimeout("updatecargo()", 200);</script>
 <script>window.setTimeout("updateresources()", 200);</script>

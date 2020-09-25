@@ -1,39 +1,38 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
-{% include '_tabs_alliance.html' %}
-
-<div class="box">
-<div class="box-body title"><div colspan="4">Alliances nous invitant à les rejoindre</div></div>
-<div class="box-body header"><div class="col"> Alliance</div><div class="col"> Réception de l'offre</div><div class="col"> Recruteur</div><div class="col"> Réponse</div></div>
+{% include 'header-credits.html' %}
+<table class="default" width="700">
+<tr class="title"><td colspan="4">Alliances nous invitant à les rejoindre</td></tr>
+<tr class="header"><td>Alliance</td><td>Réception de l'offre</td><td>Recruteur</td><td>Réponse</td></tr>
 {% for invitation in invitations %}
-<div><div class="col"> <a href="/game/alliance/?tag={{invitation.tag}}">[{{invitation.tag}}] {{invitation.name}}</a></div><div class="col"> {{invitation.date}}</div><div class="col"> {{invitation.recruiter}}</div"><div align=center>{% if invitation.accept %}<a href="?a=accept&tag={{invitation.tag}}">Accepter</a>{% endif %}{% if invitation.cant_accept %}<span class="error">Déjà dans une alliance</span>{% endif %} {% if invitation.cant_join %}<span class="error">Impossible de rejoindre</span>{% endif %} - <a href="?a=decline&tag={{invitation.tag}}">Refuser</a></div></div>
+<tr><td><a href="/game/alliance/?tag={{invitation.tag}}">[{{invitation.tag}}] {{invitation.name}}</a></td><td>{{invitation.date}}</td><td>{{invitation.recruiter}}</td><td align=center>{% if invitation.accept %}<a href="?a=accept&tag={{invitation.tag}}">Accepter</a>{% endif %}{% if invitation.cant_accept %}<span class="error">Déjà dans une alliance</span>{% endif %} {% if invitation.cant_join %}<span class="error">Impossible de rejoindre</span>{% endif %} - <a href="?a=decline&tag={{invitation.tag}}">Refuser</a></td></tr>
 {% endfor %}
 {% if noinvitations %}
-<div><div colspan="4" align="center">Aucune invitation</div></div>
+<tr><td colspan="4" align="center">Aucune invitation</td></tr>
 {% endif %}
 {% if max_members_reached %}
-<div class="box-body item"><div colspan="4" align="center" class="warning">Impossible de rejoindre l'alliance, elle a atteint son nombre maximal de membres.</div></div>
+<tr class="item"><td colspan="4" align="center" class="warning">Impossible de rejoindre l'alliance, elle a atteint son nombre maximal de membres.</td></tr>
 {% endif %}
 {% if cant_rejoin_previous_alliance %}
-<div class="box-body item"><div colspan="4" align="center" class="warning">Impossible de rejoindre cette alliance pour le moment, vous devez attendre plusieurs jours avant de pouvoir la rejoindre à nouveau.</div></div>
+<tr class="item"><td colspan="4" align="center" class="warning">Impossible de rejoindre cette alliance pour le moment, vous devez attendre plusieurs jours avant de pouvoir la rejoindre à nouveau.</td></tr>
 {% endif %}
-</div>
+</table>
 {% if cant_join %}
-<div class="box">
-<div class="box-body item"><div class="col"> <span class="warning">Vous êtes actuellement en train de quitter votre ancienne alliance, il vous est actuellement impossible de rejoindre une autre alliance.</span></div></div>
-</div>
+<table class="default" width="700">
+<tr class="item"><td><span class="warning">Vous êtes actuellement en train de quitter votre ancienne alliance, il vous est actuellement impossible de rejoindre une autre alliance.</span></td></tr>
+</table>
 {% endif %}
 {% if leave %}
 <br/>
 <form action="?a=leave" method="post">{% csrf_token %}
-<div class="default" width=700>
-<div class="box-body title"><div class="col"> Quitter l'alliance</div></div>
-<div class="box-body smallitem"><div align=center><input type="checkbox" class="checkbox" name="leave" id="leave" value="1"><label for="leave">Je quitte mon alliance actuelle{% if charges %}, les frais s'élevant à {{credits|intcomma}}&nbsp;crédits{% endif %}.</label><br/><br/><span class="warning">Attention, vous ne pourrez pas créer ou rejoindre d'alliance pendant {{hours_before_rejoin}} heures.</span></div></div>
-<div class="box-body smallitem"><div align=center><input type="submit" name="submit" value="Valider"></div></div>
-{% if too_many_leaving %}<div><div class="error">Trop de membres sont déjà en train de quitter l'alliance, vous devez attendre avant de pouvoir quitter à votre tour</div></div>{% endif %}
-{% if not_enough_credits %}<div><div class="error">Fonds insuffisants</div></div>{% endif %}
-</div>
+<table class="default" width=700>
+<tr class="title"><td>Quitter l'alliance</td></tr>
+<tr class="smallitem"><td align=center><input type="checkbox" class="checkbox" name="leave" id="leave" value="1"><label for="leave">Je quitte mon alliance actuelle{% if charges %}, les frais s'élevant à {{credits|intcomma}}&nbsp;crédits{% endif %}.</label><br/><br/><span class="warning">Attention, vous ne pourrez pas créer ou rejoindre d'alliance pendant {{hours_before_rejoin}} heures.</span></td></tr>
+<tr class="smallitem"><td align=center><input type="submit" name="submit" value="Valider"></td></tr>
+{% if too_many_leaving %}<tr><td class="error">Trop de membres sont déjà en train de quitter l'alliance, vous devez attendre avant de pouvoir quitter à votre tour</td></tr>{% endif %}
+{% if not_enough_credits %}<tr><td class="error">Fonds insuffisants</td></tr>{% endif %}
+</table>
 </form>
 {% endif %}
 {% endblock %}

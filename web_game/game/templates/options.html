@@ -3,104 +3,101 @@
 {% load bbcode_tags %}
 {% block content %}
 <form method="post" action="?cat={{cat}}">{% csrf_token %}
-<div cellpadding=0 cellspacing=0>
+<table cellpadding=0 cellspacing=0>
 
-<div>
-<div valign="top">
+<tr>
+<td valign="top">
 {% if nav %}
 <ul class="vtabs">
-     <li><a href="/game/nation/">Infos nation</a></li>
 	 {% if cat1 %}<li{% if cat1_selected %} class="active"{% endif %}><a href="?cat=1">Général</a></li>{% endif %}
 	 {% if cat2 %}<li{% if cat2_selected %} class="active"{% endif %}><a href="?cat=2">Options</a></li>{% endif %}
 	 {% if cat3 %}<li{% if cat3_selected %} class="active"{% endif %}><a href="?cat=3">Vacances</a></li>{% endif %}
 	 {% if cat4 %}<li{% if cat4_selected %} class="active"{% endif %}><a href="?cat=4">Rapports</a></li>{% endif %}
 	 {% if cat5 %}<li{% if cat5_selected %} class="active"{% endif %}><a href="?cat=5">Messagerie</a></li>{% endif %}
 	 {% if cat6 %}<li{% if cat6_selected %} class="active"{% endif %}><a href="?cat=6">Signature</a></li>{% endif %}
-     <li><a href="https://exileng.com/signout/">Déconnexion</a></li>
-     <li><a href="/game/notes/">Notes</a></li>
 </ul>
 {% endif %}
-</div>
-<div class="col"> 
+</td>
+<td>
 
-<div class="box">
-<div class="box-body title"><div colspan="2"><b>Modification du compte ({{name}})</b></div></div>
+<table class="default" width="650">
+<tr class="title"><td colspan="2"><b>Modification du compte ({{name}})</b></td></tr>
 
 {% if general %}
-<div class="box-body item">
-	<div colspan="2" align="center">
-		<div class="clear">
-			<div>
-				<div class="col"> 
+<tr class="item">
+	<td colspan="2" align="center">
+		<table class="clear">
+			<tr>
+				<td>
 					{% if avatar %}<img src="{{avatar_url}}" width="64" height="64" class="avatar">{% endif %}
 					{% if noavatar %}<img src="{{PATH_IMAGES}}/interface/noavatar.gif" width=64 height=64 class="avatar">{% endif %}
-				</div>
-				<div valign="top">{% if alliance %}<a href="/game/alliance/?tag={{alliancetag}}" class="self">[{{alliancetag}}]</a>&nbsp;{% endif %}<span class="self">{{name}}</span>, 
+				</td>
+				<td valign="top">{% if alliance %}<a href="/game/alliance/?tag={{alliancetag}}" class="self">[{{alliancetag}}]</a>&nbsp;{% endif %}<span class="self">{{name}}</span>, 
 				{% if alliance %}{{rank_label}}{% endif %}{% if noalliance %}indépendant{% endif %}
 				<br/>
 				Date d'arrivée:&nbsp;{{regdate}}<br/>
-			</div>
-		</div>
-	</div>
-</div>
+			</tr>
+		</table>
+	</td>
+</tr>
 
-<div class="box-body item"><div colspan="2"><p>{{description|safe|bbcode}}</p></div></div>
+<tr class="item"><td colspan="2"><p>{{description|safe|bbcode}}</p></td></tr>
 
-<div class="box-body clear"><div colspan="2">&nbsp;</div></div>
+<tr class="clear"><td colspan="2">&nbsp;</td></tr>
 
-<div class="box-body category"><div colspan="2">Configuration</div></div>
-<div class="box-body smallitem">
-	<div class="col"> URL avatar taille 64x64</div>
-	<div class="col"> <input type="text" name="avatar" id="avatar" value="{{avatar_url}}" style="width:350px;"></div>
-</div>
-<div class="box-body title"><div colspan="2">Description</div></div>
-<div class="box-body item"><div colspan="2" align="center"><textarea name="description" cols="65" rows="10">{{description}}</textarea><div align="center"><a href="/game/help/?cat=tags" target="_blank">Balises supportées</a></div></div></div>
+<tr class="category"><td colspan="2">Configuration</td></tr>
+<tr class="smallitem">
+	<td>URL avatar taille 64x64</td>
+	<td><input type="text" name="avatar" id="avatar" value="{{avatar_url}}" style="width:350px;"></td>
+</tr>
+<tr class="title"><td colspan="2">Description</td></tr>
+<tr class="item"><td colspan="2" align="center"><textarea name="description" cols="65" rows="10">{{description}}</textarea><div align="center"><a href="/game/help/?cat=tags" target="_blank">Balises supportées</a></div></td></tr>
 {% endif %}
 
 {% if cat2_selected %}
-<div class="box-body smallitem">
-	<div class="col"> Compteurs</div>
-	<div class="col"> 
+<tr class="smallitem">
+	<td>Compteurs</td>
+	<td>
 	<input type="checkbox" class="checkbox" name="timers_enabled" id="timers_enabled" value="1"{% if timers_enabled %} checked{% endif %}><label for="timers_enabled">Afficher le temps restant en temps réel</label>
-	</div>
-</div>
-<div class="box-body smallitem">
-	<div class="col"> Cartes de secteur</div>
-	<div class="col"> 
+	</td>
+</tr>
+<tr class="smallitem">
+	<td>Cartes de secteur</td>
+	<td>
 	<input type="checkbox" class="checkbox" name="display_alliance_planet_name" id="display_alliance_planet_name" value="1"{% if display_alliance_planet_name %} checked{% endif %}><label for="display_alliance_planet_name">Afficher le nom des planètes des membres de l'alliance</label>
-	</div>
-</div>
+	</td>
+</tr>
 
-<div><div colspan="2">&nbsp;</div></div>
+<tr><td colspan="2">&nbsp;</td></tr>
 
-<div class="box-body smallitem">
-	<div class="col"> Affichage du score</div>
-	<div class="col"> 
+<tr class="smallitem">
+	<td>Affichage du score</td>
+	<td>
 	<select name="score_visibility">
 		<option value="0"{% if score_visibility_0 %} selected{% endif %}>Personne</option>
 		<option value="1"{% if score_visibility_1 %} selected{% endif %}>Alliance uniquement</option>
 		<option value="2"{% if score_visibility_2 %} selected{% endif %}>Tout le monde (+10% gain de prestige)</option>
 	</select>
-	</div>
-</div>
+	</td>
+</tr>
 
-<div><div colspan="2">&nbsp;</div></div>
+<tr><td colspan="2">&nbsp;</td></tr>
 
-<div class="box-body smallitem">
-	<div class="col"> Skin de l'interface</div>
-	<div class="col"> 
+<tr class="smallitem">
+	<td>Skin de l'interface</td>
+	<td>
 	<select name="skin">
 		<option value="0"{% if skin_s_default %} selected{% endif %}>Par défaut</option>
 		<option value="1"{% if skin_s_transparent %} selected{% endif %}>Transparent (IE6 non supporté)</option>
 	</select>
-	</div>
-</div>
+	</td>
+</tr>
 
-<div><div colspan="2">&nbsp;</div></div>
+<tr><td colspan="2">&nbsp;</td></tr>
 
-<div class="box-body item{% if account_deleting %}del{% endif %}">
-	<div class="col"> Suppression du compte (2 jours de délai)</div>
-	<div class="col"> 
+<tr class="item{% if account_deleting %}del{% endif %}">
+	<td>Suppression du compte (2 jours de délai)</td>
+	<td>
 	{% if delete_account %}
 	<input type="checkbox" class="checkbox" name="delete" id="delete" value="1"><label for="delete">Cochez cette case pour supprimer votre compte</label>
 	{% endif %}
@@ -108,8 +105,8 @@
 	<input type="hidden" class="checkbox" name="deleting" value="1">
 	<input type="checkbox" class="checkbox" name="delete" id="delete" value="1" checked><label for="delete">Votre compte sera supprimé dans <script>putcountdown1({{remainingtime}},"");</script></label>
 	{% endif %}
-	</div>
-</div>
+	</td>
+</tr>
 {% endif %}
 
 {% if holidays %}
@@ -120,8 +117,8 @@ function checkCheckBox() {
 	return obj.checked;
 }
 </script>
-<div class="box-body item">
-	<div colspan="2"><div class=indent>Le mode vacances vous permet de protéger vos colonies pour une durée limitée.<br/>
+<tr class="item">
+	<td colspan="2"><div class=indent>Le mode vacances vous permet de protéger vos colonies pour une durée limitée.<br/>
 	Activer ce mode aura pour effet :
 	<ul>
 	<li>D'empêcher toute flotte ennemie de se mettre en orbite autour de vos planètes</li>
@@ -144,39 +141,39 @@ function checkCheckBox() {
 	<br/>
 	Le mode vacances dure au maximum 21 jours. Une fois expiré ou annulé, vous ne pourrez le réactiver qu'après une semaine de jeu.
 	</div>
-	</div>
-</div>
-<div class="box-body verysmallitem"><div colspan=2>{% if can_enable %}<input type="checkbox" name="holidays" id="holidays" class="checkbox" value="1"><label for="holidays">J'ai pris connaissance du mode vacances et je l'active pour une durée maximum de 21 jours.</label>{% endif %}{% if cant_enable %}Impossible d'activer le mode vacances avant : <script>putcountdown1({{remaining_time}}, "", "");</script>{% endif %}{% if start_in %}Le mode vacance sera activé dans : <script>putcountdown1({{remaining_time}}, "", "");</script>{% endif %}</div></div>
+	</td>
+</tr>
+<tr class="verysmallitem"><td colspan=2>{% if can_enable %}<input type="checkbox" name="holidays" id="holidays" class="checkbox" value="1"><label for="holidays">J'ai pris connaissance du mode vacances et je l'active pour une durée maximum de 21 jours.</label>{% endif %}{% if cant_enable %}Impossible d'activer le mode vacances avant : <script>putcountdown1({{remaining_time}}, "", "");</script>{% endif %}{% if start_in %}Le mode vacance sera activé dans : <script>putcountdown1({{remaining_time}}, "", "");</script>{% endif %}</td></tr>
 {% endif %}
 
 {% if reports %}
-<div class="box-body item"><div colspan="2"><div class=indent>Vous pouvez recevoir les événements du jeu directement vers votre email.<br/>Cochez les événements que vous souhaitez recevoir :</div></div></div>
-<div class="box-body item"><div colspan="2">
+<tr class="item"><td colspan="2"><div class=indent>Vous pouvez recevoir les événements du jeu directement vers votre email.<br/>Cochez les événements que vous souhaitez recevoir :</div></td></tr>
+<tr class="item"><td colspan="2">
 <div><input type="checkbox" name="r" id="r200" class="checkbox" value="200"{% if c200 %} checked{% endif %}><label for="r200">Rapport de bataille</label></div>
 <div><input type="checkbox" name="r" id="r201" class="checkbox" value="201"{% if c201 %} checked{% endif %}><label for="r201">Rapport de bataille (vainqueur)</label></div>
 <div><input type="checkbox" name="r" id="r210" class="checkbox" value="210"{% if c210 %} checked{% endif %}><label for="r210">Invasion ennemie : perte d'une planète</label></div>
 <div><input type="checkbox" name="r" id="r211" class="checkbox" value="211"{% if c211 %} checked{% endif %}><label for="r211">Invasion ennemie repoussée</label></div>
-</div></div>
+</td></tr>
 
-<div class="box-body item"><div colspan="2">
+<tr class="item"><td colspan="2">
 <div><input type="checkbox" name="r" id="r300" class="checkbox" value="300"{% if c300 %} checked{% endif %}><label for="r300">Recherche terminée</label></div>
 <div><input type="checkbox" name="r" id="r301" class="checkbox" value="301"{% if c301 %} checked{% endif %}><label for="r301">Construction terminée</label></div>
-</div></div>
+</td></tr>
 
-<div class="box-body item"><div colspan="2">
+<tr class="item"><td colspan="2">
 <div><input type="checkbox" name="r" id="r400" class="checkbox" value="400"{% if c400 %} checked{% endif %}><label for="r400">Flotte arrivée à destination</label></div>
 <div><input type="checkbox" name="r" id="r403" class="checkbox" value="403"{% if c403 %} checked{% endif %}><label for="r403">Flotte étrangère détectée à proximité d'une de nos planètes</label></div>
 <div><input type="checkbox" name="r" id="r401" class="checkbox" value="401"{% if c401 %} checked{% endif %}><label for="r401">Récolteurs pleins</label></div>
 <div><input type="checkbox" name="r" id="r402" class="checkbox" value="402"{% if c402 %} checked{% endif %}><label for="r402">Plus de matériau à recycler</label></div>
-</div></div>
+</td></tr>
 
-<div class="box-body item"><div colspan="2">
+<tr class="item"><td colspan="2">
 <div><input type="checkbox" name="r" id="r500" class="checkbox" value="500"{% if c500 %} checked{% endif %}><label for="r500">Vente effectuée</label></div>
 <div><input type="checkbox" name="r" id="r501" class="checkbox" value="501"{% if c501 %} checked{% endif %}><label for="r501">Cargaison reçue</label></div>
 <div><input type="checkbox" name="r" id="r502" class="checkbox" value="502"{% if c502 %} checked{% endif %}><label for="r502">Versement reçu</label></div>
-</div></div>
+</td></tr>
 
-<div class="box-body item"><div colspan="2">
+<tr class="item"><td colspan="2">
 <div><input type="checkbox" name="r" id="r700" class="checkbox" value="700"{% if c700 %} checked{% endif %}><label for="r700">Vaisseaux marchands détruits (Accident)</label></div>
 <div><input type="checkbox" name="r" id="r701" class="checkbox" value="701"{% if c701 %} checked{% endif %}><label for="r701">Vaisseaux marchands détruits (Pirates)</label></div>
 <div><input type="checkbox" name="r" id="r710" class="checkbox" value="710"{% if c710 %} checked{% endif %}><label for="r710">Bulletin d'alerte : tempête solaire</label></div>
@@ -185,54 +182,54 @@ function checkCheckBox() {
 <div><input type="checkbox" name="r" id="r721" class="checkbox" value="721"{% if c721 %} checked{% endif %}><label for="r721">Des émeutes éclatent</label></div>
 <div><input type="checkbox" name="r" id="r723" class="checkbox" value="723"{% if c723 %} checked{% endif %}><label for="r723">Accident de laboratoire</label></div>
 <div><input type="checkbox" name="r" id="r724" class="checkbox" value="724"{% if c724 %} checked{% endif %}><label for="r724">Flotte retardée par une avarie</label></div>
-</div></div>
+</td></tr>
 
-<div class="box-body item"><div colspan="2">
+<tr class="item"><td colspan="2">
 <div><input type="checkbox" name="r" id="r801" class="checkbox" value="801"{% if c801 %} checked{% endif %}><label for="r801">Contre-espionnage : notre Nation est espionnée</label></div>
 <div><input type="checkbox" name="r" id="r803" class="checkbox" value="803"{% if c803 %} checked{% endif %}><label for="r803">Contre-espionnage : une de nos planètes est espionnée</label></div>
 <div><input type="checkbox" name="r" id="r810" class="checkbox" value="810"{% if c810 %} checked{% endif %}><label for="r810">Rapport d'espionnage : nation</label></div>
 <div><input type="checkbox" name="r" id="r830" class="checkbox" value="830"{% if c830 %} checked{% endif %}><label for="r830">Rapport d'espionnage : planète</label></div>
-</div></div>
+</td></tr>
 {% endif %}
 
 {% if mail %}
-<div class="box-body item"><div colspan=2>
+<tr class=item><td colspan=2>
 <div class=indent>Entrez une signature qui apparaîtra automatiquement quand vous commencerez un nouveau message ou une réponse.</div>
-</div></div>
-<div class="box-body item"><div colspan=2 align=center>
+</td></tr>
+<tr class="item"><td colspan=2 align=center>
 <textarea name="autosignature" cols="75" rows="10">{{autosignature}}</textarea>
-</div></div>
+</td></tr>
 {% endif %}
 
 {% if signature %}
-<div class="box-body category"><div colspan="2">Signature forum</div></div>
-<div class="box-body item">
-	<div colspan="2" align="center">
+<tr class="category"><td colspan="2">Signature forum</td></tr>
+<tr class="item">
+	<td colspan="2" align="center">
 		<img src="https://forum.exil.pw/top/?player={{name}}&type=1&server={{universe}}">
 		<div align=left>
 		<p><b>Lien forum (bbcode, phpBB, IPB, PunBB ...)</b></p>
 		<p><input class="signaturelink" type="text" onclick="this.focus(); this.select();" value="[url=https://www.exil.pw][img]https://forum.exil.pw/top/?player={{name}}&type=1&server={{universe}}[/img][/url]" title="Ctrl+C pour copier vers le presse papier" alt="Ctrl+C pour copier vers le presse papier"></p>
 		</div>
-	</div>
-</div>
+	</td>
+</tr>
 {% if t %}
-<div class="box-body clear"><div colspan="2">&nbsp;</div></div>
-<div class="box-body category"><div colspan="2">Options</div></div>
-<div class="box-body item">
-	<div colspan="2">
+<tr class="clear"><td colspan="2">&nbsp;</td></tr>
+<tr class="category"><td colspan="2">Options</td></tr>
+<tr class="item">
+	<td colspan="2">
 		<div><input type="checkbox" name="sig" id="sig0" class="checkbox" value="alliance"><label for="sig0">Afficher le nom de son alliance</label></div>
 		<div><input type="checkbox" name="sig" id="sig1" class="checkbox" value="status"><label for="sig1">Afficher le grade de son alliance</label></div>
-	</div>
-</div>
+	</td>
+</tr>
 {% endif %}
 {% endif %}
 
 {% if submit %}
-<div><div colspan=2>&nbsp;</div></div>
-<div><div colspan=2 align=center><input type="submit" name="submit" id="submit" value="Envoyer" class="button"{% if holidays %} onclick="return checkCheckBox()"{% endif %}></div></div>
+<tr><td colspan=2>&nbsp;</td></tr>
+<tr><td colspan=2 align=center><input type="submit" name="submit" id="submit" value="Envoyer" class="button"{% if holidays %} onclick="return checkCheckBox()"{% endif %}></td></tr>
 {% endif %}
 {% if changes %}
-<div><div colspan=2><p class="error">
+<tr><td colspan=2><p class="error">
 {% if banned_email %}Les emails provenant de ce nom de domaine ne sont pas autorisés{% endif %}
 {% if check_email %}Email invalide, vérifiez votre saisie{% endif %}
 {% if check_password %}Le mot de passe est incorrect, trop court ou ne correspond pas à la vérification, vérifiez votre saisie{% endif %}
@@ -240,12 +237,12 @@ function checkCheckBox() {
 {% if done %}Changements effectués{% endif %}
 {% if mail_changed %}Changements effectués.<br/>Vous allez recevoir un courier sur votre nouvel email vous demandant de confirmer la modification.{% endif %}
 {% if mail_already_used %}Cet email est déjà utilisé par un autre compte.{% endif %}
-</p></div></div>
+</p></td></tr>
 {% endif %}
 
-</div>
-</div>
-</div>
-</div>
+</table>
+</td>
+</tr>
+</table>
 </form>
 {% endblock %}

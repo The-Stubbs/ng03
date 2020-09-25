@@ -21,7 +21,6 @@ class GlobalView(ExileMixin, View):
     displayAlliancePlanetName = True
     pagelogged = False
     selected_menu = ""
-    selected_tab = ""
     
     def pre_dispatch(self, request, *args, **kwargs):
         
@@ -308,26 +307,7 @@ class GlobalView(ExileMixin, View):
         # Initialize the menu template
 
         tpl = tpl_layout
-        
-        current_user = {}
-        tpl.AssignValue("current_user", current_user)
-        
-        current_user["name"] = self.oPlayerInfo["login"]
-        current_user["avatar"] = self.oPlayerInfo["avatar_url"]
-        current_user["credits"] = self.oPlayerInfo["credits"]
-        current_user["orientation"] = self.oPlayerInfo["orientation"]
-        current_user["prestige_points"] = self.oPlayerInfo["prestige_points"]
-        current_user["planet_count"] = self.oPlayerInfo["planets"]
-        current_user["planet_max"] = int(self.oPlayerInfo["mod_planets"])
-        
-        query = " SELECT id, name, galaxy, sector, planet, planet_floor" + \
-                " FROM nav_planet" + \
-                " WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId) + \
-                " ORDER BY id"
-        current_user["planets"] = oConnRows(query)
-        for planet in current_user["planets"]:
-            planet["img"] = self.planetimg(planet["id"], planet["planet_floor"])
-
+    
         # retrieve number of new messages & reports
         query = "SELECT (SELECT int4(COUNT(*)) FROM messages WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL)," + \
                 "(SELECT int4(COUNT(*)) FROM reports WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL AND datetime <= now());"
@@ -343,7 +323,33 @@ class GlobalView(ExileMixin, View):
             if self.oAllianceRights["leader"] or self.oAllianceRights["can_manage_description"] or self.oAllianceRights["can_manage_announce"]: tpl.Parse("show_management")
             if self.oAllianceRights["leader"] or self.oAllianceRights["can_see_reports"]: tpl.Parse("show_reports")
             if self.oAllianceRights["leader"] or self.oAllianceRights["can_see_members_info"]: tpl.Parse("show_members")
+    
+        if self.SecurityLevel >= 3:
+            tpl.Parse("show_mercenary")
             tpl.Parse("show_alliance")
+    
+        #
+        # Fill admin info
+        #
+        if self.request.session.get("privilege", 0) >= 100:
+            
+            query = "SELECT int4(MAX(id)) FROM log_http_errors"
+            oRs = oConnExecute(query)
+            last_errorid = oRs[0]
+    
+            query = "SELECT int4(MAX(id)) FROM log_notices"
+            oRs = oConnExecute(query)
+            last_noticeid = oRs[0]
+    
+            query = "SELECT COALESCE(dev_lasterror, 0), COALESCE(dev_lastnotice, 0) FROM users WHERE id=" + self.request.session.get(sLogonUserID)
+            oRs = oConnExecute(query)
+            if last_errorid > oRs[0]:
+                tpl.AssignValue("new_error", last_errorid-oRs[0])
+    
+            if last_noticeid > oRs[1]:
+                tpl.AssignValue("new_notice", last_noticeid-oRs[1])
+    
+            tpl.Parse("dev")
     
         tpl.AssignValue("planetid", self.CurrentPlanet)
     
@@ -352,8 +358,20 @@ class GlobalView(ExileMixin, View):
         tpl.AssignValue("cur_p", ((self.CurrentPlanet-1) % 25) + 1)
     
         tpl.AssignValue("selectedmenu", self.selected_menu.replace(".","_"))
-        tpl.AssignValue("selectedtab", self.selected_tab)
     
+        if self.selected_menu != "":
+            blockname = self.selected_menu + "_selected"
+    
+            while blockname != "":
+                tpl.Parse(blockname)
+    
+                i = blockname.rfind(".")
+                if i > 0: i = i - 1
+                blockname = blockname[:i]
+
+        # Assign the menu
+        tpl_layout.AssignValue("menu", True)
+
     def logpage(self):
         self.pagelogged = True
 
@@ -409,9 +427,6 @@ class GlobalView(ExileMixin, View):
                 tpl_layout.AssignValue("skin", self.oPlayerInfo["skin"])
             else:
                 tpl_layout.AssignValue("skin", "s_transparent")
-                
-            tpl_layout.AssignValue("credit_count", self.oPlayerInfo["credits"])
-            tpl_layout.AssignValue("prestige_count", self.oPlayerInfo["prestige_points"])
 
             #
             # Fill and parse the header template
@@ -530,9 +545,9 @@ class GlobalView(ExileMixin, View):
 
         query = "SELECT ""login"", privilege, lastlogin, credits, lastplanetid, deletion_date, score, planets, previous_score," +\
                 "alliance_id, alliance_rank, leave_alliance_datetime IS NULL AND (alliance_left IS NULL OR alliance_left < now()) AS can_join_alliance," +\
-                "credits_bankruptcy, mod_planets, mod_commanders, avatar_url," +\
+                "credits_bankruptcy, mod_planets, mod_commanders," +\
                 "ban_datetime, ban_expire, ban_reason, ban_reason_public, orientation, (paid_until IS NOT NULL AND paid_until > now()) AS paid," +\
-                " timers_enabled, display_alliance_planet_name, credits, prestige_points, (inframe IS NOT NULL AND inframe) AS inframe, COALESCE(skin, 's_default') AS skin," +\
+                " timers_enabled, display_alliance_planet_name, prestige_points, (inframe IS NOT NULL AND inframe) AS inframe, COALESCE(skin, 's_default') AS skin," +\
                 "lcid, security_level, (SELECT username FROM exile_nexus.users WHERE id=" + str(self.UserId) + ") AS username" +\
                 " FROM users" +\
                 " WHERE id=" + str(self.UserId)

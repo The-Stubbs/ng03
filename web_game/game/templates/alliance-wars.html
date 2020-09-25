@@ -6,9 +6,9 @@ function confirmStopWar(tag) {
 	return confirm("Êtes-vous sûr de vouloir arrêter la guerre avec [" + tag + "] ?");
 }
 </script>
-<div width="750" cellpadding=0 cellspacing=0>
-<div>
-<div align="center">
+<table width="750" cellpadding=0 cellspacing=0>
+<tr>
+<td align="center">
 	{% if nav %}
 	<div>
 	<ul class="htabs">
@@ -20,87 +20,87 @@ function confirmStopWar(tag) {
 	<div>
 
 {% if cat1_selected %}
-<div class="box">
-<div class="box-body header">
-<div class="col"> <a href="?col=1{% if r1 %}&r=1{% endif %}">Alliance</a></div>
-<div class="col"> <a href="?col=2{% if r2 %}&r=1{% endif %}">Déclarée le</a></div>
-<div class="col"> status</div>
-</div>
+<table class="default" width="100%">
+<tr class="header">
+<td><a href="?col=1{% if r1 %}&r=1{% endif %}">Alliance</a></td>
+<td><a href="?col=2{% if r2 %}&r=1{% endif %}">Déclarée le</a></td>
+<td>status</td>
+</tr>
 {% for war in wars %}
-<div><div class="col"> {{war.place}}. <a href="/game/alliance/?tag={{war.tag}}">[{{war.tag}}] {{war.name}}</a></div>
-<div class="col"> {{war.created}}<br/>{% if war.cant_fight %}Préparation en cours{% endif %}{% if war.can_fight %}{{war.next_bill}}{% endif %}</div>
-<div class="col"> 
+<tr><td>{{war.place}}. <a href="/game/alliance/?tag={{war.tag}}">[{{war.tag}}] {{war.name}}</a></td>
+<td>{{war.created}}<br/>{% if war.cant_fight %}Préparation en cours{% endif %}{% if war.can_fight %}{{war.next_bill}}{% endif %}</td>
+<td>
 {% if war.extend %}<a href="?cat={{cat}}&a=pay&tag={{war.tag}}">Étendre la guerre d'une semaine</a> <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16">{{war.cost|intcomma}}<br/>{% endif %}
 {% if war.ceasing %}Fin de guerre demandée (<script>putcountdown1({{war.time}}, "Terminé", "?")</script>){% endif %}
 {% if war.cease_requested %}<a href="?cat={{cat}}&a=cease&tag={{war.tag}}">Accepter la fin de la guerre (<script>putcountdown1({{war.time}}, "Terminé", "?")</script>)</a>{% endif %}
 {% if war.stop %}<a href="?cat={{cat}}&a=stop&tag={{war.tag}}" onclick="return confirmStopWar('{{war.tag}}')">Arrêter la guerre</a>{% endif %}
 {% if war.surrender %}&nbsp;{% endif %}
-</div>
-</div>
+</td>
+</tr>
 {% endfor %}
 {% if nowars %}
-<div><div colspan=5 align=center>Aucun</div></div>
+<tr><td colspan=5 align=center>Aucun</td></tr>
 {% endif %}
-{% if message %}<div><div colspan=5 class="error">
+{% if message %}<tr><td colspan=5 class="error">
 {% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
 {% if unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
 {% if war_not_found %}Nous ne sommes pas en guerre avec cette alliance{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
-</div>
+</table>
 {% endif %}
 
 {% if newwar %}
 <form action="?cat={{cat}}&a=new" method="post">{% csrf_token %}
-<div class="box">
-<div class="box-body title"><div colspan=2>Déclarer la guerre</div></div>
-<div><div colspan=2>Veuillez indiquer le tag de l'alliance à laquelle déclarer la guerre.{% if old %}<br/>
+<table class="default" width="100%">
+<tr class="title"><td colspan=2>Déclarer la guerre</td></tr>
+<tr><td colspan=2>Veuillez indiquer le tag de l'alliance à laquelle déclarer la guerre.{% if old %}<br/>
 La guerre n'est effective qu'après une période de préparation qui est égale au nombre de membres dans l'alliance ciblée en heure (20 membres = 20 heures de préparation).<br/>
-Tant que la guerre n'est pas effective, les combats contre les flottes de cette alliance ne seront pas automatiques et les invasions des planètes de cette alliance seront impossibles.{% endif %}</div></div>
-<div><div class="col"> Alliance (tag)</div><div class="col"> <input type="text" name="tag" value="{{tag}}" maxlength=4></div></div>
-<div><div class="col"> Coût par semaine</div><div class="col"> Le coût est proportionnel à la force des alliances actuellement en guerre contre l'alliance ciblée</div></div>
-<div><div colspan="2" align="center"><input type="submit" name="submit" value="Envoyer"></div></div>
-{% if message %}<div><div colspan="2" class="error">
+Tant que la guerre n'est pas effective, les combats contre les flottes de cette alliance ne seront pas automatiques et les invasions des planètes de cette alliance seront impossibles.{% endif %}</td></tr>
+<tr><td>Alliance (tag)</td><td><input type="text" name="tag" value="{{tag}}" maxlength=4></td></tr>
+<tr><td>Coût par semaine</td><td>Le coût est proportionnel à la force des alliances actuellement en guerre contre l'alliance ciblée</td></tr>
+<tr><td colspan="2" align="center"><input type="submit" name="submit" value="Envoyer"></td></tr>
+{% if message %}<tr><td colspan="2" class="error">
 {% if ok %}Guerre déclarée{% endif %}
 {% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
 {% if unknown %}Aucune alliance avec un tel tag n'a été trouvée{% endif %}
 {% if already_at_war %}Nous sommes déjà en guerre contre cette alliance !{% endif %}
 {% if not_enough_credits %}Pas assez de crédits !{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
-</div>
+</table>
 </form>
 
-</div>
-</div>
+</td>
+</table>
 {% endif %}
 
 {% if newwar_confirm %}
 <form action="?cat={{cat}}&a=new2" method="post">{% csrf_token %}
 <input type="hidden" name="tag" value="{{tag}}"/>
-<div class="box">
-<div class="box-body title"><div colspan="2">Déclaration de guerre</div></div>
-<div><div colspan=2>Veuillez confirmer la déclaration de guerre à l'encontre de l'alliance [{{tag}}] {{name}}.</div></div>
-<div><div class="col"> Coût </div><div class="col"> <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{cost|intcomma}}</div></div>
-<div><div colspan="2" align="center"><input type="submit" name="submit" value="Confirmer"></div></div>
-{% if message %}<div><div colspan="2" class="error">
+<table class="default" width="100%">
+<tr class="title"><td colspan="2">Déclaration de guerre</td></tr>
+<tr><td colspan=2>Veuillez confirmer la déclaration de guerre à l'encontre de l'alliance [{{tag}}] {{name}}.</td></tr>
+<tr><td>Coût </td><td><img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" class="icon" width="16" height="16"> {{cost|intcomma}}</td></tr>
+<tr><td colspan="2" align="center"><input type="submit" name="submit" value="Confirmer"></td></tr>
+{% if message %}<tr><td colspan="2" class="error">
 {% if ok %}Guerre déclarée{% endif %}
 {% if norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
 {% if unknown %}Aucune alliance avec un tel tag n'a été trouvée{% endif %}
 {% if already_at_war %}Nous sommes déjà en guerre contre cette alliance !{% endif %}
 {% if not_enough_credits %}Pas assez de crédits !{% endif %}
-</div></div>
+</td></tr>
 {% endif %}
-</div>
+</table>
 </form>
 
-</div>
-</div>
+</td>
+</table>
 {% endif %}
 
 </div>
 
-</div>
-</div>
-</div>
+</td>
+</tr>
+</table>
 {% endblock %}

@@ -85,12 +85,12 @@ function dShipList(id) {
 	for(var x in currentList){
 		var fleet = currentList[x];
 		if(fleet.id == id){
-			var s = '<div width="100%" style="margin:0px 5px">';
+			var s = '<table width="100%" style="margin:0px 5px">';
 
 			for(var i=1;i<fleet.ships.length;i++)
-				s+= '<div><div width="1%" nowrap align="right">' + fleet.ships[i].id + '</div"><div align="left">&nbsp;x&nbsp;' + fleet.ships[i].quantity + '</div></div>';
+				s+= '<tr><td width="1%" nowrap align="right">' + fleet.ships[i].id + '</td><td align="left">&nbsp;x&nbsp;' + fleet.ships[i].quantity + '</td></tr>';
 
-			return s + '</div>';
+			return s + '</table>';
 		}
 	}
 
@@ -101,12 +101,12 @@ function dCargo(id) {
 	for(var x in currentList){
 		var fleet = currentList[x];
 		if(fleet.id == id){
-			var s = '<div width="100%">';
+			var s = '<table width="100%">';
 			for(var i=1;i<fleet.resources.length;i++){
 				var res = fleet.resources[i];
-				s+='<div><div width="1%" nowrap><img src="{{PATH_IMAGES}}/interface/' + resources[res.id].image + '.gif" width="16" height="16" class="res">' + resources[res.id].label + '</div"><div width="1%" align="right" nowrap class="grey">' + res.quantity.n() + '</div></div>';
+				s+='<tr><td width="1%" nowrap><img src="{{PATH_IMAGES}}/interface/' + resources[res.id].image + '.gif" width="16" height="16" class="res">' + resources[res.id].label + '</td><td width="1%" align="right" nowrap class="grey">' + res.quantity.n() + '</td></tr>';
 			}
-			return s + '</div>';
+			return s + '</table>';
 		}
 	}
 
@@ -233,7 +233,7 @@ function sortBy(column) {
 function column(id, name) {
 	var arrow='none';
 	if(sortColumn == id) arrow = (sortReversed?'down':'up');
-	return '<div nowrap><a href="#" onclick="return sortBy(' + id + ')">' + name +'</a>&nbsp;<img src="{{PATH_IMAGES}}/interface/arrow' + arrow + '.gif" /></div>';
+	return '<td nowrap><a href="#" onclick="return sortBy(' + id + ')">' + name +'</a>&nbsp;<img src="{{PATH_IMAGES}}/interface/arrow' + arrow + '.gif" /></td>';
 }
 
 // when a countdown finishes, make the list be refreshed on next tab change
@@ -243,8 +243,8 @@ function displayFleetList(list) {
 	var ships = 0;
 	var signature = 0;
 	var cargoload = 0;
-	var s = '<div class="box">'+
-			'<div class="box-body header">' + column(0,'Nom') + column(1,'Vaisseaux') + column(2,'Signature') + column(3,'Cargaison') + column(4,'Position') + column(5,'Action') + column(6,'Commandant') + '</div>';
+	var s = '<table class="default" width="100%">'+
+			'<tr class="header">' + column(0,'Nom') + column(1,'Vaisseaux') + column(2,'Signature') + column(3,'Cargaison') + column(4,'Position') + column(5,'Action') + column(6,'Commandant') + '</tr>';
 
 	for(var i=0;i<list.length;i++){
 		var fleet = list[i];
@@ -253,18 +253,18 @@ function displayFleetList(list) {
 		signature += fleet.signature;
 		cargoload += fleet.cargoload;
 
-		var z = '<div class="box-body ' + (i%2==0?'even':'odd') + '"><div class="col"> ';
+		var z = '<tr class="' + (i%2==0?'even':'odd') + '"><td>';
 
 		if(fleet.stance == 1)
 			z+= '<img src="{{PATH_IMAGES}}/interface/stance_attack.gif" class="stance" alt="Attaque" width="10" height="10">';
 		else
 			z+= '<img src="{{PATH_IMAGES}}/interface/stance_defend.gif" class="stance" alt="Riposte" width="10" height="10">';
 
-		z+= '<a href="/game/fleet/?planet=' + fleet.position.id + '&id=' + fleet.id + '" id="fleet' + fleet.id + '" onmouseover="ddrivetip(dShipList(' + fleet.id + '))" onmouseout="hideddrivetip()" nowrap><b>' + fleet.name + '</b></div>';
+		z+= '<a href="/game/fleet/?planet=' + fleet.position.id + '&id=' + fleet.id + '" id="fleet' + fleet.id + '" onmouseover="ddrivetip(dShipList(' + fleet.id + '))" onmouseout="hideddrivetip()" nowrap><b>' + fleet.name + '</b></td>';
 
-		z+= '<div align="right" nowrap>' + fleet.size.n() + '</div"><div align="right" nowrap>' + fleet.signature.n() + '</div"><div align="right"' + (fleet.cargoload > 0?'onmouseover="ddrivetip(dCargo(' + fleet.id + '))"':'')+ 'onmouseout="hideddrivetip()" nowrap>' + fleet.cargoload.n() + ' / ' + fleet.cargocapacity.n() + '</div><div class="col"> ' + fleet.position + '</div>';
+		z+= '<td align="right" nowrap>' + fleet.size.n() + '</td><td align="right" nowrap>' + fleet.signature.n() + '</td><td align="right"' + (fleet.cargoload > 0?'onmouseover="ddrivetip(dCargo(' + fleet.id + '))"':'')+ 'onmouseout="hideddrivetip()" nowrap>' + fleet.cargoload.n() + ' / ' + fleet.cargocapacity.n() + '</td><td>' + fleet.position + '</td>';
 
-		z+= '<div nowrap>';
+		z+= '<td nowrap>';
 		switch(fleet.action){
 			case '0':
 				z+= '<span class="state_patrolling">En patrouille</span>';
@@ -285,20 +285,20 @@ function displayFleetList(list) {
 				z+= '<span class="state_fighting">En combat</span>';
 			break;
 		}
-		z+= '</div>';
+		z+= '</td>';
 
-		z+= '<div class="col"> <img src="{{PATH_IMAGES}}/interface/commander.gif" width="10" height="6" class="smallicon" title="Commandant">';
+		z+= '<td><img src="{{PATH_IMAGES}}/interface/commander.gif" width="10" height="6" class="smallicon" title="Commandant">';
 		if(fleet.commandername != '' && fleet.commandername != 'None')
 			z+= '<a href="/game/commanders/#'+escape(fleet.commandername)+'">' + fleet.commandername + '</a>';
 		else
 			z+= '-';
-		z+= '</div></div>';
+		z+= '</td></tr>';
 
 		s+= z;
 	}
 
-	s+= '<div class="box-body smallitem"><div nowrap>Total: <b>' + list.length.n() + '</b></div"><div nowrap align="right"><b>' + ships.n() + '</b></div"><div nowrap align="right"><b>' + signature.n() + '</b></div"><div nowrap align="right"><b>' + cargoload.n() + '</b></div"><div colspan="3" class="justhidden">&nbsp;</div></div>'+
-		'</div>';
+	s+= '<tr class="smallitem"><td nowrap>Total: <b>' + list.length.n() + '</b></td><td nowrap align="right"><b>' + ships.n() + '</b></td><td nowrap align="right"><b>' + signature.n() + '</b></td><td nowrap align="right"><b>' + cargoload.n() + '</b></td><td colspan="3" class="justhidden">&nbsp;</td></tr>'+
+		'</table>';
 
 	$('fleet_list').innerHTML = s;
 
@@ -550,9 +550,9 @@ function renameCategory(id){
 
 <div id="createcategoryform">
 <form action="#" method="get" onsubmit="return createCategory();">
-<div class="box">
-<div class="box-body title"><div class="col"> Créer une nouvelle catégorie</div></div>
-<div><div align="center">
+<table class="default" width="100%">
+<tr class="title"><td>Créer une nouvelle catégorie</td></tr>
+<tr><td align="center">
 Nom de catégorie : <input type="text" id="categoryname" maxlength="32"><br/>
 <br/>
 Une fois la catégorie créée, vous pouvez glisser/déposer les flottes vers les onglets de la page pour changer leurs catégories.<br/>
@@ -561,8 +561,8 @@ Pour supprimer une catégorie, double cliquez sur l'onglet et spécifiez un nouv
 <br/>
 <input type="submit" value="Créer">
 <br/>
-</div></div>
-</div>
+</td></tr>
+</table>
 </form>
 </div>
 

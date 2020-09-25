@@ -48,36 +48,36 @@ function submitchanges() {
 <div id="fleetships">
 <form method="post" action="/game/fleet-ships/?id={{fleetid}}" name="ships">{% csrf_token %}
 <input type="hidden" name="transfer_ships" value="1">
-<div class="box">
-	<div class="box-body title"><div colspan="6">{{fleetname}} - Gestion des vaisseaux</div></div>
-	<div class="box-body header"><div class="col"> Vaisseau</div><div class="col"> Cargo</div><div class="col"> Quantité</div><div class="col"> Retirer</div><div class="col"> Au sol</div><div class="col"> Ajouter</div></div>
+<table class="default">
+	<tr class="title"><td colspan="6">{{fleetname}} - Gestion des vaisseaux</td></tr>
+	<tr class="header"><td>Vaisseau</td><td>Cargo</td><td>Quantité</td><td>Retirer</td><td>Au sol</td><td>Ajouter</td></tr>
 	{% for ship in shiplist %}
-	<div>
-		<div class="col"> {{ship.name}}</div>
-		<div align=right>{{ship.cargo_capacity|intcomma}}</div>
-		<div align=right>{{ship.quantity|intcomma}}</div>
-		<div class="col"> <input type="text" id="removeship{{ship.id}}" name="removeship{{ship.id}}" size=8> <a href="javascript:setval('removeship{{ship.id}}', {{ship.quantity}})">max</a></div>
-		<div align=right>{{ship.available|intcomma}}</div>
-		<div class="col"> <input type="text" id="addship{{ship.id}}" name="addship{{ship.id}}" size=8> <a href="javascript:setval('addship{{ship.id}}', {{ship.available}})">max</a></div>
+	<tr>
+		<td>{{ship.name}}</td>
+		<td align=right>{{ship.cargo_capacity|intcomma}}</td>
+		<td align=right>{{ship.quantity|intcomma}}</td>
+		<td><input type="text" id="removeship{{ship.id}}" name="removeship{{ship.id}}" size=8> <a href="javascript:setval('removeship{{ship.id}}', {{ship.quantity}})">max</a></td>
+		<td align=right>{{ship.available|intcomma}}</td>
+		<td><input type="text" id="addship{{ship.id}}" name="addship{{ship.id}}" size=8> <a href="javascript:setval('addship{{ship.id}}', {{ship.available}})">max</a></td>
 		<script>ships.push(new Array({{ship.id}},{{ship.cargo_capacity}},{{ship.quantity}},{{ship.available}}));</script>
-	</div>
+	</tr>
 	{% endfor %}
-	<div>
-		<div colspan=2>&nbsp;</div>
-		<div colspan=2 align=center><a href="javascript:remove_all()">Tout retirer</a></div>
-		<div colspan=2 align=center><a href="javascript:add_all()">Tout ajouter</a></div>
-	</div>
+	<tr>
+		<td colspan=2>&nbsp;</td>
+		<td colspan=2 align=center><a href="javascript:remove_all()">Tout retirer</a></td>
+		<td colspan=2 align=center><a href="javascript:add_all()">Tout ajouter</a></td>
+	</tr>
 
-	<div>
-	<div class="col"> Capacité</div>
-	<div colspan=6>
+	<tr>
+	<td>Capacité</td>
+	<td colspan=6>
 	<span id="load">{{fleet_load|intcomma}}</span> / <span id="capacity">{{fleet_capacity|intcomma}}</span> unités
-	</div>
-	</div>
-	<div><div colspan=6 align=center>
+	</td>
+	</tr>
+	<tr><td colspan=6 align=center>
 	<input type="button" value="< Retour" onclick="javascript:window.location.href='/game/fleet/?id={{fleetid}}'">&nbsp;<input type="button" value="Transférer" onclick="javascript:submitchanges()">
-	</div></div>
-</div>
+	</td></tr>
+</table>
 </form>
 <script>window.setTimeout("updatecargo()", 100);</script>
 </div>

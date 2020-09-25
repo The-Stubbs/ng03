@@ -1,18 +1,17 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
-{% include '_tabs_empire.html' %}
 <div id="fleets_ships_stats">
-<div class="box">
-<div class="box-body header"><div class="col"> Vaisseau</div"><div width=100>Détruits</div"><div width=100>Perdus</div></div>
+<table class="default" width="800">
+<tr class="header"><td>Vaisseau</td><td width=100>Détruits</td><td width=100>Perdus</td></tr>
 
 {% if no_ship %}
-<div><div colspan="3"><p class="error">Vous n'avez détruit et/ou perdu aucun vaisseau.</p></div></div>
+<tr><td colspan="3"><p class="error">Vous n'avez détruit et/ou perdu aucun vaisseau.</p></td></tr>
 {% endif %}
 
 {% for category in cats %}
-<div class="box-body category">
-	<div colspan="3">
+<tr class="category">
+	<td colspan="3">
 	{% if category.id == 10 %}Vaisseaux utilitaires{% endif %}
 	{% if category.id == 11 %}Vaisseaux de déploiement{% endif %}
 	{% if category.id == 15 %}Vaisseaux tactiques{% endif %}
@@ -24,23 +23,23 @@
 	{% if category.id == 80 %}Titan{% endif %}
 	{% if category.id == 90 %}Plateforme de défense{% endif %}
 	&nbsp;
-	</div>
-</div>
+	</td>
+</tr>
 
 {% for ship in category.ships %}
-<div align="right" class="item">
-<div nowrap align="left"><a href="/game/help/?cat=ships#{{ship.id}}"><b>{{ship.name}}</b></a></div>
-<div align="right">{{ship.killed|intcomma}}</div>
-<div align="right">{{ship.lost|intcomma}}</div>
-</div>
+<tr align="right" class="item">
+<td nowrap align="left"><a href="/game/help/?cat=ships#{{ship.id}}"><b>{{ship.name}}</b></a></td>
+<td align="right">{{ship.killed|intcomma}}</td>
+<td align="right">{{ship.lost|intcomma}}</td>
+</tr>
 {% endfor %}
 
 {% endfor %}
 
 {% if total %}
-<div><div class="clear">&nbsp;</div"><div align="right">{{kills|intcomma}}</div"><div align="right">{{losses|intcomma}}</div></div>
+<tr><td class="clear">&nbsp;</td><td align="right">{{kills|intcomma}}</td><td align="right">{{losses|intcomma}}</td></tr>
 {% endif %}
 
-</div>
+</table>
 </div>
 {% endblock %}
