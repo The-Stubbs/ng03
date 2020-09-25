@@ -16,146 +16,49 @@ class View(GlobalView):
         
     def get(self, request, *args, **kwargs):
     
+        self.selected_tab = "empire"
         self.selected_menu = "overview"
         
         content = GetTemplate(request, "overview")
         data = content.data
 
-        # ---
+        # --- alliance data
+        
         if self.AllianceId:
 
             query = " SELECT announce, tag, name, defcon" + \
                     " FROM alliances" + \
                     " WHERE id=" + str(self.AllianceId)
-            row = oConnExecute(query)
-            if row:
-                data["alliance"] = {}
-                data["alliance"]["announce"] = row[0]
-                data["alliance"]["tag"] = row[1]
-                data["alliance"]["name"] = row[2]
-                data["alliance"]["defcon"] = row[3]
+            data["alliance"] = oConnRow(query)
 
-        # ---
-        data["orientation"] = self.oPlayerInfo["orientation"]
-        data["username"] = self.oPlayerInfo["login"]
-        data["rank_label"] = self.oAllianceRights["label"] if self.AllianceId else None
-        data["credit_count"] = self.oPlayerInfo["credits"]
-        data["dev_score"] = self.oPlayerInfo["score"]
-        data["dev_score_delta"] = self.oPlayerInfo["score"] - self.oPlayerInfo["previous_score"]                
-        data["prestige_count"] = self.oPlayerInfo["prestige_points"]
-        data["planet_max"] = int(self.oPlayerInfo["mod_planets"])
-
-        query = " SELECT int4(count(1))," + \
-                " (SELECT int4(count(1)) FROM vw_players WHERE score >= "+str(self.oPlayerInfo["score"])+")" + \
-                " FROM vw_players"
-        row = oConnExecute(query)
-        if row:
-            data["player_count"] = row[0]
-            data["dev_rank"] = row[1]
-
-        query = "SELECT (SELECT score_prestige FROM users WHERE id="+str(self.UserId)+"), (SELECT int4(count(1)) FROM vw_players WHERE score_prestige >= (SELECT score_prestige FROM users WHERE id=" + str(self.UserId) + "))"
-        oRs = oConnExecute(query)
-        if oRs:
-            data["battle_score"] = oRs[0]
-            data["battle_rank"] = oRs[1]
-
-        query = "SELECT count(1), sum(ore_production), sum(hydrocarbon_production), " + \
-                " int4(sum(workers)), int4(sum(scientists)), int4(sum(soldiers)), now()" + \
-                " FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId)
-        oRs = oConnExecute(query)
-        if oRs:
-            data["date"] = oRs[6]
-            data["planet_count"] = oRs[0]
-            data["prod_ore"] = oRs[1]
-            data["prod_hydro"] = oRs[2]
-
-            oRs2 = oConnExecute("SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0) FROM fleets WHERE ownerid=" + str(self.UserId))
-
-            data["worker_count"] = oRs[3] + oRs2[0]
-            data["scientist_count"] = oRs[4] + oRs2[1]
-            data["soldier_count"] = oRs[5] + oRs2[2]
-
-        # ---
-        constructionyards = []
-        content.AssignValue("constructionyards", constructionyards)
+        # --- empire stats data
         
-        query = "SELECT p.id, p.name, p.galaxy, p.sector, p.planet, b.buildingid, b.remaining_time, destroying" +\
-                " FROM nav_planet AS p" +\
-                "	 LEFT JOIN vw_buildings_under_construction2 AS b ON (p.id=b.planetid)"+\
-                " WHERE p.ownerid="+str(self.UserId)+\
-                " ORDER BY p.id, destroying, remaining_time DESC"
-        oRs = oConnExecuteAll(query)
-        lastplanet = -1
-        for item in oRs:
-            if item[0] != lastplanet:
-                lastplanet = item[0]
-                
-                planet = {"buildings":[]}
-                constructionyards.append(planet)
+        query = " SELECT orientation, ""login"" AS username, credits AS credit_count, alliances_ranks.label AS rank_label," + \
+                "   users.score AS dev_score, (users.score - users.previous_score) AS dev_score_delta, prestige_points AS prestige_count," + \
+                "   int4(mod_planets) AS planet_max, (SELECT int4(count(1)) AS player_count FROM vw_players)," + \
+                "   (SELECT int4(count(1)) AS dev_rank FROM vw_players WHERE vw_players.score >= users.score)," + \
+                "   score_prestige AS battle_score, (SELECT int4(count(1)) AS battle_rank FROM vw_players WHERE vw_players.score_prestige >= score_prestige)," + \
+                "   (SELECT count(1) AS planet_count FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=users.id)," + \
+                "   (SELECT sum(ore_production) AS prod_ore FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=users.id)," + \
+                "   (SELECT sum(hydrocarbon_production) AS prod_hydro FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=users.id)," + \
+                "   (SELECT ((SELECT sum(workers) FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=users.id) + (SELECT COALESCE(int4(sum(cargo_workers)), 0) FROM fleets WHERE ownerid=users.id)) AS worker_count)," + \
+                "   (SELECT ((SELECT sum(scientists) FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=users.id) + (SELECT COALESCE(int4(sum(cargo_scientists)), 0) FROM fleets WHERE ownerid=users.id)) AS scientist_count)," + \
+                "   (SELECT ((SELECT sum(soldiers) FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=users.id) + (SELECT COALESCE(int4(sum(cargo_soldiers)), 0) FROM fleets WHERE ownerid=users.id)) AS soldier_count)" + \
+                " FROM users" + \
+                "   LEFT JOIN alliances_ranks ON users.alliance_rank=alliances_ranks.rankid" + \
+                " WHERE users.id=" + str(self.UserId)
+        data["stats"] = oConnRow(query)
 
-                planet["id"] = item[0]
-                planet["name"] = item[1]
-                planet["g"] = item[2]
-                planet["s"] = item[3]
-                planet["p"] = item[4]
-
-            if item[5]:
-                building = {}
-                planet["buildings"].append(building)
-                
-                building["id"] = item[5]
-                building["name"] = getBuildingLabel(item[5])
-                building["time"] = item[6]
-                if item[7]: building["destroying"] = True
-
-        # ---
-        query = "SELECT p.id, p.name, p.galaxy, p.sector, p.planet, s.shipid, s.remaining_time, s.recycle, p.shipyard_next_continue IS NOT NULL, p.shipyard_suspended," +\
-                " (SELECT shipid FROM planet_ships_pending WHERE planetid=p.id ORDER BY start_time LIMIT 1)" +\
-                " FROM nav_planet AS p" +\
-                "	LEFT JOIN vw_ships_under_construction AS s ON (p.id=s.planetid AND p.ownerid=s.ownerid AND s.end_time IS NOT NULL)"+\
-                " WHERE (s.recycle OR EXISTS(SELECT 1 FROM planet_buildings WHERE (buildingid = 105 OR buildingid = 205) AND planetid=p.id)) AND p.ownerid=" + str(self.UserId) +\
-                " ORDER BY p.id, s.remaining_time DESC"
-        oRs = oConnExecuteAll(query)
-        if oRs:
-            constructionyards = []
-            content.AssignValue("shipyards", shipyards)
-            for item in oRs:
-                planet = {}
-                shipyards.append(planet)
-
-                planet["id"] = item[0]
-                planet["name"] = item[1]
-                planet["g"] = item[2]
-                planet["s"] = item[3]
-                planet["p"] = item[4]
-    
-                if item[5]:
-                    planet["ship"] = {}
-                    planet["ship"]["id"] = item[5]
-                    planet["ship"]["name"] = getShipLabel(item[5])
-                    planet["ship"]["time"] = item[6]
-                    planet["ship"]["recycling"] = item[7]
-                    
-                elif item[9]:
-                    planet["suspended"] = True
-                    
-                elif item[8]:
-                    planet["waiting_resources"] = True
-                    planet["waiting_ship"] = getShipLabel(item[10])
-
-        # ---
-        query = "SELECT researchid, int4(date_part('epoch', end_time-now()))" +\
-                " FROM researches_pending" +\
+        # --- pending research data
+        
+        query = " SELECT researchid AS id, db_research.label AS name, int4(date_part('epoch', end_time - now())) AS remaining_time" + \
+                " FROM researches_pending" + \
+                "   JOIN db_research ON researches_pending.researchid=db_research.id" + \
                 " WHERE userid=" + str(self.UserId)
-        oRs = oConnExecute(query)
-        if oRs:
-            research = {}
-            content.AssignValue("research", research)
-            
-            research["id"] = item[0]
-            research["name"] = getResearchLabel(item[0])
-            research["time"] = item[1]
+        data["research"] = oConnRow(query)
 
+        # --- moving fleets data
+        
         query =	"SELECT f.id, f.name, f.signature, f.ownerid, " +\
                 "COALESCE((( SELECT vw_relations.relation FROM vw_relations WHERE vw_relations.user1 = users.id AND vw_relations.user2 = f.ownerid)), -3) AS owner_relation, f.owner_name," +\
                 "f.planetid, f.planet_name, COALESCE((( SELECT vw_relations.relation FROM vw_relations WHERE vw_relations.user1 = users.id AND vw_relations.user2 = f.planet_ownerid)), -3) AS planet_owner_relation, f.planet_galaxy, f.planet_sector, f.planet_planet, " +\
@@ -168,94 +71,51 @@ class View(GlobalView):
                 " FROM users, vw_fleets f " +\
                 " WHERE users.id="+str(self.UserId)+" AND (""action"" = 1 OR ""action"" = -1) AND (ownerid="+str(self.UserId)+" OR (destplanetid IS NOT NULL AND destplanetid IN (SELECT id FROM nav_planet WHERE ownerid="+str(self.UserId)+")))" +\
                 " ORDER BY ownerid, COALESCE(remaining_time, 0)"
-        oRs = oConnExecuteAll(query)
-
-        fleets = []
-        i = 0
-        if oRs:
-            for item in oRs:
-    
+        rows = oConnRows(query)
+        if rows:
+            data["fleets"] = []
+            for row in rows:
+                
                 parseFleet = True
-                fleet = {}
+                if row["planetid"]:
     
-                fleet["signature"] = item[2]
-    
-                # display planet names f (from) and t (to)
-    
-                fleet["f_planetname"] = self.getPlanetName(item[8], item[23], item[18], item[7])
-                fleet["f_planetid"] = item[6]
-                fleet["f_g"] = item[9]
-                fleet["f_s"] = item[10]
-                fleet["f_p"] = item[11]
-                fleet["f_relation"] = item[8]
-    
-                fleet["t_planetname"] = self.getPlanetName(item[14], item[24], item[19], item[13])
-                fleet["t_planetid"] = item[12]
-                fleet["t_g"] = item[15]
-                fleet["t_s"] = item[16]
-                fleet["t_p"] = item[17]
-                fleet["t_relation"] = item[14]
-    
-                fleet["time"] = item[21]
-                
-                # retrieve the radar strength where the fleet comes from
-                extRadarStrength = item[23]
-                
-                # retrieve the radar strength where the fleet goes to
-                incRadarStrength = item[24]
-    
-                # if remaining time is longer than our radar range
-                if item[6]: # if origin planet is not null
-    
-                    if item[4] < rAlliance and (item[21] > sqrt(incRadarStrength)*6*1000/item[20]*3600) and (extRadarStrength == 0 or incRadarStrength == 0):
+                    if row["owner_relation"] < rAlliance and (row["remaining_time"] > sqrt(item["to_radarstrength"])*6*1000/item["speed"]*3600) and (extRadarStrength == 0 or incRadarStrength == 0):
                         parseFleet = False
                     else:
-                        # display origin if we have a radar or the planet owner is an ally or the fleet is in NAP
-                        if extRadarStrength > 0 or item[4] >= rAlliance or item[8] >= rFriend:
-                            fleet["movingfrom"] = True
-                        else:
-                            fleet["no_from"] = True
+                        if item["from_radarstrength"] > 0 or row["owner_relation"] >= rAlliance or item["planet_owner_relation"] >= rFriend: item["movingfrom"] = True
+                        else: item["no_from"] = True
     
-                if parseFleet:
-    
-                    # assign either fleet name or fleet owner name
-                    if item[4] == rSelf:
-                        # Assign fleet (id & name)
-                        fleet["id"] = item[0]
-                        fleet["name"] = item[1]
-                        if item[25]:
-                            fleet["attack"] = True
-                        else:
-                            fleet["defend"] = True
-                        fleet["owned"] = True
-                    elif item[4] == rAlliance:
-                        # assign fleet owner (id & name)
-                        fleet["id"] = item[3]
-                        fleet["name"] = item[5]
-                        if item[25]:
-                            fleet["attack"] = True
-                        else:
-                            fleet["defend"] = True
-                        fleet["ally"] = True
-                    elif item[4] == rFriend:
-                        # assign fleet owner (id & name)
-                        fleet["id"] = item[3]
-                        fleet["name"] = item[5]
-                        if item[25]:
-                            fleet["attack"] = True
-                        else:
-                            fleet["defend"] = True
-                        fleet["friend"] = True
-                    else:
-                        # assign fleet owner (id & name)
-                        fleet["id"] = item[3]
-                        fleet["name"] = item[5]
-                        fleet["hostile"] = True
-    
-                    fleets.append(fleet)
-                    i = i + 1
+                if parseFleet: data["fleets"].append(row)
 
-        if i==0: content.Parse("nofleets")
-        content.AssignValue("fleets", fleets)
+        # --- pending buildings data
         
+        query = " SELECT id, name, galaxy AS g, sector AS s, planet AS p" + \
+                " FROM nav_planet" + \
+                " WHERE ownerid=" + str(self.UserId) + \
+                " ORDER BY id"
+        data["constructionyards"] = oConnRows(query)
+        
+        for item in data["constructionyards"]:
+            query = "SELECT buildingid AS id, label AS name, remaining_time, destroying" + \
+                    " FROM vw_buildings_under_construction2"+ \
+                    "   JOIN db_buildings ON vw_buildings_under_construction2.buildingid=db_buildings.id" + \
+                    " WHERE planetid=" + str(item["id"]) + \
+                    " ORDER BY destroying, remaining_time DESC"
+            item["buildings"] = oConnRows(query)
+
+        # --- pending ships data
+        
+        query = " SELECT id, name, galaxy AS g, sector AS s, planet AS p" + \
+                " FROM nav_planet" + \
+                " WHERE EXISTS(SELECT 1 FROM planet_buildings WHERE (buildingid = 105 OR buildingid = 205) AND planetid=nav_planet.id) AND ownerid=" + str(self.UserId) + \
+                " ORDER BY id"
+        data["shipyards"] = oConnRows(query)
+        
+        for item in data["shipyards"]:
+            query = "SELECT shipid AS id, s.remaining_time, recycle AS recycling, shipyard_next_continue IS NOT NULL AS waiting, shipyard_suspended AS suspended," +\
+                    " (SELECT shipid AS waiting_ship_id FROM planet_ships_pending WHERE planetid=" + str(item["id"]) + " ORDER BY start_time LIMIT 1)" +\
+                    " FROM vw_ships_under_construction"+\
+                    " WHERE end_time IS NOT NULL AND planetid=" + str(item["id"])
+            item["ship"] = oConnRow(query)
+            
         return self.Display(content)

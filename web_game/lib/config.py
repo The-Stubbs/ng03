@@ -9,7 +9,7 @@ var connectionStrings = {
 '''
 
 registration = {
-    "enabled":True,
+    "enabled":False,
     "until":None
 }
 
@@ -21,7 +21,7 @@ allowedHolidays = True
 
 hasAdmins = False    # allow to send messages to administrators or not
 
-maintenance = False            # enable/disable maintenance
+maintenance = True            # enable/disable maintenance
 maintenance_msg = "Maintenance serveur ..." #"Mise à jour logiciel ...";#"Maintenance serveur" #Migration de la base de donnée";
 
 supportMail = "info@exil.pw"

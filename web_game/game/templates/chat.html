@@ -550,14 +550,14 @@ function displayPublicChats(list)
 
 	for(var i=1; i<list.length; i++)
 	{
-		s += '<tr><td><a href="#" onclick="joinChat2(\''+list[i][0]+'\',\'\'); return false;">' + list[i][0] + '</a></td><td>' + list[i][2] + '</td></tr>';
+		s += '<div><div class="col"> <a href="#" onclick="joinChat2(\''+list[i][0]+'\',\'\'); return false;">' + list[i][0] + '</a></div><div class="col"> ' + list[i][2] + '</div></div>';
 	}
 
-	s = '<table class="default" width="300">'+
-		'<tr class="title"><td colspan="2">Liste des salons publics</td></tr>'+
-		'<tr class="header"><td>Salon</td><td>En ligne</td></tr>'+
+	s = '<div class="box">'+
+		'<div class="box-body title"><div colspan="2">Liste des salons publics</div></div>'+
+		'<div class="box-body header"><div class="col"> Salon</div><div class="col"> En ligne</div></div>'+
 		s +
-		'</table>';
+		'</div>';
 
 	$('publicchats').innerHTML = s;
 }
@@ -569,24 +569,24 @@ function displayPublicChats(list)
 </ul>
 
 <form id="chatform" action="#" method=get onsubmit="return sendText();">{% csrf_token %}
-<table class="default" width="100%">
-<tr class="title"><td colspan="2">Salon</td></tr>
-<tr><td colspan="2"><div id="chat"></div></td></tr>
-<tr><td nowrap><input type="text" id="chatline" maxlength="256"></td><td width='1%'><input type="submit" value="Envoyer"></td></tr>
-<tr><td colspan=2>En ligne: <span id="onlineusers"></span></td></tr>
-</table>
+<div class="box">
+<div class="box-body title"><div colspan="2">Salon</div></div>
+<div><div colspan="2"><div id="chat"></div></div></div>
+<div><div nowrap><input type="text" id="chatline" maxlength="256"></div"><div width='1%'><input type="submit" value="Envoyer"></div></div>
+<div><div colspan=2>En ligne: <span id="onlineusers"></span></div></div>
+</div>
 </form>
 
 <div id="joinchatform">
 <form action="#" method=get onsubmit="return joinChat();">{% csrf_token %}
-<table class="default" width="100%">
-<tr class="title"><td colspan="2">Rejoindre un nouveau salon</td></tr>
-<tr><td colspan="2" align="center">
+<div class="box">
+<div class="box-body title"><div colspan="2">Rejoindre un nouveau salon</div></div>
+<div><div colspan="2" align="center">
 Nom du salon : <input type="text" id="chatname" maxlength="12"><br/><br/>
 Mot de passe : <input type="password" id="chatpassword" maxlength="16"><br/><br/>
 <input type="submit" value="Rejoindre">
-</td></tr>
-</table>
+</div></div>
+</div>
 </form>
 <div id="publicchats" align="center">
 </div>

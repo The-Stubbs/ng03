@@ -1,22 +1,23 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
+{% include '_tabs_empire.html' %}
 <div id="fleets">
-<table class="default" width="450">
-<tr class="header">
-	<td>Planète</td><td>Flottes</td>
-</tr>
+<div class="box">
+<div class="box-body header">
+	<div class="col"> Planète</div><div class="col"> Flottes</div>
+</div>
 
 {% for planet in planets %}
-<tr class="smallitem">
-	<td><b><a href="/game/orbit/?planet={{planet.planetid}}">{{planet.planetname}}</a>&nbsp;<a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planet.p}}">({{planet.g}}.{{planet.s}}.{{planet.p}})</a></b></td>
-	<td align=left>{% for fleet in planet.fleets %}<a title="Écrire à {{fleet.fleetowner}}" href="/game/mails/?subject=À propos de la flotte {{fleet.fleetname}}&to={{fleet.fleetowner}}" class={% if fleet.ally %}ally{% endif %}{% if fleet.friend %}friend{% endif %}{% if fleet.enemy %}enemy{% endif %}>{% if fleet.alliance %}[{{fleet.tag}}]{% endif %} {{fleet.fleetname}} ({{fleet.fleetsignature|intcomma}})</a><br/>{% endfor %}</td>
-</tr>
+<div class="box-body smallitem">
+	<div class="col"> <b><a href="/game/orbit/?planet={{planet.planetid}}">{{planet.planetname}}</a>&nbsp;<a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planet.p}}">({{planet.g}}.{{planet.s}}.{{planet.p}})</a></b></div>
+	<div align=left>{% for fleet in planet.fleets %}<a title="Écrire à {{fleet.fleetowner}}" href="/game/mails/?subject=À propos de la flotte {{fleet.fleetname}}&to={{fleet.fleetowner}}" class={% if fleet.ally %}ally{% endif %}{% if fleet.friend %}friend{% endif %}{% if fleet.enemy %}enemy{% endif %}>{% if fleet.alliance %}[{{fleet.tag}}]{% endif %} {{fleet.fleetname}} ({{fleet.fleetsignature|intcomma}})</a><br/>{% endfor %}</div>
+</div>
 {% empty %}
-<tr class="smallitem">
-	<td colspan="3" align="center">Aucune flotte étrangère en orbite de nos planètes</td>
-</tr>
+<div class="box-body smallitem">
+	<div colspan="3" align="center">Aucune flotte étrangère en orbite de nos planètes</div>
+</div>
 {% endfor %}
-</table>
+</div>
 </div>
 {% endblock %}

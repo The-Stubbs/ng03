@@ -9,7 +9,8 @@ class View(GlobalView):
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
 
-        self.selected_menu = "planets"
+        self.selected_tab = "planets"
+        self.selected_menu = "overview"
 
         return self.ListPlanets()
 

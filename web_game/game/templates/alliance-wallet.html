@@ -1,22 +1,22 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
-<table width=750>
-<tr>
-<td align=center>
+<div width=750>
+<div>
+<div align=center>
 	<div>
-	<table class="default">
-	<tr class="item"><td>
-	<table class="clear">
-		<tr>
-			<td align=left rowspan=4><img src="{{PATH_IMAGES}}/interface/wallet.jpg" class="wallet" width=64 height=64></td>
-			<td>Solde: {{credits|intcomma}}</td>
-		</tr>
-		<tr><td>Dernière 24 heures: {{last24h|intcomma}}</td></tr>
-		<tr><td>Taxes: {{tax|floatformat:1}}%{% if notax %} (exonéré){% endif %}</td></tr>
-	</table>
-	</td></tr>
-	</table>
+	<div class="box">
+	<div class="box-body item"><div class="col"> 
+	<div class="clear">
+		<div>
+			<div align=left rowspan=4><img src="{{PATH_IMAGES}}/interface/wallet.jpg" class="wallet" width=64 height=64></div>
+			<div class="col"> Solde: {{credits|intcomma}}</div>
+		</div>
+		<div><div class="col"> Dernière 24 heures: {{last24h|intcomma}}</div></div>
+		<div><div class="col"> Taxes: {{tax|floatformat:1}}%{% if notax %} (exonéré){% endif %}</div></div>
+	</div>
+	</div></div>
+	</div>
 	</div>
 
 	<ul class="htabs">
@@ -30,7 +30,7 @@
 	<div>
 	{% block page %}{% endblock %}
 	</div>
-</td>
-</tr>
-</table>
+</div>
+</div>
+</div>
 {% endblock %}

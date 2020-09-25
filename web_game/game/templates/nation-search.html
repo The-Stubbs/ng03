@@ -1,12 +1,12 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
-<table class="default">
+<div class="box">
 
-<tr class="title"><td><b>Nations</b></td></tr>
+<div class="box-body title"><div class="col"> <b>Nations</b></div></div>
 
 {% for nation in nations %}
-<tr><td><a href="?name={{nation.nation}}">{{nation.nation}}</a></td></tr>
+<div><div class="col"> <a href="?name={{nation.nation}}">{{nation.nation}}</a></div></div>
 {% endfor %}
-</table>
+</div>
 {% endblock %}

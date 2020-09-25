@@ -1,0 +1,18 @@
+{% if show_alliance %}
+<ul class="htabs">
+    <li><a href="/game/alliance/">Vue d'ensemble</a></li>
+    {% if show_management %}<li><a href="/game/alliance-manage/">Gestion</a></li>{% endif %}
+    {% if show_members %}<li><a href="/game/alliance-members/">Membres</a></li>{% endif %}
+    <li><a href="/game/alliance-naps/">PNA</a></li>
+    <li><a href="/game/alliance-tributes/">Tributs</a></li>
+    <li><a href="/game/alliance-wars/">Guerres</a></li>
+    <li><a href="/game/alliance-wallet/">Portefeuille</a></li>
+    {% if show_reports %}<li><a href="/game/alliance-reports/">Rapports</a></li>{% endif %}
+    <li><a href="/game/alliance-invitations/">Invitations</a></li>
+</ul>
+{% else %}
+<ul class="htabs">
+     <li><a href="/game/alliance-create/">Création</a></li>
+     <li><a href="/game/alliance-invitations/">Invitations</a></li>
+</ul>
+{% endif %}

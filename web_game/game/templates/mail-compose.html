@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block content %}
-{% include 'header-credits.html' %}
+{% include '_tabs_mail.html' %}
 <script>
 function setaddressee(obj,input){if(obj.selectedIndex > 0) input.value = obj.options[obj.selectedIndex].text; else input.value = '';}
 
@@ -48,23 +48,23 @@ function showAddressee(obj)
 }
 </script>
 <form method="post" name="newmail" action="?" {% if send_credits %} onsubmit="return validateAmount();"{% endif %}>{% csrf_token %}
-<table class="default" width="100%">
-	<tr class="title"><td colspan=2>Nouveau message</td></tr>
-	<tr class="item">
-		<td width="1%">Destinataire</td>
-		<td><select name="type" id="type" onchange="javascript:showAddressee(this)">
+<div class="box">
+	<div class="box-body title"><div colspan=2>Nouveau message</div></div>
+	<div class="box-body item">
+		<div width="1%">Destinataire</div>
+		<div class="col"> <select name="type" id="type" onchange="javascript:showAddressee(this)">
 		{% if sendadmins_ %}<option value="admins"{% if sendadmins_selected %} selected{% endif %}>Administrateurs</option>{% endif %}
 		{% if sendalliance %}<option value="alliance"{% if sendalliance_selected %} selected{% endif %}>Alliance</option>{% endif %}
-		<option value="nation"{% if nation_selected %} selected{% endif %}>Nation</option></select></td>
-	</tr>
-	<tr class="item" id="nation"{% if hidenation %} style="display:none; visibility:hidden"{% endif %}>
-		<td width="1%">Nation</td>
-		<td><input type="text" id=to name=to value="{{mailto}}" size=36 maxlength=128>&nbsp;&nbsp;<select onchange="return setaddressee(this,to)"><option>Derniers contacts</option>{% for to in tos %}<option>{{to.to_user}}</option>{% endfor %}</select></td>
-	</tr>
+		<option value="nation"{% if nation_selected %} selected{% endif %}>Nation</option></select></div>
+	</div>
+	<div class="box-body item" id="nation"{% if hidenation %} style="display:none; visibility:hidden"{% endif %}>
+		<div width="1%">Nation</div>
+		<div class="col"> <input type="text" id=to name=to value="{{mailto}}" size=36 maxlength=128>&nbsp;&nbsp;<select onchange="return setaddressee(this,to)"><option>Derniers contacts</option>{% for to in tos %}<option>{{to.to_user}}</option>{% endfor %}</select></div>
+	</div>
 
-	<tr class="item">
-		<td width="1%">Objet</td>
-		<td nowrap><input type="text" name="subject" value="{{subject}}" size=64 maxlength=64>
+	<div class="box-body item">
+		<div width="1%">Objet</div>
+		<div nowrap><input type="text" name="subject" value="{{subject}}" size=64 maxlength=64>
 		{% if send_credits %}
 		<span id="sendcreditsbox"{% if send_credits_hide %} style="visibility:hidden"{% endif %}>&nbsp;
 		<input type="checkbox" class="checkbox" name="sendcredits" id="sendcredits" value="1">
@@ -75,22 +75,22 @@ function showAddressee(obj)
 		{% endif %}&nbsp;
 		<input type="checkbox" class="checkbox" name="bbcode" id="bbcode" value="1"{% if bbcode %} checked{% endif %}>
 		<label for="bbcode">Utiliser bbcode</label>
-		</td>
-	</tr>
-	<tr class="item">
-		<td width="1%">Message</td>
-		<td><textarea name="message" cols=45 rows=20 style="width:100%">{{message}}</textarea>
+		</div>
+	</div>
+	<div class="box-body item">
+		<div width="1%">Message</div>
+		<div class="col"> <textarea name="message" cols=45 rows=20 style="width:100%">{{message}}</textarea>
 		<p class="error">Pas d'insulte, restez courtois, merci.</p>
-		</td>
-	</tr>
+		</div>
+	</div>
 
-	<tr class="item">
-		<td colspan="2" align="center"><input type="button" value="< Retour" onclick="javascript:window.location.href='/game/mails/'" class="button100">&nbsp;<input type="submit" name="sendmail" value="Envoyer >" class="button100"></td>
-	</tr>
+	<div class="box-body item">
+		<div colspan="2" align="center"><input type="button" value="< Retour" onclick="javascript:window.location.href='/game/mails/'" class="button100">&nbsp;<input type="submit" name="sendmail" value="Envoyer >" class="button100"></div>
+	</div>
 
 	{% if error %}
-	<tr class="item">
-		<td colspan="2">
+	<div class="box-body item">
+		<div colspan="2">
 		<p class="error">
 		{% if mail_unknown_from %}Expéditeur inconnu{% endif %}
 		{% if mail_unknown_to %}Destinataire inconnu<script>onload=function() { document.newmail.to.focus(); document.newmail.to.value = document.newmail.to.value; }</script>{% endif %}
@@ -101,10 +101,10 @@ function showAddressee(obj)
 		{% if blocked %}Vous êtes ignoré : le destinataire ne souhaite pas recevoir de message provenant de votre nation{% endif %}
 		{% if mail_sent %}Message envoyé{% endif %}
 		</p>
-		</td>
-	</tr>
+		</div>
+	</div>
 	{% endif %}
 </form>
-</table>
+</div>
 <script>onload=function() { if(document.newmail.to.value.length == 0) var o=document.newmail.to; else var o=document.newmail.message; o.focus(); o.value = o.value; if({{mail_credits}} > 0) check('sendcredits'); }</script>
 {% endblock %}

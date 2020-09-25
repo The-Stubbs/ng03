@@ -1,0 +1,8 @@
+<ul class="htabs">
+     <li><a href="/game/overview/" {% if selectedtab == 'empire' %}class="selected"{% endif %}>Aperçu</a></li>
+     <li><a href="/game/planets/" {% if selectedtab == 'planets' %}class="selected"{% endif %}>Planètes</a></li>
+     <li><a href="/game/upkeep/" {% if selectedtab == '' %}class="selected"{% endif %}>Entretien</a></li>
+     <li><a href="/game/fleets-orbiting/" {% if selectedtab == '' %}class="selected"{% endif %}>Orbites</a></li>
+     <li><a href="/game/fleets-standby/" {% if selectedtab == '' %}class="selected"{% endif %}>Au sol</a></li>
+     <li><a href="/game/fleets-ships-stats/" {% if selectedtab == '' %}class="selected"{% endif %}>Stats</a></li>
+</ul>

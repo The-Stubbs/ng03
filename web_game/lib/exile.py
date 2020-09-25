@@ -21,7 +21,7 @@ class ExileMixin(LoginRequiredMixin, BaseMixin):
         self.StartTime = time.clock()
         self.scripturl = request.META.get("SCRIPT_NAME") + "?" + request.META.get("QUERY_STRING")
         
-        if maintenance: return HttpResponseRedirect('/game/maintenance/')
+        if maintenance and not request.user.is_superuser: return HttpResponseRedirect('/game/maintenance/')
         
         connectDB()
 

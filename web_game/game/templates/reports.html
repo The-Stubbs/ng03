@@ -23,11 +23,11 @@
 </ul>
 </div>
 {% endif %}
-<table class="default" width="100%">
+<div class="box">
 {% for message in messages %}
-<tr class="item{% if message.new %}highlight{% endif %}">
-	<td width="1%" valign="top"><img src="{{PATH_IMAGES}}/reports/{{message.type}}.jpg" width="64" height="64" class="report"></td>
-	<td width="90%" valign="top">
+<div class="box-body item{% if message.new %}highlight{% endif %}">
+	<div width="1%" valign="top"><img src="{{PATH_IMAGES}}/reports/{{message.type}}.jpg" width="64" height="64" class="report"></div>
+	<div width="90%" valign="top">
 	<div class="subject">{{message.date|timezone:"Europe/Paris"|date:"d M Y H:i"}}{% if message.nation %} | <a href="/game/nation/?name={{message.nation}}">{{message.nation}}</a>{% endif %} |
 	{% if message.type == 100 %}Invitation d'alliance.
 	{% elif message.type == 120 %}Invitation d'un nouveau membre.
@@ -97,15 +97,15 @@
 	{% elif message.type == 300 %}Nos scientifiques ont terminé la recherche sur "{{message.researchname}}".<br/>
 	Ils sont prêts pour de <a href="/game/research/">nouvelles recherches</a>.
 	{% elif message.type == 310 %}Les coûts d'entretien et de fonctionnement concernant la dernière période s'élèvent à <img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" width="16" height="16"> {{message.credits|intcomma}}.<br/><br/>
-	<table class=clear>
-	<tr><td><img src="{{PATH_IMAGES}}/interface/upkeep_commander.gif" class="res" width="16" height="16">Commandants: {{message.upkeep_commanders|intcomma}}</td></tr>
-	<tr><td><img src="{{PATH_IMAGES}}/interface/planet.gif" class="res" width="16" height="16">Planètes: {{message.upkeep_planets|intcomma}}</td></tr>
-	<tr><td><img src="{{PATH_IMAGES}}/interface/scientists.gif" class="res" width="16" height="16">Scientifiques: {{message.upkeep_scientists|intcomma}}</td></tr>
-	<tr><td><img src="{{PATH_IMAGES}}/interface/soldiers.gif" class="res" width="16" height="16">Soldats: {{message.upkeep_soldiers|intcomma}}</td></tr>
-	<tr><td><img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux: {{message.upkeep_ships|intcomma}}</td></tr>
-	<tr><td><img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux en position: {{message.upkeep_ships_in_position|intcomma}}</td></tr>
-	<tr><td><img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux posés: {{message.upkeep_ships_parked|intcomma}}</td></tr>
-	</table><br/><br/>
+	<div class=clear>
+	<div><div class="col"> <img src="{{PATH_IMAGES}}/interface/upkeep_commander.gif" class="res" width="16" height="16">Commandants: {{message.upkeep_commanders|intcomma}}</div></div>
+	<div><div class="col"> <img src="{{PATH_IMAGES}}/interface/planet.gif" class="res" width="16" height="16">Planètes: {{message.upkeep_planets|intcomma}}</div></div>
+	<div><div class="col"> <img src="{{PATH_IMAGES}}/interface/scientists.gif" class="res" width="16" height="16">Scientifiques: {{message.upkeep_scientists|intcomma}}</div></div>
+	<div><div class="col"> <img src="{{PATH_IMAGES}}/interface/soldiers.gif" class="res" width="16" height="16">Soldats: {{message.upkeep_soldiers|intcomma}}</div></div>
+	<div><div class="col"> <img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux: {{message.upkeep_ships|intcomma}}</div></div>
+	<div><div class="col"> <img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux en position: {{message.upkeep_ships_in_position|intcomma}}</div></div>
+	<div><div class="col"> <img src="{{PATH_IMAGES}}/interface/fleets.gif" class="res" width="16" height="16">Vaisseaux posés: {{message.upkeep_ships_parked|intcomma}}</div></div>
+	</div><br/><br/>
 	Nos infrastructures ont généré <img src="{{PATH_IMAGES}}/interface/prestige.gif" class="res" width="16" height="16"> {{message.scientists|intcomma}} et <img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" width="16" height="16"> {{message.soldiers|intcomma}}
 	{% elif message.type == 320 %}Le commandant {{message.commandername}} s'est récemment distingué et a obtenu une promotion. Vous devriez vous rendre sur la page de gestion des commandants afin de lui attribuer son nouveau point de compétence.
 	{% elif message.type == 400 %}La flotte <script>LinkFleet('{{message.fleetid}}','{{message.fleetname}}')</script> est arrivée aux alentours de la planète <a href="/game/map/?g={{message.g}}&s={{message.s}}">{{message.planetname}} ({{message.g}}.{{message.s}}.{{message.p}})</a>.
@@ -223,11 +223,11 @@
 	{% else %}{{message.type}}
 	{% endif %}
 	</div>
-	</td>
-</tr>
+	</div>
+</div>
 {% empty %}
-<tr class="header" ><td colspan="2">Aucun rapport</td></tr>
+<div class="box-body header" "><div colspan="2">Aucun rapport</div></div>
 {% endfor %}
-</table>
+</div>
 </div>
 {% endblock %}

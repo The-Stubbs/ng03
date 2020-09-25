@@ -30,32 +30,32 @@ function unload_all(o,h,s,so,w)
 
 function showCargo(cargoOre, cargoHydrocarbon, cargoScientists, cargoSoldiers, cargoWorkers, canload, canunload)
 {
-	var s = "<table class=default width=600>"+
-			"<tr class=category><td colspan=3>Cargaison - Aucune action possible</td></tr>"+
-			"<tr class=header><td width='1%'>Ressource</td><td>En soute</td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16> Minerai</td><td align=right>"+formatnumber(cargoOre)+"</td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/hydrocarbon.gif' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</td><td align=right>"+formatnumber(cargoHydrocarbon)+"</td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/scientists.gif' title='Scientifiques' class=res width=16 height=16> Scientifiques</td><td align=right>"+formatnumber(cargoScientists)+"</td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/soldiers.gif' title='Soldats' class=res width=16 height=16> Soldats</td><td align=right>"+formatnumber(cargoSoldiers)+"</td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/workers.gif' title='Travailleurs' class=res width=16 height=16> Travailleurs</td><td align=right>"+formatnumber(cargoWorkers)+"</td></tr>"+
-			"</table>";
+	var s = "<div class=default width=600>"+
+			"<div class="box-body category"><div colspan=3>Cargaison - Aucune action possible</div></div>"+
+			"<div class="box-body header"><div width='1%'>Ressource</div><div class="col"> En soute</div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16> Minerai</div"><div align=right>"+formatnumber(cargoOre)+"</div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/hydrocarbon.gif' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</div"><div align=right>"+formatnumber(cargoHydrocarbon)+"</div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/scientists.gif' title='Scientifiques' class=res width=16 height=16> Scientifiques</div"><div align=right>"+formatnumber(cargoScientists)+"</div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/soldiers.gif' title='Soldats' class=res width=16 height=16> Soldats</div"><div align=right>"+formatnumber(cargoSoldiers)+"</div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/workers.gif' title='Travailleurs' class=res width=16 height=16> Travailleurs</div"><div align=right>"+formatnumber(cargoWorkers)+"</div></div>"+
+			"</div>";
 			$('cargobox').innerHTML = s;
 }
 
 function showLoad(planetOre, planetHydrocarbon, planetScientists, planetSoldiers, planetWorkers, cargoOre, cargoHydrocarbon, cargoScientists, cargoSoldiers, cargoWorkers)
 {
 	var s = "<form method=post action='/game/fleet-trade/?id={{fleetid}}' {% if t %}onsubmit='return transferResources()'{% endif %}>" + '{% csrf_token %}'+
-			"<table class=default width=600>"+
-			"<tr class=category><td colspan=5>Cargaison - Chargement et déchargement possible</td></tr>"+
-			"<tr class=header><td width='1%'>Ressource</td><td>En soute</td><td width='1%'>Décharger</td><td>Disponible</td><td width='1%'>Charger</td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16> Minerai</td><td align=right>"+formatnumber(cargoOre)+"</td><td nowrap><input type=text name=unload_ore id=unload_ore value=0 size=6> <a href='#' onclick='setval(\"unload_ore\","+cargoOre+")'>max</a></td><td align=right>"+formatnumber(planetOre)+"</td><td nowrap><input type=text name=load_ore id=load_ore value=0 size=6> <a href='#' onclick='setval(\"load_ore\","+planetOre+")'>max</a></td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/hydrocarbon.gif' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</td><td align=right>"+formatnumber(cargoHydrocarbon)+"</td><td><input type=text name=unload_hydrocarbon id=unload_hydrocarbon value=0 size=6> <a href='#' onclick='setval(\"unload_hydrocarbon\","+cargoHydrocarbon+")'>max</a></td><td align=right>"+formatnumber(planetHydrocarbon)+"</td><td><input type=text name=load_hydrocarbon id=load_hydrocarbon value=0 size=6> <a href='#' onclick='setval(\"load_hydrocarbon\","+planetHydrocarbon+")'>max</a></td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/scientists.gif' title='Scientifiques' class=res width=16 height=16> Scientifiques</td><td align=right>"+formatnumber(cargoScientists)+"</td><td><input type=text name=unload_scientists id=unload_scientists value=0 size=6> <a href='#' onclick='setval(\"unload_scientists\","+cargoScientists+")'>max</a></td><td align=right>"+formatnumber(planetScientists)+"</td><td><input type=text name=load_scientists id=load_scientists value=0 size=6> <a href='#' onclick='setval(\"load_scientists\","+planetScientists+")'>max</a></td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/soldiers.gif' title='Soldats' class=res width=16 height=16> Soldats</td><td align=right>"+formatnumber(cargoSoldiers)+"</td><td><input type=text name=unload_soldiers id=unload_soldiers value=0 size=6> <a href='#' onclick='setval(\"unload_soldiers\","+cargoSoldiers+")'>max</a></td><td align=right>"+formatnumber(planetSoldiers)+"</td><td><input type=text name=load_soldiers id=load_soldiers value=0 size=6> <a href='#' onclick='setval(\"load_soldiers\","+planetSoldiers+")'>max</a></td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/workers.gif' title='Travailleurs' class=res width=16 height=16> Travailleurs</td><td align=right>"+formatnumber(cargoWorkers)+"</td><td><input type=text name=unload_workers id=unload_workers value=0 size=6> <a href='#' onclick='setval(\"unload_workers\","+cargoWorkers+")'>max</a></td><td align=right>"+formatnumber(planetWorkers)+"</td><td><input type=text name=load_workers id=load_workers value=0 size=6> <a href='#' onclick='setval(\"load_workers\","+planetWorkers+")'>max</a></td></tr>"+
-			"<tr><td>&nbsp;</td><td colspan=2 align=center><a href='#' onclick='return unload_all("+cargoOre+","+cargoHydrocarbon+","+cargoScientists+","+cargoSoldiers+","+cargoWorkers+")'>Tout décharger</a></td><td colspan=2 align=center><a href='#' onclick='return load_all("+planetOre+","+planetHydrocarbon+","+planetScientists+","+planetSoldiers+","+planetWorkers+")'>Tout charger</a></td></tr>"+
-			"<tr><td colspan=5 align=center><input type=submit value='Transférer'></td></tr>"+
-			"</table>"+
+			"<div class=default width=600>"+
+			"<div class="box-body category"><div colspan=5>Cargaison - Chargement et déchargement possible</div></div>"+
+			"<div class="box-body header"><div width='1%'>Ressource</div><div class="col"> En soute</div"><div width='1%'>Décharger</div><div class="col"> Disponible</div"><div width='1%'>Charger</div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16> Minerai</div"><div align=right>"+formatnumber(cargoOre)+"</div"><div nowrap><input type=text name=unload_ore id=unload_ore value=0 size=6> <a href='#' onclick='setval(\"unload_ore\","+cargoOre+")'>max</a></div"><div align=right>"+formatnumber(planetOre)+"</div"><div nowrap><input type=text name=load_ore id=load_ore value=0 size=6> <a href='#' onclick='setval(\"load_ore\","+planetOre+")'>max</a></div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/hydrocarbon.gif' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</div"><div align=right>"+formatnumber(cargoHydrocarbon)+"</div><div class="col"> <input type=text name=unload_hydrocarbon id=unload_hydrocarbon value=0 size=6> <a href='#' onclick='setval(\"unload_hydrocarbon\","+cargoHydrocarbon+")'>max</a></div"><div align=right>"+formatnumber(planetHydrocarbon)+"</div><div class="col"> <input type=text name=load_hydrocarbon id=load_hydrocarbon value=0 size=6> <a href='#' onclick='setval(\"load_hydrocarbon\","+planetHydrocarbon+")'>max</a></div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/scientists.gif' title='Scientifiques' class=res width=16 height=16> Scientifiques</div"><div align=right>"+formatnumber(cargoScientists)+"</div><div class="col"> <input type=text name=unload_scientists id=unload_scientists value=0 size=6> <a href='#' onclick='setval(\"unload_scientists\","+cargoScientists+")'>max</a></div"><div align=right>"+formatnumber(planetScientists)+"</div><div class="col"> <input type=text name=load_scientists id=load_scientists value=0 size=6> <a href='#' onclick='setval(\"load_scientists\","+planetScientists+")'>max</a></div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/soldiers.gif' title='Soldats' class=res width=16 height=16> Soldats</div"><div align=right>"+formatnumber(cargoSoldiers)+"</div><div class="col"> <input type=text name=unload_soldiers id=unload_soldiers value=0 size=6> <a href='#' onclick='setval(\"unload_soldiers\","+cargoSoldiers+")'>max</a></div"><div align=right>"+formatnumber(planetSoldiers)+"</div><div class="col"> <input type=text name=load_soldiers id=load_soldiers value=0 size=6> <a href='#' onclick='setval(\"load_soldiers\","+planetSoldiers+")'>max</a></div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/workers.gif' title='Travailleurs' class=res width=16 height=16> Travailleurs</div"><div align=right>"+formatnumber(cargoWorkers)+"</div><div class="col"> <input type=text name=unload_workers id=unload_workers value=0 size=6> <a href='#' onclick='setval(\"unload_workers\","+cargoWorkers+")'>max</a></div"><div align=right>"+formatnumber(planetWorkers)+"</div><div class="col"> <input type=text name=load_workers id=load_workers value=0 size=6> <a href='#' onclick='setval(\"load_workers\","+planetWorkers+")'>max</a></div></div>"+
+			"<div><div class="col"> &nbsp;</div"><div colspan=2 align=center><a href='#' onclick='return unload_all("+cargoOre+","+cargoHydrocarbon+","+cargoScientists+","+cargoSoldiers+","+cargoWorkers+")'>Tout décharger</a></div"><div colspan=2 align=center><a href='#' onclick='return load_all("+planetOre+","+planetHydrocarbon+","+planetScientists+","+planetSoldiers+","+planetWorkers+")'>Tout charger</a></div></div>"+
+			"<div><div colspan=5 align=center><input type=submit value='Transférer'></div></div>"+
+			"</div>"+
 			"</form>";
 			$('cargobox').innerHTML = s;
 }
@@ -63,22 +63,22 @@ function showLoad(planetOre, planetHydrocarbon, planetScientists, planetSoldiers
 function showUnload(cargoOre, cargoHydrocarbon, cargoScientists, cargoSoldiers, cargoWorkers, canload)
 {
 	var s = "<form method=post action='/game/fleet-trade/?id={{fleetid}}' {% if t %}onsubmit='return transferResources()'{% endif %}>" + '{% csrf_token %}'+
-			"<table class=default width=600>"+
-			"<tr class=category><td colspan=3>Cargaison - Déchargement uniquement possible</td></tr>"+
-			"<tr class=header><td width='1%'>Ressource</td><td>En soute</td><td width='1%'>Décharger</td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16> Minerai</td><td align=right>"+formatnumber(cargoOre)+"</td><td nowrap><input type=text name=unload_ore id=unload_ore value=0 size=6> <a href='#' onclick='setval(\"unload_ore\", "+cargoOre+")'>max</a></td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/hydrocarbon.gif' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</td><td align=right>"+formatnumber(cargoHydrocarbon)+"</td><td><input type=text name=unload_hydrocarbon id=unload_hydrocarbon value=0 size=6> <a href='#' onclick='setval(\"unload_hydrocarbon\", "+cargoHydrocarbon+")'>max</a></td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/scientists.gif' title='Scientifiques' class=res width=16 height=16> Scientifiques</td><td align=right>"+formatnumber(cargoScientists)+"</td><td><input type=text name=unload_scientists id=unload_scientists value=0 size=6> <a href='#' onclick='setval(\"unload_scientists\", "+cargoScientists+")'>max</a></td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/soldiers.gif' title='Soldats' class=res width=16 height=16> Soldats</td><td align=right>"+formatnumber(cargoSoldiers)+"</td><td><input type=text name=unload_soldiers id=unload_soldiers value=0 size=6> <a href='#' onclick='setval(\"unload_soldiers\", "+cargoSoldiers+")'>max</a></td></tr>"+
-			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/workers.gif' title='Travailleurs' class=res width=16 height=16> Travailleurs</td><td align=right>"+formatnumber(cargoWorkers)+"</td><td><input type=text name=unload_workers id=unload_workers value=0 size=6> <a href='#' onclick='setval(\"unload_workers\", "+cargoWorkers+")'>max</a></td></tr>"+
-			"<tr><td>&nbsp;</td><td colspan=2 align=center><a href='#' onclick='return unload_all("+cargoOre+","+cargoHydrocarbon+","+cargoScientists+","+cargoSoldiers+","+cargoWorkers+")'>Tout décharger</a></td></tr>"+
-			"<tr><td colspan=3 align=center><input type=submit value='Décharger'></td></tr>"+
-			"</table>"+
+			"<div class=default width=600>"+
+			"<div class="box-body category"><div colspan=3>Cargaison - Déchargement uniquement possible</div></div>"+
+			"<div class="box-body header"><div width='1%'>Ressource</div><div class="col"> En soute</div"><div width='1%'>Décharger</div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16> Minerai</div"><div align=right>"+formatnumber(cargoOre)+"</div"><div nowrap><input type=text name=unload_ore id=unload_ore value=0 size=6> <a href='#' onclick='setval(\"unload_ore\", "+cargoOre+")'>max</a></div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/hydrocarbon.gif' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</div"><div align=right>"+formatnumber(cargoHydrocarbon)+"</div><div class="col"> <input type=text name=unload_hydrocarbon id=unload_hydrocarbon value=0 size=6> <a href='#' onclick='setval(\"unload_hydrocarbon\", "+cargoHydrocarbon+")'>max</a></div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/scientists.gif' title='Scientifiques' class=res width=16 height=16> Scientifiques</div"><div align=right>"+formatnumber(cargoScientists)+"</div><div class="col"> <input type=text name=unload_scientists id=unload_scientists value=0 size=6> <a href='#' onclick='setval(\"unload_scientists\", "+cargoScientists+")'>max</a></div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/soldiers.gif' title='Soldats' class=res width=16 height=16> Soldats</div"><div align=right>"+formatnumber(cargoSoldiers)+"</div><div class="col"> <input type=text name=unload_soldiers id=unload_soldiers value=0 size=6> <a href='#' onclick='setval(\"unload_soldiers\", "+cargoSoldiers+")'>max</a></div></div>"+
+			"<div><div nowrap><img src='{{PATH_IMAGES}}/interface/workers.gif' title='Travailleurs' class=res width=16 height=16> Travailleurs</div"><div align=right>"+formatnumber(cargoWorkers)+"</div><div class="col"> <input type=text name=unload_workers id=unload_workers value=0 size=6> <a href='#' onclick='setval(\"unload_workers\", "+cargoWorkers+")'>max</a></div></div>"+
+			"<div><div class="col"> &nbsp;</div"><div colspan=2 align=center><a href='#' onclick='return unload_all("+cargoOre+","+cargoHydrocarbon+","+cargoScientists+","+cargoSoldiers+","+cargoWorkers+")'>Tout décharger</a></div></div>"+
+			"<div><div colspan=3 align=center><input type=submit value='Décharger'></div></div>"+
+			"</div>"+
 			"</form>";
 			$('cargobox').innerHTML = s;
 }
 
-function setCargoMsg(msg){ $('cargobox').innerHTML = '<table class=default width=600><tr><td align=center>'+msg+'</td></tr></table>'; }
+function setCargoMsg(msg){ $('cargobox').innerHTML = '<div class=default width=600><div><div align=center>'+msg+'</div></div></div>'; }
 function openCargo(){ setCargoMsg('Ouverture du cargo en cours ...'); openURL("/game/fleet-trade/?id={{fleetid}}&a=open", evalResponse); }
 
 function transferResources(){
@@ -171,7 +171,7 @@ ships[{{ship.id}}]=new Array('{{ship.description|escapejs}}','{{ship.ship_signat
 
 function descShip(id) {
 	var ship = ships[id];
-	var a = '<table><tr valign="top"><td><span class="title">Description</span><br/><br/>'+ship[0]+'</td><td width="1%" nowrap><span class="title">Caractéristiques</span><br/>'+
+	var a = '<table><div valign="top"><div class="col"> <span class="title">Description</span><br/><br/>'+ship[0]+'</div"><div width="1%" nowrap><span class="title">Caractéristiques</span><br/>'+
 			'<br/>Signature: <span class=value>'+ship[1]+'</span><br/>Cargo: <span class=value>'+ship[2]+'</span>'+
 			'<br/>Vitesse: <span class=value>'+ship[3]+'</span><br/>Manœuvrabilité: <span class=value>'+ship[4]+'</span>';
 	if(ship[6] > 0)
@@ -181,7 +181,7 @@ function descShip(id) {
 	if(ship[10] != "0") a+= '<br/>Capacité de recyclage: <span class=value>'+ship[10]+'</span>';
 	if(ship[11] != "0") a+= '<br/>Capacité de saut intergalactique: <span class=value>'+ship[11]+'</span>';
 	if(ship[12] != "0") a+= '<br/>Capacité d\'invasion: <span class=value>'+ship[12]+'</span>';
-	a+= '</td></tr></table>';
+	a+= '</div></div></div>';
 	return a;
 }
 </script>
@@ -251,17 +251,17 @@ function confirmAbandon() { return confirm('Êtes-vous sûr de vouloir abandonne
 {% endif %}
 {% endif %}
 
-<table cellpadding=0 cellspacing=0 width=850>
-<tr valign=top>
+<div cellpadding=0 cellspacing=0 width=850>
+<div valign=top>
 
-<td width=600>
+<div width=600>
 
 {% if display %}
-<table class="default" width="100%">
+<div class="box">
 {% if overview %}
-<tr class="title"><td colspan=2 id="renameref">{% if attack %}<img src="{{PATH_IMAGES}}/interface/stance_attack.gif" class="stance" alt="Attaque" width="10" height="10"> {% endif %}{% if defend %}<img src="{{PATH_IMAGES}}/interface/stance_defend.gif" class="stance" alt="Riposte" width="10" height="10"> {% endif %}{{fleetname}}{% if idle %} - <a href="#" onclick="return show('renameref','renamebox')">Renommer</a> - <a href="?planet={{planetid}}&id={{fleetid}}&action=abandon" onclick="return confirmAbandon()">Abandonner</a>{% endif %}</td></tr>
-<tr><td width='1%' nowrap>Action</td>
-<td>
+<div class="box-body title"><div colspan=2 id="renameref">{% if attack %}<img src="{{PATH_IMAGES}}/interface/stance_attack.gif" class="stance" alt="Attaque" width="10" height="10"> {% endif %}{% if defend %}<img src="{{PATH_IMAGES}}/interface/stance_defend.gif" class="stance" alt="Riposte" width="10" height="10"> {% endif %}{{fleetname}}{% if idle %} - <a href="#" onclick="return show('renameref','renamebox')">Renommer</a> - <a href="?planet={{planetid}}&id={{fleetid}}&action=abandon" onclick="return confirmAbandon()">Abandonner</a>{% endif %}</div></div>
+<div><div width='1%' nowrap>Action</div>
+<div class="col"> 
 <div class=left>
 {% if recycling %}
 Recyclage en cours près de <script>putplanet("{{planetid}}","{{planetname}}","{{g}}","{{s}}","{{p}}",{{relation}});</script> - (<script>putcountdown1({{time}}, 'Cycle terminé', '?id={{fleetid}}')</script>)
@@ -300,33 +300,33 @@ En attente (<script>putcountdown1({{time}}, 'Terminé', '?id={{fleetid}}')</scri
 {% endfor %}
 </ul>
 {% endif %}
-</td>
-</tr>
+</div>
+</div>
 
-<tr><td nowrap>Attitude</td><td>
+<div><div nowrap>Attitude</div><div class="col"> 
 <div class=left>{% if attack %}<img src="{{PATH_IMAGES}}/interface/stance_attack.gif" class="stance" alt="Attaque" width="10" height="10">Attaquer à vue{% endif %}{% if defend %}<img src="{{PATH_IMAGES}}/interface/stance_defend.gif" class="stance" alt="Riposte" width="10" height="10">Riposter aux attaques{% endif %} </div>
 <div class=right>{% if setstance %}<a href="?id={{fleetid}}&action={% if setstance_attack %}attack{% endif %}{% if setstance_defend %}defend{% endif %}">{% if setstance_attack %}Attaquer{% endif %}{% if setstance_defend %}Riposter{% endif %}</a>{% endif %}{% if cant_setstance %}<span class="error" title="Les flottes non armées ne peuvent attaquer">Attaquer</span>{% endif %}</div>
-</td></tr>
+</div></div>
 
-<tr><td nowrap>Commandement</td>
-<td id="cmdref">
+<div><div nowrap>Commandement</div>
+<div id="cmdref">
 <div class=left>{{fleet_leadership|intcomma}}/{{fleet_size|intcomma}}, Efficacité: {{fleet_commander_efficiency}}%</div>
 <div class=left>&nbsp;&nbsp;<img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallres" width=10 height=6 title="Commandant">{% if nocommander %}-{% endif %}{% if commander %}{{commandername}}{% endif %}</div>
 <div class=right><a href="#" onclick="return show('cmdref','commandersbox')">Changer</a></div>
-</td></tr>
+</div></div>
 
 {% if showroute %}
-<tr><td nowrap>Route</td>
-<td id="routeref">
+<div><div nowrap>Route</div>
+<div id="routeref">
 <div class=left>{% if noroute %}-{% endif %}{% if route %}{{route}}{% endif %}</div>
 {% if idle %}
 <div class=right><a href="#" onclick="return show('routeref','routebox')">Changer</a></div>
 {% endif %}
-</td></tr>
+</div></div>
 {% endif %}
 
-<tr{% if hide_recycling %} class="hidden"{% endif %}><td nowrap>Recyclage</td>
-<td>
+<tr{% if hide_recycling %} class="hidden"{% endif %}"><div nowrap>Recyclage</div>
+<div class="col"> 
 <div class=left>{{recycler_output|intcomma}} unités/heure</div>
 {% if cant_recycle %}
 <div class=right><span class="error">Recycler</span></div>
@@ -337,10 +337,10 @@ En attente (<script>putcountdown1({{time}}, 'Terminé', '?id={{fleetid}}')</scri
 {% if recycling %}
 <div class=right><a href="?id={{fleetid}}&action=stoprecycling">Stopper</a></div>
 {% endif %}
-</td></tr>
+</div></div>
 
-<tr{% if hide_droppods %} class="hidden"{% endif %}><td nowrap>Barges d'invasion</td>
-<td id="invaderef">
+<tr{% if hide_droppods %} class="hidden"{% endif %}"><div nowrap>Barges d'invasion</div>
+<div id="invaderef">
 <div class=left>{{fleet_droppods|intcomma}} soldats</div>
 {% if cant_invade %}
 <div class=right><span class="error">Envahir</span></div>
@@ -348,47 +348,47 @@ En attente (<script>putcountdown1({{time}}, 'Terminé', '?id={{fleetid}}')</scri
 {% if invade %}
 <div class=right><script>putcountdown2({{invade_time}},"Invasion possible dans ", '<a href="#" onclick=\'return show("invaderef","invadebox")\'>Envahir</a>');putcountdown1({{invade_time}},"","#")</script></div>
 {% endif %}
-</td></tr>
+</div></div>
 
-<tr><td nowrap>Saut intergalactique</td><td{% if insufficient_long_distance_capacity %} class="notenough"{% endif %}>Signature max: {{fleet_long_distance_capacity|intcomma}} / Stabilité requise: {{fleet_required_vortex_strength|intcomma}}</td></tr>
+<div><div nowrap>Saut intergalactique</div><td{% if insufficient_long_distance_capacity %} class="notenough"{% endif %}>Signature max: {{fleet_long_distance_capacity|intcomma}} / Stabilité requise: {{fleet_required_vortex_strength|intcomma}}</div></div>
 
-<tr><td nowrap>Signature</td>
-<td>
+<div><div nowrap>Signature</div>
+<div class="col"> 
 <div class=left>{{fleet_real_signature|intcomma}} (détectée: {{fleet_signature|intcomma}})</div>
 {% if split %}
 <div class=right><a href="/game/fleet-split/?id={{fleetid}}">Scinder</a></div>
 {% endif %}
-</td></tr>
+</div></div>
 
-<tr><td nowrap>Entretien</td>
-<td>
+<div><div nowrap>Entretien</div>
+<div class="col"> 
 <div class=left><img src='{{PATH_IMAGES}}/interface/credits.gif' title='Credits' class=res width=16 height=16> {{fleet_upkeep|intcomma}} (x {{fleet_upkeep_multiplicator}})</div>
-</td></tr>
+</div></div>
 
-<tr><td nowrap>Vitesse de la flotte</td>
-<td>
+<div><div nowrap>Vitesse de la flotte</div>
+<div class="col"> 
 <div class=left>{{fleet_speed|intcomma}}</div>
 {% if cancel_moving %}
 <div class=right>Perte du contact : <script>putcountdown1({{timelimit}},"Effective"," ");</script>&nbsp;- <script>putcountdown2({{timelimit}},'<a href="?id={{fleetid}}&action=return">Annuler</a>', '');</script></div>
 {% endif %}
-</td></tr>
+</div></div>
 
-<tr><td nowrap>Partage</td>
-<td>
+<div><div nowrap>Partage</div>
+<div class="col"> 
 <div class=left>Flotte partagée à l'alliance: <a href="?id={{fleetid}}&action=share">{% if shared %}Oui{% endif %}{% if not_shared %}Non{% endif %}</a></div>
-</td></tr>
+</div></div>
 
-<tr{% if hide_cargo %} class="hidden"{% endif %}><td nowrap>Cargaison</td><td><span id="load">{{fleet_load|intcomma}}</span> / {{fleet_capacity|intcomma}} unités</td></tr>
+<tr{% if hide_cargo %} class="hidden"{% endif %}"><div nowrap>Cargaison</div><div class="col"> <span id="load">{{fleet_load|intcomma}}</span> / {{fleet_capacity|intcomma}} unités</div></div>
 
-{% if error_trade %}<tr class="error"><td colspan=2>Impossible de marchander avec cette planète, ils n'ont pas les crédits pour acheter nos ressources.</td></tr>{% endif %}
-{% if error_recycling %}<tr class="error"><td colspan=2>Une de nos flottes est déjà en train de recycler dans les parages !</td></tr>{% endif %}
-{% if error_soldiers %}<tr class="error"><td colspan=2>Nombre de soldat incorrect !</td></tr>{% endif %}
-{% if error_fleet %}<tr class="error"><td colspan=2>La flotte n'est pas prête pour une invasion !</td></tr>{% endif %}
-{% if error_planet %}<tr class="error"><td colspan=2>Impossible d'envahir une planète inoccupée, alliée ou dans une alliance qui n'est pas en guerre contre nous !</td></tr>{% endif %}
-{% if error_max_planets_reached %}<tr class="error"><td colspan=2>Nombre maximal de colonisations atteint !</td></tr>{% endif %}
-{% if error_invade_enemy_ships %}<tr class="error"><td colspan=2>Impossible d'envahir tant que des vaisseaux militaires ennemis sont proches de la planète !</td></tr>{% endif %}
-{% if error_deploy_enemy_ships %}<tr class="error"><td colspan=2>Impossible de coloniser tant que des vaisseaux militaires ennemis sont proches de la planète !</td></tr>{% endif %}
-{% if error_deploy_safe_planets %}<tr class="error"><td colspan=2>Impossible de coloniser plus de planètes dans des galaxies protégées !</td></tr>{% endif %}
+{% if error_trade %}<div class="box-body error"><div colspan=2>Impossible de marchander avec cette planète, ils n'ont pas les crédits pour acheter nos ressources.</div></div>{% endif %}
+{% if error_recycling %}<div class="box-body error"><div colspan=2>Une de nos flottes est déjà en train de recycler dans les parages !</div></div>{% endif %}
+{% if error_soldiers %}<div class="box-body error"><div colspan=2>Nombre de soldat incorrect !</div></div>{% endif %}
+{% if error_fleet %}<div class="box-body error"><div colspan=2>La flotte n'est pas prête pour une invasion !</div></div>{% endif %}
+{% if error_planet %}<div class="box-body error"><div colspan=2>Impossible d'envahir une planète inoccupée, alliée ou dans une alliance qui n'est pas en guerre contre nous !</div></div>{% endif %}
+{% if error_max_planets_reached %}<div class="box-body error"><div colspan=2>Nombre maximal de colonisations atteint !</div></div>{% endif %}
+{% if error_invade_enemy_ships %}<div class="box-body error"><div colspan=2>Impossible d'envahir tant que des vaisseaux militaires ennemis sont proches de la planète !</div></div>{% endif %}
+{% if error_deploy_enemy_ships %}<div class="box-body error"><div colspan=2>Impossible de coloniser tant que des vaisseaux militaires ennemis sont proches de la planète !</div></div>{% endif %}
+{% if error_deploy_safe_planets %}<div class="box-body error"><div colspan=2>Impossible de coloniser plus de planètes dans des galaxies protégées !</div></div>{% endif %}
 
 {% endif %}
 
@@ -416,18 +416,18 @@ function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
 {% endif %}
 </script>
 
-<tr class="clear"><td colspan="2">&nbsp;</td></tr>
-<tr class="title"><td colspan="2">Déplacer la flotte</td></tr>
+<div class="box-body clear"><div colspan="2">&nbsp;</div></div>
+<div class="box-body title"><div colspan="2">Déplacer la flotte</div></div>
 <form method="post" action="?id={{fleetid}}">{% csrf_token %}
 <input type="hidden" name="action" value="move">
 <input type="hidden" name="loop" value="0">
-<tr>
-	<td>Action</td>
-	<td><select name="movetype"><option value="0">Aller simple</option><option value="1">Aller décharger puis revenir</option><option value=2>Aller recycler puis revenir</option></select></td>
-</tr>
-<tr>
-	<td>Destination</td>
-	<td>
+<div>
+	<div class="col"> Action</div>
+	<div class="col"> <select name="movetype"><option value="0">Aller simple</option><option value="1">Aller décharger puis revenir</option><option value=2>Aller recycler puis revenir</option></select></div>
+</div>
+<div>
+	<div class="col"> Destination</div>
+	<div class="col"> 
 		<input type="text" name="g" size=3 maxlength=2 value="{{g}}">&nbsp;<input type="text" name="s" size=3 maxlength=2 value="{{s}}">&nbsp;<input type="text" name="p" size=3 maxlength=2 value="{{p}}">&nbsp;
 
 		<select name="planetlist" tabindex="1" onchange="fillDest(this)">
@@ -441,18 +441,18 @@ function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
 			{% for location in merchantplanetsgroup %}<option{% if location.selected %} selected{% endif %}>Marchand ({{location.to_g}}.{{location.to_s}}.{{location.to_p}})</option>{% endfor %}
 			</optgroup>{% endif %}
 		</select>
-	</td>
-</tr>
-<tr>
-	<td>Durée</td>
-	<td><span id="travel_time">-</span>&nbsp;<span id="travel_eta"></span></td>
-</tr>
-<tr>
-	<td>Coût</td>
-	<td><img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" title="Crédits" width=16 height=16><span id="travel_cost">0</span></td>
-</tr>
+	</div>
+</div>
+<div>
+	<div class="col"> Durée</div>
+	<div class="col"> <span id="travel_time">-</span>&nbsp;<span id="travel_eta"></span></div>
+</div>
+<div>
+	<div class="col"> Coût</div>
+	<div class="col"> <img src="{{PATH_IMAGES}}/interface/credits.gif" class="res" title="Crédits" width=16 height=16><span id="travel_cost">0</span></div>
+</div>
 {% if result %}
-<tr><td colspan=4 align=center><span class="error">
+<div><div colspan=4 align=center><span class="error">
 {% if ok %}Flotte envoyée{% endif %}
 {% if bad_destination %}Destination non valide{% endif %}
 {% if new_player_protection %}Planète temporairement protégée{% endif %}
@@ -462,63 +462,63 @@ function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
 {% if error_jump_protected_galaxy %}Galaxie protégée{% endif %}
 {% if error_jump_to_require_empty_location %}Impossible de sauter vers cette destination. Choisissez un vortex comme point d'arrivé.{% endif %}
 {% if error_jump_to_same_point_limit_reached %}Trop de flottes sautent vers la même destination, utilisez des vortex avec stabilité suffisante.{% endif %}
-</span></td></tr>
+</span></div></div>
 {% endif %}
-<tr><td colspan=2 align=center><input type="submit" value="Envoyer"></td></tr>
+<div><div colspan=2 align=center><input type="submit" value="Envoyer"></div></div>
 </form>
 <script>window.setTimeout("updatetravel()", 500);</script>
 {% endif %}
-</table>
+</div>
 <br/>
 
 <div class="left{% if hide_cargo %} hidden{% endif %}" id="cargobox"></div>
 {% endif %}
 
-</td>
+</div>
 
-<td>
+<div class="col"> 
 
-<table class=default width="100%">
-<tr class="category"><td>{{fleetname}} ({{fleet_signature|intcomma}}){% if manage %} - <a href="/game/fleet-ships/?id={{fleetid}}">Gérer vaisseaux</a>{% endif %}{% if split %} - <a href="/game/fleet-split/?id={{fleetid}}">Scinder</a>{% endif %}</tr>
+<div class=default width="100%">
+<div class="box-body category"><div class="col"> {{fleetname}} ({{fleet_signature|intcomma}}){% if manage %} - <a href="/game/fleet-ships/?id={{fleetid}}">Gérer vaisseaux</a>{% endif %}{% if split %} - <a href="/game/fleet-split/?id={{fleetid}}">Scinder</a>{% endif %}</div>
 {% for ship in shiplist %}
-<tr>
-<td nowrap><div class=left><a href="/game/help/?cat=ships#{{ship.id}}" onmouseover="ddrivetip(descShip({{ship.id}}))" onmouseout="hideddrivetip()"><b>{{ship.name}}</b></a> x{{ship.quantity|intcomma}}</div>
+<div>
+<div nowrap><div class=left><a href="/game/help/?cat=ships#{{ship.id}}" onmouseover="ddrivetip(descShip({{ship.id}}))" onmouseout="hideddrivetip()"><b>{{ship.name}}</b></a> x{{ship.quantity|intcomma}}</div>
 	{% if ship.install %}
 	<div class=right>&nbsp;<a href="?id={{fleetid}}&action=install&s={{ship.id}}">Déployer</a></div>
 	{% endif %}
 	{% if ship.cant_install %}
 	<div class=right>&nbsp;<span class="error">Déployer</span></div>
 	{% endif %}
-</td></tr>
+</div></div>
 {% endfor %}
-</table>
+</div>
 
 <br/>
 
-<table class="default" width="100%">
-<tr class="category"><td>Autres flottes</td></tr>
+<div class="box">
+<div class="box-body category"><div class="col"> Autres flottes</div></div>
 {% for fleet in fleets %}
 {% if fleet.playerfleet %}
 <script>
-var fleet{{fleet.id}}="<table width='100%'><tr><td><div id='stats'><div><span class='label'>Signature: </span><span class='value'>{{fleet.signature|intcomma}}</span></div><div><span class='label'>Vitesse: </span><span class='value'>{{fleet.speed|intcomma}}</span></div><div><span class='label'>Cargo: </span><span class='value'>{{fleet.cargo_load|intcomma}} / {{fleet.cargo_capacity|intcomma}}</span></div></div></td></tr></table>";
+var fleet{{fleet.id}}="<div width='100%'><div><div class="col"> <div id='stats'><div><span class='label'>Signature: </span><span class='value'>{{fleet.signature|intcomma}}</span></div><div><span class='label'>Vitesse: </span><span class='value'>{{fleet.speed|intcomma}}</span></div><div><span class='label'>Cargo: </span><span class='value'>{{fleet.cargo_load|intcomma}} / {{fleet.cargo_capacity|intcomma}}</span></div></div></div></div></div>";
 </script>
-<tr><td><a href="?id={{fleet.id}}" onmouseover="ddrivetip(fleet{{fleet.id}},200)" onmouseout="hideddrivetip()">{{fleet.name}}</a> ({{fleet.signature|intcomma}}){% if fleet.merge %} - <a href="?id={{fleetid}}&action=merge&with={{fleet.id}}">absorber</a>{% endif %}</td></tr>
+<div><div class="col"> <a href="?id={{fleet.id}}" onmouseover="ddrivetip(fleet{{fleet.id}},200)" onmouseout="hideddrivetip()">{{fleet.name}}</a> ({{fleet.signature|intcomma}}){% if fleet.merge %} - <a href="?id={{fleetid}}&action=merge&with={{fleet.id}}">absorber</a>{% endif %}</div></div>
 {% else %}
-<tr><td><a title="Écrire à {{fleet.owner}}" href="/game/mails/?subject=À propos de la flotte {{fleet.name}}&to={{fleet.owner}}" class="{% if fleet.ally %}ally{% endif %}{% if fleet.friend %}friend{% endif %}{% if fleet.enemy %}enemy{% endif %}">{% if fleet.alliance %}[{{fleet.tag}}] {% endif %}{{fleet.name}}</a> (<script>document.write(({{fleet.signature}}>0)?'{{fleet.signature|intcomma}}':'indéterminé'); </script>)</td></tr>
+<div><div class="col"> <a title="Écrire à {{fleet.owner}}" href="/game/mails/?subject=À propos de la flotte {{fleet.name}}&to={{fleet.owner}}" class="{% if fleet.ally %}ally{% endif %}{% if fleet.friend %}friend{% endif %}{% if fleet.enemy %}enemy{% endif %}">{% if fleet.alliance %}[{{fleet.tag}}] {% endif %}{{fleet.name}}</a> (<script>document.write(({{fleet.signature}}>0)?'{{fleet.signature|intcomma}}':'indéterminé'); </script>)</div></div>
 {% endif %}
 {% endfor %}
 
 {% if nofleets %}
-<tr><td align=center>Aucune</td></tr>
+<div><div align=center>Aucune</div></div>
 {% endif %}
-</table>
+</div>
 
 <br/>
 
-</td>
+</div>
 
-</tr>
-</table>
+</div>
+</div>
 
 <script>
 openCargo();

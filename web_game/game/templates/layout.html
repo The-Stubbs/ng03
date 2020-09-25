@@ -1,146 +1,249 @@
 {% load humanize %}
+{% load exile_tags %}
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="https://www.w3.org/1999/xhtml">
-<head>
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-134044291-1"></script>
-	<script>
-		window.dataLayer = window.dataLayer || [];
-		function gtag(){dataLayer.push(arguments);}
-		gtag('js', new Date());
-		gtag('config', 'UA-134044291-1');
-	</script>
-
-	<title>[{{server}}] Exile</title>
-
-	<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-	<meta http-equiv="cache-control" content="no-cache"/>
-	<meta http-equiv="expires" content="0"/>
-	<meta http-equiv="pragma" content="no-cache"/>
-
-	<link href="{{PATH_IMAGES}}/styles/reset.css" type="text/css" rel="stylesheet" media="all" />
-	<link href="{{PATH_IMAGES}}/styles/{{skin}}/style.css?v=0" type="text/css" rel="stylesheet" media="all"/>
-
-	<script type="text/javascript" src='/scripts/lang.js?v=1'></script>
-	<script type="text/javascript" src='/scripts/common.js?v=1'></script>
-	<script type="text/javascript" src='/scripts/third-party/ajax1.js?v=1'></script>
-	<script type="text/javascript" src='/scripts/planet.js?v=1'></script>
-	<script type="text/javascript" src='/scripts/time.js?v=1'></script>
-	{% if scroll %}<script>function loaded(){scrollTo(0,{{scrolly}});}</script>{% endif %}
-</head>
-
-<body{% if scroll %} onload="loaded()"{% endif %}>
-
-<div id="hint" onclick="donothide(event)">
-<div class="rtop"><b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b></div>
-<div id="hinttext"></div>
-<div class="rbottom"><b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b></div>
-</div>
-
-<script>
-var timers_enabled={{timers_enabled}};
-var startTime;
-</script>
-
-{% if impersonating %}
-<style>
-#impersonate{
-	height:30px;
-	vertical-align:top;
-	position: relative;
-	border-top:1px solid #ff0;
-	border-left:1px solid #ff0;
-	border-right:1px solid #bb0;
-	border-bottom:1px solid #bb0;
-	background-color:#ee6;
-	color:#000;
-}
-</style>
-<div id="impersonate"><b>Impersonisation</b> (<a href="/impersonate/stop/" style="color:#f00">Revenir au compte de départ</a>)<br/>Compte "{{login}}" - impossible d'envoyer de messages<br/></div>
-{% endif %}
-{% if onholidays %}
-<style>
-#onholidays{
-	height:30px;
-	vertical-align:top;
-	position: relative;
-	border-top:1px solid #0f0;
-	border-left:1px solid #0f0;
-	border-right:1px solid #0b0;
-	border-bottom:1px solid #0b0;
-	background-color:#6e6;
-	color:#000;
-}
-</style>
-<div id="onholidays"><b>En vacances</b><br/>Activé le {{start_datetime|date:"D d M Y"}} à {{start_datetime|time}}<br/>Désactivable à partir du {{min_end_datetime|date:"D d M Y"}} à {{min_end_datetime|time}}<br/>Terminé le {{end_datetime|date:"D d M Y"}} à {{end_datetime|time}}</div>
-{% endif %}
-{% if creditswarning %}
-<style>
-#creditswarning{
-	min-height:30px;
-	height:auto !important;
-	height:30px;
-	vertical-align:top;
-	position: relative;
-	border-top:1px solid #ff9257;
-	border-left:1px solid #ff9257;
-	border-right:1px solid #ff782f;
-	border-bottom:1px solid #ff782f;
-	background-color:#ff8543;
-	color:#000;
-}
-</style>
-<div id="creditswarning"><b>Fonds insuffisants</b><br/>Nous sommes actuellement en déficit, cette situation est tolérable pendant un moment mais nous devons réagir. Nous pouvons soit alléger nos coûts d'entretien, soit augmenter nos revenus en vendant une plus grande partie de notre production.<br/>Vous avez {% if hours %}{{bankruptcy_hours|intcomma}} heure(s){% endif %} pour faire revenir l'argent de la trésorerie dans le positif avant qu'un coup d'état n'éclate et que vous soyiez chassé de votre poste.<br/>Chaque heure passée en déficit, le nombre d'heures avant le coup d'état diminue d'une heure. Celui-ci remonte chaque heure passée dans le positif.</div>
-{% endif %}
-{% if deleting %}
-<style>
-#deleting{
-	height:30px;
-	vertical-align:top;
-	position: relative;
-	border-top:1px solid #f00;
-	border-left:1px solid #f00;
-	border-right:1px solid #b00;
-	border-bottom:1px solid #b00;
-	background-color:#e66;
-	color:#000;
-}
-</style>
-<div id="deleting"><b>Suppression du compte en cours</b><br/>Ce compte sera effacé le {{delete_datetime|date:"D d M Y"}} à {{delete_datetime|time}}</div>
-{% endif %}
-{% if banned %}
-<style>
-#banned{
-	height:30px;
-	vertical-align:top;
-	position: relative;
-	border-top:1px solid #fff;
-	border-left:1px solid #fff;
-	border-right:1px solid #bbb;
-	border-bottom:1px solid #bbb;
-	background-color:#999;
-	color:#000;
-}
-#banned table { color:#000; };
-</style>
-<div id="banned"><b>Suspendu</b><br/><table><tr><td>Depuis le:</td><td>{{ban_datetime|date:"D d M Y"}} à {{ban_datetime|time}}</td></tr>{% if expire %}<tr><td>Expire le:</td><td>{{ban_expire_datetime|date:"D d M Y"}} à {{ban_expire_datetime|time}}</td></tr>{% endif %}<tr><td>Raison:</td><td>{{ban_reason}}</td></tr><tr><td>Raison publique:</td><td>{{ban_reason_public}}</td></tr></table></div>
-{% endif %}
-
-<div id="super">
-<div id="bg"><!-- --></div>
-
-<div id="main">
-{% if menu %}<div id="leftnav">{% include 'menu.html' %}{% if dev %}<div>{{render_time|floatformat:4}}</div><div>Joueurs: {{players|intcomma}}</div>{% endif %}</div>{% endif %}
-
-<div{% if menu %} id="content"{% endif %} align="center">
-	{% if context %}<div id="status">{% include 'header.html' %}</div>{% endif %}
-	<div id="page">{% block content %}{% endblock %}</div>
-</div>
-
-</div>
-
-<div class="clear"></div>
-</div>
-
-</body>
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- -->
+    	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-134044291-1"></script>
+    	<script>
+    		window.dataLayer = window.dataLayer || [];
+    		function gtag(){dataLayer.push(arguments);}
+    		gtag('js', new Date());
+    		gtag('config', 'UA-134044291-1');
+    	</script>
+        <!-- -->
+    	<title>[ng03] ExileNG</title>
+        <!-- -->
+    	<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- -->
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,400,600" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    	<link href="{{PATH_IMAGES}}/styles/{{skin}}/style.css?v=0" type="text/css" rel="stylesheet" media="all"/>
+        <!-- -->
+    	<script type="text/javascript" src='/scripts/lang.js?v=1'></script>
+    	<script type="text/javascript" src='/scripts/common.js?v=1'></script>
+    	<script type="text/javascript" src='/scripts/third-party/ajax1.js?v=1'></script>
+    	<script type="text/javascript" src='/scripts/planet.js?v=1'></script>
+    	<script type="text/javascript" src='/scripts/time.js?v=1'></script>
+        <!-- -->
+    	{% if scrolly %}<script>function loaded() { scrollTo(0, {{scrolly}}); }</script>{% endif %}
+    </head>
+    <body {% if scrolly %}onload="loaded()"{% endif %}>
+        <div id="hint" onclick="donothide(event)">
+            <div class="rtop"><b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b></div>
+            <div id="hinttext"></div>
+            <div class="rbottom"><b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b></div>
+        </div>
+        <div id="super">
+            <div id="leftnav">
+                <div id="leftnav-content">
+                    <a href="/" id="leftnav-brand">
+                        <img id="leftnav-logo" src="/assets/exile_ng_100.png">
+                        ng03
+                    </a>
+                    <script>
+                        var defaultTitle = "[ng03] ExileNG";
+                        {% if selectedmenu == "empire" %}document.title = defaultTitle + " - Empire";
+                        {% endif%}
+                    </script>
+                    <a href="/game/options/" id="leftnav-profile" class="{% if selectedmenu == 'options' %}selected{% endif%} menu-item">
+                        <div id="leftnav-profile-cover"></div>
+                        <div class="row justify-content-between">
+                            <div class="col-auto">
+                                <img id="leftnav-profile-image" {% if current_user.avatar %}src="{{current_user.avatar}}"{% else %}src="/assets/interface/noavatar.gif"{% endif %}>
+                            </div>
+                            <div class="col-auto">
+                                <div class="text-right">{{'credit'|icon}} <span class="c-highlight">{{current_user.credits|intcomma}}</span></div>
+                                <div class="text-right">{{'prestige'|icon}} <span class="c-highlight">{{current_user.prestige_points|intcomma}}</span></div>
+                            </div>
+                        </div>
+                        <div id="leftnav-profile-info">
+                            <i class="fas fa-chevron-right caret"></i>
+                            {{current_user.name}}
+                            {% if current_user.orientation == 1 %}<small>Marchand</small>
+                            {% elif current_user.orientation == 2 %}<small>Militaire</small>
+                            {% elif current_user.orientation == 3 %}<small>Scientifique</small>
+                            {% endif %}
+                        </div>
+                    </a>
+                    <a href="/game/overview/" class="{% if selectedmenu == 'overview' %}selected{% endif%} menu-item">
+                        <i class="fas fa-th-large menu-icon"></i>
+                        <span>Empire</span>
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <a href="/game/map/?g={{cur_g}}&s={{cur_s}}" class="{% if selectedmenu == 'empire' %}selected{% endif%} menu-item">
+                        <i class="fas fa-map-marked menu-icon"></i>
+                        Carte spatiale
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <a href="/game/research/" class="{% if selectedmenu == 'empire' %}selected{% endif%} menu-item">
+                        <i class="fas fa-microscope menu-icon"></i>
+                        Recherches
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <a href="/game/market-sell/" class="{% if selectedmenu == 'empire' %}selected{% endif%} menu-item">
+                        <i class="fas fa-handshake menu-icon"></i>
+                        Commerce
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <a href="/game/fleets/" id="menu_fleets" class="{% if selectedmenu == 'empire' %}selected{% endif%} menu-item">
+                        <i class="fas fa-fighter-jet menu-icon"></i>
+                        Flottes
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <a href="/game/commanders/" id="menu_commanders" class="{% if selectedmenu == 'empire' %}selected{% endif%} menu-item">
+                        <i class="fas fa-star menu-icon"></i>
+                        Commandants
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <a href="/game/alliance/" id="menu_alliance" class="{% if selectedmenu == 'empire' %}selected{% endif%} menu-item">
+                        <i class="fas fa-users menu-icon"></i>
+                        Alliance
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <a href="/game/mercenary-intelligence/" id="menu_intelligence" class="{% if selectedmenu == 'empire' %}selected{% endif%} menu-item">
+                        <i class="fas fa-user-secret menu-icon"></i>
+                        Espionnage
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <a href="/game/ranking-alliances/" id="menu_ranking" class="{% if selectedmenu == 'empire' %}selected{% endif%} menu-item">
+                        <i class="fas fa-signal menu-icon"></i>
+                        Classement
+                        <i class="fas fa-chevron-right caret"></i>
+                    </a>
+                    <div class="d-flex justify-content-between mt-4 mb-2">
+                        <div class="col-auto px-3"><a href="https://discord.gg/9RHUEhw" style="color:#B5B5B9; font-size:150%;" target="_blank" style="font-size:150%;"><i class="fab fa-discord"></i></a></div>
+                        <div class="col-auto px-3"><a href="https://www.facebook.com/exileng/" style="color:#B5B5B9; font-size:150%;" target="_blank" style="font-size:150%;"><i class="fab fa-facebook"></i></a></div>
+                        <div class="col-auto px-3"><a href="https://twitter.com/ExileNg/" style="color:#B5B5B9; font-size:150%;" target="_blank" style="font-size:150%;"><i class="fab fa-twitter"></i></a></div>
+                        <div class="col-auto px-3"><a href="https://www.instagram.com/freddec_exileng/" style="color:#B5B5B9; font-size:150%;" target="_blank" style="font-size:150%;"><i class="fab fa-instagram"></i></a></div>
+                    </div>
+                    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" class="text-center mb-4">
+                        <input type="hidden" name="cmd" value="_s-xclick" />
+                        <input type="hidden" name="hosted_button_id" value="7XYD7SJFKQ8M4" />
+                        <input type="image" style="border:0;" src="https://www.paypalobjects.com/fr_FR/FR/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Bouton Faites un don avec PayPal" />
+                        <img alt="" border="0" src="https://www.paypal.com/fr_FR/i/scr/pixel.gif" width="1" height="1" />
+                    </form>
+                </div>
+            </div>
+            <div id="main">
+                <div id="rightnav">
+                    <a id="rightnav-toggler">
+                        <i class="fas fa-globe"></i>
+                    </a>
+                    <div id="rightnav-content">
+                        <div class="rightnav-header">
+                            <span>Planètes</span>
+                            <div>
+                                <span class="c-highlight">{{current_user.planet_count}}</span>
+                                <small>/{{current_user.planet_max}}</small>
+                            </div>
+                        </div>
+                        {% for planet in current_user.planets %}
+                        <a href="/game/planet/?planet={{planet.id}}" class="menu-item {% if planet.id == planetid %}selected{% endif %}">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <img src="{{PATH_IMAGES}}/planets/p{{planet.img}}.gif" class="rightnav-image">
+                                </div>
+                                <div class="col">
+                                    <div class="small">{{planet.galaxy}}.{{planet.sector}}.{{planet.planet}}</div>
+                                    <div class="c-highlight">{{planet.name}}</div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div id="topbar">
+                    <ul id="topbar-nav">
+                        <li>
+                            <a id="leftnav-toggler">
+                                <i class="fas fa-bars"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/game/mails/">
+                                <i class="fas fa-envelope"></i>
+                                {% if new_mail %}<span class="label">{{new_mail}}</span>{% endif %}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/game/reports/">
+                                <i class="fas fa-bell"></i>
+                                {% if new_report %}<span class="label">{{new_report}}</span>{% endif %}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/game/chat/">
+                                <i class="fas fa-comments"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/game/help/">
+                                <i class="fas fa-question-circle"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div id="content">
+                    {% if impersonating %}
+                    <div class="alert alert-warning">
+                        <div><b>Impersonisation</b> &middot; <a href="/impersonate/stop/">stop</a></div>
+                        <div>Compte "{{login}}" - impossible d'envoyer de messages</div>
+                    </div>
+                    {% endif %}
+                    {% if creditswarning %}
+                    <div class="alert alert-danger">
+                        <div><b>Fonds insuffisants</b></div>
+                        <div>Nous sommes actuellement en déficit, cette situation est tolérable pendant un moment mais nous devons réagir. Nous pouvons soit alléger nos coûts d'entretien, soit augmenter nos revenus en vendant une plus grande partie de notre production.</div>
+                        <div>Vous avez {{bankruptcy_hours|intcomma}} heure(s) pour faire revenir l'argent de la trésorerie dans le positif avant qu'un coup d'état n'éclate et que vous soyiez chassé de votre poste.</div>
+                        <div>Chaque heure passée en déficit, le nombre d'heures avant le coup d'état diminue d'une heure. Celui-ci remonte chaque heure passée dans le positif.</div>
+                    </div>
+                    {% endif %}
+                    {% if deleting %}
+                    <div class="alert alert-danger">
+                        <div id="deleting">
+                            <div><b>Suppression du compte en cours</b></div>
+                            <div>Ce compte sera effacé le {{delete_datetime|date:"D d M Y"}} à {{delete_datetime|time}}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                	{% if context %}<div id="status">{% include 'header.html' %}</div>{% endif %}
+                	{% block content %}{% endblock %}
+                </div>
+            </div>
+            <div id="overlay"></div>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script type="text/javascript" src='/scripts/jquery.slimscroll.min.js?v=1'></script>
+        <script>
+            var j = jQuery.noConflict();
+            j(document).ready(function() {
+                
+            	j('#leftnav-content').slimScroll({ height: '100%' });
+            	
+            	j('#leftnav-toggler').click(function() {
+            	    if (j('#leftnav').hasClass("open")) {j('#leftnav').removeClass("open");}
+            	    else {j('#leftnav').addClass("open");}
+            	    if (j('#overlay').hasClass("open")) {j('#overlay').removeClass("open");}
+            	    else {j('#overlay').addClass("open");}
+            	});
+            	
+            	j('#overlay').click(function() {
+            	    if (j('#leftnav').hasClass("open")) {j('#leftnav').removeClass("open");}
+            	    if (j('#rightnav').hasClass("open")) {j('#rightnav').removeClass("open");}
+            	    if (j('#overlay').hasClass("open")) {j('#overlay').removeClass("open");}
+            	});
+            	
+            	j('#rightnav-toggler').click(function() {
+            	    if (j('#rightnav').hasClass("open")) {j('#rightnav').removeClass("open");}
+            	    else {j('#rightnav').addClass("open");}
+            	});
+            });
+        </script>
+    </body>
 </html>
