@@ -12,14 +12,26 @@
     <div class="col-12 col-md-6">
         <div class="box">
             <div class="box-item">
-                <h6>Empire</h6>
+                <div class="box-title">empire</div>
                 <div class="row justify-content-between mb-1">
-                    <div class="col-auto text-nowrap">{{'commander'|icon}} Salaire des commandants</div>
-                    <div class="col-auto text-nowrap c-highlight">{{'credit'|icon}} {{commanders_estimated_cost|intcomma}}</div>
+                    <div class="col-auto text-nowrap">
+                        <span data-toggle="tooltip" title="Commandants">{{'commander'|icon}}</span>
+                        Salaire des commandants
+                    </div>
+                    <div class="col-auto text-nowrap c-highlight">
+                        <span data-toggle="tooltip" title="Crédits">{{'credit'|icon}}</span>
+                        {{commanders_estimated_cost|intcomma}}
+                    </div>
                 </div>
                 <div class="row justify-content-between">
-                    <div class="col-auto text-nowrap">{{'planet'|icon}} Entretien des planètes</div>
-                    <div class="col-auto text-nowrap c-highlight">{{'credit'|icon}}{{planets_estimated_cost|intcomma}}</div>
+                    <div class="col-auto text-nowrap">
+                        <span data-toggle="tooltip" title="Planètes">{{'planet'|icon}}</span>
+                        Entretien des planètes
+                    </div>
+                    <div class="col-auto text-nowrap c-highlight">
+                        <span data-toggle="tooltip" title="Crédits">{{'credit'|icon}}</span>
+                        {{planets_estimated_cost|intcomma}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -27,14 +39,26 @@
     <div class="col-12 col-md-6">
         <div class="box">
             <div class="box-item">
-                <h6>Population</h6>
+                <div class="box-title">population</div>
                 <div class="row justify-content-between mb-1">
-                    <div class="col-auto text-nowrap">{{'scientist'|icon}} {{scientists_quantity|intcomma}} x {{scientists_cost|intcomma}}</small></div>
-                    <div class="col-auto text-nowrap c-highlight">{{'credit'|icon}}{{scientists_estimated_cost|intcomma}}</div>
+                    <div class="col-auto text-nowrap">
+                        <span data-toggle="tooltip" data-html="true" title="<div>{{scientists_quantity|intcomma}} scientifiques</div><div>{{scientists_cost|intcomma}} crédits par scientifique</div>">{{'scientist'|icon}}</span>
+                        Scientifiques
+                    </div>
+                    <div class="col-auto text-nowrap c-highlight">
+                        <span data-toggle="tooltip" title="Crédits">{{'credit'|icon}}</span>
+                        {{scientists_estimated_cost|intcomma}}
+                    </div>
                 </div>
                 <div class="row justify-content-between">
-                    <div class="col-auto text-nowrap">{{'soldier'|icon}} Soldats <small class="ml-2">{{soldiers_quantity|intcomma}} x {{soldiers_cost|intcomma}}</small></div>
-                    <div class="col-auto text-nowrap c-highlight">{{'credit'|icon}}{{soldiers_estimated_cost|intcomma}}</div>
+                    <div class="col-auto text-nowrap">
+                        <span data-toggle="tooltip" data-html="true" title="<div>{{soldiers_quantity|intcomma}} soldats</div><div>{{soldiers_cost|intcomma}} crédits par soldat</div>">{{'soldier'|icon}}</span>
+                        Soldats
+                    </div>
+                    <div class="col-auto text-nowrap c-highlight">
+                        <span data-toggle="tooltip" title="Crédits">{{'credit'|icon}}</span>
+                        {{soldiers_estimated_cost|intcomma}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -42,18 +66,36 @@
     <div class="col-12 col-md-6">
         <div class="box">
             <div class="box-item">
-                <h6>Vaisseaux</h6>
+                <div class="box-title">vaisseaux</div>
                 <div class="row justify-content-between mb-1">
-                    <div class="col-auto text-nowrap">{{'fleet'|icon}} Flottes <small class="ml-2">{{ships_signature|intcomma}} x {{ships_cost|intcomma}}</small></div>
-                    <div class="col-auto text-nowrap c-highlight">{{'credit'|icon}}{{ships_estimated_cost|intcomma}}</div>
+                    <div class="col-auto text-nowrap">
+                        <span data-toggle="tooltip" data-html="true" title="<div>{{ships_signature|intcomma}} signature</div><div>{{ships_cost|intcomma}} crédits par signature</div>">{{'fleet'|icon}}</span>
+                        En flotte
+                    </div>
+                    <div class="col-auto text-nowrap c-highlight">
+                        <span data-toggle="tooltip" title="Crédits">{{'credit'|icon}}</span>
+                        {{ships_estimated_cost|intcomma}}
+                    </div>
                 </div>
                 <div class="row justify-content-between mb-1">
-                    <div class="col-auto text-nowrap">{{'fleet'|icon}} En position <small class="ml-2">{{ships_in_position_signature|intcomma}} x {{ships_in_position_cost|intcomma}}</small></div>
-                    <div class="col-auto text-nowrap c-highlight">{{'credit'|icon}}{{ships_in_position_estimated_cost|intcomma}}</div>
+                    <div class="col-auto text-nowrap">
+                        <span data-toggle="tooltip" data-html="true" title="<div>{{ships_in_position_signature|intcomma}} signature</div><div>{{ships_in_position_cost|intcomma}} crédits par signature</div>">{{'fleet'|icon}}</span>
+                        En orbite ennemie
+                    </div>
+                    <div class="col-auto text-nowrap c-highlight">
+                        <span data-toggle="tooltip" title="Crédits">{{'credit'|icon}}</span>
+                        {{ships_in_position_estimated_cost|intcomma}}
+                    </div>
                 </div>
                 <div class="row justify-content-between mb-1">
-                    <div class="col-auto text-nowrap">{{'fleet'|icon}} Au sol <small class="ml-2">{{ships_parked_signature|intcomma}} x {{ships_parked_cost|intcomma}}</small></div>
-                    <div class="col-auto text-nowrap c-highlight">{{'credit'|icon}}{{ships_parked_estimated_cost|intcomma}}</div>
+                    <div class="col-auto text-nowrap">
+                        <span data-toggle="tooltip" data-html="true" title="<div>{{ships_parked_signature|intcomma}} signature</div><div>{{ships_parked_cost|intcomma}} crédits par signature</div>">{{'fleet'|icon}}</span>
+                        Au sol
+                    </div>
+                    <div class="col-auto text-nowrap c-highlight">
+                        <span data-toggle="tooltip" title="Crédits">{{'credit'|icon}}</span>
+                        {{ships_parked_estimated_cost|intcomma}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -62,8 +104,9 @@
 <hr/>
 <div class="row">
     <div class="col text-right">
-        Total
-        {{'credit'|icon}}{{total_estimation|intcomma}}
+        <span class="mr-2">Total</span>
+        <span data-toggle="tooltip" title="Crédits">{{'credit'|icon}}</span>
+        <span class="c-highlight">{{total|intcomma}}</span>
     </div>
 </div>
 

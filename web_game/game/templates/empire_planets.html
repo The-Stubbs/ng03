@@ -133,13 +133,13 @@
                     <span data-toggle="tooltip" title="Scientifiques">{{'scientist'|icon}}</span>
                     <span class="c-highlight">{{planet.scientist_count|intcomma}}</span>
                     <small>/{{planet.scientist_stock|intcomma}}</small>
-                    {% if planet.scientist_training %}<span class="prod">+{{planet.scientist_training}}</span>{% endif %}
+                    {% if planet.scientist_training %}<small class="c-success">+{{planet.scientist_training}}</small>{% endif %}
                 </span>
                 <span class="text-nowrap">
                     <span data-toggle="tooltip" title="Soldats">{{'soldier'|icon}}</span>
                     <span class="c-highlight">{{planet.soldier_count|intcomma}}</span>
                     <small>/{{planet.soldier_stock|intcomma}}</small>
-                    {% if planet.soldier_training %}<span class="prod">+{{planet.soldier_training}}</span>{% endif %}
+                    {% if planet.soldier_training %}<small class="c-success">+{{planet.soldier_training}}</small>{% endif %}
                 </span>
                 <div class="mt-1"><a href="/game/training/?planet={{planet.id}}" class="badge" data-toggle="tooltip" title="Entraînements planète"><i class="fas fa-user"></i> Entraînements</a></div>
             </div>

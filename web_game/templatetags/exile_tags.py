@@ -21,4 +21,6 @@ def icon(value):
     elif value == 'space': return mark_safe('<i class="far fa-dot-circle fa-fw" style="color:#bcbcc0;"></i>')
     elif value == 'idle': return mark_safe('<i class="fas fa-wrench fa-fw" style="color:#71d171;"></i>')
     elif value == 'commander': return mark_safe('<i class="fas fa-certificate fa-fw" style="color:#ffff00;"></i>')
+    elif value == 'planet': return mark_safe('<i class="fas fa-globe fa-fw" style="color:#35eada;"></i>')
+    elif value == 'fleet': return mark_safe('<i class="fas fa-plane fa-fw" style="color:#eee;"></i>')
     return '---'
