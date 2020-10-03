@@ -9,26 +9,29 @@
 <div class="row">
     {% for planet in planets %}
     <div class="col-12 col-md-6">
-        <h1>{{planet.name}}<h1>
+        <h1 class="row mt-2">
+            <div class="col">{{planet.name}}</div>
+            <div class="col-auto"><a href="/game/orbit/?planet={{planet.id}}" class="badge" data-toggle="tooltip" title="Orbite planète"><i class="far fa-dot-circle"></i> {{planet.g}}.{{planet.s}}.{{planet.p}}</a></div>
+        </h1>
+        {% for fleet in planet.fleets %}
         <div class="box">
             <div class="box-item">
-                <div><a href="/game/orbit/?planet={{planet.id}}" class="badge" data-toggle="tooltip" title="Orbite planète"><i class="far fa-dot-circle"></i> {{planet.g}}.{{planet.s}}.{{planet.p}}</a></div>
-                {% for fleet in planet.fleets %}
                 <div class="row mt-1">
                     <div class="col text-nowrap">
-                        <a href="/game/mails/?subject=À propos de la flotte {{fleet.fleetname}}&to={{fleet.fleetowner}}" class="badge {% if fleet.relation == 1 %}ally{% elif fleet.relation == 0 %}friend{% elif fleet.relation == -1 %}enemy{% endif %}" data-toggle="tooltip" title="Nouveau message à {{fleet.fleetowner}}"><i class="fas fa-envelope"></i> {% if fleet.alliance %}[{{fleet.tag}}]{% endif %} {{fleet.name}}</a>
+                        <div class="c-highlight"><i class="fas fa-plane mr-1" data-toggle="tooltip" title="Flotte"></i> {{fleet.name}}</div>
+                        <div class="small mt-1">{{fleet.signature|intcomma}}</div>
                     </div>
                     <div class="col-auto text-nowrap">
-                        <span class="c-highlight">{{fleet.signature|intcomma}}</span>
+                        <a href="/game/mails/?subject=À propos de la flotte {{fleet.name}}&to={{fleet.owner}}" class="badge {% if fleet.relation == 1 %}ally{% elif fleet.relation == 0 %}friend{% elif fleet.relation == -1 %}enemy{% endif %}" data-toggle="tooltip" title="Nouveau message"><i class="fas fa-envelope"></i> {% if fleet.alliance %}[{{fleet.tag}}]{% endif %} {{fleet.owner}}</a>
                     </div>
                 </div>
-                {% endfor %}
             </div>
         </div>
+        {% endfor %}
     </div>
     {% empty %}
     <div class="col">
-        Aucune flotte étrangère en orbite de nos planètes
+        aucune flotte étrangère en orbite de nos planètes
     </div>
     {% endfor %}
 </div>

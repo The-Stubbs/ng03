@@ -57,7 +57,8 @@ class View(GlobalView):
                 planet["fleets"].append(item)
 
                 item["tag"] = oRs[8]
-                item["name"] = oRs[7]
+                item["name"] = oRs[6]
+                item["owner"] = oRs[7]
                 item["relation"] = oRs[9]
                 item["signature"] = oRs[10]
 
