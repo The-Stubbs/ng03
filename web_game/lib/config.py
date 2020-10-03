@@ -9,7 +9,7 @@ var connectionStrings = {
 '''
 
 registration = {
-    "enabled":True,
+    "enabled":False,
     "until":None
 }
 

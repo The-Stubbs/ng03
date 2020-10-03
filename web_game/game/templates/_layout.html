@@ -1,0 +1,214 @@
+{% load humanize %}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml">
+<head>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-134044291-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-134044291-1');
+	</script>
+
+	<title>[{{server}}] ExileNG</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:100,400,600">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="{{PATH_IMAGES}}/styles/{{skin}}/style.css?v=0" type="text/css" rel="stylesheet" media="all"/>
+
+	<script type="text/javascript" src='/scripts/lang.js?v=1'></script>
+	<script type="text/javascript" src='/scripts/common.js?v=1'></script>
+	<script type="text/javascript" src='/scripts/third-party/ajax1.js?v=1'></script>
+	<script type="text/javascript" src='/scripts/planet.js?v=1'></script>
+	<script type="text/javascript" src='/scripts/time.js?v=1'></script>
+	{% if scroll %}<script>function loaded(){scrollTo(0,{{scrolly}});}</script>{% endif %}
+</head>
+
+<body{% if scroll %} onload="loaded()"{% endif %}>
+
+<div id="hint" onclick="donothide(event)">
+<div class="rtop"><b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b></div>
+<div id="hinttext"></div>
+<div class="rbottom"><b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b></div>
+</div>
+
+<script>
+var timers_enabled={{timers_enabled}};
+var startTime;
+</script>
+
+{% if onholidays %}
+<style>
+#onholidays{
+	height:30px;
+	vertical-align:top;
+	position: relative;
+	border-top:1px solid #0f0;
+	border-left:1px solid #0f0;
+	border-right:1px solid #0b0;
+	border-bottom:1px solid #0b0;
+	background-color:#6e6;
+	color:#000;
+}
+</style>
+<div id="onholidays"><b>En vacances</b><br/>Activé le {{start_datetime|date:"D d M Y"}} à {{start_datetime|time}}<br/>Désactivable à partir du {{min_end_datetime|date:"D d M Y"}} à {{min_end_datetime|time}}<br/>Terminé le {{end_datetime|date:"D d M Y"}} à {{end_datetime|time}}</div>
+{% endif %}
+{% if creditswarning %}
+<style>
+#creditswarning{
+	min-height:30px;
+	height:auto !important;
+	height:30px;
+	vertical-align:top;
+	position: relative;
+	border-top:1px solid #ff9257;
+	border-left:1px solid #ff9257;
+	border-right:1px solid #ff782f;
+	border-bottom:1px solid #ff782f;
+	background-color:#ff8543;
+	color:#000;
+}
+</style>
+<div id="creditswarning"><b>Fonds insuffisants</b><br/>Nous sommes actuellement en déficit, cette situation est tolérable pendant un moment mais nous devons réagir. Nous pouvons soit alléger nos coûts d'entretien, soit augmenter nos revenus en vendant une plus grande partie de notre production.<br/>Vous avez {% if hours %}{{bankruptcy_hours|intcomma}} heure(s){% endif %} pour faire revenir l'argent de la trésorerie dans le positif avant qu'un coup d'état n'éclate et que vous soyiez chassé de votre poste.<br/>Chaque heure passée en déficit, le nombre d'heures avant le coup d'état diminue d'une heure. Celui-ci remonte chaque heure passée dans le positif.</div>
+{% endif %}
+{% if deleting %}
+<style>
+#deleting{
+	height:30px;
+	vertical-align:top;
+	position: relative;
+	border-top:1px solid #f00;
+	border-left:1px solid #f00;
+	border-right:1px solid #b00;
+	border-bottom:1px solid #b00;
+	background-color:#e66;
+	color:#000;
+}
+</style>
+<div id="deleting"><b>Suppression du compte en cours</b><br/>Ce compte sera effacé le {{delete_datetime|date:"D d M Y"}} à {{delete_datetime|time}}</div>
+{% endif %}
+{% if banned %}
+<style>
+#banned{
+	height:30px;
+	vertical-align:top;
+	position: relative;
+	border-top:1px solid #fff;
+	border-left:1px solid #fff;
+	border-right:1px solid #bbb;
+	border-bottom:1px solid #bbb;
+	background-color:#999;
+	color:#000;
+}
+#banned table { color:#000; };
+</style>
+<div id="banned"><b>Suspendu</b><br/><table><tr><td>Depuis le:</td><td>{{ban_datetime|date:"D d M Y"}} à {{ban_datetime|time}}</td></tr>{% if expire %}<tr><td>Expire le:</td><td>{{ban_expire_datetime|date:"D d M Y"}} à {{ban_expire_datetime|time}}</td></tr>{% endif %}<tr><td>Raison:</td><td>{{ban_reason}}</td></tr><tr><td>Raison publique:</td><td>{{ban_reason_public}}</td></tr></table></div>
+{% endif %}
+
+<div id="leftnav">
+    <div id="leftnav-inner">
+        {% include '_menu.html' %}
+    </div>
+</div>
+
+<div id="content">
+    
+    <div id="top">
+        <div id="top-toggler">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="flex-grow-1 row justify-content-around justify-content-md-center">
+            <div class="col-auto c-highlight"><img src="{{PATH_IMAGES}}/interface/credits.gif" class=res title="Crédits" width=16 height=16>{{top_credits|intcomma}}</div>
+            <div class="col-auto c-highlight"><img src="{{PATH_IMAGES}}/interface/prestige.gif" title="Prestige" width=16 height=16 class=res>{{top_prestiges|intcomma}}</div>
+        </div>
+        <div id="top-logo">
+            <img src="/assets/x_100.png">
+        </div>
+    </div>
+
+	{% if context %}<div id="status">{% include 'header.html' %}</div>{% endif %}
+	<div id="page">
+        {% if impersonating %}
+        <style>
+        #impersonate{
+        	vertical-align:top;
+        	position: relative;
+        	border:1px solid #ff0;
+        	border-radius:.25rem;
+        	background-color:#ee6;
+        	padding:0 .5rem;
+        	color:#000;
+        	margin-bottom:1rem;
+        }
+        </style>
+        <div id="impersonate"><b>Impersonisation</b> (<a href="/impersonate/stop/" style="color:#f00">Revenir au compte de départ</a>)<br/>Compte "{{login}}" - impossible d'envoyer de messages<br/></div>
+        {% endif %}
+	    {% block content %}{% endblock %}
+	</div>
+</div>
+
+<div id="rightnav">
+    <div id="rightnav-toggler">
+        <i class="fas fa-globe"></i>
+    </div>
+    <div id="rightnav-inner">
+        <div class="rightnav-header">
+            Planètes
+            <span class="ml-2">{{right_planet_count}}</span>
+            <span>/{{right_planet_max}}</span>
+        </div>
+        {% for planet in menu_planets %}
+        <a href="/game/planet/?planet={{planet.id}}" class="menu-item {% if cur_planetid == planet.id %}active{% endif %} {% if cur_planetid == planet.id and selected_menu == 'planet' %}selected{% endif %}">
+            <div class="d-flex align-items-center">
+                <img src="/assets/planets/p{{planet.img}}.gif" width="20px" height="20px" class="rounded mr-2">
+                <div>
+                    <div>{{planet.name}}</div>
+                    <div class="small" style="line-height:12px;">{{planet.g}}.{{planet.s}}.{{planet.p}}</div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="overlay"></div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/scripts/jquery.slimscroll.min.js"></script>
+
+<script>
+    var j = jQuery.noConflict();
+    j(document).ready(function() {
+        
+        j('#leftnav-inner').slimScroll({ height: '100%' });
+        j('#rightnav-inner').slimScroll({ height: '100%' });
+        
+        j("[data-toggle='tooltip']").tooltip({container: 'body'});
+        j('[data-toggle="popover"]').popover({container: 'body'});
+        
+        j( "#top-toggler" ).click(function() {
+            if (!j("#leftnav").hasClass("open")) { j("#leftnav").addClass("open"); }
+            if (!j("#overlay").hasClass("open")) { j("#overlay").addClass("open"); }
+        });
+
+        j( "#overlay" ).click(function() {
+            if (j("#leftnav").hasClass("open")) { j("#leftnav").removeClass("open"); }
+            if (j("#overlay").hasClass("open")) { j("#overlay").removeClass("open"); }
+        });
+        
+        j( "#rightnav-toggler" ).click(function() {
+            if (j("#rightnav").hasClass("open")) { j("#rightnav").removeClass("open"); }
+            else { j("#rightnav").addClass("open"); }
+        });
+    });
+</script>
+    
+</body>
+</html>

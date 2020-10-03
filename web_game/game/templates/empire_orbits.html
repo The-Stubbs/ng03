@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+
+{% load humanize %}
+
+{% block content %}
+
+{% include '_tabs_empire.html' %}
+
+<h1>Flottes étrangères en orbite</h1>
+<div class="box">
+    {% for planet in planets %}
+    <div class="box-line">
+        <div class="box-item">
+            <div><a href="/game/orbit/?planet={{planet.planetid}}">{{planet.planetname}}</a></div>
+            <div class="small">{{planet.g}}.{{planet.s}}.{{planet.p}}</div>
+        </div>
+        <div class="box-item text-right">
+            {% for fleet in planet.fleets %}
+            <div class="text-nowrap">
+                <a title="Écrire à {{fleet.fleetowner}}" href="/game/mails/?subject=À propos de la flotte {{fleet.fleetname}}&to={{fleet.fleetowner}}" class={% if fleet.ally %}ally{% endif %}{% if fleet.friend %}friend{% endif %}{% if fleet.enemy %}enemy{% endif %}>{% if fleet.alliance %}[{{fleet.tag}}]{% endif %} {{fleet.fleetname}} <small>{{fleet.fleetsignature|intcomma}}</small></a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="box-line">
+        <div class="box-item">
+            aucune flotte étrangère en orbite de nos planètes
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

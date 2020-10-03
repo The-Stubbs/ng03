@@ -1,0 +1,8 @@
+<ul class="htabs">
+    <li {% if selected_tab == 'overview' %}class="selected"{% endif %}><a href="/game/nation/">Aperçu</a></li>
+    <li {% if selected_tab == 'notes' %}class="selected"{% endif %}><a href="/game/notes/">Notes</a></li>
+    <li {% if selected_tab == 'edition' %}class="selected"{% endif %}><a href="/game/options/?cat=1">Edition</a></li>
+    <li {% if selected_tab == 'options' %}class="selected"{% endif %}><a href="/game/options/?cat=2">Options</a></li>
+    <li {% if selected_tab == 'holidays' %}class="selected"{% endif %}><a href="/game/options/?cat=3">Vacances</a></li>
+    <li><a href="https://exileng.com/signout/">Déconnexion</a></li>
+</ul>

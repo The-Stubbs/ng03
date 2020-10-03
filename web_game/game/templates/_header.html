@@ -1,0 +1,72 @@
+{% load humanize %}
+
+<script>
+function jump(obj){eval("location='{{url}}" + obj.options[obj.selectedIndex].value + "'");}
+function nextplanet(){
+	var obj = document.getElementById("planetlist");
+	if(obj.selectedIndex<obj.options.length-1) obj.selectedIndex=obj.selectedIndex+1; jump(obj);
+}
+function previousplanet(){
+	var obj = document.getElementById("planetlist");
+	if(obj.selectedIndex>0) obj.selectedIndex=obj.selectedIndex-1; jump(obj);
+}
+</script>
+
+<div class="box row align-itemx-center justify-content-around">
+	<div class="box-item col-auto text-nowrap text-center">
+	    <a href="#" onclick="previousplanet(); return false;"><i class="fas fa-chevron-left"></i></a>
+		<select id="planetlist" class="mx-2" onchange="jump(this)">
+			{% for planet in planets %}<option value="{{planet.id}}"{% if planet.selected %} selected{% endif %}>{{planet.g}}.{{planet.s}}.{{planet.p}} {{planet.name}}</option>{% endfor %}
+		</select>
+	    <a href="#" onclick="nextplanet(); return false;"><i class="fas fa-chevron-right"></i></a>
+	</div>
+	<div class="col-auto d-flex align-itemx-center justify-content-around">
+    	<div class="box-item col-auto text-center"><img src="{{PATH_IMAGES}}/interface/floor.gif" title="Terrain" width=16 height=16 class=res><span class="c-highlight">{{floor_occupied|intcomma}}</span> <small>/{{floor|intcomma}}</small></div>
+    	<div class="box-item col-auto text-center"><img src="{{PATH_IMAGES}}/interface/space.gif" title="Espace" width=16 height=16 class=res><span class="c-highlight">{{space_occupied|intcomma}}</span> <small>/{{space|intcomma}}</small></div>
+    </div>
+</div>
+<div class="row collapse" id="collapseExample">
+    <div class="col-12 col-md">
+    <div class="box">
+	    <div class="box-item col-12 col-md-auto">
+	        <div class="small mb-1">ressources</div>
+        	<div class="text-nowrap"><img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16 class=res><span{% if medium_ore %} class=med2{% elif high_ore %} class=high2{% else %} class=c-highlight{% endif %}>{{ore|intcomma}}</span> <small{% if medium_ore %} class=med2{% endif %}{% if high_ore %} class=high2{% endif %}>/{{ore_capacity|intcomma}}</small> <small class={% if normal_ore_production %}prod{% endif %}{% if medium_ore_production %}medprod{% endif %}>+{{ore_production|intcomma}}</small></div>
+        	<div class="text-nowrap"><img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16 class=res><span{% if medium_hydrocarbon %} class=med2{% elif high_hydrocarbon %} class=high2{% else %} class=c-highlight{% endif %}>{{hydrocarbon|intcomma}}</span> <small{% if medium_hydrocarbon %} class=med2{% endif %}{% if high_hydrocarbon %} class=high2{% endif %}>/{{hydrocarbon_capacity|intcomma}}</small> <small class={% if normal_hydrocarbon_production %}prod{% endif %}{% if medium_hydrocarbon_production %}medprod{% endif %}>+{{hydrocarbon_production|intcomma}}</small></div>
+        	<div class="text-nowrap"><img src="{{PATH_IMAGES}}/interface/energy.gif" title="Energie" width=16 height=16 class=res><span class="c-highlight">{{energy|intcomma}}</span> <small>/{{energy_capacity|intcomma}}</small> <small class="{% if energy_production_minus %}minus{% endif %}{% if energy_production_normal %}plus{% endif %}">{% if energy_production_normal %}+{% endif %}{{energy_production|intcomma}}</small></div>
+	    </div>
+    </div>
+    </div>
+    <div class="col-12 col-md">
+    <div class="box">
+	    <div class="box-item col-12 col-md-auto">
+	        <div class="small mb-1">population</div>
+        	<div class="text-nowrap"><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width=16 height=16 class=res><span class={% if workers_low %}low{% else %}c-highlight{% endif %}>{{workers|intcomma}}</span> <small class="mr-2">/{{workers_capacity|intcomma}}</small> <img src="{{PATH_IMAGES}}/interface/workers_idle.gif" title="oisifs" width="16" height="16" class="res">{{workers_idle|intcomma}}</div>
+        	<div class="text-nowrap"><img src="{{PATH_IMAGES}}/interface/scientists.gif" title="Scientifiques" width=16 height=16 class=res><span class={% if scientists_low %}low{% else %}c-highlight{% endif %}>{{scientists|intcomma}}</span> <small>/{{scientists_capacity|intcomma}}</small></div>
+        	<div class="text-nowrap"><img src="{{PATH_IMAGES}}/interface/soldiers.gif" title="Soldats" width=16 height=16 class=res><span class={% if soldiers_low %}low{% else %}c-highlight{% endif %}>{{soldiers|intcomma}}</span> <small>/{{soldiers_capacity|intcomma}}</small></div>
+	    </div>
+    </div>
+    </div>
+    {% if special %}
+    <div class="col-12 col-md">
+    <div class="box">
+	    <div class="box-item col-12 col-md-auto">
+	        <div class="small mb-1">bonus</div>
+			{% if special1 %}<div class="text-nowrap c-highlight"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{{special1}}</div>{% endif %}
+			{% if special2 %}<div class="text-nowrap c-highlight"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{{special2}}</div>{% endif %}
+			{% if special3 %}<div class="text-nowrap c-highlight"><img src="{{PATH_IMAGES}}/interface/special.gif" title="Spécial" class=res width=16 height=16>{{special3}}</div>{% endif %}
+	    </div>
+    </div>
+    </div>
+    {% endif %}
+</div>
+<div class="row justify-content-center">
+<div class="col-auto">
+<div class="box">
+    <div class="text-center" style="line-height:1;">
+        <a data-toggle="collapse" href="#collapseExample" class="py-0 px-3" style="font-size:8px;">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+</div>
+</div>
+</div>

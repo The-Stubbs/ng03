@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+
+{% load humanize %}
+
+{% block content %}
+
+    {% include '_tabs_empire.html' %}
+    
+    <h1>Flottes étrangères en orbite</h1>
+    <div class="box">
+        {% for planet in planets %}
+        <div class="box-line">
+            <div class="box-item">
+                <div><a href="/game/orbit/?planet={{planet.planetid}}">{{planet.planetname}}</a></div>
+                <div class="small">{{planet.g}}.{{planet.s}}.{{planet.p}}</div>
+            </div>
+            <div class="box-item text-right">
+                {% for ship in planet.ships %}
+                <div class="text-right text-nowrap">
+                    {{ship.ship}} x
+                    <span class="c-highlight">{{ship.quantity|intcomma}}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="box-line">
+            <div class="box-item">
+                aucun vaisseau au sol
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}

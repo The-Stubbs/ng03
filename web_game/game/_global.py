@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
+from math import sqrt
+
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
 
 from web_game.lib.exile import *
 from web_game.lib.template import *
+from web_game.lib.accounts import *
 
-from web_game.game.cache import *
 
-class GlobalView(ExileMixin, View):
+
+class GlobalView(LoginRequiredMixin, MaintenanceMixin, View):
 
     CurrentPlanet = None
     CurrentGalaxyId = None
@@ -20,17 +24,13 @@ class GlobalView(ExileMixin, View):
     pageTerminated = False
     displayAlliancePlanetName = True
     pagelogged = False
+    selected_tab = ""
     selected_menu = ""
     
     def pre_dispatch(self, request, *args, **kwargs):
         
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
-        
-        if not request.session.get(sUser):
-            return HttpResponseRedirect("/") # Redirect to home page
-
-        request.session["details"] = ""
         
         # Check that this session is still valid
         response = self.CheckSessionValidity()
@@ -40,20 +40,6 @@ class GlobalView(ExileMixin, View):
         response = self.CheckCurrentPlanetValidity()
         if response: return response
         
-        referer = self.request.META.get("HTTP_REFERER", "")
-        
-        if referer != "":
-        
-            # extract the website part from the referer url
-            posslash = referer[8:].find("/")
-            if posslash > 0:
-                websitename = referer[8:posslash-8]
-            else:
-                websitename = referer[8:]
-        
-            if not "exileng.com" in referer.lower() and not referer.lower() in request.META.get("LOCAL_ADDR", "") and not "viewtopic" in referer.lower() and not "forum" in referer.lower():
-                oConnExecute("SELECT sp_log_referer("+str(self.UserId)+","+dosql(referer) + ")")
-
     def hasRight(self, right):
         if self.oAllianceRights == None:
             return True
@@ -81,45 +67,6 @@ class GlobalView(ExileMixin, View):
 
     def IsImpersonating(self):
         return self.request.user.is_impersonate
-
-    '''
-    sub Impersonate(new_userid)
-        if Session(sPrivilege) >= 100 then
-            UserId = new_userid
-            Session.Contents(sUser) = new_userid
-            Session("ImpersonatingUser") = Session(sLogonUserID) <> new_userid
-    
-            InvalidatePlanetList()
-    
-            CurrentPlanet = 0
-            CurrentGalaxyId = 0
-            CurrentSectorId = 0
-    
-            Response.Redirect "/game/overview.asp"
-            Response.End
-        end if
-    end sub
-    '''
-    
-    def log_notice(self, title, details, level):
-        query = "INSERT INTO log_notices (username, title, details, url, level) VALUES(" +\
-                dosql(self.oPlayerInfo["login"]) + ", " +\
-                dosql(title[:127]) + "," +\
-                dosql(details[:127]) + "," +\
-                dosql(self.scripturl[:127]) + "," +\
-                str(level) +\
-                ")"
-        oConnDoQuery(query)
-
-    '''
-    function Min(a, b)
-        if a < b then Min = a else Min = b
-    end function
-    '''
-    
-    # Call this function when the name of a planet has changed or has been colonized or abandonned
-    def InvalidatePlanetList(self):
-        self.request.session[sPlanetList] = None
 
     # return image of a planet according to its it and its floor
     def planetimg(self,id,floor):
@@ -312,105 +259,53 @@ class GlobalView(ExileMixin, View):
         query = "SELECT (SELECT int4(COUNT(*)) FROM messages WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL)," + \
                 "(SELECT int4(COUNT(*)) FROM reports WHERE ownerid=" + str(self.UserId) + " AND read_date is NULL AND datetime <= now());"
         oRs = oConnExecute(query)
-        
-        if oRs[0] > 0:
-            tpl.AssignValue("new_mail", oRs[0])
-
-        if oRs[1] > 0:
-            tpl.AssignValue("new_report", oRs[1])
+    
+        tpl.AssignValue("new_mail", oRs[0])
+        tpl.AssignValue("new_report", oRs[1])
 
         if self.oAllianceRights:
+            tpl.Parse("show_alliance")
             if self.oAllianceRights["leader"] or self.oAllianceRights["can_manage_description"] or self.oAllianceRights["can_manage_announce"]: tpl.Parse("show_management")
             if self.oAllianceRights["leader"] or self.oAllianceRights["can_see_reports"]: tpl.Parse("show_reports")
             if self.oAllianceRights["leader"] or self.oAllianceRights["can_see_members_info"]: tpl.Parse("show_members")
-    
-        if self.SecurityLevel >= 3:
-            tpl.Parse("show_mercenary")
-            tpl.Parse("show_alliance")
-    
-        #
-        # Fill admin info
-        #
-        if self.request.session.get("privilege", 0) >= 100:
-            
-            query = "SELECT int4(MAX(id)) FROM log_http_errors"
-            oRs = oConnExecute(query)
-            last_errorid = oRs[0]
-    
-            query = "SELECT int4(MAX(id)) FROM log_notices"
-            oRs = oConnExecute(query)
-            last_noticeid = oRs[0]
-    
-            query = "SELECT COALESCE(dev_lasterror, 0), COALESCE(dev_lastnotice, 0) FROM users WHERE id=" + self.request.session.get(sLogonUserID)
-            oRs = oConnExecute(query)
-            if last_errorid > oRs[0]:
-                tpl.AssignValue("new_error", last_errorid-oRs[0])
-    
-            if last_noticeid > oRs[1]:
-                tpl.AssignValue("new_notice", last_noticeid-oRs[1])
-    
-            tpl.Parse("dev")
-    
-        tpl.AssignValue("planetid", self.CurrentPlanet)
-    
+        
+        tpl.AssignValue("top_credits", self.oPlayerInfo["credits"])
+        tpl.AssignValue("top_prestiges", self.oPlayerInfo["prestige_points"])
+        
+        tpl.AssignValue("cur_planetid", self.CurrentPlanet)
         tpl.AssignValue("cur_g", self.CurrentGalaxyId)
         tpl.AssignValue("cur_s", self.CurrentSectorId)
         tpl.AssignValue("cur_p", ((self.CurrentPlanet-1) % 25) + 1)
     
-        tpl.AssignValue("selectedmenu", self.selected_menu.replace(".","_"))
-    
-        if self.selected_menu != "":
-            blockname = self.selected_menu + "_selected"
-    
-            while blockname != "":
-                tpl.Parse(blockname)
-    
-                i = blockname.rfind(".")
-                if i > 0: i = i - 1
-                blockname = blockname[:i]
+        tpl.AssignValue("selected_tab", self.selected_tab)
+        tpl.AssignValue("selected_menu", self.selected_menu)
+        
+        tpl.AssignValue("menu_avatar", self.oPlayerInfo["avatar_url"])
+        tpl.AssignValue("menu_username", self.oPlayerInfo["login"])
+        tpl.AssignValue("menu_orientation", self.oPlayerInfo["orientation"])
 
-        # Assign the menu
-        tpl_layout.AssignValue("menu", True)
+        tpl.AssignValue("right_planet_count", self.oPlayerInfo["planets"])
+        tpl.AssignValue("right_planet_max", int(self.oPlayerInfo["mod_planets"]))
 
+        planets = []
+        tpl.AssignValue("menu_planets", planets)
+        
+        query = "SELECT id, galaxy, sector, planet, name, planet_floor FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId)
+        rows = oConnRows(query)
+        for row in rows:
+            
+            planet = {}
+            planets.append(planet)
+            
+            planet["id"] = row["id"]
+            planet["g"] = row["galaxy"]
+            planet["s"] = row["sector"]
+            planet["p"] = row["planet"]
+            planet["name"] = row["name"]
+            planet["img"] = self.planetimg(row["id"], row["planet_floor"])
+        
     def logpage(self):
         self.pagelogged = True
-
-    '''
-    sub RedirectTo(url)
-        logpage()
-    
-        pageTerminated = true
-    
-        Response.Redirect url
-        Response.End
-    end sub
-    '''
-    
-    '''
-    sub displayXML(tpl)
-        dim tpl_xml
-        set tpl_xml = GetTemplate("layoutxml")
-    
-        dim oRs, query
-    
-        ' retrieve number of new messages & reports
-        query = "SELECT (SELECT int4(COUNT(*)) FROM messages WHERE ownerid=" & UserId & " AND read_date is NULL)," & _
-                "(SELECT int4(COUNT(*)) FROM reports WHERE ownerid=" & UserId & " AND read_date is NULL AND datetime <= now());"
-        set oRs = oConn.Execute(query)
-    
-        tpl_xml.AssignValue "new_mail", oRs(0)
-        tpl_xml.AssignValue "new_report", oRs(1)
-    
-        tpl_xml.AssignValue "content", tpl.output
-        tpl_xml.AssignValue "selectedmenu", Replace(selected_menu,".","_")
-        tpl_xml.Parse ""
-    
-        response.contentType = "text/xml"
-    
-        Session("details") = "sending page"
-        response.write tpl_xml.output
-    end sub
-    '''
 
     #
     # Display the tpl content with the default layout template
@@ -468,63 +363,11 @@ class GlobalView(ExileMixin, View):
                 tpl_layout.AssignValue("login", self.oPlayerInfo["login"])
                 tpl_layout.Parse("impersonating")
                 
-            #
-            # Fill admin info
-            #
-            if self.request.session.get(sPrivilege) > 100:
-    
-                # Assign the time taken to generate the page
-                tpl_layout.AssignValue("render_time",  (time.clock() - self.StartTime))
-    
-                # Assign number of logged players
-                oRs = oConnExecute("SELECT int4(count(*)) FROM vw_players WHERE lastactivity >= now()-INTERVAL '20 minutes'")
-                tpl_layout.AssignValue("players", oRs[0])
-                tpl_layout.Parse("dev")
-    
-                if self.oPlayerInfo["privilege"] == -2:
-                    oRs = oConnExecute("SELECT start_time, min_end_time, end_time FROM users_holidays WHERE userid="+str(self.UserId))
-    
-                    if oRs:
-                        tpl_layout.AssignValue("start_datetime", oRs[0])
-                        tpl_layout.AssignValue("min_end_datetime", oRs[1])
-                        tpl_layout.AssignValue("end_datetime", oRs[2])
-                        tpl_layout.Parse("onholidays")
-    
-                if self.oPlayerInfo["privilege"] == -1:
-                    tpl_layout.AssignValue("ban_datetime", self.oPlayerInfo["ban_datetime"])
-                    tpl_layout.AssignValue("ban_reason", self.oPlayerInfo["ban_reason"])
-                    tpl_layout.AssignValue("ban_reason_public", self.oPlayerInfo["ban_reason_public"])
-    
-                    if self.oPlayerInfo["ban_expire"]:
-                        tpl_layout.AssignValue("ban_expire_datetime", self.oPlayerInfo["ban_expire"])
-                        tpl_layout.Parse("banned.expire")
-    
-                    tpl_layout.Parse("banned")
-
             tpl_layout.AssignValue("userid", self.UserId)
             tpl_layout.AssignValue("server", universe)
     
-            '''
-            if not oPlayerInfo("paid") and Session(sPrivilege) < 100:
-    
-                connectNexusDB
-                set oRs = oNexusConn.Execute("SELECT sp_ad_get_code(" & UserId & ")")
-                if not oRs.EOF:
-                    if not isnull(oRs[0]):
-                        tpl_layout.AssignValue("ad_code", oRs[0]
-                        tpl_layout.Parse("ads.code"
-                    end if
-                end if
-    
-                tpl_layout.Parse("ads"
-                oConn.Execute "UPDATE users SET displays_pages=displays_pages+1 WHERE id=" & UserId
-            '''
-            
             tpl_layout.Parse("menu")
     
-            if not self.oPlayerInfo["inframe"]:
-                tpl_layout.Parse("test_frame")
-            
             #
             # Write the template to the client
             #
@@ -538,16 +381,16 @@ class GlobalView(ExileMixin, View):
     # Check that our user is valid, otherwise redirect user to home page
     #
     def CheckSessionValidity(self):
-        self.UserId = self.request.session.get(sUser)
+        self.UserId = self.request.user.id
     
         # check that this session is still used
         # if a user tries to login multiple times, the first sessions are abandonned
 
-        query = "SELECT ""login"", privilege, lastlogin, credits, lastplanetid, deletion_date, score, planets, previous_score," +\
+        query = "SELECT ""login"", privilege, lastlogin, credits, lastplanetid, deletion_date, score, score_prestige, planets, previous_score," +\
                 "alliance_id, alliance_rank, leave_alliance_datetime IS NULL AND (alliance_left IS NULL OR alliance_left < now()) AS can_join_alliance," +\
-                "credits_bankruptcy, mod_planets, mod_commanders," +\
+                "credits_bankruptcy, mod_planets, mod_commanders, avatar_url," +\
                 "ban_datetime, ban_expire, ban_reason, ban_reason_public, orientation, (paid_until IS NOT NULL AND paid_until > now()) AS paid," +\
-                " timers_enabled, display_alliance_planet_name, prestige_points, (inframe IS NOT NULL AND inframe) AS inframe, COALESCE(skin, 's_default') AS skin," +\
+                " timers_enabled, display_alliance_planet_name, credits, prestige_points, (inframe IS NOT NULL AND inframe) AS inframe, COALESCE(skin, 's_default') AS skin," +\
                 "lcid, security_level, (SELECT username FROM exile_nexus.users WHERE id=" + str(self.UserId) + ") AS username" +\
                 " FROM users" +\
                 " WHERE id=" + str(self.UserId)
@@ -562,14 +405,6 @@ class GlobalView(ExileMixin, View):
     
         self.request.session["LCID"] = self.oPlayerInfo["lcid"]
     
-        if self.request.session.get(sPrivilege) < 100:
-            if self.request.COOKIES.get("login") == "":
-                self.request.COOKIES["login"] = self.oPlayerInfo["login"]
-            elif self.request.COOKIES.get("login") != self.oPlayerInfo["login"]:
-                self.log_notice("login cookie", "Last browser login cookie : \"" + self.request.COOKIES.get("login", "") + "\"", 1)
-                
-                self.request.COOKIES["login"] = self.oPlayerInfo["login"]
-
         if self.IsPlayerAccount():
             # Redirect to locked page
             if self.oPlayerInfo["privilege"] == -1: return HttpResponseRedirect("/game/locked/")
@@ -599,7 +434,7 @@ class GlobalView(ExileMixin, View):
                 self.AllianceId = None
 
         # log activity
-        if not self.IsImpersonating(): oConnExecute("SELECT sp_log_activity(" + str(self.UserId) + "," + dosql(self.request.META.get("REMOTE_ADDR")) + "," + str(self.browserid) + ")")
+        if not self.IsImpersonating(): oConnExecute("SELECT sp_log_activity(" + str(self.UserId) + "," + dosql(self.request.META.get("REMOTE_ADDR")) + ",0)")
 
     # set the new current planet, if the planet doesn't belong to the player then go back to the session planet
     def SetCurrentPlanet(self, planetid):
@@ -639,8 +474,7 @@ class GlobalView(ExileMixin, View):
                 self.CurrentSectorId = oRs[1]
                 return
     
-            self.InvalidatePlanetList()
-    
+
         # there is no active planet, select the first planet available
         oRs = oConnExecute("SELECT id, galaxy, sector FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId) + " LIMIT 1")
     

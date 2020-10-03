@@ -1,10 +1,12 @@
 <ul class="htabs">
-    <li><a href="/game/planet/?planet=1022">Vue d'ensemble</a></li>
-    <li><a href="/game/production/?planet=1022">Production</a></li>
-    <li><a href="/game/buildings/?planet=1022">Infrastructures</a></li>
-    <li><a href="/game/shipyard/?planet=1022">Chantier spatial</a></li>
-    <li><a href="/game/shipyard/?planet=1022&recycle=1">Recyclage</a></li>
-    <li><a href="/game/training/?planet=1022">Entraînement</a></li>
-    <li><a href="/game/orbit/?planet=1022">Orbite</a></li>
-    <li><a href="/game/market-sell/?planet=1022">Marché</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/planet/">Aperçu</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/production/?cat=1">Production</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/production/?cat=2">Fonctionnement</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/production/?cat=3">Transferts</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/buildings/">Bâtiments</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/shipyard/">Vaisseaux</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/shipyard/?&recycle=1">Recyclage</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/training/">Entraînements</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/orbit/">Orbite</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/market-sell/">Marché</a></li>
 </ul>

@@ -90,7 +90,7 @@ function formattime(s){
 function formatRemainingTime(s){
 	if(s < 0) s = 0;
 	if(s < 600) return "<span id=countdown>" + formattime(s) + "</span>";
-	return formattime(s);
+	return "<span class=c-highlight>" + formattime(s) + "</span>";
 }
 
 var countdownnbr = 0;

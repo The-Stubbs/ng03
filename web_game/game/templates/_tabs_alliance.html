@@ -1,18 +1,28 @@
 {% if show_alliance %}
 <ul class="htabs">
-    <li><a href="/game/alliance/">Vue d'ensemble</a></li>
-    {% if show_management %}<li><a href="/game/alliance-manage/">Gestion</a></li>{% endif %}
-    {% if show_members %}<li><a href="/game/alliance-members/">Membres</a></li>{% endif %}
-    <li><a href="/game/alliance-naps/">PNA</a></li>
-    <li><a href="/game/alliance-tributes/">Tributs</a></li>
-    <li><a href="/game/alliance-wars/">Guerres</a></li>
-    <li><a href="/game/alliance-wallet/">Portefeuille</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance/">Vue d'ensemble</a></li>
+    {% if show_management %}
+        <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-manage/?cat=1">Gestion</a></li>
+        <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-manage/?cat=2">Annonce</a></li>
+        <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-manage/?cat=3">Grades</a></li>
+    {% endif %}
+    {% if show_members %}
+        <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-members/?cat=1">Membres</a></li>
+        <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-members/?cat=2">Recrutement</a></li>
+    {% endif %}
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-naps/">PNA</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-tributes/">Tributs</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-wars/">Guerres</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-wallet/?cat=1">Portefeuille</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-wallet/?cat=2">Financement</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %} {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-wallet/?cat=3">Dons</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-wallet/?cat=4">Taxe</a></li>
     {% if show_reports %}<li><a href="/game/alliance-reports/">Rapports</a></li>{% endif %}
-    <li><a href="/game/alliance-invitations/">Invitations</a></li>
+    <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-invitations/">Invitations</a></li>
 </ul>
 {% else %}
 <ul class="htabs">
-     <li><a href="/game/alliance-create/">Création</a></li>
-     <li><a href="/game/alliance-invitations/">Invitations</a></li>
+     <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-create/">Création</a></li>
+     <li {% if selected_tab == '' %}class="selected"{% endif %}><a href="/game/alliance-invitations/">Invitations</a></li>
 </ul>
 {% endif %}

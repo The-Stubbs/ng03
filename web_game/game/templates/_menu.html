@@ -1,0 +1,114 @@
+{% load humanize %}
+
+<a href="/" id="leftnav-header">
+    <img src="/assets/exile_ng_100.png">
+    <span>{{server}}</span>
+</a>
+
+<a href="/game/options/" id="leftnav-profile" class="menu-item {% if selected_menu == 'profile' %}selected{% endif %}">
+    <div class="row">
+        <div class="col-auto">
+            {% if menu_avatar %}<img class="avatar" src="{{menu_avatar}}">{% else %}<img class="avatar" src="/assets/interface/noavatar.gif">{% endif %}
+        </div>
+        <div class="col">
+            <i class="caret fas fa-chevron-right"></i>
+            <div class="username">{{menu_username}}</div>
+            <div class="orientation">{% if menu_orientation == 1 %}marchand{% elif menu_orientation == 2 %}militaire{% elif menu_orientation == 3 %}scientifique{% endif %}</div>
+        </div>
+    </div>
+</a>
+
+<div class="menu-bar">
+<div class="row align-items-center justify-content-between">
+    <div class="col-auto">
+        <a href="/game/help/" class="{% if selected_menu == 'help' %}selected{% endif %}">
+            <i class="icon fas fa-question-circle"></i>
+        </a>
+    </div>
+    <div class="col-auto">
+        <a href="/game/mails/" class="{% if selected_menu == 'mail' %}selected{% endif %}">
+            <i class="icon fas fa-envelope"></i>
+            {% if new_mail > 0 %}<span class="badge">{{new_mail}}</span>{% endif %}
+        </a>
+    </div>
+    <div class="col-auto">
+        <a href="/game/chat/" class="{% if selected_menu == 'chat' %}selected{% endif %}">
+            <i class="icon fas fa-comments"></i>
+        </a>
+    </div>
+    <div class="col-auto">
+        <a href="/game/reports/" class="{% if selected_menu == 'report' %}selected{% endif %}">
+            <i class="icon fas fa-bell"></i>
+            {% if new_report > 0 %}<span class="badge">{{new_report}}</span>{% endif %}
+        </a>
+    </div>
+</div>
+</div>
+
+<a href="/game/empire_view/" class="menu-item {% if selected_menu == 'empire' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-th-large"></i>
+    Empire
+</a>
+
+<a href="/game/fleets/" class="menu-item {% if selected_menu == 'fleets' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-plane"></i>
+    Flottes
+</a>
+
+<a href="/game/market-sell/" class="menu-item {% if selected_menu == 'market' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-handshake"></i>
+    Commerce
+</a>
+
+<a href="/game/commanders/" class="menu-item {% if selected_menu == 'commanders' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-certificate"></i>
+    Commandants
+</a>
+
+<a href="/game/research/" class="menu-item {% if selected_menu == 'researches' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-microscope"></i>
+    Recherches
+</a>
+
+<a href="/game/map/?g={{cur_g}}&s={{cur_s}}" class="menu-item {% if selected_menu == 'map' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-map"></i>
+    Carte spatiale
+</a>
+
+<a href="/game/alliance/" class="menu-item {% if selected_menu == 'alliance' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-users"></i>
+    Alliance
+</a>
+
+<a href="/game/ranking-alliances/" class="menu-item {% if selected_menu == 'ranking' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-signal"></i>
+    Classement
+</a>
+
+<a href="/game/mercenary-intelligence/" class="menu-item {% if selected_menu == 'mercenary' %}selected{% endif %}">
+    <i class="caret fas fa-chevron-right"></i>
+    <i class="icon fas fa-user-secret"></i>
+    Mercenaires
+</a>
+
+<div class="row justify-content-center mt-4 mb-2">
+    <div class="col-auto"><a href="https://www.facebook.com/exileng/" target="_blank"><i class="icon fab fa-facebook"></i></a></div>
+    <div class="col-auto"><a href="https://www.instagram.com/freddec_exileng/" target="_blank"><i class="icon fab fa-instagram"></i></a></div>
+    <div class="col-auto"><a href="https://twitter.com/ExileNg/" target="_blank"><i class="icon fab fa-twitter"></i></a></div>
+    <div class="col-auto"><a href="https://discord.gg/9RHUEhw" target="_blank"><i class="icon fab fa-discord"></i></a></div>
+</div>
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" class="mb-4 text-center">
+    <input type="hidden" name="cmd" value="_s-xclick" />
+    <input type="hidden" name="hosted_button_id" value="7XYD7SJFKQ8M4" />
+    <input type="image" style="border:0;" src="https://www.paypalobjects.com/fr_FR/FR/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Bouton Faites un don avec PayPal" />
+    <img alt="" border="0" src="https://www.paypal.com/fr_FR/i/scr/pixel.gif" width="1" height="1" />
+</form>

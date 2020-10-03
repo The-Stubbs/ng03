@@ -1,0 +1,218 @@
+{% extends '_layout.html' %}
+
+{% load humanize %}
+{% load exile_tags %}
+{% load bbcode_tags %}
+
+{% block content %}
+
+{% include '_tabs_empire.html' %}
+
+<h1>Alliance</h1>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-item">
+        	    <div class="box-title">grade</div>
+        	    {% if alliance %}
+        	        <span class="c-highlight mr-2">{{alliance.rank_label}}</span>
+        	        <a href="/game/alliance/?tag={{alliance.tag}}" class="badge" data-toggle="tooltip" title="Aperçu alliance"><i class="fas fa-fw fa-users"></i> [{{alliance.tag}}] {{alliance.name}}</a>
+        	    {% else %}
+        	        <span class="c-highlight">Indépendant</span>
+        	    {% endif %}
+            </div>
+        </div>
+    </div>
+    {% if alliance %}
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-item">
+                <div class="box-title">defcon {{alliance.defcon}}</div>
+                {% if alliance.defcon == 5 %}<span class="c-highlight">Préparation normale en temps de paix</span>
+                {% elif alliance.defcon == 4 %}<span class="c-highlight">Préparation normale, mais renseignement accru et mesures de sécurité renforcées</span>
+                {% elif alliance.defcon == 3 %}<span class="c-highlight">Accroissement de la préparation des forces au-dessus de la préparation normale</span>
+                {% elif alliance.defcon == 2 %}<span class="c-highlight">Accroissement supplémentaire dans la préparation des forces</span>
+                {% elif alliance.defcon == 1 %}<span class="c-highlight">Préparation maximale des forces (état de guerre)</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="box">
+            <div class="box-item">
+                <div class="box-title">annonce</div>
+                {% if alliance.announce %}<span class="c-highlight">{{alliance.announce|safe|bbcode}}</span>
+                {% else %}aucune annonce
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<h1>Statistiques</h1>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-item">
+        	    <div class="box-title">score de développement</div>
+        	    <span class="c-highlight mr-2">{{stats.dev_score|intcomma}}</span>
+        	    <span class="mr-2 {% if stats.dev_score_delta > 0 %}c-success{% else %}c-danger{% endif %}">{% if stats.dev_score_delta > 0 %}+{% endif %}{{stats.dev_score_delta|intcomma}}</span>
+        	    <a href="/game/ranking-players/" class="badge" data-toggle="tooltip" title="Classement joueur"><i class="fas fa-fw fa-signal"></i> {{stats.dev_rank}} <small>/{{stats.player_count}}</small></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-item">
+        	    <div class="box-title">score de combat</div>
+        	    <span class="c-highlight mr-2">{{stats.battle_score|intcomma}}</span>
+        	    <a href="/game/ranking-players/?col=4" class="badge" data-toggle="tooltip" title="Classement joueur"><i class="fas fa-fw fa-signal"></i> {{stats.battle_rank}} <small>/{{stats.player_count}}</small></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-item">
+        	    <div class="box-title">production</div>
+        	    <span class="mr-2">
+            	    <span data-toggle="tooltip" title="Minerai">{{'ore'|icon}}</span>
+            	    <span class="c-highlight">{{stats.prod_ore|intcomma}}</span>
+            	    <small>/heure</small>
+        	    </span>
+        	    <span class="mr-2">
+            	    <span data-toggle="tooltip" title="Hydro">{{'hydro'|icon}}</span>
+            	    <span class="c-highlight">{{stats.prod_hydro|intcomma}}</span>
+            	    <small>/heure</small>
+        	    </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-item">
+        	    <div class="box-title">population</div>
+        	    <span class="mr-2">
+            	    <span data-toggle="tooltip" title="Ouvriers">{{'worker'|icon}}</span>
+            	    <span class="c-highlight">{{stats.worker_count|intcomma}}</span>
+        	    </span>
+        	    <span class="mr-2">
+            	    <span data-toggle="tooltip" title="Scientifiques">{{'scientist'|icon}}</span>
+            	    <span class="c-highlight">{{stats.scientist_count|intcomma}}</span>
+        	    </span>
+        	    <span class="mr-2">
+            	    <span data-toggle="tooltip" title="Soldats">{{'soldier'|icon}}</span>
+            	    <span class="c-highlight">{{stats.soldier_count|intcomma}}</span>
+        	    </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-item">
+        	    <div class="box-title">recherche en cours</div>
+            	{% if research %}
+            	<div class="row">
+                    <div class="col"><a href="/game/research/#{{research.id}}" class="badge" data-toggle="tooltip" title="Recherches"><i class="fas fa-microscope"></i> {{research.label}}</a></div>
+                    <div class="col-auto"><script>putcountdown1({{research.remaining_time}}, "Terminée", "/game/research/");</script></div>
+                </div>
+            	{% else %}
+            	<a href="/game/research/" class="badge" data-toggle="tooltip" title="Recherches"><i class="fas fa-microscope"></i> aucune recherche en cours</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<h1>Flottes en transit</h1>
+<div class="row">
+    {% for fleet in fleets %}
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-item row">
+                <div class="col text-nowrap">
+                	{% if fleet.relation == 2 %}
+                	    <a href="/game/fleet/?id={{fleet.id}}" class="badge self" data-toggle="tooltip" title="Aperçu flotte">
+                	        <i class="fas fa-plane"></i>
+                	        {{fleet.name}}
+                	    </a>
+                	{% else %}
+                	    <a href="/game/nation/?name={{fleet.name}}" class="{% if fleet.relation == -1 %}enemy{% elif fleet.relation == 0 %}friend{% elif fleet.relation == 1 %}ally{% endif %}" class="badge self" data-toggle="tooltip" title="Aperçu joueur"><i class="fas fa-user"></i> {{fleet.name}}</a>
+                	{% endif %}
+                	<div class="small mt-1">
+                	    {% if fleet.stance %}<span data-toggle="tooltip" title="Mode attaque">{{'attack'|icon}}</span>
+                	    {% else %}<span data-toggle="tooltip" title="Mode riposte">{{'defense'|icon}}</span>
+                	    {% endif %}
+                	    {{fleet.signature|intcomma}}
+                    </div>
+            	</div>
+                <div class="col text-right text-nowrap">
+                	{% if fleet.planet %}<script>putplanet("{{fleet.planet.id}}", "{{fleet.planet.name}}", "{{fleet.planet.g}}", "{{fleet.planet.s}}", "{{fleet.planet.p}}", {{fleet.planet.relation}});</script>
+                	{% else %}<small>inconnue</small>{% endif %}
+                	<i class="fas fa-long-arrow-alt-right px-1"></i>
+                	<script>putplanet("{{fleet.dest.id}}","{{fleet.dest.name}}","{{fleet.dest.g}}","{{fleet.dest.s}}","{{fleet.dest.p}}",{{fleet.dest.relation}});</script>
+                	<div class="small mt-1">
+                	    <script>putcountdown1({{fleet.remaining_time}}, "Arrivée", "/game/overview/");</script>
+                    </div>
+            	</div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col">aucun mouvement en cours</div>
+    {% endfor %}
+</div>
+
+<h1>Bâtiments en cours</h1>
+<div class="row">
+	{% for item in constructionyards %}
+	<div class="col-12 col-md-6">
+    	<div class="box">
+        	<div class="box-item row">
+        		<div class="col-auto">
+        		    <div><a href="/game/buildings/?planet={{item.id}}" class="badge" data-toggle="tooltip" title="Bâtiments planète"><i class="fas fa-building"></i> {{item.name}}</a></div>
+        		    <div class="mt-1 small">{{item.g}}.{{item.s}}.{{item.p}}</div>
+        		</div>
+        		<div class="col text-nowrap text-right">
+        			{% for building in item.buildings %}
+        			<div>{% if building.is_destroying %}<span class="c-danger">{% endif %}{{building.label}} &middot; <script>putcountdown1({{building.remaining_time}}, "Terminé", "/game/buildings/?planet={{item.id}}#{{building.id}}");</script>{% if building.is_destroying %}</span>{% endif %}</div>
+        			{% empty %}
+        			aucune bâtiment en cours
+        			{% endfor %}
+        		</div>
+        	</div>
+    	</div>
+    </div>
+	{% endfor %}
+</div>
+
+<h1>Vaisseaux en cours</h1>
+<div class="row">
+	{% for planet in shipyards %}
+	<div class="col-12 col-md-6">
+    	<div class="box">
+    		<div class="box-item row">
+        		<div class="col-auto">
+        		    <div><a href="/game/shipyard/?planet={{planet.id}}" class="badge" data-toggle="tooltip" title="Vaisseaux planète"><i class="fas fa-plane"></i> {{planet.name}}</a></div>
+        		    <div class="mt-1 small">{{planet.g}}.{{planet.s}}.{{planet.p}}</div>
+        	    </div>
+        		<div class="col text-nowrap text-right">
+        			{% if planet.ship %}
+            			{% if planet.ship.is_waiting %}
+            			{{planet.ship.label}} &middot; <span class="c-danger">en attente</span>
+            			{% else %}
+            			{% if planet.ship.is_recycling %}<span class="c-danger">{% endif %}{{planet.ship.label}} &middot; <script>putcountdown1({{planet.ship.remaining_time}}, "Terminé", "/game/shipyard/?planet={{planet.id}}&f=0#{{planet.ship.id}}");</script>{% if ship.is_recycling %}</span>{% endif %}
+            			{% endif %}
+        			{% else %}
+        			aucun vaisseau en cours
+        			{% endif %}
+        		</div>
+        	</div>
+    	</div>
+	</div>
+	{% empty %}
+	<div class="col">aucun vaisseau constructible</div>
+	{% endfor %}
+</div>
+
+{% endblock %}

@@ -1,65 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from django.urls import path
-from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
 from web_game.game import error_500
 
-from web_game import connect
+from web_game.game import empire_planets
+from web_game.game import empire_view
 
-from web_game.game import alliance
-from web_game.game import alliance_create
-from web_game.game import alliance_invitations
-from web_game.game import alliance_manage
-from web_game.game import alliance_members
-from web_game.game import alliance_naps
-from web_game.game import alliance_reports
-from web_game.game import alliance_tributes
-from web_game.game import alliance_wallet
-from web_game.game import alliance_wars
-from web_game.game import battle
-from web_game.game import battle_view
-from web_game.game import buildings
-from web_game.game import chat
-from web_game.game import commanders
-from web_game.game import fleet
-from web_game.game import fleet_trade
-from web_game.game import fleet_ships
-from web_game.game import fleet_split
-from web_game.game import fleets
-from web_game.game import fleets_handler
-from web_game.game import fleets_orbiting
-from web_game.game import fleets_ships_stats
-from web_game.game import fleets_standby
-from web_game.game import game_over
-from web_game.game import help
-from web_game.game import holidays
-from web_game.game import invasion
-from web_game.game import mails
-from web_game.game import maintenance
-from web_game.game import map
-from web_game.game import market_buy
-from web_game.game import market_sell
-from web_game.game import mercenary_intelligence
-from web_game.game import nation
-from web_game.game import notes
-from web_game.game import orbit
-from web_game.game import overview
-from web_game.game import options
-from web_game.game import planet
-from web_game.game import planets
-from web_game.game import production
-from web_game.game import ranking_alliances
-from web_game.game import ranking_players
-from web_game.game import reports
-from web_game.game import research
-from web_game.game import shipyard
-from web_game.game import spy_report
-from web_game.game import training
-from web_game.game import upkeep
-from web_game.game import start
-from web_game.game import wait
+from web_game.game import game_connection
 
 
 
@@ -68,61 +17,82 @@ handler500 = 'error_500.View'
 #-------------------------------------------------------------------------------
 urlpatterns = [
 	#---------------------------------------------------------------------------
-	path('', RedirectView.as_view(url='/game/connect/')),
-    path('connect/', connect.View.as_view()),
+	path('', RedirectView.as_view(url='/game/connection/')),
 	#---------------------------------------------------------------------------
-    path('alliance-create/', alliance_create.View.as_view()),
-    path('alliance-invitations/', alliance_invitations.View.as_view()),
-    path('alliance-manage/', alliance_manage.View.as_view()),
-    path('alliance-members/', alliance_members.View.as_view()),
-    path('alliance-naps/', alliance_naps.View.as_view()),
-    path('alliance-reports/', alliance_reports.View.as_view()),
-    path('alliance-tributes/', alliance_tributes.View.as_view()),
-    path('alliance-wallet/', alliance_wallet.View.as_view()),
-    path('alliance-wars/', alliance_wars.View.as_view()),
-    path('alliance/', alliance.View.as_view()),
-    path('battle-view/', battle_view.View.as_view()),
-    path('battle/', battle.View.as_view()),
-    path('buildings/', buildings.View.as_view()),
-    path('chat/', chat.View.as_view()),
-    path('commanders/', commanders.View.as_view()),
-    path('fleet-ships/', fleet_ships.View.as_view()),
-    path('fleet-split/', fleet_split.View.as_view()),
-    path('fleet-trade/', fleet_trade.View.as_view()),
-    path('fleet/', fleet.View.as_view()),
-    path('fleets_handler/', fleets_handler.View.as_view()),
-    path('fleets-orbiting/', fleets_orbiting.View.as_view()),
-    path('fleets-ships-stats/', fleets_ships_stats.View.as_view()),
-    path('fleets-standby/', fleets_standby.View.as_view()),
-    path('fleets/', fleets.View.as_view()),
-    path('game-over/', game_over.View.as_view()),
-    path('help/', help.View.as_view()),
-    path('holidays/', holidays.View.as_view()),
-    path('invasion/', invasion.View.as_view()),
-    path('mails/', mails.View.as_view()),
-    path('maintenance/', maintenance.View.as_view()),
-    path('map/', map.View.as_view()),
-    path('market-buy/', market_buy.View.as_view()),
-    path('market-sell/', market_sell.View.as_view()),
-    path('mercenary-intelligence/', mercenary_intelligence.View.as_view()),
-    path('nation/', nation.View.as_view()),
-    path('notes/', notes.View.as_view()),
-    path('orbit/', orbit.View.as_view()),
-    path('options/', options.View.as_view()),
-    path('overview/', overview.View.as_view()),
-    path('planets/', planets.View.as_view()),
-    path('planet/', planet.View.as_view()),
-    path('production/', production.View.as_view()),
-    path('ranking-alliances/', ranking_alliances.View.as_view()),
-    path('ranking-players/', ranking_players.View.as_view()),
-    path('reports/', reports.View.as_view()),
-    path('research/', research.View.as_view()),
-    path('shipyard/', shipyard.View.as_view()),
-    path('spy-report/', spy_report.View.as_view()),
-    path('start/', start.View.as_view()),
-    path('training/', training.View.as_view()),
-    path('upkeep/', upkeep.View.as_view()),
-    path('wait/', wait.View.as_view()),
+    #path('alliance_announce/', alliance_announce.View.as_view()),
+    #path('alliance_edition/', alliance_edition.View.as_view()),
+    #path('alliance_gifts/', alliance_gifts.View.as_view()),
+    #path('alliance_invitations/', alliance_invitations.View.as_view()),
+    #path('alliance_members/', alliance_members.View.as_view()),
+    #path('alliance_naps/', alliance_naps.View.as_view()),
+    #path('alliance_new/', alliance_new.View.as_view()),
+    #path('alliance_ranks/', alliance_ranks.View.as_view()),
+    #path('alliance_recruitment/', alliance_recruitment.View.as_view()),
+    #path('alliance_reports/', alliance_reports.View.as_view()),
+    #path('alliance_requests/', alliance_requests.View.as_view()),
+    #path('alliance_tributes/', alliance_tributes.View.as_view()),
+    #path('alliance_view/', alliance_view.View.as_view()),
+    #path('alliance_wallet/', alliance_wallet.View.as_view()),
+    #path('alliance_wars/', alliance_wars.View.as_view()),
+    #path('battle_public/', battle_public.View.as_view()),
+    #path('battle_view/', battle_view.View.as_view()),
+    #path('chat_rest/', chat_rest.View.as_view()),
+    #path('chat_view/', chat_view.View.as_view()),
+    #path('commander_list/', commander_list.View.as_view()),
+    #path('commander_skills/', commander_skills.View.as_view()),
+    
+    #path('empire_orbits/', empire_orbits.View.as_view()),
+    #path('empire_parking/', empire_parking.View.as_view()),
+    path('empire_planets/', empire_planets.View.as_view()),
+    #path('empire_production/', empire_production.View.as_view()),
+    #path('empire_stats/', empire_stats.View.as_view()),
+    #path('empire_upkeep/', empire_upkeep.View.as_view()),
+    path('empire_view/', empire_view.View.as_view()),
+    
+    #path('fleets_rest/', fleets_rest.View.as_view()),
+    #path('fleets_view/', fleets_view.View.as_view()),
+    #path('fleet_ships/', fleet_ships.View.as_view()),
+    #path('fleet_splitting/', fleet_splitting.View.as_view()),
+    #path('fleet_view/', fleet_view.View.as_view()),
+    
+    path('connection/', game_connection.View.as_view()),
+    #path('game_holidays/', game_holidays.View.as_view()),
+    #path('game_maintenance/', game_maintenance.View.as_view()),
+    #path('game_over/', game_over.View.as_view()),
+    #path('game_starting/', game_starting.View.as_view()),
+    #path('game_waiting/', game_waiting.View.as_view()),
+
+    #path('help_buildings/', help_buildings.View.as_view()),
+    #path('help_general/', help_general.View.as_view()),
+    #path('help_researches/', help_researches.View.as_view()),
+    #path('help_ships/', help_ships.View.as_view()),
+    #path('help_tags/', help_tags.View.as_view()),
+    #path('invasion/', invasion.View.as_view()),
+    #path('mail_blacklist/', mail_blacklist.View.as_view()),
+    #path('mail_inbox/', mail_inbox.View.as_view()),
+    #path('mail_new/', mail_new.View.as_view()),
+    #path('mail_outbox/', mail_outbox.View.as_view()),
+    #path('map/', map.View.as_view()),
+    #path('market_purchases/', market_purchases.View.as_view()),
+    #path('market_sales/', market_sales.View.as_view()),
+    #path('mercenary/', mercenary.View.as_view()),
+    #path('planet_buildings/', planet_buildings.View.as_view()),
+    #path('planet_market/', planet_market.View.as_view()),
+    #path('planet_orbit/', planet_orbit.View.as_view()),
+    #path('planet_results/', planet_results.View.as_view()),
+    #path('planet_ships/', planet_ships.View.as_view()),
+    #path('planet_trainings/', planet_trainings.View.as_view()),
+    #path('planet_transferts/', planet_transferts.View.as_view()),
+    #path('planet_view/', planet_view.View.as_view()),
+    #path('planet_working/', planet_working.View.as_view()),
+    #path('profile_notes/', profile_notes.View.as_view()),
+    #path('profile_options/', profile_options.View.as_view()),
+    #path('profile_reports/', profile_reports.View.as_view()),
+    #path('profile_view/', profile_view.View.as_view()),
+    #path('ranking_alliances/', ranking_alliances.View.as_view()),
+    #path('ranking_players/', ranking_players.View.as_view()),
+    #path('researches/', researches.View.as_view()),
+    #path('spying/', spying.View.as_view()),
 	#---------------------------------------------------------------------------
 ]
 ################################################################################
