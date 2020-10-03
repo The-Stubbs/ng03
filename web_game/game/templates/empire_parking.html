@@ -4,32 +4,29 @@
 
 {% block content %}
 
-    {% include '_tabs_empire.html' %}
-    
-    <h1>Flottes étrangères en orbite</h1>
-    <div class="box">
-        {% for planet in planets %}
-        <div class="box-line">
+{% include '_tabs_empire.html' %}
+
+<div class="row">
+    {% for planet in planets %}
+    <div class="col-12 col-md-6">
+        <h1 class="row mt-2">
+            <div class="col">{{planet.name}}</div>
+            <div class="col-auto"><a href="/game/orbit/?planet={{planet.id}}" class="badge" data-toggle="tooltip" title="Orbite planète"><i class="far fa-dot-circle"></i> {{planet.g}}.{{planet.s}}.{{planet.p}}</a></div>
+        </h1>
+        {% for ship in planet.ships %}
+        <div class="box">
             <div class="box-item">
-                <div><a href="/game/orbit/?planet={{planet.planetid}}">{{planet.planetname}}</a></div>
-                <div class="small">{{planet.g}}.{{planet.s}}.{{planet.p}}</div>
-            </div>
-            <div class="box-item text-right">
-                {% for ship in planet.ships %}
-                <div class="text-right text-nowrap">
-                    {{ship.ship}} x
-                    <span class="c-highlight">{{ship.quantity|intcomma}}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% empty %}
-        <div class="box-line">
-            <div class="box-item">
-                aucun vaisseau au sol
+                <span class="c-highlight">{{ship.name}}</span>
+                x{{ship.quantity|intcomma}}
             </div>
         </div>
         {% endfor %}
     </div>
+    {% empty %}
+    <div class="col">
+        aucun vaisseau au sol
+    </div>
+    {% endfor %}
+</div>
 
 {% endblock %}

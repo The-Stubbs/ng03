@@ -52,12 +52,14 @@ class View(GlobalView):
 
         query = " SELECT sum(ore_production) AS prod_ore, sum(hydrocarbon_production) AS prod_hydro, " + \
                 " int4(sum(workers)) AS worker_count, int4(sum(scientists)) AS scientist_count, int4(sum(soldiers)) AS soldier_count" + \
-                " FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId)
+                " FROM vw_planets" + \
+                " WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=" + str(self.UserId)
         row = oConnRow(query)
         stats.update(row)
 
         query = " SELECT COALESCE(int4(sum(cargo_workers)), 0), COALESCE(int4(sum(cargo_scientists)), 0), COALESCE(int4(sum(cargo_soldiers)), 0)" + \
-                " FROM fleets WHERE ownerid=" + str(self.UserId)
+                " FROM fleets" + \
+                " WHERE ownerid=" + str(self.UserId)
         row = oConnExecute(query)
         stats["worker_count"] += row[0]
         stats["scientist_count"] += row[1]
