@@ -7,122 +7,134 @@
 
 {% include '_tabs_empire.html' %}
 
-<h1>Planètes de l'empire</h1>
-<div class="box mb-2">
-    <div class="box-line">
-        <div class="box-item">
-            <span class="mr-2">tri</span>
-            <a class="mx-3" href="?col=0{% if reversed %}&r=0{% endif %}">localisation</a>
-            <a class="mx-3" href="?col=1{% if reversed %}&r=1{% endif %}">nom</a>
-            <a class="mx-3" href="?col=5{% if reversed %}&r=1{% endif %}">contrôle</a>
-        </div>
+<div class="small">tri</small>
+<div class="row">
+    <div class="col">
+        <a href="?col=0{% if reversed %}&r=0{% endif %}">
+            localisation
+        </a>
+    </div>
+    <div class="col">
+        <a href="?col=1{% if reversed %}&r=1{% endif %}">
+            nom
+        </a>
+    </div>
+    <div class="col">
+        <a href="?col=5{% if reversed %}&r=1{% endif %}">
+            contrôle
+        </a>
     </div>
 </div>
+<hr/>
 
-{% for planet in page_planets %}
-<div class="box mb-2">
-    <div class="box-line {% if planet.highlight %}highlight{% endif %}">
-        <div class="box-item">
-        	<div class="row flex-nowrap">
-        		<div class="col-auto text-center">
-        		    <img src="{{PATH_IMAGES}}/planets/p{{planet.img}}.gif" class="rounded" width=48 height=48>
-        	    </div>
-        		<div class="col-auto text-center">
-                	<img src="{{PATH_IMAGES}}/interface/uv{{planet.mood_level}}.gif" title="{{planet.mood}}%" alt="{{planet.mood}}%" width="16" height="35"><br/>
-                	<span class={% if planet.mood_delta > 0 %}"prod">+{% else %}"negprod">{% endif %}{{planet.mood_delta}}</span>
-        	    </div>
-        		<div class="col">
-    			    <div><a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planet.p}}">{{planet.g}}.{{planet.s}}.{{planet.p}}</a></div>
-            		<div><a class="mr-2" href="/game/buildings/?planet={{planet.id}}">Infrastructures</a></div>
-            		<div><a href="/game/shipyard/?planet={{planet.id}}">Chantier spatial</a></div>
-        	    </div>
-    	    </div>
-    		<div class="col">
-			    <div><a href="/game/planet/?planet={{planet.id}}">{{planet.planet_name}}</a></div>
-        		<div><img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallicon" title="Commandant" width=10 height=6>{% if planet.commander %}<a href="/game/commanders/#{{planet.commander_name}}">{{planet.commander_name}}</a>{% else %}-{% endif %}</div>
-    	    </div>
-        </div>
-        <div class="box-item">
-        	<h6>Ressources</h6>
-        	<div class="text-nowrap">
-        	    <img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16>
-        		<span class="{% if planet.ore_level >= 90 %}high2{% elif planet.ore_level >= 70 %}med2{% else %}c-highlight{% endif %}">{{planet.ore_count|intcomma}}</span>
-        		<small class="{% if planet.ore_level >= 90 %}high2{% elif planet.ore_level >= 70 %}med2{% endif %}">/{{planet.ore_stock|intcomma}}</small>
-        		<small class={% if planet.ore_prod_low %}medprod{% else %}prod{% endif %}>+{{planet.ore_prod|intcomma}}</small>
-        	</div>
-        	<div class="text-nowrap">
-        	    <img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16>
-        		<span class="{% if planet.hydro_level >= 90 %}high2{% elif planet.hydro_level >= 70 %}med2{% else %}c-highlight{% endif %}">{{planet.hydro_count|intcomma}}</span>
-        		<small class="{% if planet.hydro_level >= 90 %}high2{% elif planet.hydro_level >= 70 %}med2{% endif %}">/{{planet.hydro_stock|intcomma}}</small>
-        		<small class={% if planet.hydro_prod_low %}medprod{% else %}prod{% endif %}>+{{planet.hydro_prod|intcomma}}</small>
-        	</div>
-        	<div class="text-nowrap">
-            	<img src="{{PATH_IMAGES}}/interface/energy.gif" title="Énergie" width=16 height=16>
-        		<span class="c-highlight">{{planet.energy_count|intcomma}}</span>
-        		<small>/{{planet.energy_stock|intcomma}}</small>
-        		<small class={% if planet.energy_prod_low %}medprod>+{% elif planet.energy_prod > 0 %}prod>+{% else %}negprod>{% endif %}{{planet.energy_prod|intcomma}}</small>
-        	</div>
-        	<div class="text-nowrap">
-            	<img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width=16 height=16>
-        		<span class="mr-2 prod">{{planet.credit_prod|intcomma}}</span>
-        		<img src="{{PATH_IMAGES}}/interface/prestige.gif" title="Prestige" class="icon" width=16 height=16>
-        		<span class="prod">+{{planet.prestige_prod|intcomma}}</span>
-        	</div>
-        </div>
-        <div class="box-item">
-        	<h6>Population</h6>
-        	<div class="text-nowrap">
-        		<a href="/game/production/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width="16" height="16"></a>
-        		<span class="c-highlight">{{planet.worker_count|intcomma}}</span>
-        		<small>/{{planet.worker_stock|intcomma}}</small>
-        	</div>
-        	<div class="text-nowrap">
-        		<a href="/game/training/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/scientists.gif" title="Scientifiques" width="16" height="16"></a>
-        		<span class="c-highlight">{{planet.scientist_count|intcomma}}</span>
-        		<small>/{{planet.scientist_stock|intcomma}}</small>
-        		{% if planet.scientist_training %}<span class="prod">+{{planet.scientist_training}}</span>{% endif %}
-        	</div>
-        	<div class="text-nowrap">
-        		<a href="/game/training/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/soldiers.gif" title="Soldats" width="16" height="16"></a>
-        		<span class="c-highlight">{{planet.soldier_count|intcomma}}</span>
-        		<small>/{{planet.soldier_stock|intcomma}}</small>
-        		{% if planet.soldier_training %}<span class="prod">+{{planet.soldier_training}}</span>{% endif %}
-        	</div>
-        	<div class="text-nowrap">
-        		<img src="{{PATH_IMAGES}}/interface/workers_idle.png" width=16 height=16 title="oisifs">
-        		<span class="prod">{{planet.worker_idle|intcomma}}</span>
+<div class="row">
+    {% for planet in page_planets %}
+    <div class="col-12 col-md-6">
+        <div class="box">
+            <div class="box-line {% if planet.highlight %}highlight{% endif %}">
+                <div class="box-item">
+                    <div class="row flex-nowrap">
+                        <div class="col-auto text-center">
+                            <img src="{{PATH_IMAGES}}/planets/p{{planet.img}}.gif" class="rounded" width=48 height=48>
+                        </div>
+                        <div class="col-auto text-center">
+                            <img src="{{PATH_IMAGES}}/interface/uv{{planet.mood_level}}.gif" title="{{planet.mood}}%" alt="{{planet.mood}}%" width="16" height="35"><br/>
+                            <span class={% if planet.mood_delta > 0 %}"prod">+{% else %}"negprod">{% endif %}{{planet.mood_delta}}</span>
+                        </div>
+                        <div class="col">
+                            <div><a href="/game/map/?g={{planet.g}}&s={{planet.s}}&p={{planet.p}}">{{planet.g}}.{{planet.s}}.{{planet.p}}</a></div>
+                            <div><a class="mr-2" href="/game/buildings/?planet={{planet.id}}">Infrastructures</a></div>
+                            <div><a href="/game/shipyard/?planet={{planet.id}}">Chantier spatial</a></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div><a href="/game/planet/?planet={{planet.id}}">{{planet.planet_name}}</a></div>
+                        <div><img src="{{PATH_IMAGES}}/interface/commander.gif" class="smallicon" title="Commandant" width=10 height=6>{% if planet.commander %}<a href="/game/commanders/#{{planet.commander_name}}">{{planet.commander_name}}</a>{% else %}-{% endif %}</div>
+                    </div>
+                </div>
+                <div class="box-item">
+                    <h6>Ressources</h6>
+                    <div class="text-nowrap">
+                        <img src="{{PATH_IMAGES}}/interface/ore.gif" title="Minerai" width=16 height=16>
+                        <span class="{% if planet.ore_level >= 90 %}high2{% elif planet.ore_level >= 70 %}med2{% else %}c-highlight{% endif %}">{{planet.ore_count|intcomma}}</span>
+                        <small class="{% if planet.ore_level >= 90 %}high2{% elif planet.ore_level >= 70 %}med2{% endif %}">/{{planet.ore_stock|intcomma}}</small>
+                        <small class={% if planet.ore_prod_low %}medprod{% else %}prod{% endif %}>+{{planet.ore_prod|intcomma}}</small>
+                    </div>
+                    <div class="text-nowrap">
+                        <img src="{{PATH_IMAGES}}/interface/hydrocarbon.gif" title="Hydrocarbure" width=16 height=16>
+                        <span class="{% if planet.hydro_level >= 90 %}high2{% elif planet.hydro_level >= 70 %}med2{% else %}c-highlight{% endif %}">{{planet.hydro_count|intcomma}}</span>
+                        <small class="{% if planet.hydro_level >= 90 %}high2{% elif planet.hydro_level >= 70 %}med2{% endif %}">/{{planet.hydro_stock|intcomma}}</small>
+                        <small class={% if planet.hydro_prod_low %}medprod{% else %}prod{% endif %}>+{{planet.hydro_prod|intcomma}}</small>
+                    </div>
+                    <div class="text-nowrap">
+                        <img src="{{PATH_IMAGES}}/interface/energy.gif" title="Énergie" width=16 height=16>
+                        <span class="c-highlight">{{planet.energy_count|intcomma}}</span>
+                        <small>/{{planet.energy_stock|intcomma}}</small>
+                        <small class={% if planet.energy_prod_low %}medprod>+{% elif planet.energy_prod > 0 %}prod>+{% else %}negprod>{% endif %}{{planet.energy_prod|intcomma}}</small>
+                    </div>
+                    <div class="text-nowrap">
+                        <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width=16 height=16>
+                        <span class="mr-2 prod">{{planet.credit_prod|intcomma}}</span>
+                        <img src="{{PATH_IMAGES}}/interface/prestige.gif" title="Prestige" class="icon" width=16 height=16>
+                        <span class="prod">+{{planet.prestige_prod|intcomma}}</span>
+                    </div>
+                </div>
+                <div class="box-item">
+                    <h6>Population</h6>
+                    <div class="text-nowrap">
+                        <a href="/game/production/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width="16" height="16"></a>
+                        <span class="c-highlight">{{planet.worker_count|intcomma}}</span>
+                        <small>/{{planet.worker_stock|intcomma}}</small>
+                    </div>
+                    <div class="text-nowrap">
+                        <a href="/game/training/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/scientists.gif" title="Scientifiques" width="16" height="16"></a>
+                        <span class="c-highlight">{{planet.scientist_count|intcomma}}</span>
+                        <small>/{{planet.scientist_stock|intcomma}}</small>
+                        {% if planet.scientist_training %}<span class="prod">+{{planet.scientist_training}}</span>{% endif %}
+                    </div>
+                    <div class="text-nowrap">
+                        <a href="/game/training/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/soldiers.gif" title="Soldats" width="16" height="16"></a>
+                        <span class="c-highlight">{{planet.soldier_count|intcomma}}</span>
+                        <small>/{{planet.soldier_stock|intcomma}}</small>
+                        {% if planet.soldier_training %}<span class="prod">+{{planet.soldier_training}}</span>{% endif %}
+                    </div>
+                    <div class="text-nowrap">
+                        <img src="{{PATH_IMAGES}}/interface/workers_idle.png" width=16 height=16 title="oisifs">
+                        <span class="prod">{{planet.worker_idle|intcomma}}</span>
+                    </div>
+                </div>
+                <div class="box-item">
+                    <h6>Maintenance</h6>
+                    <div class="text-nowrap"{% if planet.worker_low %} class="low"{% endif %}>
+                        <a href="/game/production/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width="16" height="16"></a>
+                        <span class="c-highlight">{{planet.upkeep_workers|intcomma}}</span>
+                    </div>
+                    <div class="text-nowrap">
+                        <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width="16" height="16">
+                        <span class="c-highlight">{{planet.upkeep_credits|intcomma}}</span>
+                    </div>
+                    <div class="text-nowrap" {% if planet.soldier_low %} class="low"{% endif %}>
+                        <a href="/game/training/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/soldiers.gif" title="Soldats" width="16" height="16"></a>
+                        <span class="c-highlight">{{planet.upkeep_soldiers|intcomma}}</span>
+                    </div>
+                </div>
+                <div class="box-item">
+                    <h6>Occupation</h6>
+                    <div class="text-nowrap">
+                        <img src="{{PATH_IMAGES}}/interface/floor.gif" title="Terrain" width=16 height=16>
+                        <span class="c-highlight">{{planet.floor_occupied|intcomma}}</span>
+                        <small>/{{planet.floor_capacity|intcomma}}</small>
+                    </div>
+                    <div class="text-nowrap">
+                        <img src="{{PATH_IMAGES}}/interface/space.gif" title="Espace" width=16 height=16>
+                        <span class="c-highlight">{{planet.space_occupied|intcomma}}</span>
+                        <small>/{{planet.space_capacity|intcomma}}</small>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="box-item">
-        	<h6>Maintenance</h6>
-        	<div class="text-nowrap"{% if planet.worker_low %} class="low"{% endif %}>
-        	    <a href="/game/production/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/workers.gif" title="Travailleurs" width="16" height="16"></a>
-        		<span class="c-highlight">{{planet.upkeep_workers|intcomma}}</span>
-        	</div>
-        	<div class="text-nowrap">
-        	    <img src="{{PATH_IMAGES}}/interface/credits.gif" title="Crédits" width="16" height="16">
-        		<span class="c-highlight">{{planet.upkeep_credits|intcomma}}</span>
-        	</div>
-        	<div class="text-nowrap" {% if planet.soldier_low %} class="low"{% endif %}>
-            	<a href="/game/training/?planet={{planet.id}}"><img src="{{PATH_IMAGES}}/interface/soldiers.gif" title="Soldats" width="16" height="16"></a>
-        		<span class="c-highlight">{{planet.upkeep_soldiers|intcomma}}</span>
-        	</div>
-        </div>
-        <div class="box-item">
-        	<h6>Occupation</h6>
-        	<div class="text-nowrap">
-        		<img src="{{PATH_IMAGES}}/interface/floor.gif" title="Terrain" width=16 height=16>
-        		<span class="c-highlight">{{planet.floor_occupied|intcomma}}</span>
-        		<small>/{{planet.floor_capacity|intcomma}}</small>
-        	</div>
-        	<div class="text-nowrap">
-        		<img src="{{PATH_IMAGES}}/interface/space.gif" title="Espace" width=16 height=16>
-        		<span class="c-highlight">{{planet.space_occupied|intcomma}}</span>
-        		<small>/{{planet.space_capacity|intcomma}}</small>
-        	</div>
-        </div>
     </div>
+    {% endfor %}
 </div>
-{% endfor %}
 
 {% endblock %}
