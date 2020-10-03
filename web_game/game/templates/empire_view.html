@@ -129,31 +129,29 @@
     {% for fleet in fleets %}
     <div class="col-12 col-md-6">
         <div class="box">
-            <div class="box-item row">
-                <div class="col text-nowrap">
+            <div class="box-item">
+                <div class="text-nowrap mb-1">
                 	{% if fleet.relation == 2 %}
-                	    <a href="/game/fleet/?id={{fleet.id}}" class="badge self" data-toggle="tooltip" title="Aperçu flotte">
+                	    <a href="/game/fleet/?id={{fleet.id}}" class="badge self mr-2" data-toggle="tooltip" title="Aperçu flotte">
                 	        <i class="fas fa-plane"></i>
                 	        {{fleet.name}}
                 	    </a>
                 	{% else %}
-                	    <a href="/game/nation/?name={{fleet.name}}" class="{% if fleet.relation == -1 %}enemy{% elif fleet.relation == 0 %}friend{% elif fleet.relation == 1 %}ally{% endif %}" class="badge self" data-toggle="tooltip" title="Aperçu joueur"><i class="fas fa-user"></i> {{fleet.name}}</a>
+                	    <a href="/game/nation/?name={{fleet.name}}" class="mr-2 {% if fleet.relation == -1 %}enemy{% elif fleet.relation == 0 %}friend{% elif fleet.relation == 1 %}ally{% endif %}" class="badge self" data-toggle="tooltip" title="Aperçu joueur"><i class="fas fa-user"></i> {{fleet.name}}</a>
                 	{% endif %}
-                	<div class="small mt-1">
-                	    {% if fleet.stance %}<span data-toggle="tooltip" title="Mode attaque">{{'attack'|icon}}</span>
-                	    {% else %}<span data-toggle="tooltip" title="Mode riposte">{{'defense'|icon}}</span>
-                	    {% endif %}
-                	    {{fleet.signature|intcomma}}
-                    </div>
             	</div>
-                <div class="col text-right text-nowrap">
+                <div class="text-right text-nowrap">
+            	    {% if fleet.stance %}<span data-toggle="tooltip" title="Mode attaque">{{'attack'|icon}}</span>
+            	    {% else %}<span data-toggle="tooltip" title="Mode riposte">{{'defense'|icon}}</span>
+            	    {% endif %}
+            	    <span>{{fleet.signature|intcomma}}</span>
+                	&middot;
                 	{% if fleet.planet %}<script>putplanet("{{fleet.planet.id}}", "{{fleet.planet.name}}", "{{fleet.planet.g}}", "{{fleet.planet.s}}", "{{fleet.planet.p}}", {{fleet.planet.relation}});</script>
                 	{% else %}<small>inconnue</small>{% endif %}
-                	<i class="fas fa-long-arrow-alt-right px-1"></i>
+                	<i class="fas fa-long-arrow-alt-right"></i>
                 	<script>putplanet("{{fleet.dest.id}}","{{fleet.dest.name}}","{{fleet.dest.g}}","{{fleet.dest.s}}","{{fleet.dest.p}}",{{fleet.dest.relation}});</script>
-                	<div class="small mt-1">
-                	    <script>putcountdown1({{fleet.remaining_time}}, "Arrivée", "/game/overview/");</script>
-                    </div>
+                	&middot;
+            	    <script>putcountdown1({{fleet.remaining_time}}, "Arrivée", "/game/overview/");</script>
             	</div>
             </div>
         </div>
@@ -175,7 +173,11 @@
         		</div>
         		<div class="col text-nowrap text-right">
         			{% for building in item.buildings %}
-        			<div>{% if building.is_destroying %}<span class="c-danger">{% endif %}{{building.label}} &middot; <script>putcountdown1({{building.remaining_time}}, "Terminé", "/game/buildings/?planet={{item.id}}#{{building.id}}");</script>{% if building.is_destroying %}</span>{% endif %}</div>
+        			<div>
+        			    <span class="{% if building.is_destroying %}c-danger{% else %}c-highlight{% endif %}">{{building.label}}</span>
+            			&middot;
+            			<script>putcountdown1({{building.remaining_time}}, "Terminé", "/game/buildings/?planet={{item.id}}#{{building.id}}");</script>
+        			</div>
         			{% empty %}
         			aucune bâtiment en cours
         			{% endfor %}
@@ -199,12 +201,16 @@
         		<div class="col text-nowrap text-right">
         			{% if planet.ship %}
             			{% if planet.ship.is_waiting %}
-            			{{planet.ship.label}} &middot; <span class="c-danger">en attente</span>
+                			<span class="c-highlight">{{planet.ship.label}}</span>
+                			&middot;
+                			<span class="c-danger">en attente</span>
             			{% else %}
-            			{% if planet.ship.is_recycling %}<span class="c-danger">{% endif %}{{planet.ship.label}} &middot; <script>putcountdown1({{planet.ship.remaining_time}}, "Terminé", "/game/shipyard/?planet={{planet.id}}&f=0#{{planet.ship.id}}");</script>{% if ship.is_recycling %}</span>{% endif %}
+        			        <span class="{% if planet.ship.is_recycling %}c-danger{% else %}c-highlight{% endif %}">{{planet.ship.label}}</span>
+        			        &middot;
+        			        <script>putcountdown1({{planet.ship.remaining_time}}, "Terminé", "/game/shipyard/?planet={{planet.id}}&f=0#{{planet.ship.id}}");</script>
             			{% endif %}
         			{% else %}
-        			aucun vaisseau en cours
+        			    aucun vaisseau en cours
         			{% endif %}
         		</div>
         	</div>

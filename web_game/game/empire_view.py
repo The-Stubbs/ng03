@@ -151,7 +151,7 @@ class View(GlobalView):
                 "   LEFT JOIN vw_buildings_under_construction2 AS b ON (p.id=b.planetid)" + \
                 "   LEFT JOIN db_buildings ON db_buildings.id = b.buildingid" + \
                 " WHERE p.ownerid=" + str(self.UserId) + \
-                " ORDER BY p.id, destroying, remaining_time DESC"
+                " ORDER BY p.id, destroying, remaining_time"
         rows = oConnExecuteAll(query)
 
         lastplanet = -1

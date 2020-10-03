@@ -1,6 +1,7 @@
 {% extends '_layout.html' %}
 
 {% load humanize %}
+{% load exile_tags %}
 
 {% block content %}
 
@@ -16,15 +17,12 @@
         {% for fleet in planet.fleets %}
         <div class="box">
             <div class="box-item">
-                <div class="row mt-1">
-                    <div class="col text-nowrap">
-                        <div class="c-highlight"><i class="fas fa-plane mr-1" data-toggle="tooltip" title="Flotte"></i> {{fleet.name}}</div>
-                        <div class="small mt-1">{{fleet.signature|intcomma}}</div>
-                    </div>
-                    <div class="col-auto text-nowrap">
-                        <a href="/game/mails/?subject=À propos de la flotte {{fleet.name}}&to={{fleet.owner}}" class="badge {% if fleet.relation == 1 %}ally{% elif fleet.relation == 0 %}friend{% elif fleet.relation == -1 %}enemy{% endif %}" data-toggle="tooltip" title="Nouveau message"><i class="fas fa-envelope"></i> {% if fleet.alliance %}[{{fleet.tag}}]{% endif %} {{fleet.owner}}</a>
-                    </div>
-                </div>
+                <a href="/game/mails/?subject=À propos de la flotte {{fleet.name}}&to={{fleet.owner}}" class="mr-2 badge {% if fleet.relation == 1 %}ally{% elif fleet.relation == 0 %}friend{% elif fleet.relation == -1 %}enemy{% endif %}" data-toggle="tooltip" title="Nouveau message"><i class="fas fa-envelope"></i> {% if fleet.alliance %}[{{fleet.tag}}]{% endif %} {{fleet.owner}}</a>
+                <span class="c-highlight mr-2">{{fleet.name}}</span>
+        	    {% if fleet.stance %}<span data-toggle="tooltip" title="Mode attaque">{{'attack'|icon}}</span>
+        	    {% else %}<span data-toggle="tooltip" title="Mode riposte">{{'defense'|icon}}</span>
+        	    {% endif %}
+                <span>{{fleet.signature|intcomma}}</span>
             </div>
         </div>
         {% endfor %}

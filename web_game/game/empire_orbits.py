@@ -28,7 +28,7 @@ class View(GlobalView):
         content.AssignValue("planets", planets)
         
         query = " SELECT nav_planet.id, nav_planet.name, nav_planet.galaxy, nav_planet.sector, nav_planet.planet," + \
-                " fleets.id, fleets.name, users.login, alliances.tag, sp_relation(fleets.ownerid, nav_planet.ownerid), fleets.signature" + \
+                " fleets.id, fleets.name, users.login, alliances.tag, sp_relation(fleets.ownerid, nav_planet.ownerid), fleets.signature, fleets.attackonsight" + \
                 " FROM nav_planet" + \
                 "    INNER JOIN fleets ON fleets.planetid=nav_planet.id" + \
                 "    INNER JOIN users ON fleets.ownerid=users.id" + \
@@ -61,5 +61,6 @@ class View(GlobalView):
                 item["owner"] = oRs[7]
                 item["relation"] = oRs[9]
                 item["signature"] = oRs[10]
+                item["stance"] = oRs[11]
 
         return self.Display(content)
