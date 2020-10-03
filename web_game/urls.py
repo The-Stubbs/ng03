@@ -5,6 +5,7 @@ from django.views.generic.base import RedirectView
 
 from web_game.game import error_500
 
+from web_game.game import empire_orbits
 from web_game.game import empire_planets
 from web_game.game import empire_upkeep
 from web_game.game import empire_view
@@ -42,7 +43,7 @@ urlpatterns = [
     #path('commander_list/', commander_list.View.as_view()),
     #path('commander_skills/', commander_skills.View.as_view()),
     
-    #path('empire_orbits/', empire_orbits.View.as_view()),
+    path('empire_orbits/', empire_orbits.View.as_view()),
     #path('empire_parking/', empire_parking.View.as_view()),
     path('empire_planets/', empire_planets.View.as_view()),
     #path('empire_production/', empire_production.View.as_view()),

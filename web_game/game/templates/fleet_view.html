@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends '_layout.html' %}
 
 {% load humanize %}
 
@@ -30,7 +30,7 @@
     			"<div class='box'>" +
     			"<div class='box-item'>" +
     			"<div class='row'>" +
-        			"<div class='col'><img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16><span class='c-highlight'>" + formatnumber(cargoOre) + "</span></div>" +
+        			"<div class='col'>{{'ore'|icon}}<span class='c-highlight'>" + formatnumber(cargoOre) + "</span></div>" +
         			"<div class='col'><img src='{{PATH_IMAGES}}/interface/hydrocarbon.gif' title='Hydrocarbure' class=res width=16 height=16><span class='c-highlight'>" + formatnumber(cargoHydrocarbon) + "</span></div>" +
         			"<div class='col'><img src='{{PATH_IMAGES}}/interface/scientists.gif' title='Scientifiques' class=res width=16 height=16><span class='c-highlight'>" + formatnumber(cargoScientists) + "</span></div>" +
         			"<div class='col'><img src='{{PATH_IMAGES}}/interface/soldiers.gif' title='Soldats' class=res width=16 height=16><span class='c-highlight'>" + formatnumber(cargoSoldiers) + "</span></div>" +
@@ -51,7 +51,7 @@
         			    "<div class='small mb-1'>déchargement</div>" +
         			    "<div class='row mb-1'>" +
             			    "<div class='col text-nowrap'>" +
-            			        "<img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16>" +
+            			        "{{'ore'|icon}}" +
                 			    "<input type=text name=unload_ore id=unload_ore value=0 size=6> " +
                 			    "<small>/" + formatnumber(cargoOre) + "</small> " +
                 			    "<a href='#' onclick='setval(\"unload_ore\"," + cargoOre + ")'>max</a>" +
@@ -98,7 +98,7 @@
         			    "<div class='small mb-1'>chargement</div>" + 
         			    "<div class='row mb-1'>" +
             			    "<div class='col text-nowrap'>" +
-            			        "<img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16>" +
+            			        "{{'ore'|icon}}" +
                 			    "<input type=text name=load_ore id=load_ore value=0 size=6> " +
                 			    "<small>/" + formatnumber(planetOre) + "</small> " +
                 			    "<a href='#' onclick='setval(\"load_ore\"," + planetOre + ")'>max</a>" +
@@ -156,7 +156,7 @@
     	var s = "<form method=post action='/game/fleet-trade/?id={{fleetid}}'>" + '{% csrf_token %}'+
     	        "<h1>Cargaison - Déchargement uniquement possible</h1>"
     			"<div class='box'>"+
-    			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/ore.gif' title='Minerai' class=res width=16 height=16> Minerai</td><td align=right>"+formatnumber(cargoOre)+"</td><td nowrap><input type=text name=unload_ore id=unload_ore value=0 size=6> <a href='#' onclick='setval(\"unload_ore\", "+cargoOre+")'>max</a></td></tr>"+
+    			"<tr><td nowrap>{{'ore'|icon}} Minerai</td><td align=right>"+formatnumber(cargoOre)+"</td><td nowrap><input type=text name=unload_ore id=unload_ore value=0 size=6> <a href='#' onclick='setval(\"unload_ore\", "+cargoOre+")'>max</a></td></tr>"+
     			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/hydrocarbon.gif' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</td><td align=right>"+formatnumber(cargoHydrocarbon)+"</td><td><input type=text name=unload_hydrocarbon id=unload_hydrocarbon value=0 size=6> <a href='#' onclick='setval(\"unload_hydrocarbon\", "+cargoHydrocarbon+")'>max</a></td></tr>"+
     			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/scientists.gif' title='Scientifiques' class=res width=16 height=16> Scientifiques</td><td align=right>"+formatnumber(cargoScientists)+"</td><td><input type=text name=unload_scientists id=unload_scientists value=0 size=6> <a href='#' onclick='setval(\"unload_scientists\", "+cargoScientists+")'>max</a></td></tr>"+
     			"<tr><td nowrap><img src='{{PATH_IMAGES}}/interface/soldiers.gif' title='Soldats' class=res width=16 height=16> Soldats</td><td align=right>"+formatnumber(cargoSoldiers)+"</td><td><input type=text name=unload_soldiers id=unload_soldiers value=0 size=6> <a href='#' onclick='setval(\"unload_soldiers\", "+cargoSoldiers+")'>max</a></td></tr>"+
