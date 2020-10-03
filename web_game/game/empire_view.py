@@ -12,7 +12,9 @@ class View(GlobalView):
         if response: return response
             
         return super().dispatch(request, *args, **kwargs)
-        
+    
+    
+    
     def get(self, request, *args, **kwargs):
 
         self.selected_menu = "empire"
