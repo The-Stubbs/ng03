@@ -7,19 +7,22 @@
 
 {% include '_tabs_empire.html' %}
 
-<div class="small">tri</small>
 <div class="row">
-    <div class="col">
+    <div class="col text-center">
         <a href="?col=0{% if reversed %}&r=0{% endif %}">
             localisation
+            {% if col == 0 %}
+                {% if reversed %}<i class="fas fa-fw fa-chevron-up"></i>
+                {% else %}<i class="fas fa-fw fa-chevron-down"></i>
+            {% endif %}
         </a>
     </div>
-    <div class="col">
+    <div class="col text-center">
         <a href="?col=1{% if reversed %}&r=1{% endif %}">
             nom
         </a>
     </div>
-    <div class="col">
+    <div class="col text-center">
         <a href="?col=5{% if reversed %}&r=1{% endif %}">
             contrôle
         </a>

@@ -44,6 +44,7 @@ class View(GlobalView):
         if reversed: orderby = orderby + " DESC"
         orderby = orderby + ", upper(name)"
         
+        content.AssignValue("col", col)
         content.AssignValue("reversed", reversed)
 
         # --- user planets data
