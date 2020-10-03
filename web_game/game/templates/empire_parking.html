@@ -9,7 +9,7 @@
 <div class="row">
     {% for planet in planets %}
     <div class="col-12 col-md-6">
-        <h1 class="row mt-2">
+        <h1 class="row">
             <div class="col">{{planet.name}}</div>
             <div class="col-auto"><a href="/game/orbit/?planet={{planet.id}}" class="badge" data-toggle="tooltip" title="Orbite planète"><i class="far fa-dot-circle"></i> {{planet.g}}.{{planet.s}}.{{planet.p}}</a></div>
         </h1>

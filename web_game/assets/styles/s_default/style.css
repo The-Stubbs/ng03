@@ -292,7 +292,7 @@ body {
 
 /* tabs */
 
-ul.htabs { list-style:none; padding:0; margin:0 0 1rem 0; border-bottom:1px solid #555; display:flex; flex-wrap:nowrap; overflow:auto; }
+ul.htabs { list-style:none; padding:0; margin:0; border-bottom:1px solid #555; display:flex; flex-wrap:nowrap; overflow:auto; }
 @media (min-width: 768px) { ul.htabs { flex-wrap:wrap; } }
 
 ul.htabs li { border:1px solid transparent; border-bottom:0; border-radius:.25rem .25rem 0 0; }
