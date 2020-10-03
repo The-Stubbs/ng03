@@ -8,6 +8,7 @@ from web_game.game import error_500
 from web_game.game import empire_orbits
 from web_game.game import empire_parking
 from web_game.game import empire_planets
+from web_game.game import empire_stats
 from web_game.game import empire_upkeep
 from web_game.game import empire_view
 
@@ -47,8 +48,7 @@ urlpatterns = [
     path('empire_orbits/', empire_orbits.View.as_view()),
     path('empire_parking/', empire_parking.View.as_view()),
     path('empire_planets/', empire_planets.View.as_view()),
-    #path('empire_production/', empire_production.View.as_view()),
-    #path('empire_stats/', empire_stats.View.as_view()),
+    path('empire_stats/', empire_stats.View.as_view()),
     path('empire_upkeep/', empire_upkeep.View.as_view()),
     path('empire_view/', empire_view.View.as_view()),
     
@@ -82,6 +82,7 @@ urlpatterns = [
     #path('planet_buildings/', planet_buildings.View.as_view()),
     #path('planet_market/', planet_market.View.as_view()),
     #path('planet_orbit/', planet_orbit.View.as_view()),
+    #path('planet_production/', planet_production.View.as_view()),
     #path('planet_results/', planet_results.View.as_view()),
     #path('planet_ships/', planet_ships.View.as_view()),
     #path('planet_trainings/', planet_trainings.View.as_view()),

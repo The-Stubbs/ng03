@@ -6,39 +6,38 @@
 
 {% include '_tabs_empire.html' %}
 
-<h1>Vaisseaux détruits lors des combats</h1>
-<div class="box">
-    {% for category in cats %}
-    {% for ship in category.ships %}
-    {% if ship.killed > 0 %}
-    <div class="box-line">
-        <div class="box-item"><a href="/game/help/?cat=ships#{{ship.id}}">{{ship.name}}</a></div>
-        <div class="box-item text-right c-highlight">{{ship.killed|intcomma}}</div>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <h1>Vaisseaux détruits</h1>
+        {% for ship in kills %}
+        <div class="box">
+            <div class="box-item">
+                <a href="/game/help/?cat=ships#{{ship.id}}" class="badge" data-toggle="tooltip" title="Aide vaisseau"><i class="fas fa-help"></i> {{ship.name}}</a>
+                x{{ship.count|intcomma}}
+            </div>
+        </div>
+        {% endfor %}
+        <hr/>
+        <div>
+            Total
+            {{kills|intcomma}}
+        </div>
     </div>
-    {% endif %}
-    {% endfor %}
-    {% endfor %}
-    <div class="box-line">
-        <div class="box-item">Total</div>
-        <div class="box-item text-right c-highlight">{{kills|intcomma}}</div>
-    </div>
-</div>
-
-<h1>Vaisseaux perdus lors des combats</h1>
-<div class="box">
-    {% for category in cats %}
-    {% for ship in category.ships %}
-    {% if ship.lost > 0 %}
-    <div class="box-line">
-        <div class="box-item"><a href="/game/help/?cat=ships#{{ship.id}}">{{ship.name}}</a></div>
-        <div class="box-item text-right c-highlight">{{ship.lost|intcomma}}</div>
-    </div>
-    {% endif %}
-    {% endfor %}
-    {% endfor %}
-    <div class="box-line">
-        <div class="box-item">Total</div>
-        <div class="box-item text-right c-highlight">{{losses|intcomma}}</div>
+    <div class="col-12 col-md-6">
+        <h1>Vaisseaux perdus</h1>
+        {% for ship in losses %}
+        <div class="box">
+            <div class="box-item">
+                <a href="/game/help/?cat=ships#{{ship.id}}" class="badge" data-toggle="tooltip" title="Aide vaisseau"><i class="fas fa-help"></i> {{ship.name}}</a>
+                x{{ship.count|intcomma}}
+            </div>
+        </div>
+        {% endfor %}
+        <hr/>
+        <div>
+            Total
+            {{losses|intcomma}}
+        </div>
     </div>
 </div>
 
