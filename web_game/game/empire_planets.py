@@ -70,7 +70,7 @@ class View(GlobalView):
                 " ORDER BY " + orderby
         rows = oConnExecuteAll(query)
         
-        for oRs in oRss:
+        for oRs in rows:
         
             item = {}
             list.append(item)
