@@ -27,7 +27,7 @@ a.badge i {
 ul { margin-bottom:0; padding-left:2rem; }
 
 hr {
-    margin-top:.25rem; margin-bottom:1rem;
+    margin-top:.25rem; margin-bottom:.25rem;
     border:0; border-top:1px solid #555;
 }
 
@@ -65,12 +65,19 @@ h6 {
     background:#3c3c3c;
     border-radius:.25rem; border:#555 1px solid;
 }
+.box.selected { background:#005a00; }
 
 .box-item { padding:.25rem .5rem; }
 
 .box-title {
     margin-bottom:.25rem;
     color: rgba(255,255,255,.6); font-size:80%; font-weight:400;
+}
+
+.sorting {
+    padding:.25rem;
+    background:rgba(255,255,255,.15);
+    border-radius:.25rem;
 }
 
 

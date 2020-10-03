@@ -38,7 +38,7 @@ class View(GlobalView):
         elif col == 5:
             orderby = "mood"
 
-        if request.GET.get("r", "") != "":
+        if request.GET.get("r", "0") == "1":
             reversed = not reversed
         
         if reversed: orderby = orderby + " DESC"
