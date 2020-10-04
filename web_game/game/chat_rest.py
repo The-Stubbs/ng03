@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpResponse
-from django.utils.dateparse import parse_date
-
 from web_game.game._global import *
+
+
 
 class View(GlobalView):
 
@@ -11,114 +10,92 @@ class View(GlobalView):
 
         response = super().pre_dispatch(request, *args, **kwargs)
         if response: return response
+        
+        return super().dispatch(request, *args, **kwargs)
 
-        self.onlineusers_refreshtime = 60
 
-        self.selected_menu = "chat"
 
-        chatid = ToInt(request.GET.get("id"), 0)
-        action = request.GET.get("a")
+    def get(self, request, *args, **kwargs):
+    
+        action = request.GET.get("a", "")
+
+        # --- post a new line
 
         if action == "send":
-            return self.addLine(chatid, request.GET.get("l", ""))
-
-        if action == "refresh":
-            return self.refreshChat(chatid)
-
-        if action == "join":
-            return self.joinChat()
-
-        if action == "leave":
-            return self.leaveChat(chatid)
-
-        if action == "chatlist":
-            return self.displayChatList()
-
-        return self.displayChat()
-
-    def getChatId(self, id):
-
-        if id == 0 and self.AllianceId:
-            id = self.request.session.get("alliancechat_" + str(self.AllianceId))
-
-            if id == None or id == "":
-                query = "SELECT chatid FROM alliances WHERE id=" + str(self.AllianceId)
-                oRs = oConnExecute(query)
-
-                if oRs:
-                    self.request.session["alliancechat_" + str(self.AllianceId)] = oRs[0]
-                    return oRs[0]
-                    
-        return id
-
-    def addLine(self, chatid, msg):
-        msg = msg.strip()[:260]
-        if msg != "":
-            connExecuteRetryNoRecords("INSERT INTO chat_lines(chatid, allianceid, userid, login, message) VALUES(" + str(chatid) + "," + str(sqlValue(self.AllianceId)) + "," + str(self.UserId) + "," + dosql(self.oPlayerInfo["login"]) + "," + dosql(msg) + ")")
-        return HttpResponse(" ")
-
-    def refreshContent(self, chatid):
-        if chatid != 0 and self.request.session.get("chat_joined_" + str(chatid)) != "1": return HttpResponse(" ")
-
-        userChatId = chatid
-
-        chatid = self.getChatId(chatid)
-
-        refresh_userlist = True
-
-        lastmsgid = self.request.session.get("lastchatmsg_" + str(chatid), "")
-        if lastmsgid == "": lastmsgid = 0
-
-        query = "SELECT chat_lines.id, datetime, allianceid, login, message" + \
-                " FROM chat_lines" + \
-                " WHERE chatid=" + str(chatid) + " AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid="+ str(chatid) +" ORDER BY datetime DESC OFFSET 100 LIMIT 1), " + str(lastmsgid) + ")" + \
-                " ORDER BY chat_lines.id"
-        oRss = oConnExecuteAll(query)
-
-        if oRss == None: oRss = None
-
-        # if there's no line to send and no list of users to send, exit
-        if oRss == None and not refresh_userlist:
-            return HttpResponse(" ") # return an empty string : fix safari "undefined XMLHttpRequest.status" bug
-
-        # load the template
-
-        content = GetTemplate(self.request, "chat-handler")
-        content.AssignValue("login", self.oPlayerInfo["login"])
-        content.AssignValue("chatid", userChatId)
-
-        if oRss:
-            list = []
-            content.AssignValue("lines", list)
-            for oRs in oRss:
-                item = {}
-                list.append(item)
+        
+            chatid = ToInt(request.GET.get("id"), -1)
+            
+            msg = request.GET.get("l", "")
+            msg = msg.strip()[:260]
+            if msg != "":
+                connExecuteRetryNoRecords("INSERT INTO chat_lines(chatid, allianceid, userid, login, message) VALUES(" + str(chatid) + "," + str(sqlValue(self.AllianceId)) + "," + str(self.UserId) + "," + dosql(self.oPlayerInfo["login"]) + "," + dosql(msg) + ")")
                 
-                self.request.session["lastchatmsg_" + str(chatid)] = oRs[0]
+            return HttpResponse(" ")
 
-                item["lastmsgid"] = oRs[0]
-                item["datetime"] = oRs[1]
-                item["author"] = oRs[3]
-                item["line"] = oRs[4]
-                item["alliancetag"] = getAllianceTag(oRs[2])
+        # --- retrieve last messages and online users
 
-        # update user lastactivity in the DB and retrieve users online only every 3 minutes
-        if refresh_userlist:
-            if self.request.session.get(sPrivilege) < 100:    # prevent admin from showing their presence in chat
-                connExecuteRetryNoRecords("INSERT INTO chat_onlineusers(chatid, userid) VALUES(" + str(chatid) + "," + str(self.UserId) + ")")
+        elif action == "refresh":
+        
+            chatid = ToInt(request.GET.get("id"), -1)
+           
+            if chatid != -1 and request.session.get("chat_joined_" + str(chatid)) != "1":
+                return HttpResponse(" ")
 
-            # self.request.session["lastchatactivity_" + str(chatid)] = timezone.now()
+            content = GetTemplate(request, "chat_rest")
+            
+            content.AssignValue("chatid", chatid)
+            content.Parse("refresh")
 
-            # retrieve online users in chat
-            query = "SELECT users.alliance_id, users.login, date_part('epoch', now()-chat_onlineusers.lastactivity)" + \
+            if chatid == 0 and self.AllianceId:
+            
+                chatid = request.session.get("alliancechat_" + str(self.AllianceId), "")
+                if id == "":
+                
+                    query = "SELECT chatid FROM alliances WHERE id=" + str(self.AllianceId)
+                    oRs = oConnExecute(query)
+                    if oRs:
+                    
+                        request.session["alliancechat_" + str(self.AllianceId)] = oRs[0]
+                        chatid = oRs[0]
+
+            lastmsgid = request.session.get("lastchatmsg_" + str(chatid), "")
+            if lastmsgid == "": lastmsgid = 0
+
+            query = " SELECT chat_lines.id, datetime, allianceid, login, message" + \
+                    " FROM chat_lines" + \
+                    " WHERE chatid=" + str(chatid) + " AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid="+ str(chatid) +" ORDER BY datetime DESC OFFSET 100 LIMIT 1), " + str(lastmsgid) + ")" + \
+                    " ORDER BY chat_lines.id"
+            oRss = oConnExecuteAll(query)
+            if oRss:
+            
+                list = []
+                content.AssignValue("lines", list)
+                
+                for oRs in oRss:
+                
+                    item = {}
+                    list.append(item)
+                    
+                    item["datetime"] = oRs[1]
+                    item["author"] = oRs[3]
+                    item["line"] = oRs[4]
+                    item["alliancetag"] = getAllianceTag(oRs[2])
+                    
+                    request.session["lastchatmsg_" + str(chatid)] = oRs[0]
+
+            connExecuteRetryNoRecords("INSERT INTO chat_onlineusers(chatid, userid) VALUES(" + str(chatid) + "," + str(self.UserId) + ")")
+
+            query = " SELECT users.alliance_id, users.login, date_part('epoch', now()-chat_onlineusers.lastactivity)" + \
                     " FROM chat_onlineusers" + \
-                    "    INNER JOIN users ON (users.id=chat_onlineusers.userid)" + \
+                    "   INNER JOIN users ON (users.id=chat_onlineusers.userid)" + \
                     " WHERE chat_onlineusers.lastactivity > now()-INTERVAL '10 minutes' AND chatid=" + str(chatid)
             oRss = oConnExecuteAll(query)
 
             list = []
             content.AssignValue("online_users", list)
+            
             for oRs in oRss:
+            
                 item = {}
                 list.append(item)
                 
@@ -126,147 +103,98 @@ class View(GlobalView):
                 item["user"] = oRs[1]
                 item["lastactivity"] = oRs[2]
 
-        content.Parse("refresh")
+            return render(request, content.template, content.data)
 
-        return render(self.request, content.template, content.data)
+        # --- join to a chat
 
-    def refreshChat(self, chatid):
-        return self.refreshContent(chatid)
-
-    def displayChatList(self):
-
-        content = GetTemplate(self.request, "chat-handler")
-        content.AssignValue("login", self.oPlayerInfo["login"])
-
-        query = "SELECT name, topic, count(chat_onlineusers.userid)" + \
-                " FROM chat" + \
-                "    LEFT JOIN chat_onlineusers ON (chat_onlineusers.chatid = chat.id AND chat_onlineusers.lastactivity > now()-INTERVAL '10 minutes')" + \
-                " WHERE name IS NOT NULL AND password = \'\' AND public" + \
-                " GROUP BY name, topic" + \
-                " ORDER BY length(name), name"
-        oRss = oConnExecuteAll(query)
-
-        list = []
-        content.AssignValue("publicchats", list)
-        for oRs in oRss:
-            item = {}
-            list.append(item)
-            
-            item["name"] = oRs[0]
-            item["topic"] = oRs[1]
-            item["online"] = oRs[2]
-
-        return render(self.request, content.template, content.data)
-
-    # add a chat to the joined chat list
-    def addChat(self, chatid):
-        result = True
-
-        #self.request.session["lastchatactivity_" + str(chatid)] = timezone.now()-self.onlineusers_refreshtime
-
-        if self.request.session.get("chat_joined_" + str(chatid)) != "1":
-            self.request.session["chat_joined_count"] = ToInt(self.request.session.get("chat_joined_count"), 0) + 1
-            self.request.session["chat_joined_" + str(chatid)] = "1"
-
-            result = True
+        elif action == "join":
         
-        return result
+            pwd = request.GET.get("pass", "").strip()
+            name = request.GET.get("chat", "").strip()
+            
+            query = "SELECT sp_chat_join(" + dosql(name) + "," + dosql(pwd) + ")"
+            oRs = oConnExecute(query)
 
-    # remove a chat from list
-    def removeChat(self, chatid):
-        if self.request.session.get("chat_joined_" + str(chatid)) == "1":
-            self.request.session["chat_joined_" + str(chatid)] = ""
-            self.request.session["chat_joined_count"] = self.request.session.get("chat_joined_count") - 1
+            chatid = oRs[0]
+            
+            if request.session.get("chat_joined_" + str(chatid)) != "1":
+            
+                request.session["chat_joined_count"] = ToInt(request.session.get("chat_joined_count"), 0) + 1
+                request.session["chat_joined_" + str(chatid)] = "1"
+                
+            content = GetTemplate(request, "chat_rest")
+            
+            if chatid != 0:
+                
+                query = "INSERT INTO users_chats(userid, chatid, password) VALUES(" + str(self.UserId) + "," + str(chatid) + "," + dosql(pwd) + ")"
+                oConnDoQuery(query)
 
-    def displayChat(self):
-        self.request.session["chatinstance"] = ToInt(self.request.session.get("chatinstance"), 0) + 1
+                query = "SELECT name, topic FROM chat WHERE id=" + str(chatid)
+                oRs = oConnExecute(query)
 
-        content = GetTemplate(self.request, "chat")
-        content.AssignValue("login", self.oPlayerInfo["login"])
-        content.AssignValue("chatinstance", self.request.session.get("chatinstance"))
+                if oRs:
+                    
+                    content.AssignValue("id", chatid)
+                    content.AssignValue("name", oRs[0])
+                    content.AssignValue("topic", oRs[1])
+                    
+                    content.Parse("join")
 
-        if (self.AllianceId):
-            chatid = self.getChatId(0)
-            self.request.session["lastchatmsg_" + str(chatid)] = ""
-            #self.request.session["lastchatactivity_" + str(chatid)] = str(timezone.now()-timezone.timedelta(seconds=self.onlineusers_refreshtime))
+                    request.session["lastchatmsg_" + str(chatid)] = ""
 
-            content.Parse("alliance")
+                else: content.Parse("join_error")
 
-        query = "SELECT chat.id, chat.name, chat.topic" + \
-                " FROM users_chats" + \
-                "    INNER JOIN chat ON (chat.id=users_chats.chatid AND ((chat.password = '') OR (chat.password = users_chats.password)))" + \
-                " WHERE userid = " + str(self.UserId) + \
-                " ORDER BY users_chats.added"
-        oRss = oConnExecuteAll(query)
+            else: content.Parse("join_badpassword")
 
-        list = []
-        content.AssignValue("joins", list)
-        for oRs in oRss:
-            if self.addChat(oRs[0]):
+            return render(request, content.template, content.data)
+
+        # --- leave a chat
+
+        elif action == "leave":
+        
+            chatid = ToInt(request.GET.get("id"), -1)
+            
+            request.session["lastchatmsg_" + str(chatid)] = ""
+
+            if request.session.get("chat_joined_" + str(chatid)) == "1":
+            
+                request.session["chat_joined_" + str(chatid)] = ""
+                request.session["chat_joined_count"] = ToInt(request.session.get("chat_joined_count"), 1) - 1
+
+            query = "DELETE FROM users_chats WHERE userid=" + str(self.UserId) + " AND chatid=" + str(chatid)
+            oConnDoQuery(query)
+
+            query = "DELETE FROM chat WHERE id > 0 AND NOT public AND name IS NOT NULL AND id=" + str(chatid) + " AND (SELECT count(1) FROM users_chats WHERE chatid=chat.id) = 0"
+            oConnDoQuery(query)
+            
+            return HttpResponse(" ")
+
+        # --- get public chats
+
+        elif action == "chatlist":
+        
+            content = GetTemplate(request, "chat_rest")
+
+            list = []
+            content.AssignValue("publicchats", list)
+            
+            query = " SELECT name, topic, count(chat_onlineusers.userid)" + \
+                    " FROM chat" + \
+                    "   LEFT JOIN chat_onlineusers ON (chat_onlineusers.chatid = chat.id AND chat_onlineusers.lastactivity > now()-INTERVAL '10 minutes')" + \
+                    " WHERE name IS NOT NULL AND password = \'\' AND public" + \
+                    " GROUP BY name, topic" + \
+                    " ORDER BY length(name), name"
+            oRss = oConnExecuteAll(query)
+
+            for oRs in oRss:
+            
                 item = {}
                 list.append(item)
                 
-                item["id"] = oRs[0]
-                item["name"] = oRs[1]
-                item["topic"] = oRs[2]
+                item["name"] = oRs[0]
+                item["topic"] = oRs[1]
+                item["online"] = oRs[2]
 
-                self.request.session["lastchatmsg_" + str(oRs[0])] = ""
+            return render(request, content.template, content.data)
 
-        content.AssignValue("now", timezone.now())
-
-        content.Parse("chat")
-
-        return self.Display(content)
-
-    def joinChat(self):
-
-        content = GetTemplate(self.request, "chat-handler")
-        content.AssignValue("login", self.oPlayerInfo["login"])
-
-        pwd = self.request.GET.get("pass", "").strip()
-
-        # join chat
-        query = "SELECT sp_chat_join(" + dosql(self.request.GET.get("chat", "").strip()) + "," + dosql(pwd) + ")"
-        oRs = oConnExecute(query)
-
-        chatid = oRs[0]
-
-        if not self.addChat(oRs[0]): return
-
-        if chatid != 0:
-            # save the chatid to the user chatlist
-            query = "INSERT INTO users_chats(userid, chatid, password) VALUES(" + str(self.UserId) + "," + str(chatid) + "," + dosql(pwd) + ")"
-            oConnDoQuery(query)
-
-            query = "SELECT name, topic FROM chat WHERE id=" + str(chatid)
-            oRs = oConnExecute(query)
-
-            if oRs:
-                content.AssignValue("id", chatid)
-                content.AssignValue("name", oRs[0])
-                content.AssignValue("topic", oRs[1])
-                content.Parse("setactive")
-                content.Parse("join")
-
-                self.request.session["lastchatmsg_" + str(chatid)] = ""
-
-            else:
-                content.Parse("join_error")
-
-        else:
-            content.Parse("join_badpassword")
-
-        return render(self.request, content.template, content.data)
-
-    def leaveChat(self, chatid):
-        self.request.session["lastchatmsg_" + str(chatid)] = ""
-
-        self.removeChat(chatid)
-
-        query = "DELETE FROM users_chats WHERE userid=" + str(self.UserId) + " AND chatid=" + str(chatid)
-        oConnDoQuery(query)
-
-        query = "DELETE FROM chat WHERE id > 0 AND NOT public AND name IS NOT NULL AND id=" + str(chatid) + " AND (SELECT count(1) FROM users_chats WHERE chatid=chat.id) = 0"
-        oConnDoQuery(query)
-        
         return HttpResponse(" ")

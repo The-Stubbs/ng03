@@ -1,41 +1,47 @@
 {% extends '_layout.html' %}
+
 {% load tz %}
 {% load humanize %}
+
 {% block content %}
-{% if chat %}
+
 <script>
-var chatInstance = {{chatinstance}};
-var chatDateTime = new Date(new Date({{now|timezone:"Europe/Paris"|date:"Y"}},{{now|timezone:"Europe/Paris"|date:"m"}}-1,{{now|timezone:"Europe/Paris"|date:"d"}},{{now|timezone:"Europe/Paris"|date:"H"}},{{now|timezone:"Europe/Paris"|date:"i"}},{{now|timezone:"Europe/Paris"|date:"s"}},{{now|date:"z"}}));
-var pageLocation = location.href;
+var days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+var months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+var chatDateTime = new Date().getTime();
+var pageLocation = '/game/chat_rest/';
+var regexpCoords = new RegExp('^([0-9]+)[.]([0-9]+)[.]([0-9]+)$', '');
+var min_refreshtime = 2000;
+var max_refreshtime = 10000;
+var disabled_refreshtime = 120000;
+var max_idletime = 600000;
+var chatlist = [];
 
-var days=['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-var months=['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-
-function formatDate(dt)
-{
+function formatDate(dt) {
 	return days[dt.getDay()] + " " + dt.getDate() + " " + months[dt.getMonth()];
 }
 
-function sameDay(d1, d2)
-{
+function sameDay(d1, d2) {
 	return d1.getYear() == d2.getYear() && d1.getMonth() == d2.getMonth() && d1.getDay() == d2.getDay();
 }
 
-function formatTime(dt)
-{
-	if(dt==null) return '';
+function formatTime(dt) {
+	if (dt==null) return '';
 	return dt.getHours().lz() + ':' + dt.getMinutes().lz();
 }
 
-var Smileys={
+var Smileys = {
+
 	list:[],
+
 	add:function() {
-		for(var i=1; i<arguments.length; i++)
+		for (var i = 1; i < arguments.length; i++)
 			this.list.push([arguments[0], arguments[i]]);
 	},
+
 	get:function(smiley) {
-		for(var i=0; i<this.list.length; i++)
-			if(this.list[i][1] == smiley)
+		for (var i = 0; i < this.list.length; i++)
+			if (this.list[i][1] == smiley)
 				return this.list[i][0];
 		return false;
 	}
@@ -55,71 +61,60 @@ Smileys.add('roll.png', ':rolleyes:');
 Smileys.add('cool.png', ':cool:');
 Smileys.add('grog.gif', ':beer:', ':grog:');
 
+function formatLine(author, line) {
 
-var regexpCoords = new RegExp('^([0-9]+)[.]([0-9]+)[.]([0-9]+)$','');
-
-function formatLine(author,line)
-{
 	var smileys = 0;
 
-	highlight = line.indexOf('{{login}}', 0) > -1;
 	words = line.split(" ");
-
-	for(i=0;i<words.length;i++)
-	{
+	for (i = 0; i < words.length; i++) {
+    
 		var tab = words[i].match(regexpCoords);
-
-		if(tab != null && tab[1] > 0 && tab[2] > 0 && tab[2] < 100 && tab[3] > 0 && tab[3] <= 25)
-		{
+		if (tab != null && tab[1] > 0 && tab[2] > 0 && tab[2] < 100 && tab[3] > 0 && tab[3] <= 25) {
 			words[i] = "<a href='/game/map/?g="+tab[1] + "&s=" + tab[2] + "&p=" + tab[3] + "' target=_blank>" + words[i] + "</a>";
 			continue;
 		}
 
-		if(smileys < 3) {
+		if (smileys < 3) {
 			var smiley = Smileys.get(words[i]);
-			if(smiley) {
-				words[i] = '<img src="{{PATH_IMAGES}}/smileys/'+smiley+'" class=smiley alt="'+smiley+'">';
+			if (smiley) {
+				words[i] = '<img src="{{PATH_IMAGES}}/smileys/' + smiley + '" class=smiley alt="' + smiley + '">';
 				smileys++;
 				continue;
 			}
 		}
 
-		if(words[i].substr(0,7).toLowerCase() == 'http://' || words[i].substr(0,8).toLowerCase() == 'https://')
-			words[i] = '<a href="'+words[i]+'" target=_blank>'+addWbr(words[i])+'</a>';
+		if (words[i].substr(0,7).toLowerCase() == 'http://' || words[i].substr(0,8).toLowerCase() == 'https://')
+			words[i] = '<a href="' + words[i] + '" target=_blank>' + addWbr(words[i]) + '</a>';
 		else
 			words[i] = addWbr(words[i]);
 	}
 
-	if(author == '{{login}}')
+	highlight = line.indexOf('{{login}}', 0) > -1;
+    
+	if (author == '{{login}}')
 		return '<span class="player">' + words.join(' ') + '</span>';
-	else
-	if(highlight)
+	else if (highlight)
 		return '<span class="highlight">' + words.join(' ') + '</span>';
 	else
 		return words.join(' ');
 }
 
-function sortName(a, b)
-{
-	if(a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-	if(a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+function sortName(a, b) {
+
+	if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+	if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
 	return 0;
 }
 
-var min_refreshtime = 2000;
-var max_refreshtime = 10000;
-var disabled_refreshtime = 120000;
-var max_idletime = 600000;
-var chatlist = [];
-
 function User(allianceTag, name, idleTime) {
+
 	this.tag = allianceTag;
 	this.name = name;
-	this.idleSince = new Date().getTime()-idleTime*1000;
+	this.idleSince = new Date().getTime() - idleTime * 1000;
 }
 
-
 var Class = {
+
 	create: function() {
 		return function() {
 			this.initialize.apply(this, arguments);
@@ -128,12 +123,14 @@ var Class = {
 } 
 
 var Chat = Class.create();
+
 Chat.prototype = {
+
 	initialize: function(id, name, canClose, showTag) {
+    
 		this.id = id;
 		this.name = name;
 		this.showTag = showTag;
-
 		this.active = false;
 		this.lines = [];
 		this.users = [];
@@ -143,33 +140,28 @@ Chat.prototype = {
 		this.refreshTime = disabled_refreshtime;
 		this.lastRefresh = new Date().getTime();
 		this.nextRefreshOnlineUsers = new Date().getTime() + 60000;
-
-		this.loaded = false; {% if comment %}// set to true once chat history has been filled{% endif %}
-
+		this.loaded = false; 
 		this.lastTo = '';
 		this.line = '';
 		this.sendingText = false;
 
-		// create/display this chat tab
-		var newtab = $('newtab');
-		var tabs = $('chattabs');
-
 		this.tab = document.createElement('li');
 		this.tab.chat = this;
+		this.tab.innerHTML = '<a href="#" onclick="chatlist[' + id + '].setActive(); return false;">' + name +
+							 (canClose ? '&nbsp;<i title="Fermer" class="ml-1 c-danger fas fa-times" onclick="chatlist[' + id + '].close();"></i>' : '') + '</a>';
 
-		this.tab.innerHTML = '<a href="#" onclick="chatlist['+id+'].setActive(); return false;">' + name +
-							 (canClose?'&nbsp;<i title="Fermer" class="ml-1 c-danger fas fa-times" onclick="chatlist['+id+'].close();"></i>':'') + '</a>';
-
+		var newtab = $('newtab');
+		var tabs = $('chattabs');
 		tabs.insertBefore(this.tab, newtab);
 
-		// add this chat to the chat list
 		chatlist[this.id] = this;
 
 		checkNewTabVisility();
 	},
 
 	close: function() {
-		if(!confirm('Êtes-vous sûr de vouloir fermer le salon ' + this.name + ' ?')) return;
+    
+		if (!confirm('Êtes-vous sûr de vouloir fermer le salon ' + this.name + ' ?')) return;
 
 		this.setInactive();
 
@@ -178,23 +170,22 @@ Chat.prototype = {
 
 		checkNewTabVisility();
 
-		// send leave command
-		var url = pageLocation + "?a=leave&id="+this.id;
+		var url = pageLocation + "?a=leave&id=" + this.id;
 		openURL(url, leaveChatResponse);
 
-		// activate first possible tab
-		if(activeChat == this) {
+		if (activeChat == this) {
+        
 			activeChat = null;
 
 			var previousTab = null;
 
-			for(x in chatlist)
-				if(chatlist[x]) {
+			for (x in chatlist)
+				if (chatlist[x]) {
 					previousTab = chatlist[x];
 					break;
 				}
 
-			if(previousTab)
+			if (previousTab)
 				previousTab.setActive();
 			else
 				showJoinChatForm();
@@ -202,11 +193,11 @@ Chat.prototype = {
 	},
 
 	setTopic: function(topic) {
-	//
 	},
 
 	send: function(line) {
-		if(line == '') return false;
+    
+		if (line == '') return false;
 
 		this.sendingText = true;
 		this.lastTo = '';
@@ -215,17 +206,17 @@ Chat.prototype = {
 
 		var c = this;
 		var cb = function(req) {
-					var s=0;
-					try {
-						s=req.status;
-						if(s != 200) throw null;
-					}
-					catch(e) {
-						c.addLine('', '', null, s+':Erreur lors de l\'envoi de "' + line + '"');
-					}
-					c.display();
-					c.textSent(); 
-				}
+            var s = 0;
+            try {
+                s = req.status;
+                if (s != 200) throw null;
+            }
+            catch(e) {
+                c.addLine('', '', null, s + ':Erreur lors de l\'envoi de "' + line + '"');
+            }
+            c.display();
+            c.sendingText = false;
+        }
 		openURL(url, cb);
 
 		this.refreshTime = new Date() - this.lastRefresh + 500;
@@ -233,13 +224,14 @@ Chat.prototype = {
 	},
 
 	textSent: function() {
-		this.sendingText=false;
+		this.sendingText = false;
 	},
 
 	setActive: function() {
-		if(this.active) return;
+    
+		if (this.active) return;
 
-		if(activeChat) activeChat.setInactive();
+		if (activeChat) activeChat.setInactive();
 
 		var newtab = $('newtab');
 		newtab.className = '';
@@ -269,7 +261,8 @@ Chat.prototype = {
 	},
 
 	setInactive: function() {
-		if(!this.active) return;
+    
+		if (!this.active) return;
 
 		this.line = oChatLine.value;
 
@@ -280,10 +273,11 @@ Chat.prototype = {
 	},
 
 	tell: function(to) {
+    
 		oChatLine.focus();
 
-		if(this.lastTo != '' && oChatLine.value.substring(0, this.lastTo.length) == this.lastTo)
-			oChatLine.value = oChatLine.value.substring(this.lastTo.length+1, oChatLine.value.length);
+		if (this.lastTo != '' && oChatLine.value.substring(0, this.lastTo.length) == this.lastTo)
+			oChatLine.value = oChatLine.value.substring(this.lastTo.length + 1, oChatLine.value.length);
 
 		to = to + ' >';
 		oChatLine.value = to + ' ' + oChatLine.value;
@@ -291,12 +285,12 @@ Chat.prototype = {
 	},
 
 	addLine: function(tag, author, datetime, line) {
+    
 		this.refreshTime -= 100;
-		if(this.refreshTime > max_refreshtime) this.refreshTime = max_refreshtime;
-		if(this.refreshTime < min_refreshtime) this.refreshTime = min_refreshtime;
+		if (this.refreshTime > max_refreshtime) this.refreshTime = max_refreshtime;
+		if (this.refreshTime < min_refreshtime) this.refreshTime = min_refreshtime;
 
-		if(datetime!=null && (this.lastDateTime=='' || !sameDay(this.lastDateTime,datetime)))
-		{
+		if (datetime!=null && (this.lastDateTime=='' || !sameDay(this.lastDateTime,datetime))) {
 			this.lines.push('<div class=newday>' + formatDate(datetime) + '</div>');
 			this.lastDateTime = datetime;
 		}
@@ -305,22 +299,24 @@ Chat.prototype = {
 
 		if(!this.showTag) tag = '';
 
-		this.lines.push((datetime==null?'<b>':'')+'<img src="{{PATH_IMAGES}}/interface/spacer.gif" width="0" height="15" border="0">' + formatTime(datetime) + (tag!=''?' <a href="/game/alliance/?tag='+tag+'" target="_blank">['+tag+']</a>':'') + ' <a href="#" onclick="chatlist['+this.id+'].tell(\''+author+'\'); return false;" class="author">' + author + '</a> : ' + line + (datetime==null?'</b>':''));
+		this.lines.push((datetime == null ? '<b>' : '') + '<img src="{{PATH_IMAGES}}/interface/spacer.gif" width="0" height="15" border="0">' + formatTime(datetime) + (tag != '' ? ' <a href="/game/alliance/?tag=' + tag + '" target="_blank">['+tag+']</a>' : '') + ' <a href="#" onclick="chatlist[' + this.id + '].tell(\'' + author + '\'); return false;" class="author">' + author + '</a> : ' + line + (datetime == null ? '</b>' : ''));
 
-		// limit chatbox to 250 messages
-		while(this.lines.length > 250) this.lines.shift();
+		while (this.lines.length > 250)
+            this.lines.shift();
 
-		if(author!='' && this.loaded && datetime.getTime() > chatDateTime.getTime()-max_idletime) this.addUser(tag, author, 0);
+		if (author != '' && this.loaded && datetime.getTime() > chatDateTime.getTime() - max_idletime)
+            this.addUser(tag, author, 0);
 
 		this.linesAdded++;
 	},
 
 	addUser: function(allianceTag, name, idleTime) {
-		if(!this.showTag) allianceTag = '';
+    
+		if (!this.showTag) allianceTag = '';
 
-		for(var i=0; i<this.users.length; i++) {
+		for (var i = 0; i < this.users.length; i++) {
 			var user = this.users[i];
-			if(user.name.toLowerCase() == name.toLowerCase()) {
+			if (user.name.toLowerCase() == name.toLowerCase()) {
 				this.users[i] = new User(allianceTag, name, idleTime);
 				return;
 			}
@@ -332,36 +328,39 @@ Chat.prototype = {
 	clearUsers: function() { this.users = []; },
 
 	display: function() {
+    
 		this.loaded = true;
-		if(!this.active) return;
+		if (!this.active) return;
 
 		oChat.innerHTML = this.lines.join("<br/>");
-		if(this.linesAdded > this.lastLine)	{
+		if (this.linesAdded > this.lastLine) {
 			oChat.scrollTop = oChat.scrollHeight;
 			this.lastLine = this.linesAdded;
 		}
 	},
 
 	displayUsers: function() {
-		if(!this.active) return;
+    
+		if (!this.active) return;
 
 		var d = new Date().getTime()-max_idletime;
 
 		this.users.sort(sortName);
 
 		var s = '';
-		for(var i=0; i<this.users.length; i++) {
+		for (var i = 0; i < this.users.length; i++) {
 			var user = this.users[i];
-			if(user.idleSince > d)
-				s += (s!=''?', ':'') + (user.tag!=''?' <a href="/game/alliance/?tag='+user.tag+'" target="_blank">['+user.tag+']</a>':'') + ' <a href="#" onclick="chatlist[' + this.id + '].tell(\'' + user.name + '\'); return false;">' + user.name + '</a>';
+			if (user.idleSince > d)
+				s += (s != '' ? ', ' : '') + (user.tag != '' ? ' <a href="/game/alliance/?tag=' + user.tag + '" target="_blank">[' + user.tag + ']</a>' : '') + ' <a href="#" onclick="chatlist[' + this.id + '].tell(\'' + user.name + '\'); return false;">' + user.name + '</a>';
 		}
 
 		$('onlineusers').innerHTML = s;
 	},
 
 	refresh: function() {
-		if(!this.active) {
-			window.setTimeout('refreshChat('+this.id+')', 100);
+    
+		if (!this.active) {
+			window.setTimeout('refreshChat(' + this.id + ')', 100);
 			return;
 		}
 
@@ -369,60 +368,55 @@ Chat.prototype = {
 
 		var c = this;
 		var cb = function(req) {
-					try {
-						{% if dev %}
-						alert(req.status + '\r\n'+req.responseText);
-						{% endif %}
-						if(req.status==200)
-							eval(req.responseText);
-					} catch(e) {
-						//window.location.reload(true);
-						try {
-							c.addLine('', '', null, ':Erreur lors de la réception des données: "' + e.message + '"');
-						} catch(e) {
-						}
-					}
-					c.refreshed(); 
-				}
+            try {
+                if (req.status == 200)
+                    eval(req.responseText);
+            } catch(e) {
+                try {
+                    c.addLine('', '', null, ':Erreur lors de la réception des données: "' + e.message + '"');
+                } catch(e) {
+                }
+            }
+            c.refreshed(); 
+        }
 		openURL(url, cb);
 	},
 
 	refreshed: function() {
-		if(this.active) {
+    
+		if (this.active) {
 			this.refreshTime += this.refreshTime / 10;
-			if(this.refreshTime < min_refreshtime) this.refreshTime = min_refreshtime;
-			if(this.refreshTime > max_refreshtime) this.refreshTime = max_refreshtime;
+			if (this.refreshTime < min_refreshtime) this.refreshTime = min_refreshtime;
+			if (this.refreshTime > max_refreshtime) this.refreshTime = max_refreshtime;
 		}
 
-		// refresh list of online users
-		if(new Date().getTime() > this.nextRefreshOnlineUsers) {
+		if (new Date().getTime() > this.nextRefreshOnlineUsers) {
 			this.nextRefreshOnlineUsers = new Date().getTime() + 60000;
 			this.displayUsers();
 		}
 
 		this.lastRefresh = new Date().getTime();
 
-		window.setTimeout('refreshChat('+this.id+')', 100);
+		window.setTimeout('refreshChat(' + this.id + ')', 100);
 	}
 }
 
 function checkNewTabVisility() {
+
 	var newtab = $('newtab');
 
 	activeChatsCount = 0;
 
-	for(var x in chatlist) {
+	for (var x in chatlist) {
 		var chat = chatlist[x];
-		if(chat) activeChatsCount++;
+		if (chat) activeChatsCount++;
 	}
 
-	if(activeChatsCount < 10)
-	{
+	if (activeChatsCount < 10) {
 		newtab.style.visibility = "visible";
 		newtab.style.display = "block";
 	}
-	else
-	{
+	else {
 		newtab.style.visibility = "hidden";
 		newtab.style.display = "none";
 	}
@@ -432,11 +426,12 @@ var oChat, oChatLine;
 var activeChat;
 
 function leaveChatResponse(req) {
-	if(req.status=="200") eval(req.responseText);
+	if (req.status == "200") eval(req.responseText);
 }
 
 function sendText() {
-	if(activeChat.sendingText) return false;
+	
+    if (activeChat.sendingText) return false;
 
 	activeChat.send(oChatLine.value);
 	oChatLine.value = "";
@@ -444,52 +439,42 @@ function sendText() {
 	return false;
 }
 
-//
-// Chat refresh
-//
-
 function refreshChat(id) {
-	var chat = chatlist[id];
-	if(!chat) return;
 
-	if(chat.lastRefresh + chat.refreshTime < new Date().getTime() && !chat.sendingText)
+	var chat = chatlist[id];
+	if (!chat) return;
+
+	if (chat.lastRefresh + chat.refreshTime < new Date().getTime() && !chat.sendingText)
 		chat.refresh();
 	else
-		window.setTimeout('refreshChat('+id+')', 100);
+		window.setTimeout('refreshChat(' + id + ')', 100);
 }
 
-//
-// Join chat
-//
-
-var joining = false;
-
 function joinChatResponse(req) {
-	joining = false;
 
 	try {
-		if(req.status=="200")
+		if (req.status == "200")
 			eval(req.responseText);
 	} catch (e)	{
-		//window.location.reload(true);
 		alert(e.message);
 	}
 }
 
 function joinChat2(name,pass) {
+
 	var url = pageLocation + "?a=join&chat=" + encodeURIComponent(name) + "&pass=" + encodeURIComponent(pass);
 
-	for(var x in chatlist)
-		if(chatlist[x] && chatlist[x].id > 0 && (chatlist[x].name.toLowerCase() == name.toLowerCase())) {
+	for (var x in chatlist)
+		if (chatlist[x] && chatlist[x].id > 0 && (chatlist[x].name.toLowerCase() == name.toLowerCase())) {
 			alert('Vous êtes déjà sur ce salon.');
 			return;
 		}
 
-	joining = true;
 	openURL(url, joinChatResponse);
 }
 
 function joinChat() {
+
 	var oName = $("chatname");
 	var oPass = $("chatpassword");
 	joinChat2(oName.value, oPass.value);
@@ -497,13 +482,14 @@ function joinChat() {
 	return false;
 }
 
-var isFirstChat=true;
+var isFirstChat = true;
+
 function addChat(id, name, topic, canClose, showTag) {
-	// reset join form if we joined a chat
+
 	var oName = $("chatname");
 	var oPass = $("chatpassword");
 
-	if(name.toLowerCase() == oName.value.toLowerCase()) {
+	if (name.toLowerCase() == oName.value.toLowerCase()) {
 		oName.value = "";
 		oPass.value = "";
 	}
@@ -511,22 +497,22 @@ function addChat(id, name, topic, canClose, showTag) {
 	var c = new Chat(id, name, canClose, showTag);
 	c.setTopic(topic);
 
-	if(isFirstChat) {
+	if (isFirstChat) {
 		c.setActive();
 		isFirstChat = false;
 	}
-	window.setTimeout('refreshChat('+c.id+')', 100);
+    
+	window.setTimeout('refreshChat(' + c.id + ')', 100);
 	return c;
 }
 
-function leaveChat(id)
-{
+function leaveChat(id) {
 	chatlist[id].close();
 }
 
-function showJoinChatForm()
-{
-	if(activeChat) activeChat.setInactive();
+function showJoinChatForm() {
+
+	if (activeChat) activeChat.setInactive();
 
 	var newtab = $('newtab');
 	newtab.className = "selected";
@@ -544,12 +530,11 @@ function showJoinChatForm()
 	openURL(pageLocation + "?a=chatlist", joinChatResponse);
 }
 
-function displayPublicChats(list)
-{
+function displayPublicChats(list) {
+
 	var s = "";
 
-	for(var i=1; i<list.length; i++)
-	{
+	for (var i = 1; i < list.length; i++) {
 		s += '<div class="box-line"><div class="box-item"><a href="#" onclick="joinChat2(\''+list[i][0]+'\',\'\'); return false;">' + list[i][0] + '</a></div><div class="box-item text-right"><span class="c-highlight">' + list[i][2] + '</span> <small>en ligne</small></div></div>';
 	}
 
@@ -560,22 +545,31 @@ function displayPublicChats(list)
 
 	$('publicchats').innerHTML = s;
 }
-
 </script>
 
 <ul id="chattabs" class="htabs">
-	<li id="newtab"><a href="#" onclick="showJoinChatForm(); return false;"><i class="fas fa-plus"></i></a></li>
+	<li id="newtab">
+        <a href="#" onclick="showJoinChatForm(); return false;">
+            <i class="fas fa-plus"></i>
+        </a>
+    </li>
 </ul>
 
-<form id="chatform" action="#" method=get onsubmit="return sendText();">{% csrf_token %}
+<form id="chatform" action="#" method="get" onsubmit="return sendText();">{% csrf_token %}
     <div id="chatbox">
         <div class="box flex-grow-1 mb-0 d-flex flex-column" style="overflow:auto;">
             <div id="chat" class="box-item"></div>
+        </div>
+        <div class="box">
             <div class="box-item">
                 <div class="row mb-1">
                     <div class="col"><input type="text" id="chatline" maxlength="256"></div>
                     <div class="col-auto"><input type="submit" value="Envoyer"></div>
                 </div>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-item">
                 <div class="small">en ligne</div>
                 <div id="onlineusers"></div>
             </div>
@@ -583,52 +577,46 @@ function displayPublicChats(list)
     </div>
 </form>
 
-<div id="joinchatform">
-<div class="row">
+<div id="joinchatform" class="row">
     <div class="col-12 col-md-6">
-    <form action="#" method=get onsubmit="return joinChat();">{% csrf_token %}
-        <h1>Rejoindre un nouveau salon</h1>
-        <div class="box">
-            <div class="box-line">
-                <div class="box-item">
-                    <div class="mb-2">
-                        <div class="small">Nom du salon</div>
-                        <input type="text" id="chatname" maxlength="12" style="width:100%;">
+        <form action="#" method="get" onsubmit="return joinChat();">{% csrf_token %}
+            <h1>Rejoindre un nouveau salon</h1>
+            <div class="box">
+                <div class="box-line">
+                    <div class="box-item">
+                        <div class="mb-2">
+                            <div class="small">Nom du salon</div>
+                            <input type="text" id="chatname" maxlength="12" style="width:100%;">
+                        </div>
+                        <div class="mb-3">
+                            <div class="small">Mot de passe</div>
+                            <input type="password" id="chatpassword" maxlength="16" style="width:100%;">
+                        </div>
+                        <input type="submit" value="Rejoindre">
                     </div>
-                    <div class="mb-3">
-                        <div class="small">Mot de passe</div>
-                        <input type="password" id="chatpassword" maxlength="16" style="width:100%;">
-                    </div>
-                    <input type="submit" value="Rejoindre">
                 </div>
             </div>
-        </div>
-    </form>
+        </form>
     </div>
     <div class="col-12 col-md-6">
-    <div id="publicchats">
+        <div id="publicchats">
     </div>
-    </div>
-</div>
 </div>
 
 <script>
 oChat = $('chat');
 oChatLine = $('chatline');
-{% endif %}
 
 {% if alliance %}
-var allianceChat = addChat(0,'Alliance','',false,false);
+    var allianceChat = addChat(0,'Alliance','',false,false);
 {% endif %}
 
 {% for join in joins %}
-var chat = addChat({{join.id}},'{{join.name}}','{{join.topic}}',true,true);
-{% if join.setactive %}chat.setActive();{% endif %}
+    var chat = addChat({{join.id}},'{{join.name}}','{{join.topic}}',true,true);
+    {% if join.setactive %}chat.setActive();{% endif %}
 {% endfor %}
 
-{% if chat %}
-if(chatlist.length == 0) showJoinChatForm();
+if (chatlist.length == 0) showJoinChatForm();
 </script>
-{% endif %}
 
 {% endblock %}

@@ -3,7 +3,7 @@
 from math import sqrt
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.shortcuts import render
 from django.views import View
