@@ -12,15 +12,15 @@
         {% for ship in kills %}
         <div class="box">
             <div class="box-item">
-                <a href="/game/help/?cat=ships#{{ship.id}}" class="badge" data-toggle="tooltip" title="Aide vaisseau"><i class="fas fa-help"></i> {{ship.name}}</a>
+                <a href="/game/help/?cat=ships#{{ship.id}}" class="badge mr-2" data-toggle="tooltip" title="Aide vaisseau"><i class="fas fa-question-circle"></i> {{ship.name}}</a>
                 x{{ship.count|intcomma}}
             </div>
         </div>
         {% endfor %}
         <hr/>
-        <div>
-            Total
-            {{kills|intcomma}}
+        <div class="text-right">
+            <span class="mr-2">Total</span>
+            <span class="c-highlight">{{total_kills|intcomma}}</span>
         </div>
     </div>
     <div class="col-12 col-md-6">
@@ -28,15 +28,15 @@
         {% for ship in losses %}
         <div class="box">
             <div class="box-item">
-                <a href="/game/help/?cat=ships#{{ship.id}}" class="badge" data-toggle="tooltip" title="Aide vaisseau"><i class="fas fa-help"></i> {{ship.name}}</a>
+                <a href="/game/help/?cat=ships#{{ship.id}}" class="badge mr-2" data-toggle="tooltip" title="Aide vaisseau"><i class="fas fa-question-circle"></i> {{ship.name}}</a>
                 x{{ship.count|intcomma}}
             </div>
         </div>
         {% endfor %}
         <hr/>
-        <div>
-            Total
-            {{losses|intcomma}}
+        <div class="text-right">
+            <span class="mr-2">Total</span>
+            <span class="c-highlight">{{total_losses|intcomma}}</span>
         </div>
     </div>
 </div>

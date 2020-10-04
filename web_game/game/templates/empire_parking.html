@@ -16,14 +16,14 @@
         {% for ship in planet.ships %}
         <div class="box">
             <div class="box-item">
-                <span class="c-highlight">{{ship.name}}</span>
+                <span class="c-highlight mr-2">{{ship.name}}</span>
                 x{{ship.quantity|intcomma}}
             </div>
         </div>
         {% endfor %}
     </div>
     {% empty %}
-    <div class="col">
+    <div class="col mt-4">
         aucun vaisseau au sol
     </div>
     {% endfor %}

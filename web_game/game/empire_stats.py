@@ -20,7 +20,7 @@ class View(GlobalView):
         self.selected_tab = "stats"
         self.selected_menu = "empire"
 
-        content = GetTemplate(self.request, "empire-stats")
+        content = GetTemplate(self.request, "empire_stats")
 
         # --- user lost and killed ships data
 
@@ -31,10 +31,7 @@ class View(GlobalView):
         content.AssignValue("losses", losses)
 
         total_kills = 0
-        content.AssignValue("total_kills", total_kills)
-        
         total_losses = 0
-        content.AssignValue("total_losses", total_losses)
         
         query = " SELECT shipid, killed, lost, db_ships.label" + \
                 " FROM users_ships_kills" + \
@@ -63,7 +60,10 @@ class View(GlobalView):
                     item["name"] = oRs[3]
                     item["count"] = oRs[2]
 
-                total_kills += oRs[2]
-                total_losses += oRs[3]
+                total_kills += oRs[1]
+                total_losses += oRs[2]
 
+        content.AssignValue("total_kills", total_kills)
+        content.AssignValue("total_losses", total_losses)
+        
         return self.Display(content)
