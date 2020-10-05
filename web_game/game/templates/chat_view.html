@@ -299,12 +299,12 @@ Chat.prototype = {
 
 		if(!this.showTag) tag = '';
 
-		this.lines.push((datetime == null ? '<b>' : '') + '<img src="{{PATH_IMAGES}}/interface/spacer.gif" width="0" height="15" border="0">' + formatTime(datetime) + (tag != '' ? ' <a href="/game/alliance/?tag=' + tag + '" target="_blank">['+tag+']</a>' : '') + ' <a href="#" onclick="chatlist[' + this.id + '].tell(\'' + author + '\'); return false;" class="author">' + author + '</a> : ' + line + (datetime == null ? '</b>' : ''));
+		this.lines.push('<div><small>' + formatTime(datetime) + '</small>' + (tag != '' ? ' <a href="/game/alliance/?tag=' + tag + '" target="_blank">['+tag+']</a>' : '') + ' <a href="#" onclick="chatlist[' + this.id + '].tell(\'' + author + '\'); return false;" class="author">' + author + '</a> : ' + line + '</div>');
 
 		while (this.lines.length > 250)
             this.lines.shift();
 
-		if (author != '' && this.loaded && datetime.getTime() > chatDateTime.getTime() - max_idletime)
+		if (author != '' && this.loaded && datetime.getTime() > chatDateTime - max_idletime)
             this.addUser(tag, author, 0);
 
 		this.linesAdded++;
@@ -332,7 +332,7 @@ Chat.prototype = {
 		this.loaded = true;
 		if (!this.active) return;
 
-		oChat.innerHTML = this.lines.join("<br/>");
+		oChat.innerHTML = this.lines.join("");
 		if (this.linesAdded > this.lastLine) {
 			oChat.scrollTop = oChat.scrollHeight;
 			this.lastLine = this.linesAdded;
@@ -523,7 +523,7 @@ function showJoinChatForm() {
 
 	var obj = $('joinchatform');
 	obj.style.visibility = "visible";
-	obj.style.display = "block";
+	obj.style.display = "flex";
 
 	$("chatname").focus();
 
@@ -535,13 +535,11 @@ function displayPublicChats(list) {
 	var s = "";
 
 	for (var i = 1; i < list.length; i++) {
-		s += '<div class="box-line"><div class="box-item"><a href="#" onclick="joinChat2(\''+list[i][0]+'\',\'\'); return false;">' + list[i][0] + '</a></div><div class="box-item text-right"><span class="c-highlight">' + list[i][2] + '</span> <small>en ligne</small></div></div>';
+		s += '<div class="box"><div class="box-item"><a href="#" onclick="joinChat2(\''+list[i][0]+'\',\'\'); return false;">' + list[i][0] + '</a><span class="ml-2 c-highlight">' + list[i][2] + '</span> <small>en ligne</small></div></div>';
 	}
 
 	s = '<h1>Liste des salons publics</h1>'+
-		'<div class="box">'+
-		s +
-		'</div>';
+		s;
 
 	$('publicchats').innerHTML = s;
 }
@@ -557,12 +555,12 @@ function displayPublicChats(list) {
 
 <form id="chatform" action="#" method="get" onsubmit="return sendText();">{% csrf_token %}
     <div id="chatbox">
-        <div class="box flex-grow-1 mb-0 d-flex flex-column" style="overflow:auto;">
+        <div class="box flex-grow-1 d-flex flex-column" style="overflow:auto;">
             <div id="chat" class="box-item"></div>
         </div>
         <div class="box">
             <div class="box-item">
-                <div class="row mb-1">
+                <div class="row">
                     <div class="col"><input type="text" id="chatline" maxlength="256"></div>
                     <div class="col-auto"><input type="submit" value="Envoyer"></div>
                 </div>
@@ -582,24 +580,22 @@ function displayPublicChats(list) {
         <form action="#" method="get" onsubmit="return joinChat();">{% csrf_token %}
             <h1>Rejoindre un nouveau salon</h1>
             <div class="box">
-                <div class="box-line">
-                    <div class="box-item">
-                        <div class="mb-2">
-                            <div class="small">Nom du salon</div>
-                            <input type="text" id="chatname" maxlength="12" style="width:100%;">
-                        </div>
-                        <div class="mb-3">
-                            <div class="small">Mot de passe</div>
-                            <input type="password" id="chatpassword" maxlength="16" style="width:100%;">
-                        </div>
-                        <input type="submit" value="Rejoindre">
+                <div class="box-item">
+                    <div class="mb-2">
+                        <div class="box-title">Nom du salon</div>
+                        <input type="text" id="chatname" maxlength="12" style="width:100%;">
                     </div>
+                    <div class="mb-2">
+                        <div class="box-title">Mot de passe</div>
+                        <input type="password" id="chatpassword" maxlength="16" style="width:100%;">
+                    </div>
+                    <input type="submit" value="Rejoindre">
                 </div>
             </div>
         </form>
     </div>
     <div class="col-12 col-md-6">
-        <div id="publicchats">
+        <div id="publicchats"></div>
     </div>
 </div>
 

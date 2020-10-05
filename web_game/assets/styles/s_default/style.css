@@ -323,7 +323,7 @@ ul.htabs li.selected a { color:#fff; }
 #chat { flex-basis:0; flex-grow:1; max-width:100%; overflow:auto; }
 #chat .highlight { color:#1dd1d3; }
 #chat .player { color:#fff!important; }
-#chat .newday { text-align:center; font-weight:bold; color:#fff; margin-top:5px; }
+#chat .newday { text-align:center; font-weight:bold; color:#fff; margin:.5rem 0; }
 #chat .smiley { vertical-align:-3px; }
 
 #joinchatform { display:none; visibility:hidden; }

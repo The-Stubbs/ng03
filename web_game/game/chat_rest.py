@@ -61,9 +61,10 @@ class View(GlobalView):
             lastmsgid = request.session.get("lastchatmsg_" + str(chatid), "")
             if lastmsgid == "": lastmsgid = 0
 
-            query = " SELECT chat_lines.id, datetime, allianceid, login, message" + \
+            query = " SELECT chat_lines.id, datetime, allianceid, login, message, alliances.tag" + \
                     " FROM chat_lines" + \
-                    " WHERE chatid=" + str(chatid) + " AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid="+ str(chatid) +" ORDER BY datetime DESC OFFSET 100 LIMIT 1), " + str(lastmsgid) + ")" + \
+                    "   LEFT JOIN alliances ON alliances.id=allianceid" + \
+                    " WHERE chat_lines.chatid=" + str(chatid) + " AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid="+ str(chatid) +" ORDER BY datetime DESC OFFSET 100 LIMIT 1), " + str(lastmsgid) + ")" + \
                     " ORDER BY chat_lines.id"
             oRss = oConnExecuteAll(query)
             if oRss:
@@ -79,16 +80,17 @@ class View(GlobalView):
                     item["datetime"] = oRs[1]
                     item["author"] = oRs[3]
                     item["line"] = oRs[4]
-                    item["alliancetag"] = getAllianceTag(oRs[2])
+                    if oRs[5]: item["alliancetag"] = oRs[5]
                     
                     request.session["lastchatmsg_" + str(chatid)] = oRs[0]
 
             connExecuteRetryNoRecords("INSERT INTO chat_onlineusers(chatid, userid) VALUES(" + str(chatid) + "," + str(self.UserId) + ")")
 
-            query = " SELECT users.alliance_id, users.login, date_part('epoch', now()-chat_onlineusers.lastactivity)" + \
+            query = " SELECT users.alliance_id, users.login, date_part('epoch', now()-chat_onlineusers.lastactivity), alliances.tag" + \
                     " FROM chat_onlineusers" + \
                     "   INNER JOIN users ON (users.id=chat_onlineusers.userid)" + \
-                    " WHERE chat_onlineusers.lastactivity > now()-INTERVAL '10 minutes' AND chatid=" + str(chatid)
+                    "   LEFT JOIN alliances ON alliances.id=users.alliance_id" + \
+                    " WHERE chat_onlineusers.lastactivity > now()-INTERVAL '10 minutes' AND chat_onlineusers.chatid=" + str(chatid)
             oRss = oConnExecuteAll(query)
 
             list = []
@@ -99,7 +101,7 @@ class View(GlobalView):
                 item = {}
                 list.append(item)
                 
-                item["alliancetag"] = getAllianceTag(oRs[0])
+                if oRs[3]: item["alliancetag"] = oRs[3]
                 item["user"] = oRs[1]
                 item["lastactivity"] = oRs[2]
 

@@ -30,15 +30,15 @@ class View(GlobalView):
 
         if self.AllianceId:
         
-            id = request.session.get("alliancechat_" + str(self.AllianceId), "")
-            if id == "":
+            chatid = request.session.get("alliancechat_" + str(self.AllianceId), "")
+            if chatid == "":
             
                 query = "SELECT chatid FROM alliances WHERE id=" + str(self.AllianceId)
                 oRs = oConnExecute(query)
                 if oRs:
                 
                     request.session["alliancechat_" + str(self.AllianceId)] = oRs[0]
-                    id = oRs[0]
+                    chatid = oRs[0]
                     
             request.session["lastchatmsg_" + str(chatid)] = ""
 
@@ -59,10 +59,10 @@ class View(GlobalView):
         
             for oRs in oRss:
             
-                if request.session.get("chat_joined_" + str(chatid)) != "1":
+                if request.session.get("chat_joined_" + str(oRs[0])) != "1":
                 
                     request.session["chat_joined_count"] = ToInt(request.session.get("chat_joined_count"), 0) + 1
-                    request.session["chat_joined_" + str(chatid)] = "1"
+                    request.session["chat_joined_" + str(oRs[0])] = "1"
                 
                 item = {}
                 list.append(item)
