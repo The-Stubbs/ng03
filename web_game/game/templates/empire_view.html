@@ -132,20 +132,19 @@
             <div class="box-item">
                 <div class="text-nowrap mb-1">
                 	{% if fleet.relation == 2 %}
-                	    <a href="/game/fleet/?id={{fleet.id}}" class="badge self mr-2" data-toggle="tooltip" title="Aperçu flotte">
+                	    <a href="/game/fleet/?id={{fleet.id}}" class="badge self" data-toggle="tooltip" title="Aperçu flotte">
                 	        <i class="fas fa-plane"></i>
                 	        {{fleet.name}}
                 	    </a>
                 	{% else %}
-                	    <a href="/game/nation/?name={{fleet.name}}" class="mr-2 {% if fleet.relation == -1 %}enemy{% elif fleet.relation == 0 %}friend{% elif fleet.relation == 1 %}ally{% endif %}" class="badge self" data-toggle="tooltip" title="Aperçu joueur"><i class="fas fa-user"></i> {{fleet.name}}</a>
+                	    <a href="/game/nation/?name={{fleet.name}}" class="{% if fleet.relation == -1 %}enemy{% elif fleet.relation == 0 %}friend{% elif fleet.relation == 1 %}ally{% endif %}" class="badge self" data-toggle="tooltip" title="Aperçu joueur"><i class="fas fa-user"></i> {{fleet.name}}</a>
                 	{% endif %}
+            	    {% if fleet.stance %}<small data-toggle="tooltip" title="Signature mode attaque">{{'attack'|icon}}</small>
+            	    {% else %}<small data-toggle="tooltip" title="Signature mode riposte">{{'defense'|icon}}</small>
+            	    {% endif %}
+            	    <small>{{fleet.signature|intcomma}}</small>
             	</div>
                 <div class="text-right text-nowrap">
-            	    {% if fleet.stance %}<span data-toggle="tooltip" title="Mode attaque">{{'attack'|icon}}</span>
-            	    {% else %}<span data-toggle="tooltip" title="Mode riposte">{{'defense'|icon}}</span>
-            	    {% endif %}
-            	    <span>{{fleet.signature|intcomma}}</span>
-                	&middot;
                 	{% if fleet.planet %}<script>putplanet("{{fleet.planet.id}}", "{{fleet.planet.name}}", "{{fleet.planet.g}}", "{{fleet.planet.s}}", "{{fleet.planet.p}}", {{fleet.planet.relation}});</script>
                 	{% else %}<small>inconnue</small>{% endif %}
                 	<i class="fas fa-long-arrow-alt-right"></i>

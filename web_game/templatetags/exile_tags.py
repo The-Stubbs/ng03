@@ -14,7 +14,7 @@ def icon(value):
     elif value == 'worker': return mark_safe('<i class="fas fa-wrench fa-fw" style="color:#94a5ad;"></i>')
     elif value == 'scientist': return mark_safe('<i class="fas fa-flask fa-fw" style="color:#42b54a;"></i>')
     elif value == 'soldier': return mark_safe('<i class="fas fa-user-ninja fa-fw" style="color:#f70000;"></i>')
-    elif value == 'attack': return mark_safe('<i class="fas fa-exclamation fa-fw" style="color:#d6c642;"></i>')
+    elif value == 'attack': return mark_safe('<i class="fas fa-exclamation-circle fa-fw" style="color:#ffe82d;"></i>')
     elif value == 'defense': return mark_safe('<i class="fas fa-shield-alt fa-fw" style="color:#3173bd;"></i>')
     elif value == 'energy': return mark_safe('<i class="fas fa-bolt fa-fw" style="color:#f7f763;"></i>')
     elif value == 'floor': return mark_safe('<i class="fas fa-th fa-fw" style="color:#bd845a;"></i>')

@@ -1,23 +1,20 @@
 {% extends '_layout.html' %}
+
 {% load humanize %}
+{% load exile_tags %}
+
 {% block content %}
-{% if master %}
+
 <script type="text/javascript" src='/scripts/third-party/tooltip.js?v=1'></script>
+<script>tipname = "hint"; tipwidth = 250; tiptext = $("hinttext");</script>
+
 <script>
-tipname = "hint";
-tipwidth = 250;
-tiptext = $("hinttext");
-</script>
-
-<script type="text/javascript">
-/* <![CDATA[ */
-
 var resources = [];
-resources[1] = { image:'ore', label:'Minerai' };
-resources[2] = { image:'hydrocarbon', label:'Hydrocarbure' };
-resources[3] = { image:'scientists', label:'Scientifiques' };
-resources[4] = { image:'soldiers', label:'Soldats' };
-resources[5] = { image:'workers', label:'Travailleurs' };
+resources[1] = { image:"<i class='fas fa-cubes fa-fw' style='color:#7b94a5!important;'></i>", label:'Minerai' };
+resources[2] = { image:"<i class='fas fa-tint fa-fw' style='color:#c35ff5!important;'></i>", label:'Hydro' };
+resources[3] = { image:"<i class='fas fa-flask fa-fw' style='color:#42b54a!important;'></i>", label:'Scientifiques' };
+resources[4] = { image:"<i class='fas fa-user-ninja fa-fw' style='color:#f70000!important;'></i>", label:'Soldats' };
+resources[5] = { image:"<i class='fas fa-wrench fa-fw' style='color:#94a5ad!important;'></i>", label:'Ouvriers' };
 
 var categories = [];
 var activeCategory = 0;
@@ -28,11 +25,13 @@ var sortReversed = false;
 var lastUpdate = null;
 
 function Category(id, name) {
+    
 	this.id = id;
 	this.name = name;
 }
 
 function Planet(id, name, relation, g, s, p) {
+    
 	this.id = id;
 	this.name = name;
 	this.relation = relation;
@@ -40,25 +39,27 @@ function Planet(id, name, relation, g, s, p) {
 	this.s = s;
 	this.p = p;
 
-	this.toString = function(){
-		if(this.id != 0)
-			return planet_str(this.id,this.name,this.g,this.s,this.p,this.relation);
-		else
-			return 'Indéterminé';
+	this.toString = function() {
+	    
+		if (this.id != 0) return planet_str(this.id,this.name,this.g,this.s,this.p,this.relation);
+		else return 'Indéterminé';
 	}
 }
 
 function Resource(id, quantity) {
+    
 	this.id = id;
 	this.quantity = quantity;
 }
 
 function Ship(id, quantity) {
+    
 	this.id = id;
 	this.quantity = quantity;
 }
 
 function Fleet(id, name, category, stance, size, signature, cargoload, cargocapacity, action, timeremaining, commandername, position, destination, ships, resources) {
+    
 	this.id = id;
 	this.name = name;
 	this.category = category;
@@ -75,22 +76,20 @@ function Fleet(id, name, category, stance, size, signature, cargoload, cargocapa
 	this.ships = ships;
 	this.resources = resources;
 
-	this.remainingTime = function(){
-		return Math.max(0, Math.ceil((this.endtime - new Date().getTime())/1000));
+	this.remainingTime = function() {
+		return Math.max(0, Math.ceil((this.endtime - new Date().getTime()) / 1000));
 	}
 }
 
-// description when hovering
 function dShipList(id) {
-	for(var x in currentList){
+    
+	for (var x in currentList){
 		var fleet = currentList[x];
-		if(fleet.id == id){
-			var s = '<table width="100%" style="margin:0px 5px">';
-
-			for(var i=1;i<fleet.ships.length;i++)
-				s+= '<tr><td width="1%" nowrap align="right">' + fleet.ships[i].id + '</td><td align="left">&nbsp;x&nbsp;' + fleet.ships[i].quantity + '</td></tr>';
-
-			return s + '</table>';
+		if (fleet.id == id) {
+			var s = "<div class='box-title'>vaisseaux</div>";
+			for (var i = 1; i < fleet.ships.length; i++)
+				s += "<div class='text-nowrap'>" + fleet.ships[i].id + "<small class='ml-2 c-highlight'>x" + fleet.ships[i].quantity.n() + "</small></div>";
+			return s;
 		}
 	}
 
@@ -98,230 +97,248 @@ function dShipList(id) {
 }
 
 function dCargo(id) {
-	for(var x in currentList){
+    
+	for (var x in currentList) {
 		var fleet = currentList[x];
-		if(fleet.id == id){
-			var s = '<table width="100%">';
-			for(var i=1;i<fleet.resources.length;i++){
+		if (fleet.id == id) {
+			var s = "<div class='box-title'>cargaison</div>";
+			for (var i = 1; i < fleet.resources.length; i++) {
 				var res = fleet.resources[i];
-				s+='<tr><td width="1%" nowrap><img src="{{PATH_IMAGES}}/interface/' + resources[res.id].image + '.gif" width="16" height="16" class="res">' + resources[res.id].label + '</td><td width="1%" align="right" nowrap class="grey">' + res.quantity.n() + '</td></tr>';
+				if (res.quantity > 0) s += "<div class='text-nowrap'>" + resources[res.id].image + " " + resources[res.id].label + "<small class='ml-2 c-highlight'>" + res.quantity.n() + "</small></div>";
 			}
-			return s + '</table>';
+			return s;
 		}
 	}
 
 	return '';
 }
 
-
 function $fleet(id) {
-	for(var x in fleetList)
-		if(fleetList[x].id == id)
+    
+	for (var x in fleetList)
+		if (fleetList[x].id == id)
 			return fleetList[x];
 }
 
-function setFleetCategory(id,oldCategory,newCategory) {
-	for(var x in fleetList){
+function setFleetCategory(id, oldCategory, newCategory) {
+    
+	for (var x in fleetList) {
+	    
 		var fleet = fleetList[x];
-		if(fleet.id == id){
-			if(fleet.category == oldCategory) fleet.category = newCategory;
-
-			// update fleet list
-			if(activeCategory != 0)	displayCategory(activeCategory);
-
+		if (fleet.id == id) {
+		    
+			if (fleet.category == oldCategory) fleet.category = newCategory;
+			if (activeCategory != 0) displayCategory(activeCategory);
 			return;
 		}
 	}
 }
 
-// sort functions
-function sortName(a,b) {
+function sortName(a, b) {
+    
 	var x = a.name.toUpperCase();
 	var y = b.name.toUpperCase();
 
-	if(x < y) return -1;
-	if(x > y) return 1;
+	if (x < y) return -1;
+	if (x > y) return 1;
 
 	return a.id - b.id;
 }
 
-function sortSize(a,b) {
-	if(a.size < b.size) return -1;
-	if(a.size > b.size) return 1;
-	return sortName(a,b);
+function sortSize(a, b) {
+    
+	if (a.size < b.size) return -1;
+	if (a.size > b.size) return 1;
+	
+	return sortName(a, b);
 }
 
-function sortSignature(a,b) {
-	if(a.signature < b.signature) return -1;
-	if(a.signature > b.signature) return 1;
-	return sortName(a,b);
+function sortSignature(a, b) {
+    
+	if (a.signature < b.signature) return -1;
+	if (a.signature > b.signature) return 1;
+	
+	return sortName(a, b);
 }
 
-function sortCargo(a,b) {
-	if(a.cargoload < b.cargoload) return -1;
-	if(a.cargoload > b.cargoload) return 1;
-	return sortName(a,b);
+function sortCargo(a, b) {
+    
+	if (a.cargoload < b.cargoload) return -1;
+	if (a.cargoload > b.cargoload) return 1;
+	
+	return sortName(a, b);
 }
 
-function sortPosition(a,b) {
-	if(a.position.id < b.position.id) return -1;
-	if(a.position.id > b.position.id) return 1;
-	return sortName(a,b);
+function sortPosition(a, b) {
+    
+	if (a.position.id < b.position.id) return -1;
+	if (a.position.id > b.position.id) return 1;
+	
+	return sortName(a, b);
 }
 
-function sortAction(a,b) {
-	if(a.action < b.action) return -1;
-	if(a.action > b.action) return 1;
+function sortAction(a, b) {
+    
+	if (a.action < b.action) return -1;
+	if (a.action > b.action) return 1;
 
-	if(a.endtime < b.endtime) return -1;
-	if(a.endtime > b.endtime) return 1;
+	if (a.endtime < b.endtime) return -1;
+	if (a.endtime > b.endtime) return 1;
 
-	return sortName(a,b);
+	return sortName(a, b);
 }
 
-function sortCommander(a,b) {
+function sortCommander(a, b) {
+    
 	var x = a.commandername.toUpperCase();
 	var y = b.commandername.toUpperCase();
-	if(x < y) return -1;
-	if(x > y) return 1;
-	return sortName(a,b);
+	
+	if (x < y) return -1;
+	if (x > y) return 1;
+	
+	return sortName(a, b);
 }
 
 function sortList(list) {
-	switch(sortColumn){
-		case 0:	// name
+    
+	switch (sortColumn) {
+	    
+		case 0:
 			list.sort(sortName);
-		break;
-		case 1: // size
+		    break;
+		    
+		case 1:
 			list.sort(sortSize);
-		break;
-		case 2: // signature
+		    break;
+		    
+		case 2:
 			list.sort(sortSignature);
-		break;
-		case 3: // cargo load
+		    break;
+		    
+		case 3:
 			list.sort(sortCargo);
-		break;
-		case 4: // position
+		    break;
+		    
+		case 4:
 			list.sort(sortPosition);
-		break;
-		case 5: // action
+		    break;
+		    
+		case 5:
 			list.sort(sortAction);
-		break;
-		case 6: // action
+		    break;
+		    
+		case 6:
 			list.sort(sortCommander);
-		break;
+		    break;
 	}
 
-	if(sortReversed) list.reverse();
+	if (sortReversed) list.reverse();
 }
 
 function sortBy(column) {
-	if(sortColumn != column){
+    
+	if (sortColumn != column) {
 		sortColumn = column;
 		sortReversed = false;
 	}
-	else
-		sortReversed = !sortReversed;
+	else sortReversed = !sortReversed;
 
 	sortList(currentList);
-
 	displayFleetList(currentList);
 
 	return false;
 }
 
 function column(id, name) {
-	var arrow='none';
-	if(sortColumn == id) arrow = (sortReversed?'down':'up');
-	return '<div class="col-4 col-md text-nowrap mb-1 text-center"><a href="#" onclick="return sortBy(' + id + ')">' + name +'</a>&nbsp;<img src="{{PATH_IMAGES}}/interface/arrow' + arrow + '.gif" /></div>';
+    
+	var arrow = 'none';
+	if (sortColumn == id) arrow = (sortReversed ? 'down' : 'up');
+	return '<div class="col-4 col-md text-nowrap text-center"><a href="#" onclick="return sortBy(' + id + ')">' + name +' <i class="fas fa-fw fa-caret-' + arrow + '"></i></a></div>';
 }
 
-// when a countdown finishes, make the list be refreshed on next tab change
-function counterFinished(c){ lastUpdate = null; }
+function counterFinished(c) { lastUpdate = null; }
 
 function displayFleetList(list) {
+    
 	var ships = 0;
 	var signature = 0;
 	var cargoload = 0;
 	var s = '';
 	
-	s += '<div class="mb-2">' +
+	s += '<div class="sorting my-4">' +
 	     '  <div class="row">' +
 	     '      ' + column(0,'Nom') + column(1,'Vaisseaux') + column(2,'Signature') + column(3,'Cargaison') + column(4,'Position') + column(5,'Action') + column(6,'Commandant') +
     	 '  </div>' +
-	     '</div>' +
-	     '<hr/>';
+	     '</div>';
 	
 	s += '<div class="row">';
-	for(var i=0;i<list.length;i++){
+	for (var i = 0; i < list.length; i++) {
 		var fleet = list[i];
 
 		ships += fleet.size;
 		signature += fleet.signature;
 		cargoload += fleet.cargoload;
 
-		var z = '<div class="col-12 col-md-6"><div class="box mb-2"><div class="box-line"><div class="box-item">';
+		var z = '<div class="col-12 col-md-6"><div class="box"><div class="box-item">';
 		
 		z += '<div class="mb-1">';
-		if (fleet.stance == 1) z+= '<img src="{{PATH_IMAGES}}/interface/stance_attack.gif" class="stance" alt="Attaque" width="10" height="10">';
-		else z+= '<img src="{{PATH_IMAGES}}/interface/stance_defend.gif" class="stance" alt="Riposte" width="10" height="10">';
-		z+= '<a href="/game/fleet/?planet=' + fleet.position.id + '&id=' + fleet.id + '" id="fleet' + fleet.id + '" onmouseover="ddrivetip(dShipList(' + fleet.id + '))" onmouseout="hideddrivetip()" nowrap>' + fleet.name + '</a>';
-		z+= '</div>';
+		    z += '<a href="/game/fleet_view/?planet=' + fleet.position.id + '&id=' + fleet.id + '" class="badge mr-2" id="fleet' + fleet.id + '" data-toggle="tooltip" title="Aperçu flotte"><i class="fas fa-plane"></i>' + fleet.name + '</a>';
+		    z += ' <small class="mr-2">';
+		    if (fleet.stance == 1) z += '<span data-toggle="tooltip" title="Signature mode attaque">{{"attack"|icon}}</span> ';
+		    else z += '<span data-toggle="tooltip" title="Signature mode riposte">{{"defense"|icon}}</span> ';
+		    z += fleet.signature.n() + '</small>';
+		    z += ' <small class="mr-2"><i class="fas fa-fw fa-paper-plane" data-toggle="tooltip" data-html="true" title="' + dShipList(fleet.id) + '"></i> ' + fleet.size.n() + '</small>';
+		    if (fleet.cargoload > 0) z += ' <small class="mr-2"><i class="fas fa-fw fa-battery-half" data-toggle="tooltip" data-html="true" title="' + dCargo(fleet.id) + '"></i> <span class="c-highlight">' + fleet.cargoload.n() + '</span> /' + fleet.cargocapacity.n() + '</small>';
+		    else z += ' <small class="mr-2"><i class="fas fa-fw fa-battery-half" data-toggle="tooltip" data-html="true" title="Cargaison"></i> <span class="c-highlight">' + fleet.cargoload.n() + '</span> /' + fleet.cargocapacity.n() + '</small>';
+		    z += '</small>';
+		z += '</div>';
 
-		z += '<div class="text-right mb-2">';
+	    if (fleet.commandername != '' && fleet.commandername != 'None') z += '<div class="mb-1"><a href="/game/commanders/#' + escape(fleet.commandername) + '" class="small badge"><i class="fas fa-certificate"></i> ' + fleet.commandername + '</a></div>';
+	    
+		z += '<div class="text-right">';
 		switch (fleet.action) {
 		    
 			case '0':
 				z+= '<span class="c-highlight">En patrouille </span>';
-				z+= '<small>près de</small> ';
+				z+= '&middot; ';
                 z+= fleet.position;
                 break;
     			
 			case '1':
 				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="/game/fleets/?id=' + fleet.id + '">Arrivé</a>', counterFinished);
-				z+= '<span class="state_moving">En transit </span>';
-				z+= '<small>de</small>';
+				z+= '<span class="c-highlight">En transit </span>';
+				z+= '&middot;';
                 z+= '<span> ' + fleet.position + '</span>';
-				z+= ' <small>vers</small> ';
+				z+= ' <i class="fas fa-long-arrow-alt-right"></i> ';
 				z+= fleet.destination + ' &middot; ' + c;
 			    break;
 			    
 			case '2':
 				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="/game/fleets/?id=' + fleet.id + '">Cycle terminé</a>', counterFinished);
-				z+= '<span class="state_recycling">En recyclage</span> ';
-				z+= '<small>près de</small> ';
+				z+= '<span class="c-success">En recyclage</span> ';
+				z+= '&middot; ';
                 z+= fleet.position;
 				z+= ' &middot; ' + c;
 			break;
 			
 			case '4':
 				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="/game/fleets/?id=' + fleet.id + '">Terminé</a>', counterFinished);
-				z+= '<span class="state_waiting">En attente</span> ';
-				z+= '<small>près de</small> ';
+				z+= '<span class="c-highlight">En attente</span> ';
+				z+= '&middot; ';
                 z+= fleet.position;
 				z+= ' &middot; ' + c;
 			break;
 			
 			case 'x':
-				z+= '<span class="state_fighting">En combat</span>';
-				z+= '<small>près de</small> ';
+				z+= '<span class="c-danger">En combat</span>';
+				z+= '&middot; ';
                 z+= fleet.position;
 			break;
 		}
 		z += '</div>';
+		z += '</div></div></div>';
 
-		z+= '<div class="row">';
-		z+= '<div class="col"><div class="small">taille</div> <span class="c-highlight">' + fleet.size.n() + '</span></div>';
-		z+= '<div class="col"><div class="small">signature</div> <span class="c-highlight">' + fleet.signature.n() + '</span></div>';
-		z+= '<div class="col text-nowrap"><div class="small">soute</div> <span class="c-highlight" ' + (fleet.cargoload > 0?'onmouseover="ddrivetip(dCargo(' + fleet.id + '))"':'')+ 'onmouseout="hideddrivetip()" nowrap>' + fleet.cargoload.n() + '</span> <small>/' + fleet.cargocapacity.n() + '</small></div>';
-		z+= '<div class="col text-nowrap"><div class="small">commandant</div> <img src="{{PATH_IMAGES}}/interface/commander.gif" width="10" height="6" class="smallicon" title="Commandant">';
-		if (fleet.commandername != '' && fleet.commandername != 'None') z+= '<a href="/game/commanders/#'+escape(fleet.commandername)+'">' + fleet.commandername + '</a>';
-		else z+= '-';
-		z+= '</div>';
-		
-		z+= '</div></div></div></div></div>';
-
-		s+= z;
+		s += z;
 	}
     
     s+= '</div>';
@@ -329,28 +346,31 @@ function displayFleetList(list) {
     
 	s+= '<div class="row">' +
 	    '   <div class="col text-center"><div class="small">total flotte</div><span class="c-highlight">' + list.length.n() + '</span></div>' +
-	    '   <div class="col text-center"><div class="small">total taille</div><span class="c-highlight">' + ships.n() + '</span></div>' +
+	    '   <div class="col text-center"><div class="small">total vaisseaux</div><span class="c-highlight">' + ships.n() + '</span></div>' +
 	    '   <div class="col text-center"><div class="small">total signature</div><span class="c-highlight">' + signature.n() + '</span></div>' +
-	    '   <div class="col text-center"><div class="small">total soute</div><span class="c-highlight">' + cargoload.n() + '</span></div>' +
+	    '   <div class="col text-center"><div class="small">total cargaison</div><span class="c-highlight">' + cargoload.n() + '</span></div>' +
 		'</div>';
 		
 	$('fleet_list').innerHTML = s;
 
-	for(var i=0;i<list.length;i++) makeDraggable($('fleet'+list[i].id), list[i].id);
+	for (var i = 0; i < list.length; i++)
+	    makeDraggable($('fleet' + list[i].id), list[i].id);
+
+    j("[data-toggle='tooltip']").tooltip({container: 'body'});
 }
 
 function retrieveFleetListResponse(req) {
+    
 	try {
 		lastUpdate = new Date();
-
-		if(req.status=="200")
-			eval(req.responseText);
+		if (req.status == "200") eval(req.responseText);
 	} catch (e)	{
-		window.location.reload(true);
+		console.log(e);
 	}
 }
 
 function displayCategory(category) {
+    
 	setCategory(category);
 
 	var obj = $('fleet_list');
@@ -362,112 +382,110 @@ function displayCategory(category) {
 	obj.style.visibility = 'hidden';
 	obj.style.display = 'none';
 
-	if(lastUpdate == null || new Date().getTime() - lastUpdate > 20000){
-		var url = "/game/fleets_handler/?a=list";
-
+	if (lastUpdate == null || new Date().getTime() - lastUpdate > 20000) {
+	    
+		var url = "/game/fleets_rest/?a=list";
 		openURL(url, retrieveFleetListResponse);
-
 		return false;
 	}
 
-	if(category == -1){
+	if (category == -1) {
+	    
 		currentList = [];
-		for(var x in fleetList)
-			if(fleetList[x].category <= 0 || categories[fleetList[x].category] == null)
+		for (var x in fleetList)
+			if (fleetList[x].category <= 0 || categories[fleetList[x].category] == null)
 				currentList.push(fleetList[x]);
 	}
-	else
-	if(category == 0)
+	
+	else if (category == 0)
 		currentList = fleetList;
-	else{
+		
+	else {
 		currentList = [];
-		for(var x in fleetList)
-			if(fleetList[x].category == category)
+		for (var x in fleetList)
+			if (fleetList[x].category == category)
 				currentList.push(fleetList[x]);
 	}
 
 	sortList(currentList);
-
 	displayFleetList(currentList);
 
 	return false;
 }
 
-// drag/drop functions
-
 var dragObject = null;
 var dropCategory = null;
 
 function makeDraggable(item, fleetid) {
-	if(!item) return;
-	item.onmousedown = function(ev){
+    
+	if (!item) return;
+	
+	item.onmousedown = function(ev) {
+	    
 		dropCategory = null;
 		dragObject = $fleet(fleetid);
-		{% if t %}//quand la sourie bouge faire apparaitre le tooltip (la function du	tooltip fait deja tout le travail pour nous :-){% endif %}
-		document.onmousemove = function(e){
-			positiontip(e);
-		}
-		{% if t %}// enlever le onmouseout function comme sa on est sur que le tooltip reste coller au pointer{% endif %}
-		item.onmouseout = function(){
-		}
-		{% if t %}//quand la sourie et depresser hide le tooltip et remetre la function sur le onmouseout event{% endif %}
-		document.onmouseup = function(){
+		
+		document.onmousemove = function(e) { positiontip(e); }
+		
+		item.onmouseout = function() { }
+		
+		document.onmouseup = function() {
+		    
 			hideddrivetip();
-			item.onmouseout = function(){hideddrivetip()};
+			item.onmouseout = function() { hideddrivetip(); }
 		}
+		
 		ev.cancelBubble = true;
 		return false;
 	}
 }
 
-
-function startDrag(item, ev){
+function startDrag(item, ev) {
+    
 	dragObject = item;
 	ev.cancelBubble = true;
 	return false;
 }
 
-function dropTest(id, b){
-	if(dragObject != null && b)
-		dropCategory = id;
-	else
-		dropCategory = null;
+function dropTest(id, b) {
+    
+	if (dragObject != null && b) dropCategory = id;
+	else dropCategory = null;
 }
 
-function mouseDown(){
-	dropCategory = null;
-}
+function mouseDown() { dropCategory = null; }
 
-function mouseUp(){
-	if(dragObject != null && dropCategory != null){
-		var url = "/game/fleets_handler/?a=setcat&id=" + dragObject.id + "&old=" + dragObject.category + "&new=" + dropCategory;
-
+function mouseUp() {
+	
+	if (dragObject != null && dropCategory != null) {
+	    
+		var url = "/game/fleets_rest/?a=setcat&id=" + dragObject.id + "&old=" + dragObject.category + "&new=" + dropCategory;
 		openURL(url, evalResponse);
 	}
+	
 	dragObject = null;
 	dropCategory = null;
 }
 
-// category functions
-
-function $tab(id){
-	if(id == null)
-		return $('newtab');
-	else
-		return $('tab'+id);
+function $tab(id) {
+    
+	if (id == null) return $('newtab');
+	else return $('tab' + id);
 }
 
-function setCategory(id){
+function setCategory(id) {
+    
 	var tab = $tab(activeCategory);
-	if(tab != null) tab.className = "";
+	if (tab != null) tab.className = "";
 	
 	tab = $tab(id);
-	if(tab != null) tab.className = "selected";
+	if (tab != null) tab.className = "selected";
 
 	activeCategory = id;
 }
 
-function showNewCategoryForm(){
+function showNewCategoryForm() {
+    
 	setCategory(null);
 
 	var obj = $('fleet_list');
@@ -481,36 +499,34 @@ function showNewCategoryForm(){
 	$('categoryname').focus();
 }
 
-// add, category
-function addCategory(id, name){
+function addCategory(id, name) {
+
 	var newtab = $tab(null);
 	var tab = $tab(id);
 
-	// remove category
-	if(tab != null && name == ''){
+	if (tab != null && name == '') {
 		$('fleets_categories').removeChild(tab);
 		categories[id] == null;
 		return;
 	}
 
-	// add category if not found
-	if(tab == null){
+	if (tab == null){
 		tab = document.createElement('li');
 		tab.id = 'tab'+id;
 		$('fleets_categories').insertBefore(tab, newtab);
 	}
 
-	tab.innerHTML = '<a href="" onclick="displayCategory('+id+'); return false;" ondblclick="editCategory(' + id + ')" onmouseover="dropTest('+id+',true)" onmouseout="dropTest('+id+',false)" onmousedown="mouseDown()" onmouseup="mouseUp()">' + name + '</a>';
+	tab.innerHTML = '<a href="" onclick="displayCategory(' + id + '); return false;" ondblclick="editCategory(' + id + ')" onmouseover="dropTest(' + id + ',true)" onmouseout="dropTest(' + id + ',false)" onmousedown="mouseDown()" onmouseup="mouseUp()">' + name + '</a>';
 	categories[id] = new Category(id, name);
 }
 
-// replace tab content with an input box to edit category name
-function editCategory(id){
-	if(id <= 0) return false;
+function editCategory(id) {
+
+	if (id <= 0) return false;
 
 	var tab = $tab(id);
 
-	if(categories[id].editing){
+	if (categories[id].editing){
 		categories[id].editing = false;
 		tab.innerHTML = categories[id].old;
 		return false;
@@ -524,97 +540,82 @@ function editCategory(id){
 	$('editcat' + id).focus();
 }
 
-var creatingCategory = false;
-
-function createCategoryResponse(req){
-	creatingCategory = false;
-
+function createCategoryResponse(req) {
+    
 	try {
-		if(req.status=="200")
-			eval(req.responseText);
+		if (req.status == "200") eval(req.responseText);
 	} catch (e)	{
-		window.location.reload(true);
+		console.log(e);
 	}
 }
 
-function createCategory(){
+function createCategory() {
+    
 	var name = $('categoryname').value;
-	var url = "/game/fleets_handler/?a=newcat&name=" + encodeURIComponent(name);
+	var url = "/game/fleets_rest/?a=newcat&name=" + encodeURIComponent(name);
 
-	for(var x in categories)
-		if(categories[x] && categories[x].id != null && (categories[x].name.toLowerCase() == name.toLowerCase())) {
+	for (var x in categories)
+		if (categories[x] && categories[x].id != null && (categories[x].name.toLowerCase() == name.toLowerCase())) {
 			alert('Une catégorie avec ce nom existe déjà.');
 			return;
 		}
 
-	creatingCategory = true;
 	openURL(url, createCategoryResponse);
-
 	return false;
 }
 
-function renameCategory(id){
-	var name = $('editcat'+id).value;
-	var url = '/game/fleets_handler/?a=rencat&id=' + id + '&name=' + encodeURIComponent(name);
+function renameCategory(id) {
+    
+	var name = $('editcat' + id).value;
+	var url = '/game/fleets_rest/?a=rencat&id=' + id + '&name=' + encodeURIComponent(name);
 
-	for(var x in categories)
-		if(categories[x] && x!=id && categories[x].id != null && (categories[x].name.toLowerCase() == name.toLowerCase())) {
+	for (var x in categories)
+		if (categories[x] && x != id && categories[x].id != null && (categories[x].name.toLowerCase() == name.toLowerCase())) {
 			alert('Une catégorie avec ce nom existe déjà.');
 			return;
 		}
 
-	creatingCategory = true;
 	openURL(url, createCategoryResponse);
-
 	return false;
 }
-/*  %}> */
 </script>
 
-<div id="fleets">
-<div>
 <ul class="htabs" id="fleets_categories">
 	<li id="newtab"><a href="#" onClick="showNewCategoryForm(); return false;"><i class="fas fa-plus"></i></a></li>
 </ul>
-</div>
 
-<div id="fleet_list">
-
-</div>
+<div id="fleet_list"></div>
 
 <div id="createcategoryform">
-<form action="#" method="get" onsubmit="return createCategory();">
-    <h1>Créer une nouvelle catégorie</h1>
-    <div class="box">
-        <div class="box-line">
-            <div class="box-item">
-                <input type="text" id="categoryname" maxlength="32">
-                <input type="submit" value="Créer">
+    <form action="#" method="get" onsubmit="return createCategory();">
+        <h1>Créer une nouvelle catégorie</h1>
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="box">
+                    <div class="box-item">
+                        <div class="row mb-2">
+                            <div class="col"><input type="text" id="categoryname" maxlength="32" style="width:100%;"></div>
+                            <div class="col-auto"><input type="submit" value="Créer"></div>
+                        </div>
+                        <div class="mb-2">Une fois la catégorie créée, vous pouvez glisser/déposer les flottes vers les onglets de la page pour changer leurs catégories.</div>
+                        <div class="mb-2">Pour renommer une catégorie, double-cliquez sur l'onglet.</div>
+                        <div>Pour supprimer une catégorie, double-cliquez sur l'onglet et spécifiez un nouveau nom vide.</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="box-line">
-            <div class="box-item">
-                <div>Une fois la catégorie créée, vous pouvez glisser/déposer les flottes vers les onglets de la page pour changer leurs catégories.</div>
-                <div>Pour renommer une catégorie, double cliquez sur l'onglet.</div>
-                <div>Pour supprimer une catégorie, double cliquez sur l'onglet et spécifiez un nouveau nom vide.</div>
-            </div>
-        </div>
-    </div>
-</form>
+    </form>
 </div>
 
-</div>
+<script>
+    addCategory(-1, 'Sans catégorie');
+    addCategory(0, 'Tout');
 
-<script type="text/javascript">
-/* <![CDATA[ */
-addCategory(-1, 'Sans catégorie');
-addCategory(0, 'Tout');
-{% for category in categories %}
-addCategory({{category.id}}, '{{category.label}}');
-{% endfor %}
-{{list}}
-displayCategory(activeCategory);
-/*  %}> */
+    {% for category in categories %}
+        addCategory({{category.id}}, '{{category.label}}');
+    {% endfor %}
+    
+    displayCategory(0);
 </script>
-{% endif %}
+
 {% endblock %}

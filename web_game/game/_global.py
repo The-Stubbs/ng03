@@ -222,7 +222,7 @@ class GlobalView(LoginRequiredMixin, MaintenanceMixin, View):
     
         tpl_header.AssignValue("planets", planets)
     
-        query = "SELECT buildingid" +\
+        query = "SELECT buildingid, db_buildings.label" +\
                 " FROM planet_buildings INNER JOIN db_buildings ON (db_buildings.id=buildingid AND db_buildings.is_planet_element)" +\
                 " WHERE planetid="+str(self.CurrentPlanet)+\
                 " ORDER BY upper(db_buildings.label)"
@@ -233,11 +233,11 @@ class GlobalView(LoginRequiredMixin, MaintenanceMixin, View):
             for item in oRs:
 
                 if i % 3 == 0:
-                    tpl_header.AssignValue("special1", getBuildingLabel(item[0]))
+                    tpl_header.AssignValue("special1", item[1])
                 elif i % 3 == 1:
-                    tpl_header.AssignValue("special2", getBuildingLabel(item[0]))
+                    tpl_header.AssignValue("special2", item[1])
                 else:
-                    tpl_header.AssignValue("special3", getBuildingLabel(item[0]))
+                    tpl_header.AssignValue("special3", item[1])
                     tpl_header.AssignValue("special")
         
                 i = i + 1
@@ -457,9 +457,7 @@ class GlobalView(LoginRequiredMixin, MaintenanceMixin, View):
                 if not self.request.user.is_impersonate:
                     oConnDoQuery("UPDATE users SET lastplanetid=" + str(planetid) + " WHERE id=" + str(self.UserId))
     
-                return
-    
-            self.InvalidatePlanetList()
+                return None
     
         # 
         # retrieve current planet from session
@@ -473,7 +471,7 @@ class GlobalView(LoginRequiredMixin, MaintenanceMixin, View):
                 # the planet still belongs to the player, exit
                 self.CurrentGalaxyId = oRs[0]
                 self.CurrentSectorId = oRs[1]
-                return
+                return None
     
 
         # there is no active planet, select the first planet available
@@ -488,7 +486,7 @@ class GlobalView(LoginRequiredMixin, MaintenanceMixin, View):
                 self.CurrentGalaxyId = 0
                 self.CurrentSectorId = 0
     
-                return
+                return None
     
         # assign planet id
         self.CurrentPlanet = oRs[0]
@@ -503,7 +501,7 @@ class GlobalView(LoginRequiredMixin, MaintenanceMixin, View):
         # a player may wish to destroy a building on a planet that belonged to him
         # if the planet doesn't belong to him anymore, the action may be performed on another planet
         # so we redirect the user to the overview to prevent executing an order on another planet
-        return HttpResponseRedirect("/game/overview/")
+        return HttpResponseRedirect("/game/empire_view/")
     
     #
     # check if a planet is given in the querystring and that it belongs to the player

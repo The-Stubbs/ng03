@@ -5,7 +5,7 @@
     <span>{{server}}</span>
 </a>
 
-<a href="/game/options/" id="leftnav-profile" class="menu-item {% if selected_menu == 'profile' %}selected{% endif %}">
+<a href="/game/profile_view/" id="leftnav-profile" class="menu-item {% if selected_menu == 'profile' %}selected{% endif %}">
     <div class="row">
         <div class="col-auto">
             {% if menu_avatar %}<img class="avatar" src="{{menu_avatar}}">{% else %}<img class="avatar" src="/assets/interface/noavatar.gif">{% endif %}
@@ -21,12 +21,12 @@
 <div class="menu-bar">
 <div class="row align-items-center justify-content-between">
     <div class="col-auto">
-        <a href="/game/help/" class="{% if selected_menu == 'help' %}selected{% endif %}">
+        <a href="/game/help_general/" class="{% if selected_menu == 'help' %}selected{% endif %}">
             <i class="icon fas fa-question-circle"></i>
         </a>
     </div>
     <div class="col-auto">
-        <a href="/game/mails/" class="{% if selected_menu == 'mail' %}selected{% endif %}">
+        <a href="/game/mail_inbox/" class="{% if selected_menu == 'mail' %}selected{% endif %}">
             <i class="icon fas fa-envelope"></i>
             {% if new_mail > 0 %}<span class="badge">{{new_mail}}</span>{% endif %}
         </a>
@@ -37,7 +37,7 @@
         </a>
     </div>
     <div class="col-auto">
-        <a href="/game/reports/" class="{% if selected_menu == 'report' %}selected{% endif %}">
+        <a href="/game/profile_reports/" class="{% if selected_menu == 'report' %}selected{% endif %}">
             <i class="icon fas fa-bell"></i>
             {% if new_report > 0 %}<span class="badge">{{new_report}}</span>{% endif %}
         </a>
@@ -51,25 +51,25 @@
     Empire
 </a>
 
-<a href="/game/fleets/" class="menu-item {% if selected_menu == 'fleets' %}selected{% endif %}">
+<a href="/game/fleets_view/" class="menu-item {% if selected_menu == 'fleets' %}selected{% endif %}">
     <i class="caret fas fa-chevron-right"></i>
     <i class="icon fas fa-plane"></i>
     Flottes
 </a>
 
-<a href="/game/market-sell/" class="menu-item {% if selected_menu == 'market' %}selected{% endif %}">
+<a href="/game/market-sales/" class="menu-item {% if selected_menu == 'market' %}selected{% endif %}">
     <i class="caret fas fa-chevron-right"></i>
     <i class="icon fas fa-handshake"></i>
     Commerce
 </a>
 
-<a href="/game/commanders/" class="menu-item {% if selected_menu == 'commanders' %}selected{% endif %}">
+<a href="/game/commander_list/" class="menu-item {% if selected_menu == 'commanders' %}selected{% endif %}">
     <i class="caret fas fa-chevron-right"></i>
     <i class="icon fas fa-certificate"></i>
     Commandants
 </a>
 
-<a href="/game/research/" class="menu-item {% if selected_menu == 'researches' %}selected{% endif %}">
+<a href="/game/researches/" class="menu-item {% if selected_menu == 'researches' %}selected{% endif %}">
     <i class="caret fas fa-chevron-right"></i>
     <i class="icon fas fa-microscope"></i>
     Recherches
@@ -81,19 +81,19 @@
     Carte spatiale
 </a>
 
-<a href="/game/alliance/" class="menu-item {% if selected_menu == 'alliance' %}selected{% endif %}">
+<a href="/game/alliance_view/" class="menu-item {% if selected_menu == 'alliance' %}selected{% endif %}">
     <i class="caret fas fa-chevron-right"></i>
     <i class="icon fas fa-users"></i>
     Alliance
 </a>
 
-<a href="/game/ranking-alliances/" class="menu-item {% if selected_menu == 'ranking' %}selected{% endif %}">
+<a href="/game/ranking_alliances/" class="menu-item {% if selected_menu == 'ranking' %}selected{% endif %}">
     <i class="caret fas fa-chevron-right"></i>
     <i class="icon fas fa-signal"></i>
     Classement
 </a>
 
-<a href="/game/mercenary-intelligence/" class="menu-item {% if selected_menu == 'mercenary' %}selected{% endif %}">
+<a href="/game/mercenary/" class="menu-item {% if selected_menu == 'mercenary' %}selected{% endif %}">
     <i class="caret fas fa-chevron-right"></i>
     <i class="icon fas fa-user-secret"></i>
     Mercenaires

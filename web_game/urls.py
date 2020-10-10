@@ -15,6 +15,12 @@ from web_game.game import empire_stats
 from web_game.game import empire_upkeep
 from web_game.game import empire_view
 
+from web_game.game import fleets_rest
+from web_game.game import fleets_view
+
+from web_game.game import fleet_view
+from web_game.game import fleet_ships
+
 from web_game.game import game_connection
 
 
@@ -57,11 +63,12 @@ urlpatterns = [
     path('empire_upkeep/', empire_upkeep.View.as_view()),
     path('empire_view/', empire_view.View.as_view()),
     
-    #path('fleets_rest/', fleets_rest.View.as_view()),
-    #path('fleets_view/', fleets_view.View.as_view()),
-    #path('fleet_ships/', fleet_ships.View.as_view()),
+    path('fleets_rest/', fleets_rest.View.as_view()),
+    path('fleets_view/', fleets_view.View.as_view()),
+    
+    path('fleet_ships/', fleet_ships.View.as_view()),
     #path('fleet_splitting/', fleet_splitting.View.as_view()),
-    #path('fleet_view/', fleet_view.View.as_view()),
+    path('fleet_view/', fleet_view.View.as_view()),
     
     path('connection/', game_connection.View.as_view()),
     #path('game_holidays/', game_holidays.View.as_view()),

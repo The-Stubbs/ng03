@@ -84,7 +84,7 @@ h6 {
 /* tooltip */
 
 .tooltip { font-family:inherit; font-size:inherit; pointer-events:none; }
-.tooltip-inner { color:inherit; text-align:left; }
+.tooltip-inner { color:inherit; text-align:left; max-width:550px; }
 
 
 
